@@ -17,6 +17,7 @@
 | --- | ----------------------------------- |
 | 맥북  | `/Users/th/개발/workspace/Finvesting` |
 | 윈도우 | (미정 — 정해지면 여기 기록)                   |
+| 원격  | `https://github.com/kotaehyun/Finvesting` (브랜치 `main`) |
 
 
 ## 첫 실행
@@ -38,6 +39,17 @@ pnpm dev:worker                  # 또는 pnpm --filter @finvesting/worker run:o
 - `pnpm dev:mobile` → Expo Go로 QR 스캔 (같은 Wi‑Fi)
 
 
+
+## 윈도우에서 처음 받기
+```powershell
+git config --global core.autocrlf false
+git clone https://github.com/kotaehyun/Finvesting.git D:\workspace\Finvesting
+cd D:\workspace\Finvesting
+corepack enable; corepack prepare pnpm@9.15.0 --activate
+pnpm install
+copy .env.example .env
+```
+이후 "첫 실행" 절차와 동일. DB 데이터는 맥북과 공유되지 않으므로 윈도우는 빈 DB로 시작한다.
 
 ## 윈도우 주의
 

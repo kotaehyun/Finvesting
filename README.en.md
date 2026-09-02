@@ -107,6 +107,7 @@ Full procedure (DB init, worker, mobile, Windows notes): [docs/tech/setup.md](./
 ## Dev environment
 - MacBook: `/Users/th/개발/workspace/Finvesting` (primary machine, holds real data)
 - Windows: TBD — code synced via Git, DB data stays local per machine
+- Remote: https://github.com/kotaehyun/Finvesting (`main`)
 - Node 22, pnpm 9, Docker, Ollama
 
 ## Language policy

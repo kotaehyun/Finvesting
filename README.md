@@ -108,6 +108,7 @@ DB 초기화, 수집기, 모바일, 윈도우 주의사항 등 전체 절차는 
 ## 개발 환경
 - 맥북: `/Users/th/개발/workspace/Finvesting` (주 작업 기기, 실데이터 보관)
 - 윈도우: 미정 — 코드는 Git으로 동기화, DB 데이터는 기기별 로컬
+- 원격 저장소: https://github.com/kotaehyun/Finvesting (`main`)
 - Node 22, pnpm 9, Docker, Ollama
 
 ## 언어 정책
