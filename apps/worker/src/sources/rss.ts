@@ -37,7 +37,7 @@ export async function collectRssNews() {
         inserted += r.length; n += r.length;
       }
       perFeed[f.id] = `${n}/${feed.items.length}`; // 신규/전체
-    } catch (e) { perFeed[f.id] = `FAIL ${(e as Error).message.split("\n")[0].slice(0, 60)}`; }
+    } catch (e) { perFeed[f.id] = `FAIL ${((e as Error).message ?? String(e)).split("\n")[0]?.slice(0, 60)}`; }
   }
   return { inserted, perFeed };
 }
