@@ -32,6 +32,7 @@
 ```
 
 ## 검증 현황 요약 (최신 상태 — 항목이 바뀌면 갱신)
+✅ 실행 확인 · ⏸ 키/대상 없어 보류(코드 경로는 skip까지 확인) · ❌ 아무도 실행 안 함
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
@@ -41,14 +42,14 @@
 | `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
 | `pnpm dev:web` 기동 | ❌ 미실행 | | |
-| worker `run:once` — RSS 국내 | ❌ 미실행 | | |
-| worker — RSS 해외 (URL 유효성) | ❌ 미실행 | | |
-| worker — Upbit | ❌ 미실행 | | |
-| worker — ECOS (통계코드 유효성) | ❌ 미실행, 키 없음 | | |
-| worker — FRED | ❌ 미실행, 키 없음 | | |
-| worker — Yahoo (`yahoo-finance2` 시그니처) | ❌ 미실행 | | |
-| worker — DART (계정명 매핑) | ❌ 미실행, 키 없음 | | |
-| worker — EDGAR (태그·UA) | ❌ 미실행 | | |
+| worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
+| worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
+| worker — Upbit BTC/ETH/SOL/XRP | ✅ 4 upsert | 2026-09-02 | 사용자 실행 |
+| worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
+| worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
+| worker — Yahoo (v3, SPY/QQQ/^GSPC/^IXIC) | ✅ 4/4 (v2는 429·지원종료 → v3 전환) | 2026-09-02 | 사용자 실행 |
+| worker — DART (계정명 매핑) | ⏸ 키·대상 없음, skip 동작 확인 | 2026-09-02 | |
+| worker — EDGAR (태그·UA) | ⏸ 대상 없음, skip 동작 확인 | 2026-09-02 | |
 | Ollama 연결 + `/chat` | ❌ 미실행 | | |
 | 모바일 Expo 기동 + 루트 .env 로드 | ❌ 미실행 | | |
 | 윈도우 환경 전체 | ❌ 경로 미정 | | |

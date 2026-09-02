@@ -12,7 +12,7 @@
 | 업비트 BTC/ETH/SOL/XRP 일봉 | `upbit.ts` | 공개 API | 5분 | 불필요 | `market_quotes` |
 | 한국은행 ECOS — 원/달러, 기준금리, CPI, 국고채3년 | `ecos.ts` | API | 09·18시 | `ECOS_API_KEY` | `macro_indicators` (USDKRW, BOK_BASE_RATE, CPI, KTB_3Y) |
 | 미국 FRED — 연방기금금리, CPI, 국채 2y/10y, 달러지수, 실업률, VIX | `fred.ts` | API | 07·19시 | `FRED_API_KEY` (무료) | `macro_indicators` (US_*, DXY_BROAD, VIX) |
-| Yahoo Finance — 미국 주식/ETF/지수 시세 + 핵심 지표(시총·PER·PBR·EPS·배당·베타) | `yahoo.ts` | 비공식 라이브러리 `yahoo-finance2` | 30분 | 불필요, `YAHOO_TARGETS` | `market_quotes`, `instrument_fundamentals` |
+| Yahoo Finance — 미국 주식/ETF/지수 시세 + 핵심 지표(시총·PER·PBR·EPS·배당·베타) | `yahoo.ts` | 비공식 라이브러리 `yahoo-finance2` v3 (429 잦음 → 종목 간 `YAHOO_GAP_MS`, 재시도) | 30분 | 불필요, `YAHOO_TARGETS` | `market_quotes`, `instrument_fundamentals` |
 | 금감원 DART — 한국 상장사 연결 재무제표(사업보고서) | `dart.ts` | 공식 API | 매주 월 | `DART_API_KEY`, `DART_TARGETS` | `financial_statements` |
 | SEC EDGAR — 미국 상장사 10-K/10-Q (XBRL companyfacts) | `edgar.ts` | 공식 API | 매주 월 | 키 불필요, `SEC_USER_AGENT` 필수, `EDGAR_TARGETS` | `financial_statements` |
 
