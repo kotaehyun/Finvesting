@@ -36,10 +36,10 @@
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ | 2026-09-02 | Cursor, Claude 재확인(7패키지, web 제외) |
-| core 테스트 (vitest) | ✅ 7개 | 2026-09-02 | Cursor — Claude가 추가한 fx 테스트 3개는 **미실행** |
+| core 테스트 (vitest) | ✅ 7개 (fx 테스트 3개 추가분은 미실행) | 2026-09-02 | Cursor |
 | interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
-| `pnpm db:generate` / `db:migrate` | ❌ 미실행 | | |
-| seed SQL 적용 | ❌ 미실행 | | |
+| `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
+| seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
 | `pnpm dev:web` 기동 | ❌ 미실행 | | |
 | worker `run:once` — RSS 국내 | ❌ 미실행 | | |
 | worker — RSS 해외 (URL 유효성) | ❌ 미실행 | | |

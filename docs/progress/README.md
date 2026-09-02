@@ -2,6 +2,22 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-02 (7) — 첫 실행: DB 마이그레이션 성공 (feat/first-run)
+**한 일**
+- 브랜치 전략 적용: main/dev 푸시, `feat/first-run`에서 작업
+- Docker Desktop 기동, `pnpm db:up`, pgvector 확장
+- `pnpm db:generate` 실패 → 상대 import `.js` 제거(29파일)로 해결 (logs 기록)
+- `pnpm db:migrate` 실패 → 루트 `.env` 생성으로 해결
+- 마이그레이션 `0000_blue_carlie_cooper.sql` 적용(16 테이블), 기본 사용자 seed 완료
+
+**다음 할 일**
+1. `pnpm --filter @finvesting/worker run:once` — 소스별 생존 확인 (RSS 국내·해외, Upbit, Yahoo; ECOS·FRED·DART는 키 필요)
+2. `pnpm dev:web` 기동, 대시보드 렌더 확인
+3. `pnpm -r test` (fx 테스트 3개 포함)
+4. feat/first-run → dev merge
+
+**막힌 것** — 없음
+
 ## 2026-09-02 (6) — 검증 기록 폴더, ChatGPT.md, 영문 미러 (Claude)
 **한 일**
 - `docs/verification/` 신설: AI 모델별 검증 기록 + 검증 현황 표
