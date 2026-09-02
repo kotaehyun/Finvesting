@@ -3,12 +3,14 @@ import cron from "node-cron";
 import { collectRssNews } from "./sources/rss.js";
 import { collectEcos } from "./sources/ecos.js";
 import { collectUpbit } from "./sources/upbit.js";
+import { collectFred } from "./sources/fred.js";
 
 // 수집 스케줄 (KST). 각 소스는 실패해도 다른 소스에 영향 없음.
 const jobs: Array<[string, string, () => Promise<unknown>]> = [
   ["뉴스 RSS",       "*/15 * * * *", collectRssNews],   // 15분마다
   ["업비트 시세",     "*/5 * * * *",  collectUpbit],     // 5분마다
   ["ECOS 거시지표",   "0 9,18 * * *", collectEcos],      // 하루 2회
+  ["FRED 미국지표",   "0 7,19 * * *", collectFred],      // 하루 2회 (미국 장 마감 후 반영)
 ];
 
 for (const [name, expr, fn] of jobs) {

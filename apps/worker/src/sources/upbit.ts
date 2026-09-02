@@ -2,7 +2,7 @@ import { db, instruments, quotes } from "@finvesting/db";
 import { eq, and } from "drizzle-orm";
 
 // 업비트 공개 API (키 불필요). 일봉 종가 기준.
-const MARKETS = ["KRW-BTC", "KRW-ETH"];
+const MARKETS = ["KRW-BTC", "KRW-ETH", "KRW-SOL", "KRW-XRP"];
 
 export async function collectUpbit() {
   let upserted = 0;
