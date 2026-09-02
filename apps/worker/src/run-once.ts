@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./lib/env.js";
 import { collectRssNews } from "./sources/rss.js";
 import { collectEcos } from "./sources/ecos.js";
 import { collectUpbit } from "./sources/upbit.js";

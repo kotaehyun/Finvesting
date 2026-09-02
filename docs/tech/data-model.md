@@ -19,11 +19,11 @@
 ## 투자 (Investment)
 | 테이블 | 역할 |
 |---|---|
-| `instruments` | 종목 마스터. `(symbol, market)` 조합이 식별자. 시세·뉴스·보유가 모두 참조 |
+| `instruments` | 종목 마스터. `(symbol, market)` **유니크**. 시세·뉴스·보유가 모두 참조 |
 | `trades` | 체결 원장. 보유 수량·평단·실현손익은 저장하지 않고 `core/portfolio.ts`로 계산 |
 | `investment_incomes` | 배당·이자 수취 (세금·현금흐름 양쪽에 사용) |
 | `research_notes` | 종목 노트, 매수/매도 근거 |
-| `watchlist` | 관심 종목 |
+| `watchlist` | 관심 종목. `user_id` → `users.id` FK |
 
 ## 재무제표·펀더멘털 (worker가 채움)
 | 테이블 | 역할 | 유니크 |

@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./lib/env.js";
 import cron from "node-cron";
 import { collectRssNews } from "./sources/rss.js";
 import { collectEcos } from "./sources/ecos.js";
@@ -19,11 +19,18 @@ const jobs: Array<[string, string, () => Promise<unknown>]> = [
   ["EDGAR 재무제표",  "0 4 * * 1",    collectEdgar],     // 매주 월 04시
 ];
 
+async function run(name: string, fn: () => Promise<unknown>) {
+  const t0 = Date.now();
+  try { const r = await fn(); console.log(`[${name}] ok ${JSON.stringify(r)} ${Date.now() - t0}ms`); }
+  catch (e) { console.error(`[${name}] fail`, e); }
+}
+
 for (const [name, expr, fn] of jobs) {
-  cron.schedule(expr, async () => {
-    const t0 = Date.now();
-    try { const r = await fn(); console.log(`[${name}] ok ${JSON.stringify(r)} ${Date.now() - t0}ms`); }
-    catch (e) { console.error(`[${name}] fail`, e); }
-  }, { timezone: "Asia/Seoul" });
+  cron.schedule(expr, () => run(name, fn), { timezone: "Asia/Seoul" });
   console.log(`scheduled ${name} (${expr})`);
+}
+
+// 기동 시 즉시 1회 수집 (기본 켜짐). 끄려면 WORKER_RUN_ON_START=false
+if ((process.env.WORKER_RUN_ON_START ?? "true") !== "false") {
+  (async () => { for (const [name, , fn] of jobs) await run(name, fn); })();
 }

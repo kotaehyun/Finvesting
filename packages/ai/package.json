@@ -6,6 +6,5 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": { "typecheck": "tsc --noEmit" },
-  "dependencies": { "@finvesting/core": "workspace:*" },
-  "devDependencies": { "typescript": "^5.7.2" }
+  "devDependencies": { "@types/node": "^22.10.2", "typescript": "^5.7.2" }
 }

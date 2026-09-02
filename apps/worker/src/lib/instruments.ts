@@ -7,8 +7,10 @@ type AssetClass = "stock" | "etf" | "bond" | "crypto" | "fund" | "other";
 export async function ensureInstrument(p: { symbol: string; market: string; name: string; assetClass: AssetClass; currency: string }) {
   const [found] = await db.select().from(instruments).where(and(eq(instruments.symbol, p.symbol), eq(instruments.market, p.market)));
   if (found) return found;
-  const [created] = await db.insert(instruments).values(p).returning();
-  return created!;
+  const [created] = await db.insert(instruments).values(p).onConflictDoNothing().returning();
+  if (created) return created;
+  const [again] = await db.select().from(instruments).where(and(eq(instruments.symbol, p.symbol), eq(instruments.market, p.market)));
+  return again!;
 }
 
 export async function ensureIdentifier(instrumentId: string, provider: string, externalId: string) {

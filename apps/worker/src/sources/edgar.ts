@@ -24,7 +24,11 @@ const TAGS: Array<{ tag: string; key: string; statement: "income" | "balance" | 
 type Fact = { end: string; val: number; fy: number; fp: string; form: string };
 
 export async function collectEdgar() {
-  const targets = targetSymbols("EDGAR_TARGETS", []).map((t) => { const [ticker, cik] = t.split(":"); return { ticker: ticker!, cik: cik!.padStart(10, "0") }; });
+  const targets = targetSymbols("EDGAR_TARGETS", []).map((t) => {
+    const [ticker, cik] = t.split(":");
+    if (!ticker || !cik) { console.warn(`edgar skip invalid target: ${t}`); return null; }
+    return { ticker, cik: cik.padStart(10, "0") };
+  }).filter((t): t is { ticker: string; cik: string } => t !== null);
   if (!targets.length) return { skipped: "EDGAR_TARGETS empty" };
   let upserted = 0;
   for (const t of targets) {

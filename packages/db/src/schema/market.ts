@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, numeric, date, timestamp, index, jsonb, uniqueIndex, vector } from "drizzle-orm/pg-core";
+import { users } from "./common.js";
 import { instruments } from "./investments.js";
 
 // 시세 (일봉 기준으로 시작, 필요 시 분봉 테이블 추가)
@@ -61,7 +62,7 @@ export const economicEvents = pgTable("economic_events", {
 // 관심 종목
 export const watchlist = pgTable("watchlist", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull(),
+  userId: uuid("user_id").notNull().references(() => users.id),
   instrumentId: uuid("instrument_id").notNull().references(() => instruments.id),
   note: text("note"),
   addedAt: timestamp("added_at", { withTimezone: true }).notNull().defaultNow(),

@@ -9,7 +9,7 @@ import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instru
 export async function collectYahoo() {
   const symbols = targetSymbols("YAHOO_TARGETS", ["SPY", "QQQ", "^GSPC", "^IXIC"]);
   const yf = (await import("yahoo-finance2")).default;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10);
   let upserted = 0;
   for (const sym of symbols) {
     try {

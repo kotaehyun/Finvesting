@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, date, pgEnum, index, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, date, pgEnum, index, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { users, timestamps } from "./common.js";
 import { accounts } from "./accounts.js";
 
@@ -14,7 +14,7 @@ export const instruments = pgTable("instruments", {
   assetClass: assetClass("asset_class").notNull(),
   currency: text("currency").notNull().default("KRW"),
   ...timestamps,
-}, (t) => [index("instruments_symbol_market_idx").on(t.symbol, t.market)]);
+}, (t) => [uniqueIndex("instruments_symbol_market_uq").on(t.symbol, t.market)]);
 
 // 체결 내역 (원장). 보유 수량·평단·실현손익은 여기서 계산한다.
 export const trades = pgTable("trades", {

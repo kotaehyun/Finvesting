@@ -41,7 +41,7 @@ export async function collectDart() {
       if (!std) continue;
       const stmt = row.sj_div === "BS" ? "balance" : row.sj_div === "CF" ? "cashflow" : "income";
       const g = groups.get(stmt) ?? {};
-      g[std] = Number(row.thstrm_amount.replace(/,/g, "")) || 0;
+      g[std] = Number((row.thstrm_amount ?? "").replace(/,/g, "")) || 0;
       groups.set(stmt, g);
     }
     for (const [statement, items] of groups) {

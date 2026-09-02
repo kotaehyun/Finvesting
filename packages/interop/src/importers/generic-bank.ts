@@ -1,5 +1,5 @@
 import type { TransactionImporter, ParsedTransaction } from "../types.js";
-import { findHeaderRow, toNumber, toIsoDate } from "../parse-file.js";
+import { toNumber, toIsoDate } from "../parse-file.js";
 
 // 범용 통장 내보내기 파서: 헤더에서 날짜/입금/출금/내용/잔액 컬럼을 이름으로 찾는다.
 // 은행별 전용 파서는 detect가 더 구체적인 것을 먼저 등록.
@@ -18,7 +18,8 @@ export const genericBankImporter: TransactionImporter = {
   label: "범용 통장 내보내기 (CSV/XLSX)",
   detect(headers) { return find(headers, COLS.date) >= 0 && (find(headers, COLS.in) >= 0 || find(headers, COLS.out) >= 0); },
   parse(rows) {
-    const h = findHeaderRow(rows, ["일"]);
+    const h = rows.findIndex((r) => find(r, COLS.date) >= 0 && (find(r, COLS.in) >= 0 || find(r, COLS.out) >= 0));
+    if (h < 0) return { rows: [], skipped: [{ line: 1, reason: "헤더 없음" }], detected: "generic-bank" };
     const headers = rows[h] ?? [];
     const ix = { date: find(headers, COLS.date), in: find(headers, COLS.in), out: find(headers, COLS.out), memo: find(headers, COLS.memo), merchant: find(headers, COLS.merchant), balance: find(headers, COLS.balance) };
     const out: ParsedTransaction[] = []; const skipped: Array<{ line: number; reason: string }> = [];

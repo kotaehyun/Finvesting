@@ -6,12 +6,10 @@
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@finvesting/api": "workspace:*",
-    "@finvesting/core": "workspace:*",
     "@tanstack/react-query": "^5.62.11",
     "@trpc/client": "^11.0.0-rc.660",
     "@trpc/react-query": "^11.0.0-rc.660",

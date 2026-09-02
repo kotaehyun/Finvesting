@@ -9,9 +9,11 @@ export const dashboardRouter = router({
   overview: publicProcedure
     .input(z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) }).optional())
     .query(async ({ ctx, input }) => {
-      const month = input?.month ?? new Date().toISOString().slice(0, 7);
+      // 기본 월은 UTC가 아니라 KST. to를 31일로 고정하면 2·4·6·9·11월에 Postgres date 오류가 난다.
+      const month = input?.month ?? new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 7);
+      const [y, m] = month.split("-").map(Number) as [number, number];
       const from = `${month}-01`;
-      const to = `${month}-31`;
+      const to = `${month}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`;
 
       const accts = await ctx.db.select().from(accounts).where(and(eq(accounts.userId, ctx.userId), eq(accounts.isActive, true)));
       const txns = await ctx.db.select().from(transactions)

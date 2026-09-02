@@ -18,7 +18,7 @@
 ## 첫 실행
 ```bash
 pnpm install
-cp .env.example .env            # 값 채우기
+cp .env.example .env            # 저장소 루트. web·worker·db가 이 파일을 읽는다
 pnpm db:up                       # Postgres + pgvector
 psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db/seed/000_extensions.sql
 pnpm db:generate && pnpm db:migrate
@@ -28,7 +28,7 @@ pnpm dev:worker                  # 또는 pnpm --filter @finvesting/worker run:o
 ```
 
 ## 모바일
-- `.env`의 `EXPO_PUBLIC_API_URL=http://<맥북 IP>:3000`
+- 루트 `.env`의 `EXPO_PUBLIC_API_URL=http://<맥북 IP>:3000` (`apps/mobile/app.config.ts`가 루트 .env를 읽음. 실기기에서는 localhost가 폰 자신이므로 반드시 맥북 IP)
 - `pnpm dev:mobile` → Expo Go로 QR 스캔 (같은 Wi‑Fi)
 
 ## 윈도우 주의

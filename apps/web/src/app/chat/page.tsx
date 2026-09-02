@@ -13,8 +13,12 @@ export default function ChatPage() {
     if (!input.trim()) return;
     const next: Msg[] = [...messages, { role: "user", content: input }];
     setMessages(next); setInput("");
-    const r = await ask.mutateAsync({ messages: next });
-    setMessages([...next, { role: "assistant", content: r.answer }]);
+    try {
+      const r = await ask.mutateAsync({ messages: next });
+      setMessages([...next, { role: "assistant", content: r.answer }]);
+    } catch (e) {
+      setMessages([...next, { role: "assistant", content: `오류: ${e instanceof Error ? e.message : String(e)}` }]);
+    }
   }
 
   return (
