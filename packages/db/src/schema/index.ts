@@ -4,3 +4,4 @@ export * from "./transactions.js";
 export * from "./investments.js";
 export * from "./market.js";
 export * from "./profile.js";
+export * from "./fundamentals.js";

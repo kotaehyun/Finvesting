@@ -25,6 +25,13 @@
 | `research_notes` | 종목 노트, 매수/매도 근거 |
 | `watchlist` | 관심 종목 |
 
+## 재무제표·펀더멘털 (worker가 채움)
+| 테이블 | 역할 | 유니크 |
+|---|---|---|
+| `financial_statements` | 기간별 재무제표. `statement`(income/balance/cashflow), `fiscal_period`(FY/Q1~Q4), `items` jsonb에 표준 키(revenue, operating_income, net_income, eps_diluted, total_assets, total_liabilities, total_equity, cfo). 원본은 `raw` | (instrument, fy, period, statement, consolidated, source) |
+| `instrument_fundamentals` | 일 단위 지표 스냅샷: 시총, PER, forward PER, PBR, EPS, ROE, 배당수익률, TTM 매출·순이익, 부채비율, 베타. 소스별 추가 지표는 `extra` | (instrument, date, source) |
+| `instrument_identifiers` | 외부 식별자 매핑 — dart corp_code, sec CIK, yahoo 티커, kis 코드 | (provider, external_id) |
+
 ## 시장 데이터 (worker가 채움)
 | 테이블 | 역할 | 유니크 |
 |---|---|---|

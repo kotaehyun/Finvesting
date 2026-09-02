@@ -8,9 +8,11 @@
 - docs/prompts: 모델 무관 공통 프롬프트(부트스트랩, 작업별 템플릿, 세션 종료, 컨벤션)
 - 수집 범위를 국내+해외로 확장: FRED 어댑터(연준금리·CPI·국채 2y/10y·달러지수·실업률·VIX), 해외 뉴스 RSS(CNBC·MarketWatch·Fed·ECB), 업비트 SOL/XRP 추가
 - 결정: `macro_indicators.code`는 국가 접두어(`US_*`)로 구분, 접두어 없음 = 한국
+- 재무제표·펀더멘털 수집 추가: 스키마 `financial_statements`, `instrument_fundamentals`, `instrument_identifiers`; 어댑터 DART(한국, 공식), SEC EDGAR(미국, 공식), Yahoo Finance(미국 시세·지표, 비공식 라이브러리)
+- 사이트별 방침 정리(data-sources.md): Finviz는 개인용 한정, TradingView는 공식 위젯 임베드만, Investing.com은 크롤링 비권장
 
 **다음 할 일** — 아래 첫 항목과 동일 (첫 실행 검증이 최우선)
-**막힌 것** — FRED·ECOS 키 발급 필요, 해외 RSS URL은 변경될 수 있어 첫 실행 때 확인
+**막힌 것** — FRED·ECOS·DART 키 발급 필요, 해외 RSS URL은 변경될 수 있어 첫 실행 때 확인. DART 계정명 매핑·yahoo-finance2 API 시그니처·SEC 태그는 실제 응답으로 검증 필요(코드에 TODO). 수집 대상 종목은 아직 환경변수(`*_TARGETS`)로 수동 지정
 
 ## 2026-09-02 — 프로젝트 스캐폴딩
 **한 일**
