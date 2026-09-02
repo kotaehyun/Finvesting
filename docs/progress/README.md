@@ -9,6 +9,7 @@
 - 수집 범위를 국내+해외로 확장: FRED 어댑터(연준금리·CPI·국채 2y/10y·달러지수·실업률·VIX), 해외 뉴스 RSS(CNBC·MarketWatch·Fed·ECB), 업비트 SOL/XRP 추가
 - 결정: `macro_indicators.code`는 국가 접두어(`US_*`)로 구분, 접두어 없음 = 한국
 - 재무제표·펀더멘털 수집 추가: 스키마 `financial_statements`, `instrument_fundamentals`, `instrument_identifiers`; 어댑터 DART(한국, 공식), SEC EDGAR(미국, 공식), Yahoo Finance(미국 시세·지표, 비공식 라이브러리)
+- `packages/interop` 신설: 통장 CSV/XLSX 범용 파서, 세무사 전달용 장부 CSV 내보내기 초안, 더존·위하고·세무사랑 연동 계획(interop.md)
 - 사이트별 방침 정리(data-sources.md): Finviz는 개인용 한정, TradingView는 공식 위젯 임베드만, Investing.com은 크롤링 비권장
 
 **다음 할 일** — 아래 첫 항목과 동일 (첫 실행 검증이 최우선)

@@ -18,13 +18,14 @@ Finvesting/
 │  ├─ web/                    Next.js 15 — 웹 대시보드(/), 챗봇(/chat), tRPC API(/api/trpc)
 │  ├─ mobile/                 Expo(React Native) — 모바일 대시보드, 웹과 같은 API 사용
 │  └─ worker/                 수집기 — node-cron으로 뉴스 RSS·시세·거시지표를 주기 수집해 DB 저장
-│     └─ src/sources/         소스별 어댑터 (rss, upbit, ecos …)
+│     └─ src/sources/         소스별 어댑터 (rss, upbit, ecos, fred, yahoo, dart, edgar)
 ├─ packages/                  앱들이 공유하는 라이브러리
 │  ├─ db/                     Drizzle ORM 스키마·마이그레이션 (PostgreSQL 16 + pgvector)
-│  │  ├─ src/schema/          accounts, transactions, investments, market, profile
+│  │  ├─ src/schema/          accounts, transactions, investments, market, profile, fundamentals
 │  │  └─ seed/                확장(pgvector) 설치, 기본 사용자 SQL
 │  ├─ core/                   순수 도메인 로직 — 현금흐름 요약, 배분 가이드, 포지션·손익 계산
 │  ├─ api/                    tRPC 라우터 — accounts, dashboard, market, chat
+│  ├─ interop/                외부 파일 변환 — 통장·카드·증권 CSV/XLSX 가져오기, 더존·위하고·세무사랑 양식 내보내기
 │  └─ ai/                     LLM 프로바이더 추상화 (Ollama → 맥스튜디오 → DGX Spark/vLLM), 프롬프트
 ├─ docs/                      프로젝트 문서 — 단일 진실 원천(SSOT)
 │  ├─ progress/               진행 로그(최신순), 로드맵
@@ -66,6 +67,7 @@ packages/api (tRPC) ── packages/core (계산) ── packages/ai (LLM)
 | 테이블이 무슨 뜻인지 | [docs/tech/data-model.md](./docs/tech/data-model.md) |
 | 어떤 데이터를 어디서 어떻게 수집하나 | [docs/tech/data-sources.md](./docs/tech/data-sources.md) |
 | 챗봇·LLM·RAG 설계 | [docs/tech/ai.md](./docs/tech/ai.md) |
+| 통장·카드 파일 가져오기, 회계 프로그램 내보내기 | [docs/tech/interop.md](./docs/tech/interop.md) |
 | 맥/윈도우 환경 설정과 실행 명령 | [docs/tech/setup.md](./docs/tech/setup.md) |
 | 왜 이렇게 결정했나 | [docs/tech/decisions/](./docs/tech/decisions/README.md) |
 | 이 오류 전에도 났었나 | [docs/logs/](./docs/logs/README.md) |

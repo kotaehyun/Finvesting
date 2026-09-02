@@ -28,8 +28,11 @@
       └─ apps/mobile (Expo) ── 같은 API를 HTTP로 호출
 ```
 
+## packages/interop
+외부 파일 ↔ 내부 모델 변환(통장·카드·증권 가져오기, 더존·위하고·세무사랑·세무사 전달용 내보내기). `core`처럼 순수 함수만, DB 접근 없음. 상세 [interop.md](./interop.md).
+
 ## 패키지 의존 규칙
-- `core`는 아무것도 의존하지 않는다 (순수 함수). 계산 로직은 반드시 여기.
+- `core`와 `interop`은 DB·네트워크에 의존하지 않는다 (순수 함수). 계산 로직은 `core`, 파일 변환은 `interop`.
 - `db`는 `core`를 모른다. 스키마와 연결만.
 - `api`가 `db` + `core` + `ai`를 조합한다.
 - `web`/`mobile`은 `api`의 타입만 import, DB 직접 접근 금지.
