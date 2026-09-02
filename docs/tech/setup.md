@@ -51,6 +51,9 @@ copy .env.example .env
 ```
 이후 "첫 실행" 절차와 동일. DB 데이터는 맥북과 공유되지 않으므로 윈도우는 빈 DB로 시작한다.
 
+## 브랜치·기기 이동
+브랜치 전략과 맥/윈도우별 git 명령, 기기 옮길 때 체크리스트는 [git-workflow.md](./git-workflow.md).
+
 ## 윈도우 주의
 
 - 한글 경로는 피하는 것이 안전 (`D:\workspace\Finvesting` 등)
