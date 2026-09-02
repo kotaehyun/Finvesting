@@ -41,7 +41,8 @@
 | interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
 | `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm dev:web` 기동 | ❌ 미실행 | | |
+| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25 | 2026-09-02 | 사용자 실행 |
+| `/chat` 화면 렌더 | ❌ 미확인 | | |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
 | worker — Upbit BTC/ETH/SOL/XRP | ✅ 4 upsert | 2026-09-02 | 사용자 실행 |

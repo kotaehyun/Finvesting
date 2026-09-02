@@ -12,8 +12,10 @@
 
 - worker `run:once`: env.ts 경로 버그 수정 → RSS 8개 피드 전부 응답(1차 325건), Upbit 4, Yahoo v2 429 실패 → v3 전환·백오프 후 4/4 성공. 시세일을 `regularMarketTime` 미국 동부 날짜로 변경
 
+- `pnpm dev:web` 기동 성공: `/` 200, tRPC 대시보드·뉴스 200 (DB 실데이터로 렌더)
+
 **다음 할 일**
-1. `pnpm dev:web` 기동, 대시보드·뉴스 목록·/chat 렌더 확인
+1. `/chat` 화면 확인, Ollama 설치·모델 pull 후 질의 테스트
 2. `pnpm -r test` (fx 테스트 3개 포함)
 3. ECOS·FRED·DART 키 발급 후 해당 소스 검증
 4. feat/first-run → dev merge
