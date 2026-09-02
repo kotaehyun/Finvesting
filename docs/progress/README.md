@@ -13,7 +13,8 @@
 - api: accounts, dashboard.overview, market, chat 라우터
 - web: 대시보드(/), 챗봇(/chat) 최소 UI
 - mobile: Expo 대시보드 최소 UI
-- docs/ 구조(progress · tech · logs · review)와 README, AGENTS.md/CLAUDE.md
+- docs/ 구조(progress · tech · logs · review · prompts)와 README, AGENTS.md/CLAUDE.md
+- docs/prompts: 모델 무관 공통 프롬프트(부트스트랩, 기능/버그/스키마/수집/AI/리뷰 템플릿, 세션 종료, 컨벤션)
 
 **아직 안 한 것 (의존성 설치·실행 전)**
 - `pnpm install` 및 첫 실행 검증 — 패키지 버전 충돌 가능성 있음

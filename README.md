@@ -44,3 +44,4 @@ pnpm dev:mobile     # Expo (같은 Wi-Fi, .env의 EXPO_PUBLIC_API_URL을 맥 IP�
 | [docs/tech](./docs/tech/README.md) | 제품 개요, 아키텍처, 데이터 모델, 수집 소스, AI, 환경 설정, ADR |
 | [docs/logs](./docs/logs/README.md) | 실행 로그, 오류 기록 |
 | [docs/review](./docs/review/README.md) | 코드 리뷰 기록 |
+| [docs/prompts](./docs/prompts/README.md) | AI 모델 공통 프롬프트 (세션 시작·작업별·종료) |

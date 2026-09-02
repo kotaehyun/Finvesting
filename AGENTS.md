@@ -1,6 +1,6 @@
 # AGENTS.md — AI 도구 공통 지침 (Cursor, Codex, Copilot, Claude 등)
 
-1. 작업 전 `docs/README.md`와 `docs/progress/README.md`를 읽는다. 문서가 SSOT다.
+1. 세션은 `docs/prompts/00-bootstrap.md`의 규칙으로 시작하고 `docs/prompts/90-session-end.md`로 끝낸다. 작업 전 `docs/README.md`와 `docs/progress/README.md`를 읽는다. 문서가 SSOT다.
 2. 문서에 없는 사실은 추측하지 않는다. 코드를 확인하거나 사용자에게 묻는다.
 3. 작업 후 `docs/progress/README.md`에 기록하고, 변경한 영역의 `docs/tech/` 문서를 갱신한다. 기술 결정은 `docs/tech/decisions/`에 ADR 추가.
 4. 오류를 만나면 `docs/logs/`를 먼저 검색하고, 해결하면 기록한다. 코드 리뷰는 `docs/review/`에 남긴다.

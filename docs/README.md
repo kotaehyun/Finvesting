@@ -10,8 +10,11 @@
 | [`tech/`](./tech/README.md) | 기술 문서 — 제품 개요, 아키텍처, 데이터 모델, 수집 소스, AI, 환경 설정, 결정 기록(ADR) | 구조·스키마·소스·AI·설정 변경 시 |
 | [`logs/`](./logs/README.md) | 실행 로그, 오류 기록과 해결 방법 | 오류를 만나거나 해결했을 때 |
 | [`review/`](./review/README.md) | 코드 리뷰 기록 — 발견한 문제, 개선 제안, 반영 여부 | 리뷰할 때 |
+| [`prompts/`](./prompts/README.md) | AI 모델 공통 프롬프트 — 어떤 모델을 쓰든 세션 시작·작업별·종료 프롬프트를 여기서 복사 | 프롬프트가 부족하거나 모델이 반복해 틀릴 때 |
 
 ## AI 도구 작업 규칙
+
+0. 새 세션은 `prompts/00-bootstrap.md`를 붙여 넣어 시작하고, `prompts/90-session-end.md`로 끝낸다.
 
 1. 작업 시작 전 `progress/README.md`, `tech/overview.md`, `tech/architecture.md`를 읽는다. 건드리는 영역의 tech 문서도 읽는다.
 2. 문서에 없는 것은 **추측하지 말고** 코드를 확인하거나 사용자에게 묻는다.
