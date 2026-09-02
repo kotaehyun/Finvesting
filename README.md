@@ -34,18 +34,13 @@ pnpm dev:worker     # 수집기
 pnpm dev:mobile     # Expo (같은 Wi-Fi, .env의 EXPO_PUBLIC_API_URL을 맥 IP로)
 ```
 
-자세한 설정은 [docs/50-setup](./docs/50-setup/README.md).
+자세한 설정은 [docs/tech/setup.md](./docs/tech/setup.md).
 
 ## 문서
 
 | 폴더 | 내용 |
 |---|---|
-| [docs/00-overview](./docs/00-overview/README.md) | 제품 정의, 핵심 사용자, 범위 |
-| [docs/10-architecture](./docs/10-architecture/README.md) | 모노레포 구조, 데이터 흐름, 기술 스택 |
-| [docs/20-data-model](./docs/20-data-model/README.md) | DB 테이블과 의미 |
-| [docs/30-data-sources](./docs/30-data-sources/README.md) | 수집 소스(API/크롤링), 스케줄, 법적 주의 |
-| [docs/40-ai](./docs/40-ai/README.md) | 챗봇·LLM 프로바이더·RAG 설계 |
-| [docs/50-setup](./docs/50-setup/README.md) | 맥/윈도우 개발 환경 |
-| [docs/60-decisions](./docs/60-decisions/README.md) | 아키텍처 결정 기록(ADR) |
-| [docs/70-progress](./docs/70-progress/README.md) | 진행 상황 로그 |
-| [docs/80-roadmap](./docs/80-roadmap/README.md) | MVP 단계와 다음 할 일 |
+| [docs/progress](./docs/progress/README.md) | 진행 로그, 로드맵 |
+| [docs/tech](./docs/tech/README.md) | 제품 개요, 아키텍처, 데이터 모델, 수집 소스, AI, 환경 설정, ADR |
+| [docs/logs](./docs/logs/README.md) | 실행 로그, 오류 기록 |
+| [docs/review](./docs/review/README.md) | 코드 리뷰 기록 |

@@ -1,4 +1,4 @@
-# 70 — 진행 로그
+# 진행 로그
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
@@ -13,7 +13,7 @@
 - api: accounts, dashboard.overview, market, chat 라우터
 - web: 대시보드(/), 챗봇(/chat) 최소 UI
 - mobile: Expo 대시보드 최소 UI
-- docs/ 구조와 README
+- docs/ 구조(progress · tech · logs · review)와 README, AGENTS.md/CLAUDE.md
 
 **아직 안 한 것 (의존성 설치·실행 전)**
 - `pnpm install` 및 첫 실행 검증 — 패키지 버전 충돌 가능성 있음
