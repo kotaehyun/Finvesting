@@ -34,7 +34,7 @@ Finvesting/
 │  ├─ review/                 코드 리뷰 기록
 │  ├─ verification/           AI 모델별 검증 기록 — 무엇이 실제 실행으로 확인됐고 무엇이 아직인지
 │  └─ prompts/                AI 모델 공통 프롬프트 (세션 시작·작업별·종료)
-├─ AGENTS.md / CLAUDE.md      AI 도구 공통 지침 (docs를 가리킴)
+├─ AGENTS.md / CLAUDE.md / ChatGPT.md   AI 도구 공통 지침 (docs를 가리킴)
 ├─ docker-compose.yml         로컬 PostgreSQL(pgvector)
 ├─ turbo.json, pnpm-workspace.yaml, tsconfig.base.json
 └─ .env.example               환경변수 목록 (복사해 .env로)

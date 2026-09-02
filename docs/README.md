@@ -1,6 +1,6 @@
 # docs — 프로젝트 문서 (SSOT)
 
-사람과 AI 도구(Claude, Cursor, Codex, Copilot 등) 모두가 참조하는 **단일 진실 원천**. 코드와 문서가 어긋나면 반드시 맞춘다.
+사람과 AI 도구(Claude, ChatGPT/Codex, Cursor, Copilot 등) 모두가 참조하는 — 루트의 `AGENTS.md`(Cursor·Codex·Copilot), `CLAUDE.md`, `ChatGPT.md`가 모두 이 폴더를 가리킨다. **단일 진실 원천**. 코드와 문서가 어긋나면 반드시 맞춘다.
 
 ## 폴더
 
