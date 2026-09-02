@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { accounts } from "@finvesting/db";
-import { router, publicProcedure } from "../trpc.js";
+import { router, publicProcedure } from "../trpc";
 
 export const accountsRouter = router({
   list: publicProcedure.query(({ ctx }) =>

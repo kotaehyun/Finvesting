@@ -1,11 +1,11 @@
 import "./lib/env.js";
-import { collectRssNews } from "./sources/rss.js";
-import { collectEcos } from "./sources/ecos.js";
-import { collectUpbit } from "./sources/upbit.js";
-import { collectFred } from "./sources/fred.js";
-import { collectYahoo } from "./sources/yahoo.js";
-import { collectDart } from "./sources/dart.js";
-import { collectEdgar } from "./sources/edgar.js";
+import { collectRssNews } from "./sources/rss";
+import { collectEcos } from "./sources/ecos";
+import { collectUpbit } from "./sources/upbit";
+import { collectFred } from "./sources/fred";
+import { collectYahoo } from "./sources/yahoo";
+import { collectDart } from "./sources/dart";
+import { collectEdgar } from "./sources/edgar";
 
 // 개발용: 모든 소스 1회 실행
 for (const [name, fn] of [["rss", collectRssNews], ["upbit", collectUpbit], ["ecos", collectEcos], ["fred", collectFred], ["yahoo", collectYahoo], ["dart", collectDart], ["edgar", collectEdgar]] as const) {

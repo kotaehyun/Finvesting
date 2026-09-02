@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { toIsoDate, toNumber } from "./parse-file.js";
-import { genericBankImporter } from "./importers/generic-bank.js";
+import { toIsoDate, toNumber } from "./parse-file";
+import { genericBankImporter } from "./importers/generic-bank";
 
 describe("toIsoDate", () => {
   it("여러 구분자를 YYYY-MM-DD로 맞춘다", () => {

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { desc } from "drizzle-orm";
 import { news, macroIndicators } from "@finvesting/db";
 import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock } from "@finvesting/ai";
-import { router, publicProcedure } from "../trpc.js";
+import { router, publicProcedure } from "../trpc";
 
 // 투자 판단용 챗봇: 최근 뉴스·거시지표를 컨텍스트로 주입해 로컬 LLM에 질의.
 // TODO: 보유 종목·현금흐름 컨텍스트, pgvector 유사 뉴스 검색(RAG) 추가

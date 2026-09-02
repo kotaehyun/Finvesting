@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, numeric, boolean, pgEnum, index } from "drizzle-orm/pg-core";
-import { users, timestamps } from "./common.js";
+import { users, timestamps } from "./common";
 
 // 계좌 유형: 자산 배분 계산의 기준이 된다.
 export const accountType = pgEnum("account_type", [

@@ -30,6 +30,7 @@
 6. 스키마를 바꾸면 `pnpm db:generate`로 마이그레이션을 만들고 `docs/tech/data-model.md`를 같이 고칩니다.
 7. 문서·주석은 한국어, 식별자는 영어.
 8. 큰 변경(새 패키지, 라이브러리 교체, 구조 변경)은 먼저 계획을 제시하고 사용자 확인 후 진행합니다.
+9. **브랜치**: `main`·`dev`에 직접 커밋하지 않습니다. 시작 시 `git branch --show-current`를 확인하고, `dev`면 `feat|fix|docs|chore/<이름>` 브랜치를 새로 땁니다. push·merge는 사용자가 지시할 때만. 상세 `docs/tech/git-workflow.md`.
 
 ## 작업 후 반드시
 - `docs/progress/README.md` 맨 위에 오늘 날짜 항목 추가: 한 일 / 다음 할 일 / 막힌 것

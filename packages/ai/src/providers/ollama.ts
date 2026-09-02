@@ -1,4 +1,4 @@
-import type { ChatMessage, LlmProvider } from "../provider.js";
+import type { ChatMessage, LlmProvider } from "../provider";
 
 export class OllamaProvider implements LlmProvider {
   readonly name = "ollama";

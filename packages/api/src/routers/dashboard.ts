@@ -2,7 +2,7 @@ import { z } from "zod";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { accounts, transactions, financialProfiles } from "@finvesting/db";
 import { summarizeCashflow, monthlyBudgetGuide } from "@finvesting/core";
-import { router, publicProcedure } from "../trpc.js";
+import { router, publicProcedure } from "../trpc";
 
 export const dashboardRouter = router({
   // 첫 화면: 총자산·배분, 이번 달 현금흐름, 권장 배분 vs 현재

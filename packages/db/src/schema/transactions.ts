@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, numeric, date, pgEnum, index, jsonb } from "drizzle-orm/pg-core";
-import { users, timestamps } from "./common.js";
-import { accounts } from "./accounts.js";
+import { users, timestamps } from "./common";
+import { accounts } from "./accounts";
 
 export const txnDirection = pgEnum("txn_direction", ["in", "out", "transfer"]);
 

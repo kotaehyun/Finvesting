@@ -1,5 +1,5 @@
 import { db, financialStatements } from "@finvesting/db";
-import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments.js";
+import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments";
 
 // 미국 SEC EDGAR — 공식, 키 불필요, 단 User-Agent에 연락처 필수(SEC 정책). 초당 10요청 제한.
 // companyfacts API: https://data.sec.gov/api/xbrl/companyfacts/CIK##########.json

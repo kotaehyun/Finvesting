@@ -72,6 +72,7 @@ packages/api (tRPC) ── packages/core (calculations) ── packages/ai (LLM)
 | Chatbot / LLM / RAG design | [docs/tech/ai.md](./docs/tech/ai.md) |
 | Importing bank/card files, exporting to accounting software | [docs/tech/interop.md](./docs/tech/interop.md) |
 | Mac/Windows setup and run commands | [docs/tech/setup.md](./docs/tech/setup.md) |
+| Branching strategy, syncing two machines | [docs/tech/git-workflow.md](./docs/tech/git-workflow.md) |
 | Why decisions were made | [docs/tech/decisions/](./docs/tech/decisions/README.md) |
 | Has this error happened before | [docs/logs/](./docs/logs/README.md) |
 | Code review results | [docs/review/](./docs/review/README.md) |
@@ -107,7 +108,7 @@ Full procedure (DB init, worker, mobile, Windows notes): [docs/tech/setup.md](./
 ## Dev environment
 - MacBook: `/Users/th/개발/workspace/Finvesting` (primary machine, holds real data)
 - Windows: TBD — code synced via Git, DB data stays local per machine
-- Remote: https://github.com/kotaehyun/Finvesting (`main`)
+- Remote: https://github.com/kotaehyun/Finvesting — `main` (verified) / `dev` (integration) / `feat|fix|docs|chore/*`
 - Node 22, pnpm 9, Docker, Ollama
 
 ## Language policy

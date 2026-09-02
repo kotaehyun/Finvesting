@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summarizeCashflow } from "./cashflow.js";
+import { summarizeCashflow } from "./cashflow";
 
 describe("summarizeCashflow", () => {
   it("수입·고정비·변동비·저축을 나눈다. 이체는 소비에 넣지 않는다", () => {

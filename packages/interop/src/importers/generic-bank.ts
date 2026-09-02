@@ -1,5 +1,5 @@
-import type { TransactionImporter, ParsedTransaction } from "../types.js";
-import { toNumber, toIsoDate } from "../parse-file.js";
+import type { TransactionImporter, ParsedTransaction } from "../types";
+import { toNumber, toIsoDate } from "../parse-file";
 
 // 범용 통장 내보내기 파서: 헤더에서 날짜/입금/출금/내용/잔액 컬럼을 이름으로 찾는다.
 // 은행별 전용 파서는 detect가 더 구체적인 것을 먼저 등록.

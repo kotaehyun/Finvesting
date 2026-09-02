@@ -4,7 +4,7 @@
 
 ## 일반
 - TypeScript strict. `any` 금지(불가피하면 `// eslint-disable` 대신 `unknown` + 좁히기).
-- ESM(`"type": "module"`), 내부 import는 `.js` 확장자 표기.
+- ESM(`"type": "module"`), 상대 import는 **확장자 없이** (`./common`). `.js`를 붙이면 drizzle-kit(CJS 로더)이 `.ts`를 못 찾는다. 모든 실행 경로(tsx, Next, Metro, vitest)가 확장자 없는 import를 지원한다.
 - 패키지 매니저 pnpm. 워크스페이스 참조는 `workspace:*`.
 - 커밋: `type(scope): 요약` — type은 feat/fix/docs/refactor/chore/test, scope는 web/mobile/worker/db/core/api/ai/docs.
 
@@ -19,6 +19,11 @@
 - `api`: zod 입력 검증 필수. `ctx.userId`로 사용자 범위 제한.
 - `worker`: 어댑터는 `collect<Name>()` 하나 export, 멱등 upsert, 실패는 throw.
 - `ai`: `LlmProvider` 인터페이스 뒤에만 구현. 프롬프트는 `prompts.ts`에 상수로.
+
+## UI
+- 색상은 `globals.css`의 CSS 변수(`--bg`, `--fg`, `--card`, `--border`, `--muted`, `--accent`)만 사용. 하드코딩 색상 금지.
+- 한글 입력을 받는 Enter 전송은 `e.nativeEvent.isComposing`이 false일 때만.
+- LLM 답변은 `react-markdown`으로 렌더 (`.md` 클래스).
 
 ## 문서
 - 문서·주석 한국어, 식별자 영어.

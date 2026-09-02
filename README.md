@@ -73,6 +73,7 @@ packages/api (tRPC) ── packages/core (계산) ── packages/ai (LLM)
 | 챗봇·LLM·RAG 설계 | [docs/tech/ai.md](./docs/tech/ai.md) |
 | 통장·카드 파일 가져오기, 회계 프로그램 내보내기 | [docs/tech/interop.md](./docs/tech/interop.md) |
 | 맥/윈도우 환경 설정과 실행 명령 | [docs/tech/setup.md](./docs/tech/setup.md) |
+| 브랜치 전략, 두 기기 동기화 | [docs/tech/git-workflow.md](./docs/tech/git-workflow.md) |
 | 왜 이렇게 결정했나 | [docs/tech/decisions/](./docs/tech/decisions/README.md) |
 | 이 오류 전에도 났었나 | [docs/logs/](./docs/logs/README.md) |
 | 코드 리뷰 결과 | [docs/review/](./docs/review/README.md) |
@@ -108,7 +109,7 @@ DB 초기화, 수집기, 모바일, 윈도우 주의사항 등 전체 절차는 
 ## 개발 환경
 - 맥북: `/Users/th/개발/workspace/Finvesting` (주 작업 기기, 실데이터 보관)
 - 윈도우: 미정 — 코드는 Git으로 동기화, DB 데이터는 기기별 로컬
-- 원격 저장소: https://github.com/kotaehyun/Finvesting (`main`)
+- 원격 저장소: https://github.com/kotaehyun/Finvesting — `main`(검증됨) / `dev`(통합) / `feat|fix|docs|chore/*`
 - Node 22, pnpm 9, Docker, Ollama
 
 ## 언어 정책

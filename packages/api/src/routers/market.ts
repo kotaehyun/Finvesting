@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { desc, eq, inArray } from "drizzle-orm";
 import { news, macroIndicators, quotes, instruments } from "@finvesting/db";
-import { router, publicProcedure } from "../trpc.js";
+import { router, publicProcedure } from "../trpc";
 
 export const marketRouter = router({
   latestNews: publicProcedure

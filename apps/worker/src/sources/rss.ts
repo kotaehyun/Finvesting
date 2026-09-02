@@ -18,9 +18,11 @@ const FEEDS: Array<{ id: string; url: string; publisher: string; lang: "ko" | "e
 export async function collectRssNews() {
   const parser = new Parser({ timeout: 10_000 });
   let inserted = 0;
+  const perFeed: Record<string, number | string> = {};
   for (const f of FEEDS) {
     try {
       const feed = await parser.parseURL(f.url);
+      let n = 0;
       for (const item of feed.items) {
         if (!item.link || !item.title) continue;
         const r = await db.insert(news).values({
@@ -32,9 +34,10 @@ export async function collectRssNews() {
           source: `rss:${f.id}`,
           raw: { guid: item.guid, categories: item.categories, lang: f.lang },
         }).onConflictDoNothing().returning({ id: news.id });
-        inserted += r.length;
+        inserted += r.length; n += r.length;
       }
-    } catch (e) { console.warn(`rss ${f.id} failed`, (e as Error).message); }
+      perFeed[f.id] = `${n}/${feed.items.length}`; // 신규/전체
+    } catch (e) { perFeed[f.id] = `FAIL ${((e as Error).message ?? String(e)).split("\n")[0]?.slice(0, 60)}`; }
   }
-  return { inserted };
+  return { inserted, perFeed };
 }
