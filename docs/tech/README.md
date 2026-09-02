@@ -9,4 +9,5 @@
 | [ai.md](./ai.md) | 챗봇, LLM 프로바이더, RAG 계획 |
 | [interop.md](./interop.md) | 외부 파일 가져오기/내보내기 — 통장·카드·증권 CSV, 더존·위하고·세무사랑 양식 |
 | [setup.md](./setup.md) | 맥/윈도우 개발 환경, 실행 명령 |
+| [git-workflow.md](./git-workflow.md) | 브랜치 전략(main/dev/기능), 두 기기 동기화, AI 도구 커밋 규칙 |
 | [decisions/](./decisions/README.md) | 아키텍처 결정 기록(ADR) |

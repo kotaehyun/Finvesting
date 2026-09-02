@@ -32,3 +32,4 @@ ChatGPT(웹·앱)나 Codex로 이 저장소를 작업할 때 적용한다. 내�
 6. Follow the package dependency rules in `docs/tech/architecture.md`: `core` is pure; `web`/`mobile` never access the DB directly.
 7. Money: `numeric` string ↔ `Number()`. Never store full news article bodies.
 8. Language: docs and comments in Korean (core docs mirrored as `*.en.md`), identifiers in English. Package manager: pnpm only.
+9. Branches: never commit directly to `main` or `dev`. Work only on `feat|fix|docs|chore/<name>` branches; push and merge only when the user says so (`docs/tech/git-workflow.md`).
