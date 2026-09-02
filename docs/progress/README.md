@@ -2,6 +2,30 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-02 (7) — 첫 실행: DB 마이그레이션 성공 (feat/first-run)
+**한 일**
+- 브랜치 전략 적용: main/dev 푸시, `feat/first-run`에서 작업
+- Docker Desktop 기동, `pnpm db:up`, pgvector 확장
+- `pnpm db:generate` 실패 → 상대 import `.js` 제거(29파일)로 해결 (logs 기록)
+- `pnpm db:migrate` 실패 → 루트 `.env` 생성으로 해결
+- 마이그레이션 `0000_blue_carlie_cooper.sql` 적용(16 테이블), 기본 사용자 seed 완료
+
+- worker `run:once`: env.ts 경로 버그 수정 → RSS 8개 피드 전부 응답(1차 325건), Upbit 4, Yahoo v2 429 실패 → v3 전환·백오프 후 4/4 성공. 시세일을 `regularMarketTime` 미국 동부 날짜로 변경
+
+- `pnpm dev:web` 기동 성공: `/` 200, tRPC 대시보드·뉴스 200 (DB 실데이터로 렌더)
+
+- `/chat` + Ollama(gemma4:12b) 질의 성공 — 수집 뉴스 기반 시장 요약 답변. 한글 IME Enter 이중 전송·색상 대비 버그 수정, 답변 마크다운 렌더(react-markdown)
+
+**다음 할 일**
+1. `pnpm install` 후 `/chat` 재확인 (react-markdown 추가)
+2. `pnpm -r test` (fx 테스트 3개 포함)
+3. ECOS·FRED·DART 키 발급 후 해당 소스 검증
+4. feat/first-run → dev merge
+
+**막힌 것**
+- 맥 Node가 26.7.0 (`.nvmrc`는 22) — 지금은 동작하나 Expo 등에서 문제 가능, `nvm use`로 맞출 것
+- yahoo-finance2 3.15.4에도 deprecated 경고 — 상위 메이저가 있는지 확인 필요
+
 ## 2026-09-02 (6) — 검증 기록 폴더, ChatGPT.md, 영문 미러 (Claude)
 **한 일**
 - `docs/verification/` 신설: AI 모델별 검증 기록 + 검증 현황 표

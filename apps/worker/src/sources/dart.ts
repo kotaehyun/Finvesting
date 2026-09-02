@@ -1,5 +1,5 @@
 import { db, financialStatements } from "@finvesting/db";
-import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments.js";
+import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments";
 
 // 금융감독원 DART Open API — 한국 상장사 재무제표 (공식, 무료 키). https://opendart.fss.or.kr
 // 필요: DART_API_KEY. 종목코드→corp_code 매핑은 corpCode.xml(zip)에서 얻어야 하나, 여기선 환경변수로 직접 지정.

@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, numeric, date, timestamp, index, jsonb, uniqueIndex, vector } from "drizzle-orm/pg-core";
-import { users } from "./common.js";
-import { instruments } from "./investments.js";
+import { users } from "./common";
+import { instruments } from "./investments";
 
 // 시세 (일봉 기준으로 시작, 필요 시 분봉 테이블 추가)
 export const quotes = pgTable("market_quotes", {

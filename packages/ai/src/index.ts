@@ -1,8 +1,8 @@
-import type { LlmProvider } from "./provider.js";
-import { OllamaProvider } from "./providers/ollama.js";
+import type { LlmProvider } from "./provider";
+import { OllamaProvider } from "./providers/ollama";
 
-export * from "./provider.js";
-export * from "./prompts.js";
+export * from "./provider";
+export * from "./prompts";
 
 export function createProvider(): LlmProvider {
   const kind = process.env.AI_PROVIDER ?? "ollama";

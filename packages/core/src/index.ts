@@ -1,3 +1,3 @@
-export * from "./allocation.js";
-export * from "./cashflow.js";
-export * from "./portfolio.js";
+export * from "./allocation";
+export * from "./cashflow";
+export * from "./portfolio";
