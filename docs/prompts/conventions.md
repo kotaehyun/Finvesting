@@ -4,7 +4,7 @@
 
 ## 일반
 - TypeScript strict. `any` 금지(불가피하면 `// eslint-disable` 대신 `unknown` + 좁히기).
-- ESM(`"type": "module"`), 내부 import는 `.js` 확장자 표기.
+- ESM(`"type": "module"`), 상대 import는 **확장자 없이** (`./common`). `.js`를 붙이면 drizzle-kit(CJS 로더)이 `.ts`를 못 찾는다. 모든 실행 경로(tsx, Next, Metro, vitest)가 확장자 없는 import를 지원한다.
 - 패키지 매니저 pnpm. 워크스페이스 참조는 `workspace:*`.
 - 커밋: `type(scope): 요약` — type은 feat/fix/docs/refactor/chore/test, scope는 web/mobile/worker/db/core/api/ai/docs.
 

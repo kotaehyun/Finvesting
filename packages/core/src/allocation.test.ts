@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { monthlyBudgetGuide } from "./allocation.js";
+import { monthlyBudgetGuide } from "./allocation";
 
 const base = {
   monthlyNetIncome: 1_000_000,

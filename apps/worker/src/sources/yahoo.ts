@@ -1,5 +1,5 @@
 import { db, quotes, fundamentals } from "@finvesting/db";
-import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments.js";
+import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments";
 
 // Yahoo Finance — 비공식 라이브러리(yahoo-finance2). 개인 사용은 사실상 문제없으나 서비스화 시 정식 데이터 공급자로 교체 필요.
 // 미국 주식/ETF/지수 일봉 + 핵심 지표(시총, PER, PBR, EPS, 배당수익률, 베타).

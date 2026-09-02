@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, numeric, date, pgEnum, index, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
-import { users, timestamps } from "./common.js";
-import { accounts } from "./accounts.js";
+import { users, timestamps } from "./common";
+import { accounts } from "./accounts";
 
 export const assetClass = pgEnum("asset_class", ["stock", "etf", "bond", "crypto", "fund", "other"]);
 export const tradeSide = pgEnum("trade_side", ["buy", "sell"]);

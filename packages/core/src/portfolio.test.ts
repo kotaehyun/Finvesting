@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPositions, unrealizedPnl, type Position } from "./portfolio.js";
+import { buildPositions, unrealizedPnl, type Position } from "./portfolio";
 
 const pos = (o: Partial<Position>): Position => ({ instrumentId: "a", quantity: 0, avgCost: 0, avgFxRate: 1, realizedPnl: 0, realizedPnlKrw: 0, ...o });
 

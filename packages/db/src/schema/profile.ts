@@ -1,5 +1,5 @@
 import { pgTable, uuid, numeric, integer, jsonb, text } from "drizzle-orm/pg-core";
-import { users, timestamps } from "./common.js";
+import { users, timestamps } from "./common";
 
 // 배분 가이드 계산에 필요한 본인 재무 프로필
 export const financialProfiles = pgTable("financial_profiles", {

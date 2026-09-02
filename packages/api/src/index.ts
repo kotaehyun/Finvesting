@@ -1,8 +1,8 @@
-import { router } from "./trpc.js";
-import { accountsRouter } from "./routers/accounts.js";
-import { dashboardRouter } from "./routers/dashboard.js";
-import { marketRouter } from "./routers/market.js";
-import { chatRouter } from "./routers/chat.js";
+import { router } from "./trpc";
+import { accountsRouter } from "./routers/accounts";
+import { dashboardRouter } from "./routers/dashboard";
+import { marketRouter } from "./routers/market";
+import { chatRouter } from "./routers/chat";
 
 export const appRouter = router({
   accounts: accountsRouter,
@@ -11,4 +11,4 @@ export const appRouter = router({
   chat: chatRouter,
 });
 export type AppRouter = typeof appRouter;
-export { createContext } from "./trpc.js";
+export { createContext } from "./trpc";

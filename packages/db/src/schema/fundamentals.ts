@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, numeric, date, integer, jsonb, timestamp, uniqueIndex, index } from "drizzle-orm/pg-core";
-import { instruments } from "./investments.js";
+import { instruments } from "./investments";
 
 // 재무제표 원본 (기간 단위). 항목은 jsonb로 유연하게 보관하고, 자주 쓰는 값은 fundamentals 스냅샷에 정규화.
 // source: "dart"(한국 금감원) | "edgar"(미국 SEC) | "yahoo"

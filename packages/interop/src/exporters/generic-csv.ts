@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import type { LedgerExporter } from "../types.js";
+import type { LedgerExporter } from "../types";
 
 // 세무사 전달용 범용 장부 CSV (UTF-8 BOM, 엑셀에서 바로 열림)
 export const genericCsvExporter: LedgerExporter = {
