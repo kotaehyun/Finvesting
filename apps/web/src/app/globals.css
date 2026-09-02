@@ -1,10 +1,23 @@
-:root { color-scheme: light dark; font-family: system-ui, -apple-system, "Pretendard", sans-serif; }
-body { margin: 0; }
-.nav { display: flex; gap: 16px; padding: 12px 20px; border-bottom: 1px solid #8884; }
-.nav a { text-decoration: none; color: inherit; font-weight: 600; }
+:root {
+  color-scheme: light dark;
+  --bg: #f6f7f9; --fg: #1a1d21; --muted: #5c6470; --card: #ffffff; --border: #d9dde3; --user: #e8f0fe; --accent: #2563eb;
+  font-family: system-ui, -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f1115; --fg: #e6e8eb; --muted: #9aa3ad; --card: #171a20; --border: #2a2f37; --user: #1e2a44; --accent: #60a5fa; }
+}
+html, body { background: var(--bg); color: var(--fg); margin: 0; }
+a { color: var(--accent); }
+.nav { display: flex; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--card); }
+.nav a { text-decoration: none; color: var(--fg); font-weight: 600; }
 .main { max-width: 1100px; margin: 0 auto; padding: 20px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.card { border: 1px solid #8884; border-radius: 10px; padding: 16px; }
-.card h3 { margin: 0 0 8px; font-size: 14px; opacity: .7; }
+.card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: var(--card); }
+.card h3 { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+.card.user { background: var(--user); }
 .big { font-size: 26px; font-weight: 700; }
-.muted { opacity: .65; font-size: 13px; }
+.muted { color: var(--muted); font-size: 13px; }
+input, button { font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+button { background: var(--accent); color: #fff; border-color: transparent; cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+.md p { margin: 0 0 8px; } .md ul, .md ol { margin: 4px 0 8px 20px; } .md li { margin: 2px 0; } .md strong { font-weight: 700; }

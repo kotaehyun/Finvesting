@@ -20,6 +20,11 @@
 - `worker`: 어댑터는 `collect<Name>()` 하나 export, 멱등 upsert, 실패는 throw.
 - `ai`: `LlmProvider` 인터페이스 뒤에만 구현. 프롬프트는 `prompts.ts`에 상수로.
 
+## UI
+- 색상은 `globals.css`의 CSS 변수(`--bg`, `--fg`, `--card`, `--border`, `--muted`, `--accent`)만 사용. 하드코딩 색상 금지.
+- 한글 입력을 받는 Enter 전송은 `e.nativeEvent.isComposing`이 false일 때만.
+- LLM 답변은 `react-markdown`으로 렌더 (`.md` 클래스).
+
 ## 문서
 - 문서·주석 한국어, 식별자 영어.
 - 스키마 변경 = 마이그레이션 + `docs/tech/data-model.md` 동시 갱신.

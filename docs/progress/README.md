@@ -14,8 +14,10 @@
 
 - `pnpm dev:web` 기동 성공: `/` 200, tRPC 대시보드·뉴스 200 (DB 실데이터로 렌더)
 
+- `/chat` + Ollama(gemma4:12b) 질의 성공 — 수집 뉴스 기반 시장 요약 답변. 한글 IME Enter 이중 전송·색상 대비 버그 수정, 답변 마크다운 렌더(react-markdown)
+
 **다음 할 일**
-1. `/chat` 화면 확인, Ollama 설치·모델 pull 후 질의 테스트
+1. `pnpm install` 후 `/chat` 재확인 (react-markdown 추가)
 2. `pnpm -r test` (fx 테스트 3개 포함)
 3. ECOS·FRED·DART 키 발급 후 해당 소스 검증
 4. feat/first-run → dev merge

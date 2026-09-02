@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { trpc } from "@/lib/trpc";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -10,8 +11,9 @@ export default function ChatPage() {
   const ask = trpc.chat.ask.useMutation();
 
   async function send() {
-    if (!input.trim()) return;
-    const next: Msg[] = [...messages, { role: "user", content: input }];
+    const text = input.trim();
+    if (!text || ask.isPending) return;
+    const next: Msg[] = [...messages, { role: "user", content: text }];
     setMessages(next); setInput("");
     try {
       const r = await ask.mutateAsync({ messages: next });
@@ -27,16 +29,24 @@ export default function ChatPage() {
       <p className="muted">수집된 뉴스·거시지표를 바탕으로 로컬 LLM이 답합니다. (Ollama 실행 필요)</p>
       <div style={{ display: "grid", gap: 10 }}>
         {messages.map((m, i) => (
-          <div key={i} className="card" style={{ background: m.role === "user" ? "#8881" : "transparent" }}>
+          <div key={i} className={`card ${m.role === "user" ? "user" : ""}`}>
             <h3>{m.role === "user" ? "나" : "비서"}</h3>
-            <div style={{ whiteSpace: "pre-wrap" }}>{m.content}</div>
+            {m.role === "assistant"
+              ? <div className="md"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+              : <div style={{ whiteSpace: "pre-wrap" }}>{m.content}</div>}
           </div>
         ))}
         {ask.isPending && <div className="muted">생각 중…</div>}
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="예: 지금 환율·금리 상황에서 미국 ETF 추가 매수가 맞을까?" style={{ flex: 1, padding: 10 }} />
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          // 한글 IME 조합 중 Enter는 무시 (조합 확정 + 전송이 겹쳐 마지막 글자가 따로 전송되는 문제)
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }}
+          placeholder="예: 지금 환율·금리 상황에서 미국 ETF 추가 매수가 맞을까?"
+          style={{ flex: 1 }}
+        />
         <button onClick={send} disabled={ask.isPending}>보내기</button>
       </div>
     </>
