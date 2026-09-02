@@ -8,7 +8,7 @@ This folder is the **single source of truth** for both humans and AI tools (Clau
 
 | Folder | Contents | Update when |
 |---|---|---|
-| [`progress/`](./progress/README.md) | Progress log (newest first), [roadmap](./progress/roadmap.md) | **every work session** |
+| [`progress/`](./progress/README.md) | Progress log (newest first), [roadmap](./progress/roadmap.md), [status summary](./progress/status.md) (copy of the Claude project doc) | **every work session** |
 | [`tech/`](./tech/README.md) | Technical docs — product overview, architecture, data model, data sources, AI, setup, decision records (ADR) | structure / schema / sources / AI / setup change |
 | [`logs/`](./logs/README.md) | Run logs, errors and how they were fixed | when hitting or fixing an error |
 | [`review/`](./review/README.md) | Code review records — findings, suggestions, whether applied | when reviewing |
