@@ -16,7 +16,8 @@
 2. `docs/progress/README.md` — 지금까지 한 일, 다음 할 일, 막힌 것
 3. `docs/tech/overview.md`, `docs/tech/architecture.md`
 4. 작업 영역에 따라: `tech/data-model.md`(스키마), `tech/data-sources.md`(수집), `tech/ai.md`(챗봇), `tech/setup.md`(환경)
-5. 오류가 관련되면 `docs/logs/`를 검색
+5. `docs/verification/README.md` 검증 현황 표 — ❌ 항목은 아무도 실행해보지 않은 것이다
+6. 오류가 관련되면 `docs/logs/`를 검색
 
 ## 절대 규칙
 1. **문서에 없는 사실은 지어내지 않습니다.** 모르면 코드를 열어 확인하거나 사용자에게 묻습니다. 외부 API의 엔드포인트·파라미터·통계코드는 확신 없으면 "확인 필요"라고 표시합니다.
@@ -32,6 +33,7 @@
 - `docs/progress/README.md` 맨 위에 오늘 날짜 항목 추가: 한 일 / 다음 할 일 / 막힌 것
 - 바꾼 영역의 `docs/tech/*` 갱신, 기술 결정은 `docs/tech/decisions/NNNN-제목.md` 추가
 - 오류를 해결했으면 `docs/logs/YYYY-MM-DD-제목.md`, 리뷰했으면 `docs/review/YYYY-MM-DD-대상.md`
+- `docs/verification/YYYY-MM-DD-<모델>.md`에 실제 실행해 확인한 것과 못 한 것을 기록, 현황 표 갱신
 - 커밋 메시지: `type(scope): 요약` (예: `feat(worker): add naver news adapter`)
 
 읽었으면 "docs를 읽었고, 현재 상태는 …, 다음 할 일은 …" 한 단락으로 요약한 뒤 작업 지시를 기다리세요.

@@ -32,6 +32,7 @@ Finvesting/
 │  ├─ tech/                   기술 문서 — 개요, 아키텍처, 데이터 모델, 수집 소스, AI, 환경 설정, ADR
 │  ├─ logs/                   오류·실행 기록과 해결법
 │  ├─ review/                 코드 리뷰 기록
+│  ├─ verification/           AI 모델별 검증 기록 — 무엇이 실제 실행으로 확인됐고 무엇이 아직인지
 │  └─ prompts/                AI 모델 공통 프롬프트 (세션 시작·작업별·종료)
 ├─ AGENTS.md / CLAUDE.md      AI 도구 공통 지침 (docs를 가리킴)
 ├─ docker-compose.yml         로컬 PostgreSQL(pgvector)
@@ -72,6 +73,7 @@ packages/api (tRPC) ── packages/core (계산) ── packages/ai (LLM)
 | 왜 이렇게 결정했나 | [docs/tech/decisions/](./docs/tech/decisions/README.md) |
 | 이 오류 전에도 났었나 | [docs/logs/](./docs/logs/README.md) |
 | 코드 리뷰 결과 | [docs/review/](./docs/review/README.md) |
+| 어떤 AI가 무엇을 실제로 검증했나, 아직 검증 안 된 것 | [docs/verification/](./docs/verification/README.md) |
 | AI에게 뭐라고 시작 프롬프트를 주나 | [docs/prompts/](./docs/prompts/README.md) |
 | 코딩 규칙 | [docs/prompts/conventions.md](./docs/prompts/conventions.md) |
 
