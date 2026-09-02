@@ -8,7 +8,7 @@
 
 | 단계 | 하드웨어 | 프로바이더 | 모델 예 |
 |---|---|---|---|
-| 지금 | 맥북 | Ollama | qwen2.5:7b, 임베딩 nomic-embed-text(768차원) |
+| 지금 | 맥북 | Ollama | 채팅 `gemma4:12b` (대안: `exaone3.5:7.8b` 한국어 특화). 보유 중: qwen2.5-coder:32b, gemma4:31b/e4b — 맥북에선 느려 보류. 임베딩 `nomic-embed-text`(768차원)는 RAG 단계에서 pull |
 | 연말 | 맥스튜디오 M5 Ultra (도입 고려) | Ollama | 70B급 |
 | 서비스화 | DGX Spark (도입 고려) | vLLM (OpenAI 호환) — `OpenAiCompatProvider` 추가 예정 | |
 
