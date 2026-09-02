@@ -1,0 +1,11 @@
+{
+  "name": "@finvesting/ai",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "dependencies": { "@finvesting/core": "workspace:*" },
+  "devDependencies": { "typescript": "^5.7.2" }
+}

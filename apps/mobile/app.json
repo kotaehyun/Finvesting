@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Finvesting",
+    "slug": "finvesting",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "scheme": "finvesting",
+    "userInterfaceStyle": "automatic",
+    "ios": { "supportsTablet": false },
+    "android": {}
+  }
+}

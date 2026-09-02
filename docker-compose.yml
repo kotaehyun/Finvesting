@@ -1,0 +1,13 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: finvesting-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finvesting
+      POSTGRES_PASSWORD: finvesting
+      POSTGRES_DB: finvesting
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data

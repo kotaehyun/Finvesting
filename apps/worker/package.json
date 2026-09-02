@@ -1,0 +1,22 @@
+{
+  "name": "@finvesting/worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "run:once": "tsx src/run-once.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@finvesting/ai": "workspace:*",
+    "@finvesting/db": "workspace:*",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.3",
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": { "@types/node-cron": "^3.0.11", "tsx": "^4.19.2", "typescript": "^5.7.2" }
+}
