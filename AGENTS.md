@@ -8,3 +8,16 @@
 6. 패키지 의존 규칙(`docs/tech/architecture.md`)을 지킨다: core는 순수, web/mobile은 DB 직접 접근 금지.
 7. 금액은 `numeric` 문자열 ↔ `Number()` 변환. 뉴스 본문은 저장하지 않는다.
 8. 언어: 문서·주석은 한국어, 식별자는 영어. 패키지 매니저는 pnpm만.
+
+---
+
+## English (same rules)
+
+1. Start a session with the rules in `docs/prompts/00-bootstrap.md` (`00-bootstrap.en.md`) and end it with `docs/prompts/90-session-end.md`. Read `docs/README.md` and `docs/progress/README.md` first. The docs are the single source of truth.
+2. Never guess facts the docs don't state — check the code or ask the user.
+3. After work, record in `docs/progress/README.md` and update the `docs/tech/` doc for the area you changed. Add an ADR under `docs/tech/decisions/` for technical decisions.
+4. On an error, search `docs/logs/` first and record the fix. Leave code reviews in `docs/review/`.
+5. At session end, write `docs/verification/YYYY-MM-DD-<model>.md` listing what was actually run and confirmed vs. not, and update the status table. ❌ rows in `docs/verification/README.md` are unverified — do not assume they work.
+6. Follow the package dependency rules in `docs/tech/architecture.md`: `core` is pure; `web`/`mobile` never access the DB directly.
+7. Money: `numeric` string ↔ `Number()`. Never store full news article bodies.
+8. Language: docs and comments in Korean (core docs mirrored as `*.en.md`), identifiers in English. Package manager: pnpm only.

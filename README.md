@@ -1,5 +1,7 @@
 # Finvesting
 
+> 🇺🇸 English: [README.en.md](./README.en.md)
+
 **개인 자산·투자·돈의 흐름을 한곳에서 파악하고, 수집한 시장 정보를 바탕으로 로컬 LLM 챗봇과 대화하며 투자 판단을 돕는 개인용 금융 업무 터미널.**
 
 계좌·카드·증권·코인 잔액과 거래를 모아 순자산과 월 현금흐름(수입 대비 소비율·저축률)을 보여주고, 소득·자산·비상금·위험 성향에 따라 예적금/투자/소비를 어떻게 나눌지 가이드합니다. 뉴스·시세·물가·금리·환율은 수집기가 자동으로 모으고, 그 데이터와 본인 재무 상황을 컨텍스트로 챗봇에 질문해 투자 판단을 내립니다. 금융 데이터는 외부로 나가지 않고 로컬에서 처리합니다.
@@ -35,6 +37,7 @@ Finvesting/
 │  ├─ verification/           AI 모델별 검증 기록 — 무엇이 실제 실행으로 확인됐고 무엇이 아직인지
 │  └─ prompts/                AI 모델 공통 프롬프트 (세션 시작·작업별·종료)
 ├─ AGENTS.md / CLAUDE.md / ChatGPT.md   AI 도구 공통 지침 (docs를 가리킴)
+├─ README.en.md               영문 README (핵심 문서는 *.en.md 로 영문 미러 유지)
 ├─ docker-compose.yml         로컬 PostgreSQL(pgvector)
 ├─ turbo.json, pnpm-workspace.yaml, tsconfig.base.json
 └─ .env.example               환경변수 목록 (복사해 .env로)
@@ -106,3 +109,6 @@ DB 초기화, 수집기, 모바일, 윈도우 주의사항 등 전체 절차는 
 - 맥북: `/Users/th/개발/workspace/Finvesting` (주 작업 기기, 실데이터 보관)
 - 윈도우: 미정 — 코드는 Git으로 동기화, DB 데이터는 기기별 로컬
 - Node 22, pnpm 9, Docker, Ollama
+
+## 언어 정책
+한국어 `*.md`가 정본. 핵심 문서(README, docs 안내, 개요, 아키텍처, 부트스트랩 프롬프트, AGENTS)는 옆에 `*.en.md` 영문 미러를 둔다. 한국어 문서를 고치면 같은 세션에서 `.en.md`도 갱신한다. `.en.md`가 없는 문서는 당분간 한국어만.

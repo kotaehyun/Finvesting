@@ -2,6 +2,16 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-02 (6) — 검증 기록 폴더, ChatGPT.md, 영문 미러 (Claude)
+**한 일**
+- `docs/verification/` 신설: AI 모델별 검증 기록 + 검증 현황 표
+- `ChatGPT.md` 추가
+- 영문 미러: `README.en.md`, `docs/README.en.md`, `tech/overview.en.md`, `tech/architecture.en.md`, `prompts/00-bootstrap.en.md`, AGENTS/CLAUDE/ChatGPT 영문 규칙 섹션. 언어 정책(한국어 정본, 핵심 문서만 `.en.md`)을 README에 명시
+- 원격 저장소 미연결 — GitHub 저장소 생성 후 push 필요
+
+**다음 할 일** — (3)과 동일 + GitHub remote 연결·push
+**막힌 것** — 나머지 문서(data-model, data-sources, ai, interop, setup, 프롬프트 템플릿 등)는 아직 한국어만
+
 ## 2026-09-02 (5) — Cursor 리뷰 검토 + 보류 항목 처리 (Claude)
 **한 일**
 - Cursor 변경분 검토: 수정 내용 타당, 7개 패키지 typecheck 재확인 통과

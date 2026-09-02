@@ -1,5 +1,7 @@
 # docs — 프로젝트 문서 (SSOT)
 
+> 🇺🇸 English: [README.en.md](./README.en.md)
+
 사람과 AI 도구(Claude, ChatGPT/Codex, Cursor, Copilot 등) 모두가 참조하는 — 루트의 `AGENTS.md`(Cursor·Codex·Copilot), `CLAUDE.md`, `ChatGPT.md`가 모두 이 폴더를 가리킨다. **단일 진실 원천**. 코드와 문서가 어긋나면 반드시 맞춘다.
 
 ## 폴더
@@ -23,4 +25,4 @@
 4. 구조/스키마/소스/AI/설정을 바꿨으면 해당 `tech/` 문서를 갱신하고, 중요한 기술 선택은 `tech/decisions/`에 ADR 한 장 추가.
 5. 오류를 만나면 `logs/`에, 코드를 리뷰하면 `review/`에 기록한다.
 6. 세션마다 `verification/YYYY-MM-DD-<모델>.md`에 **실제로 실행해 확인한 것**과 **못 한 것**을 남기고, `verification/README.md`의 검증 현황 표를 갱신한다. 실행 안 해본 것을 검증됐다고 쓰지 않는다.
-7. 문서는 한국어, 코드 식별자는 영어 그대로.
+7. 문서는 한국어, 코드 식별자는 영어 그대로. 핵심 문서는 `*.en.md` 영문 미러가 있으니 한국어를 고치면 같은 세션에서 영문도 갱신한다.

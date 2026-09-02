@@ -1,5 +1,7 @@
 # 아키텍처
 
+> 🇺🇸 English: [architecture.en.md](./architecture.en.md)
+
 ## 기술 스택
 | 영역 | 선택 | 이유 |
 |---|---|---|
