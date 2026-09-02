@@ -21,3 +21,4 @@
 | 2026-09-02 | File 'expo/tsconfig.base' not found | 해결 |
 | 2026-09-02 | 대시보드 월 종료일 Postgres date 오류 | 해결 |
 | 2026-09-02 | drizzle-kit `Cannot find module ./common.js` + `url: undefined` | 해결 |
+| 2026-09-02 | worker `DATABASE_URL is not set` (env.ts 경로 한 단계 부족) | 해결 |
