@@ -37,12 +37,12 @@
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ | 2026-09-02 | Cursor, Claude 재확인(7패키지, web 제외) |
-| core 테스트 (vitest) | ✅ 7개 (fx 테스트 3개 추가분은 미실행) | 2026-09-02 | Cursor |
+| core 테스트 (vitest) | ✅ 9개 (cashflow 2 + allocation 2 + portfolio 5, fx 포함) | 2026-09-02 | Cursor, Grok 재실행 |
 | interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
 | `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25 | 2026-09-02 | 사용자 실행 |
-| `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b, 뉴스 컨텍스트 반영된 답변 확인 | 2026-09-02 | 사용자 실행 |
+| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-05 재확인: latestNews에 embedding/raw 없음 | 2026-09-05 | 사용자(09-02), Grok curl 재확인 |
+| `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
 | worker — Upbit BTC/ETH/SOL/XRP | ✅ 4 upsert | 2026-09-02 | 사용자 실행 |
@@ -50,7 +50,7 @@
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — Yahoo (v3, SPY/QQQ/^GSPC/^IXIC) | ✅ 4/4 (v2는 429·지원종료 → v3 전환) | 2026-09-02 | 사용자 실행 |
 | worker — DART (계정명 매핑) | ⏸ 키·대상 없음, skip 동작 확인 | 2026-09-02 | |
-| worker — EDGAR (태그·UA) | ⏸ 대상 없음, skip 동작 확인 | 2026-09-02 | |
+| worker — EDGAR (태그·UA) | ⏸ `SEC_USER_AGENT` 없어 skip (`SEC_USER_AGENT not set`) | 2026-09-05 | Grok |
 
 | 모바일 Expo 기동 + 루트 .env 로드 | ❌ 미실행 | | |
 | 윈도우 환경 전체 | ❌ 경로 미정 | | |
@@ -58,6 +58,9 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-05 | Cursor Grok (계좌·CSV) | [2026-09-05-grok-2.md](./2026-09-05-grok-2.md) |
+| 2026-09-05 | Cursor Grok (리뷰 반영) | [2026-09-05-grok.md](./2026-09-05-grok.md) |
+| 2026-09-02 | Cursor Grok (first-run 리뷰) | [2026-09-02-grok.md](./2026-09-02-grok.md) |
 | 2026-09-02 | Claude (Cowork, 스캐폴딩) | [2026-09-02-claude.md](./2026-09-02-claude.md) |
 | 2026-09-02 | Cursor | [2026-09-02-cursor.md](./2026-09-02-cursor.md) |
 | 2026-09-02 | Claude (Cowork, 리뷰 검토) | [2026-09-02-claude-2.md](./2026-09-02-claude-2.md) |

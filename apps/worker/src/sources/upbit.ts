@@ -18,7 +18,13 @@ export async function collectUpbit() {
         instrumentId: inst.id, date: c.candle_date_time_kst.slice(0, 10),
         open: String(c.opening_price), high: String(c.high_price), low: String(c.low_price), close: String(c.trade_price),
         volume: String(Math.round(c.candle_acc_trade_volume)), source: "upbit",
-      }).onConflictDoUpdate({ target: [quotes.instrumentId, quotes.date], set: { close: String(c.trade_price), fetchedAt: new Date() } });
+      }).onConflictDoUpdate({
+        target: [quotes.instrumentId, quotes.date],
+        set: {
+          open: String(c.opening_price), high: String(c.high_price), low: String(c.low_price),
+          close: String(c.trade_price), volume: String(Math.round(c.candle_acc_trade_volume)), fetchedAt: new Date(),
+        },
+      });
       upserted++;
     } catch (e) { console.warn(`upbit ${m} failed`, (e as Error).message); }
   }

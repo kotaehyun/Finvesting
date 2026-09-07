@@ -7,7 +7,7 @@
 - Node 22 (`.nvmrc`) — 맥: `fnm`/`nvm`, 윈도우: `fnm` 또는 nvm-windows
 - pnpm 9 — `corepack enable && corepack prepare pnpm@9.15.0 --activate`
 - Docker Desktop (Postgres용)
-- Ollama (챗봇용) — `ollama pull qwen2.5:7b && ollama pull nomic-embed-text`
+- Ollama (챗봇용) — `ollama pull gemma4:12b && ollama pull nomic-embed-text` (대안: `exaone3.5:7.8b`)
 - Git 줄바꿈: `.gitattributes`로 LF 강제. 윈도우는 `git config --global core.autocrlf false` 권장
 
 ## 경로

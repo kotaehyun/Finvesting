@@ -2,6 +2,71 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-05 (2) — 계좌 등록 + CSV 가져오기 (feat/accounts-csv)
+**한 일**
+- `/accounts`: 계좌 추가·목록, 범용 통장 CSV/XLSX 미리보기 후 저장
+- `transactions.previewImport` / `commitImport` / `list` — api가 `@finvesting/interop`로 파싱. EUC-KR/UTF-8 자동, 같은 계좌·날짜·금액·방향·메모는 중복 skip. 마지막 `잔액`으로 계좌 잔액 갱신. 입금=`other_income`, 출금=`uncategorized`
+- 대시보드에 계좌 0건이면 `/accounts` 링크
+
+**실행 확인**
+- `GET /accounts` 200, 계좌 생성 200
+- 샘플 CSV 3건 preview → commit inserted 3, 잔액 3,150,000. 재업로드 duplicate 3
+- 대시보드: 순자산 3,150,000 · 수입 3,200,000 · 변동 50,000
+- 2026-09-06 Chrome UI: `UI검증 입출금` 추가 + CSV 2건 저장 → 대시보드 순자산 3,635,000 · 수입 3,700,000 · 변동 65,000
+
+**다음 할 일**
+1. 재무 프로필 입력 화면 → 배분 가이드
+2. 거래 분류(카테고리) 수정 UI
+3. ECOS·FRED·DART 키 발급 후 소스 검증
+4. 모바일 Expo 기동
+
+**막힌 것**
+- 은행별 전용 파서는 실제 내보내기 샘플이 필요
+- DB에 검증용 계좌 `테스트 입출금`과 거래 3건이 남아 있음 (삭제 여부 사용자)
+
+## 2026-09-05 — 리뷰 반영 (fix/first-run-review)
+**한 일**
+- `latestNews`는 제목·url·publisher·날짜·요약만 (embedding/raw 제외), `published_at DESC NULLS LAST`
+- 챗: 거시지표 코드별 최신 1건, 뉴스 요약, 계좌·거래·체결이 있으면 자산/현금흐름/보유 주입. 프롬프트는 없는 데이터를 지어내지 않게 수정. 메시지 40턴·8000자
+- Yahoo/Upbit upsert에 당일 OHLC·거래량. Yahoo 펀더멘털 날짜를 시세일(NY)과 맞춤
+- DART 타깃 형식 검증, 금액 파싱 실패는 skip. EDGAR는 `SEC_USER_AGENT` 없으면 skip, fact는 `end` 최신
+- Next `.env` 인라인 주석 제거, `.env.example` 주석을 윗줄로. Ollama 기본 `gemma4:12b`, setup.md 일치
+- 대시보드 조회를 `packages/api/src/lib/overview.ts`로 공유
+
+**다음 할 일**
+1. 계좌 등록 + 거래 CSV 업로드 UI (`packages/interop` 파서 연결)
+2. ECOS·FRED·DART 키 발급 후 해당 소스 검증
+3. 모바일 Expo 기동 검증
+4. `quotes` unique에 source 넣을지 (리뷰 #7, KIS 전에 ADR)
+
+**실행 확인 (같은 세션)**
+- Docker 기동 → `pnpm db:up` → `pnpm dev:web`: `/`·`/chat` 200, tRPC 배치 200. latestNews 키에 embedding/raw 없음
+- `chat.ask` 2회: 보유/현금흐름 없음 정직 응답, 뉴스 제목 3개 인용 (Ollama gemma4:12b)
+- `run:once` 2회: rss 268→0, upbit/yahoo 당일 OHLC upsert, EDGAR는 UA 없어 skip
+
+**막힌 것**
+- web `tsc`: `react-markdown`이 React 19 JSX 타입과 안 맞음 (이번 변경과 무관, 기존)
+- 리뷰 #7·#11·#13 미반영/보류
+- 맥 Node 26 vs `.nvmrc` 22
+- 브라우저 자동화 없음 — 화면 클릭/IME는 curl로 대체
+
+## 2026-09-02 (8) — 첫 실행 이후 코드 리뷰 (docs/first-run-review)
+**한 일**
+- `dev`(feat/first-run 머지 후) 정적 리뷰: `docs/review/2026-09-02-first-run.md`
+- core 테스트 9개(fx 3개 포함)·interop 3개 실행 통과 — 이전 표의 “fx 미실행” 해소
+- 수정은 하지 않음 (리뷰만)
+
+**다음 할 일**
+1. 리뷰 반영 여부 결정 (우선: latestNews 컬럼 제한, 시세 upsert OHLC, 챗 거시지표 코드별 최신 1건)
+2. ECOS·FRED·DART 키 발급 후 해당 소스 검증
+3. 계좌 등록 + 거래 CSV 업로드 UI
+4. 모바일 Expo 기동 검증
+
+**막힌 것**
+- 맥 Node 26.7.0 (`.nvmrc`는 22) — 지금은 동작하나 Expo 등에서 문제 가능
+- yahoo-finance2 3.x deprecated 경고 — 상위 메이저 확인 필요
+- Next `.env` 파서와 dotenv·모바일 파서가 인라인 주석 처리가 다름
+
 ## 2026-09-02 (7) — 첫 실행: DB 마이그레이션 성공 (feat/first-run)
 **한 일**
 - 브랜치 전략 적용: main/dev 푸시, `feat/first-run`에서 작업

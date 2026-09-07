@@ -4,7 +4,7 @@ export class OllamaProvider implements LlmProvider {
   readonly name = "ollama";
   constructor(
     private baseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434",
-    private model = process.env.OLLAMA_MODEL ?? "qwen2.5:7b",
+    private model = process.env.OLLAMA_MODEL ?? "gemma4:12b",
     private embedModel = process.env.OLLAMA_EMBED_MODEL ?? "nomic-embed-text",
   ) {}
 

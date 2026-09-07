@@ -11,12 +11,14 @@ if (existsSync(rootEnv)) {
     const i = t.indexOf("=");
     if (i < 0) continue;
     const k = t.slice(0, i).trim();
-    const v = t.slice(i + 1).trim().replace(/^["']|["']$/g, "");
+    let v = t.slice(i + 1).trim();
+    const quoted = (v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"));
+    v = quoted ? v.slice(1, -1) : v.split("#")[0]!.trim();
     if (k && process.env[k] === undefined) process.env[k] = v;
   }
 }
 
 const config: NextConfig = {
-  transpilePackages: ["@finvesting/api", "@finvesting/core", "@finvesting/db", "@finvesting/ai"],
+  transpilePackages: ["@finvesting/api", "@finvesting/core", "@finvesting/db", "@finvesting/ai", "@finvesting/interop"],
 };
 export default config;

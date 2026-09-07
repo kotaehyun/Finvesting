@@ -10,6 +10,7 @@
     "@finvesting/ai": "workspace:*",
     "@finvesting/core": "workspace:*",
     "@finvesting/db": "workspace:*",
+    "@finvesting/interop": "workspace:*",
     "@trpc/server": "^11.0.0-rc.660",
     "drizzle-orm": "^0.38.3",
     "superjson": "^2.2.2",

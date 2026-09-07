@@ -36,7 +36,7 @@
 ## 패키지 의존 규칙
 - `core`와 `interop`은 DB·네트워크에 의존하지 않는다 (순수 함수). 계산 로직은 `core`, 파일 변환은 `interop`.
 - `db`는 `core`를 모른다. 스키마와 연결만.
-- `api`가 `db` + `core` + `ai`를 조합한다.
+- `api`가 `db` + `core` + `ai` + `interop`를 조합한다. (파일 파싱·가져오기는 api가 interop 결과를 저장)
 - `web`/`mobile`은 `api`의 타입만 import, DB 직접 접근 금지.
 - `worker`는 `db`(+`ai` 임베딩)만 사용, `api`를 거치지 않는다.
 

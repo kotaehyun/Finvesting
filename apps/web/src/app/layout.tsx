@@ -11,6 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <nav className="nav">
             <a href="/">Finvesting</a>
+            <a href="/accounts">계좌</a>
             <a href="/chat">Chat</a>
           </nav>
           <main className="main">{children}</main>

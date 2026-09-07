@@ -1,5 +1,6 @@
 export * from "./types";
 export * from "./parse-file";
+export { genericBankImporter } from "./importers/generic-bank";
 import { genericBankImporter } from "./importers/generic-bank";
 import { genericCsvExporter } from "./exporters/generic-csv";
 import type { TransactionImporter, TradeImporter, LedgerExporter } from "./types";

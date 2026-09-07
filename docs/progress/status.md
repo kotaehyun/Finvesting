@@ -5,7 +5,7 @@
 
 ---
 
-# Finvesting — 개발 현황 (2026-09-02 저녁 기준)
+# Finvesting — 개발 현황 (2026-09-05)
 
 ## 결정 사항
 - **핵심 사용자:** 본인(근로자 투자자). 자체 로컬 사용 목적, 최적화 후 서비스화 검토.
@@ -19,15 +19,14 @@
 
 ## 검증된 것 (2026-09-02, 맥북)
 `pnpm install`, 타입체크 8패키지, core·interop 테스트, Docker Postgres + pgvector, 마이그레이션(16 테이블) + seed, worker 수집(RSS 국내3·해외5 피드, Upbit 4종목, Yahoo v3 4종목), `pnpm dev:web` 대시보드·뉴스 렌더, `/chat` Ollama 질의 응답.
-**미검증:** ECOS·FRED·DART·EDGAR(키/대상 없음), Expo 모바일, 윈도우 환경, 새로 추가한 fx 포트폴리오 테스트 3개.
+**미검증:** ECOS·FRED·DART·EDGAR(키/대상 없음), Expo 모바일, 윈도우 환경. fx 포트폴리오 테스트는 2026-09-02 Grok이 9/9 통과 확인. 2026-09-05 리뷰 반영분(`/`·`/chat` 브라우저)은 Docker 꺼져 있어 미재확인.
 
 ## 경로
 - 맥북: `/Users/th/개발/workspace/Finvesting` (Node 26 설치돼 있음 — `.nvmrc`는 22, 맞출 것)
 - 윈도우: 미정
 
 ## 다음 할 일
-1. ECOS·FRED·DART 키 발급 → 거시지표·재무제표 수집 검증
-2. `pnpm -r test`
-3. 계좌 등록 + 거래 CSV 업로드 화면(`packages/interop` 파서 연결), 재무 프로필 입력 화면 → 배분 가이드 표시
-4. 챗봇 컨텍스트에 보유 종목·현금흐름 추가, 뉴스 임베딩 RAG
-5. Expo 모바일 기동 확인, 윈도우 경로 정하고 clone
+1. 재무 프로필 입력 화면 → 배분 가이드, 거래 카테고리 수정
+2. ECOS·FRED·DART 키 발급 → 거시지표·재무제표 수집 검증
+3. Expo 모바일 기동 확인, 윈도우 경로 정하고 clone
+4. 뉴스 임베딩 RAG, 평가손익(시세 연동)

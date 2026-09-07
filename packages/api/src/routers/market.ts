@@ -1,12 +1,23 @@
 import { z } from "zod";
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { news, macroIndicators, quotes, instruments } from "@finvesting/db";
 import { router, publicProcedure } from "../trpc";
+
+const newsListCols = {
+  id: news.id,
+  title: news.title,
+  url: news.url,
+  publisher: news.publisher,
+  publishedAt: news.publishedAt,
+  summary: news.summary,
+};
 
 export const marketRouter = router({
   latestNews: publicProcedure
     .input(z.object({ limit: z.number().min(1).max(100).default(30) }).optional())
-    .query(({ ctx, input }) => ctx.db.select().from(news).orderBy(desc(news.publishedAt)).limit(input?.limit ?? 30)),
+    .query(({ ctx, input }) =>
+      ctx.db.select(newsListCols).from(news).orderBy(sql`${news.publishedAt} DESC NULLS LAST`).limit(input?.limit ?? 30),
+    ),
 
   macro: publicProcedure
     .input(z.object({ codes: z.array(z.string()) }))
