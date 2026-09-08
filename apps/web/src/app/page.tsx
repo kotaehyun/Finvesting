@@ -30,6 +30,9 @@ export default function Dashboard() {
           </div>
         )}
         {!guide && <div className="card"><h3>권장 배분</h3><div className="muted">financial_profiles에 월 소득·고정비를 입력하면 표시됩니다.</div></div>}
+        {assets.accountCount === 0 && (
+          <div className="card"><h3>계좌</h3><div className="muted">등록된 계좌가 없습니다. <a href="/accounts">계좌·거래 가져오기</a></div></div>
+        )}
       </div>
       <h2>최근 뉴스</h2>
       <ul>{news.data?.map((n) => <li key={n.id}><a href={n.url} target="_blank" rel="noreferrer">{n.title}</a> <span className="muted">{n.publisher}</span></li>)}</ul>

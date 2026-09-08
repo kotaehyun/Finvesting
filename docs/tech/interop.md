@@ -6,7 +6,7 @@
 ## 가져오기 (Import)
 | 대상 | 파일 | 파서 | 상태 |
 |---|---|---|---|
-| 은행 통장 거래내역 (공통) | CSV/XLSX | `importers/generic-bank.ts` — 헤더 이름으로 날짜/입금/출금/내용/잔액 컬럼 탐지 | 초안 |
+| 은행 통장 거래내역 (공통) | CSV/XLSX | `importers/generic-bank.ts` — 헤더 이름으로 날짜/입금/출금/내용/잔액 컬럼 탐지. 웹 `/accounts` → `transactions.previewImport`/`commitImport` | 연결됨 |
 | 은행별 전용 (카카오뱅크, 토스, 국민, 신한 …) | 각 은행 내보내기 | 은행별 파서 — 실제 파일 샘플 받아서 작성 | 미구현 |
 | 카드 이용내역 | CSV/XLSX | 승인일·가맹점·금액·할부 | 미구현 |
 | 증권사 체결내역 (한투, 키움 …) | CSV/XLSX | `TradeImporter` | 미구현 |

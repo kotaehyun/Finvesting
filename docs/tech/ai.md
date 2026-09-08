@@ -15,12 +15,13 @@
 임베딩 차원을 바꾸면 `market_news.embedding` vector 차원도 마이그레이션 필요.
 
 ## 현재 구현
-- `packages/api/src/routers/chat.ts`: 최근 뉴스 15건 + 거시지표 20건을 컨텍스트로 주입해 `chat()` 호출
-- 시스템 프롬프트: `packages/ai/src/prompts.ts` — 근거 없는 수치 금지, 매수/매도 단정 금지, 한국 세제 반영
+- `packages/api/src/routers/chat.ts`: 자산 현황(계좌 있으면)·이번 달 현금흐름(거래 있으면)·보유 포지션(체결 있으면) + 최근 뉴스 15건(요약 포함, `published_at` NULL은 뒤로) + 거시지표 **코드별 최신 1건**을 컨텍스트로 주입
+- 메시지 한도: 대화 40턴, 각 8000자
+- 시스템 프롬프트: `packages/ai/src/prompts.ts` — 컨텍스트에 없는 수치는 모름, 매수/매도 단정 금지, 한국 세제 반영. 기본 모델 `gemma4:12b`
 - 웹 UI: `/chat`
 
 ## 계획
-1. 컨텍스트 확장: 보유 포지션·평가손익, 이번 달 현금흐름, 배분 가이드 결과
+1. 컨텍스트 확장: 평가손익(시세 연동), 배분 가이드 결과, 종목별 펀더멘털
 2. RAG: worker가 뉴스 저장 시 임베딩 생성 → 질문과 유사한 뉴스만 검색해 주입 (pgvector `<=>`)
 3. 스트리밍 응답 (`chatStream`)
 4. 대화 기록 저장 테이블 (`chat_sessions`, `chat_messages`)

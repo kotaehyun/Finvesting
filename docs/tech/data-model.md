@@ -12,7 +12,7 @@
 | 테이블 | 역할 |
 |---|---|
 | `accounts` | 계좌. `type`(checking/savings/installment/brokerage/crypto/card/cash/pension/loan)이 자산 배분 분류 기준. `balance`는 현재 잔액 |
-| `transactions` | 입출금 원장. `amount`는 항상 양수, `direction`(in/out/transfer)으로 방향. `category`로 수입/고정비/변동비/저축·투자 분류. `raw`에 CSV 원본 행 보존 |
+| `transactions` | 입출금 원장. `amount`는 항상 양수, `direction`(in/out/transfer)으로 방향. `category`로 수입/고정비/변동비/저축·투자 분류. CSV 가져오기는 입금=`other_income`, 출금=`uncategorized`. `source`는 `csv:<파서id>`, `raw`에 원본 행. 같은 계좌·날짜·금액·방향·메모는 재업로드 시 건너뜀 |
 
 카테고리 → 현금흐름 분류 매핑은 `packages/core/src/cashflow.ts`의 상수가 기준.
 

@@ -6,7 +6,7 @@ import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instru
 // EDGAR_TARGETS="AAPL:0000320193,MSFT:0000789019"  (ticker:CIK 10자리)
 // TODO: https://www.sec.gov/files/company_tickers.json 으로 ticker→CIK 자동 매핑
 
-const UA = process.env.SEC_USER_AGENT ?? "Finvesting personal-use contact@example.com";
+const UA = process.env.SEC_USER_AGENT?.trim();
 
 // us-gaap 태그 → 표준 키
 const TAGS: Array<{ tag: string; key: string; statement: "income" | "balance" | "cashflow" }> = [
@@ -24,6 +24,7 @@ const TAGS: Array<{ tag: string; key: string; statement: "income" | "balance" | 
 type Fact = { end: string; val: number; fy: number; fp: string; form: string };
 
 export async function collectEdgar() {
+  if (!UA) return { skipped: "SEC_USER_AGENT not set" };
   const targets = targetSymbols("EDGAR_TARGETS", []).map((t) => {
     const [ticker, cik] = t.split(":");
     if (!ticker || !cik) { console.warn(`edgar skip invalid target: ${t}`); return null; }
@@ -43,12 +44,13 @@ export async function collectEdgar() {
     const groups = new Map<string, { fy: number; fp: string; statement: string; end: string; items: Record<string, number> }>();
     for (const { tag, key, statement } of TAGS) {
       const units = gaap[tag]?.units; if (!units) continue;
-      const facts = units["USD"] ?? units["USD/shares"] ?? [];
+      const facts = [...(units["USD"] ?? units["USD/shares"] ?? [])].sort((a, b) => b.end.localeCompare(a.end));
       for (const f of facts) {
         if (!["10-K", "10-Q"].includes(f.form) || f.fy < new Date().getFullYear() - 3) continue;
         const k = `${f.fy}|${f.fp}|${statement}`;
         const g = groups.get(k) ?? { fy: f.fy, fp: f.fp, statement, end: f.end, items: {} };
-        if (!(key in g.items)) g.items[key] = f.val;  // 같은 키에 여러 태그가 있으면 첫 것 유지
+        if (!(key in g.items)) g.items[key] = f.val; // end 내림차순이므로 첫 값이 최신
+        if (f.end > g.end) g.end = f.end;
         groups.set(k, g);
       }
     }

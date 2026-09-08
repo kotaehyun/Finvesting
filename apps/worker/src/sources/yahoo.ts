@@ -51,15 +51,29 @@ export async function collectYahoo() {
           instrumentId: inst.id, date: tradeDate,
           open: n(q.regularMarketOpen), high: n(q.regularMarketDayHigh), low: n(q.regularMarketDayLow),
           close: String(q.regularMarketPrice), volume: n(q.regularMarketVolume), source: "yahoo",
-        }).onConflictDoUpdate({ target: [quotes.instrumentId, quotes.date], set: { close: String(q.regularMarketPrice), fetchedAt: new Date() } });
+        }).onConflictDoUpdate({
+          target: [quotes.instrumentId, quotes.date],
+          set: {
+            open: n(q.regularMarketOpen), high: n(q.regularMarketDayHigh), low: n(q.regularMarketDayLow),
+            close: String(q.regularMarketPrice), volume: n(q.regularMarketVolume), fetchedAt: new Date(),
+          },
+        });
       }
       if (assetClass === "stock") {
+        const extra = { fiftyTwoWeekHigh: q.fiftyTwoWeekHigh, fiftyTwoWeekLow: q.fiftyTwoWeekLow, averageVolume: q.averageDailyVolume3Month };
         await db.insert(fundamentals).values({
-          instrumentId: inst.id, date: today, source: "yahoo",
+          instrumentId: inst.id, date: tradeDate, source: "yahoo",
           marketCap: n(q.marketCap), per: n(q.trailingPE), forwardPer: n(q.forwardPE), pbr: n(q.priceToBook),
           eps: n(q.epsTrailingTwelveMonths), dividendYield: n(q.dividendYield), beta: n(q.beta),
-          extra: { fiftyTwoWeekHigh: q.fiftyTwoWeekHigh, fiftyTwoWeekLow: q.fiftyTwoWeekLow, averageVolume: q.averageDailyVolume3Month },
-        }).onConflictDoUpdate({ target: [fundamentals.instrumentId, fundamentals.date, fundamentals.source], set: { per: n(q.trailingPE), marketCap: n(q.marketCap), fetchedAt: new Date() } });
+          extra,
+        }).onConflictDoUpdate({
+          target: [fundamentals.instrumentId, fundamentals.date, fundamentals.source],
+          set: {
+            marketCap: n(q.marketCap), per: n(q.trailingPE), forwardPer: n(q.forwardPE), pbr: n(q.priceToBook),
+            eps: n(q.epsTrailingTwelveMonths), dividendYield: n(q.dividendYield), beta: n(q.beta),
+            extra, fetchedAt: new Date(),
+          },
+        });
       }
       upserted++;
     } catch (e) { console.warn(`yahoo ${sym} save failed`, (e as Error).message); }

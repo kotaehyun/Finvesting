@@ -36,7 +36,7 @@ Converts external files to/from internal models (import bank/card/brokerage expo
 ## Package dependency rules
 - `core` and `interop` depend on neither DB nor network (pure functions). Calculations live in `core`, file conversion in `interop`.
 - `db` knows nothing about `core` — schema and connection only.
-- `api` composes `db` + `core` + `ai`.
+- `api` composes `db` + `core` + `ai` + `interop` (file import is parsed by interop and stored by api).
 - `web` / `mobile` import only types from `api`; no direct DB access.
 - `worker` uses only `db` (+ `ai` for embeddings); it does not go through `api`.
 

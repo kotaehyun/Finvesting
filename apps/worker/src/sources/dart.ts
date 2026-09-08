@@ -18,8 +18,12 @@ const ACCOUNT_MAP: Record<string, string> = {
 export async function collectDart() {
   const key = process.env.DART_API_KEY;
   if (!key) return { skipped: "DART_API_KEY not set" };
-  const targets = targetSymbols("DART_TARGETS", []).map((t) => { const [stock, corp, name] = t.split(":"); return { stock: stock!, corp: corp!, name: name ?? stock! }; });
-  if (!targets.length) return { skipped: "DART_TARGETS empty" };
+  const targets = targetSymbols("DART_TARGETS", []).flatMap((t) => {
+    const [stock, corp, name] = t.split(":");
+    if (!stock || !corp) { console.warn(`dart skip invalid target: ${t}`); return []; }
+    return [{ stock, corp, name: name ?? stock }];
+  });
+  if (!targets.length) return { skipped: "DART_TARGETS empty or invalid" };
 
   const year = new Date().getFullYear() - 1; // 직전 사업연도 확정치부터
   let upserted = 0;
@@ -40,8 +44,11 @@ export async function collectDart() {
       const std = ACCOUNT_MAP[row.account_nm.replace(/\s/g, "")];
       if (!std) continue;
       const stmt = row.sj_div === "BS" ? "balance" : row.sj_div === "CF" ? "cashflow" : "income";
+      const raw = (row.thstrm_amount ?? "").replace(/,/g, "").trim();
+      const num = Number(raw);
+      if (!raw || !Number.isFinite(num)) continue;
       const g = groups.get(stmt) ?? {};
-      g[std] = Number((row.thstrm_amount ?? "").replace(/,/g, "")) || 0;
+      g[std] = num;
       groups.set(stmt, g);
     }
     for (const [statement, items] of groups) {
