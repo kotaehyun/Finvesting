@@ -2,6 +2,23 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-13 (2) — 워커 시세·USDKRW 실행 확인 (feat/quote-targets)
+**한 일**
+- Docker Desktop 기동, `pnpm db:up`, `run:once` + tRPC로 검토 2~4 실데이터 확인
+
+**실행 확인**
+- upbit 보유 BTC만 1건. 2026-09-13 종가 104,802,000
+- USDKRW 1,342.4 (`source=yahoo`). holdings `usdkrw` 동일. 평가 104,802 · 손익 6,835.2
+- overview 투자 104,802 = 평가+예수금 0
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- KRX·해외 체결 없어 `.KS`/환율 환산 경로는 미실행. 검토 5~14 미반영. push·dev 머지는 사용자 지시 대기
+
 ## 2026-09-13 — 시세 대상·USDKRW·투자자산 (feat/quote-targets)
 **한 일**
 - Claude 검토 1: `feat/financial-profile`에 09-05~09-12 작업 6커밋. `_to_delete/` 제외
@@ -11,7 +28,7 @@
 
 **실행 확인**
 - `pnpm typecheck` 8패키지 통과. core 48 · interop 9
-- Docker 데몬이 꺼져 `run:once`·`trades.holdings` tRPC는 못 함
+- Docker 데몬이 꺼져 `run:once`·`trades.holdings` tRPC는 못 함 → 같은 날 (2)에서 실행
 
 **다음 할 일**
 1. Docker 켜고 `pnpm --filter @finvesting/worker run:once` → BTC 시세·USDKRW 확인

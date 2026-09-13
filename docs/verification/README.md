@@ -52,11 +52,11 @@
 | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
-| worker — Upbit (보유·관심 ∪ UPBIT_TARGETS) | ❌ 대상 로직 변경 후 run:once 미실행 (Docker 꺼짐). 09-02는 고정 4종 4 upsert | 2026-09-02 | 사용자 실행(구버전) |
+| worker — Upbit (보유·관심 ∪ UPBIT_TARGETS) | ✅ 보유 BTC만 1 upsert. 종가 104,802,000 (2026-09-13). 구버전 고정 4종은 09-02 | 2026-09-13 | Grok run:once |
 | worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
-| worker — Yahoo (보유·관심 + KRW=X USDKRW) | ❌ 대상·환율 변경 후 run:once 미실행 (Docker 꺼짐). 09-02는 env 4종 4/4 | 2026-09-02 | 사용자 실행(구버전) |
-| 대시보드 투자자산 = 평가액+예수금 | ❌ 함수·문구만. overview tRPC·브라우저 미실행 | | |
+| worker — Yahoo (보유·관심 + KRW=X USDKRW) | ✅ 종목 0(보유 미국/KRX 없음) · USDKRW 1342.4 source=yahoo. 구버전 env 4종은 09-02 | 2026-09-13 | Grok run:once |
+| 대시보드 투자자산 = 평가액+예수금 | ✅ overview invested 104,802 = 평가 104,802 + 예수금 0. 브라우저 문구는 미클릭 | 2026-09-13 | Grok tRPC |
 | worker — DART (계정명 매핑) | ⏸ 키·대상 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — EDGAR (태그·UA) | ⏸ `SEC_USER_AGENT` 없어 skip (`SEC_USER_AGENT not set`) | 2026-09-05 | Grok |
 
@@ -66,6 +66,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-13 | Cursor Grok (워커 시세·USDKRW 실행) | [2026-09-13-grok-2.md](./2026-09-13-grok-2.md) |
 | 2026-09-13 | Cursor Grok (시세 대상·USDKRW·투자자산) | [2026-09-13-grok.md](./2026-09-13-grok.md) |
 | 2026-09-13 | Claude (Cowork, 종합 검토) | [2026-09-13-claude.md](./2026-09-13-claude.md) |
 | 2026-09-12 | Cursor Grok (투자내역) | [2026-09-12-grok-7.md](./2026-09-12-grok-7.md) |
