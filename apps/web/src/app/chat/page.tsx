@@ -2,6 +2,7 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { trpc } from "@/lib/trpc";
+import { CHAT_STARTERS } from "./starters";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -10,11 +11,12 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const ask = trpc.chat.ask.useMutation();
 
-  async function send() {
-    const text = input.trim();
-    if (!text || ask.isPending) return;
-    const next: Msg[] = [...messages, { role: "user", content: text }];
-    setMessages(next); setInput("");
+  async function send(text = input) {
+    const q = text.trim();
+    if (!q || ask.isPending) return;
+    const next: Msg[] = [...messages, { role: "user", content: q }];
+    setMessages(next);
+    setInput("");
     try {
       const r = await ask.mutateAsync({ messages: next });
       setMessages([...next, { role: "assistant", content: r.answer }]);
@@ -26,7 +28,28 @@ export default function ChatPage() {
   return (
     <>
       <h1>투자 비서</h1>
-      <p className="muted">수집된 뉴스·거시지표를 바탕으로 로컬 LLM이 답합니다. (Ollama 실행 필요)</p>
+      <p className="muted">자산·현금흐름·보유·뉴스·거시지표를 바탕으로 로컬 LLM이 답합니다. 아래 목록을 누르면 바로 묻습니다. (Ollama 실행 필요)</p>
+      <div className="starters" aria-label="대화 목록">
+        {CHAT_STARTERS.map((g) => (
+          <section key={g.group}>
+            <h2>{g.group}</h2>
+            <div className="starter-list">
+              {g.items.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  className="starter"
+                  disabled={ask.isPending}
+                  title={item.prompt}
+                  onClick={() => send(item.prompt)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
       <div style={{ display: "grid", gap: 10 }}>
         {messages.map((m, i) => (
           <div key={i} className={`card ${m.role === "user" ? "user" : ""}`}>

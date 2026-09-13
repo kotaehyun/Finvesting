@@ -50,6 +50,7 @@
 | `/profile` 09 투자내역 (계좌·자산군) | ✅ 페이지 200. holdings byClass 6칸·byAccount 검증 코인·BTC 평가 108,852. 브라우저 클릭·복수 증권 체결은 미실행 | 2026-09-12 | Grok tRPC |
 | `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
 | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
+| `/chat` 대화 목록 12문항 | ✅ 5그룹 버튼. 「순자산 구성」 클릭 후 순자산 3,749,802·투자 104,802 인용 | 2026-09-13 | Grok Chrome |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
 | worker — Upbit (보유·관심 ∪ UPBIT_TARGETS) | ✅ 보유 BTC만 1 upsert. 종가 104,802,000 (2026-09-13). 구버전 고정 4종은 09-02 | 2026-09-13 | Grok run:once |
@@ -66,6 +67,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-13 | Cursor Grok (투자 비서 대화 목록) | [2026-09-13-grok-3.md](./2026-09-13-grok-3.md) |
 | 2026-09-13 | Cursor Grok (워커 시세·USDKRW 실행) | [2026-09-13-grok-2.md](./2026-09-13-grok-2.md) |
 | 2026-09-13 | Cursor Grok (시세 대상·USDKRW·투자자산) | [2026-09-13-grok.md](./2026-09-13-grok.md) |
 | 2026-09-13 | Claude (Cowork, 종합 검토) | [2026-09-13-claude.md](./2026-09-13-claude.md) |
