@@ -12,6 +12,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <nav className="nav">
             <a href="/">Finvesting</a>
             <a href="/accounts">계좌</a>
+            <a href="/holdings">보유</a>
+            <a href="/profile">프로필대장</a>
             <a href="/chat">Chat</a>
           </nav>
           <main className="main">{children}</main>

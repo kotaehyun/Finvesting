@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { trpc } from "@/lib/trpc";
+import { categoriesFor, categoryLabel, type TxnCategoryId } from "@/lib/categories";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 
@@ -103,7 +104,7 @@ export default function AccountsPage() {
   return (
     <>
       <h1>계좌 · 거래</h1>
-      <p className="muted">통장·카드 계좌를 등록하고, 은행 내보내기 CSV/XLSX를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어갑니다.</p>
+      <p className="muted">통장·카드 계좌를 등록하고, 은행 내보내기 CSV/엑셀/워드를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 분류를 바꿀 수 있습니다. 프로필대장 통장내역에서도 같은 파일을 볼 수 있습니다.</p>
 
       <div className="card" style={{ marginBottom: 16 }}>
         <h3>계좌 추가</h3>
@@ -134,8 +135,8 @@ export default function AccountsPage() {
 
       {accountId && (
         <div className="card" style={{ marginBottom: 16 }}>
-          <h3>CSV/XLSX 가져오기</h3>
-          <input type="file" accept=".csv,.xlsx,.xls,text/csv" onChange={(e) => onFile(e.target.files?.[0])} disabled={preview.isPending} />
+          <h3>CSV/엑셀/문서 가져오기</h3>
+          <input type="file" accept=".csv,.xlsx,.xls,.docx,.doc,text/csv" onChange={(e) => onFile(e.target.files?.[0])} disabled={preview.isPending} />
           {detected && <p className="muted">인식: {detected} · {previewRows?.length ?? 0}건</p>}
           {!!skipped.length && <p className="muted">건너뜀 {skipped.length}행 (예: {skipped[0]?.reason})</p>}
           {previewRows && previewRows.length > 0 && (
@@ -165,25 +166,67 @@ export default function AccountsPage() {
       )}
 
       {accountId && !!txns.data?.length && (
-        <div className="card">
-          <h3>최근 거래</h3>
-          <div className="table-wrap">
-            <table>
-              <thead><tr><th>날짜</th><th>방향</th><th>금액</th><th>내용</th></tr></thead>
-              <tbody>
-                {txns.data.map((t) => (
-                  <tr key={t.id}>
-                    <td>{String(t.date)}</td>
-                    <td>{t.direction === "in" ? "입금" : t.direction === "out" ? "출금" : "이체"}</td>
-                    <td>{won(Number(t.amount))}</td>
-                    <td>{t.memo ?? t.merchant ?? ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TxnTable rows={txns.data} onChanged={() => { txns.refetch(); utils.dashboard.overview.invalidate(); }} />
       )}
     </>
+  );
+}
+
+type TxnRow = {
+  id: string;
+  date: string | Date;
+  amount: string | number;
+  direction: "in" | "out" | "transfer";
+  category: string;
+  merchant: string | null;
+  memo: string | null;
+};
+
+function TxnTable({ rows, onChanged }: { rows: TxnRow[]; onChanged: () => void }) {
+  const update = trpc.transactions.updateCategory.useMutation();
+  const [err, setErr] = useState("");
+
+  async function onCategory(id: string, category: string) {
+    setErr("");
+    try {
+      await update.mutateAsync({ id, category: category as TxnCategoryId });
+      onChanged();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  return (
+    <div className="card">
+      <h3>최근 거래</h3>
+      <div className="table-wrap">
+        <table>
+          <thead><tr><th>날짜</th><th>방향</th><th>금액</th><th>분류</th><th>내용</th></tr></thead>
+          <tbody>
+            {rows.map((t) => (
+              <tr key={t.id}>
+                <td>{String(t.date)}</td>
+                <td>{t.direction === "in" ? "입금" : t.direction === "out" ? "출금" : "이체"}</td>
+                <td>{won(Number(t.amount))}</td>
+                <td>
+                  <select
+                    value={t.category}
+                    aria-label={`${categoryLabel(t.category)} 분류`}
+                    onChange={(e) => onCategory(t.id, e.target.value)}
+                    disabled={update.isPending}
+                  >
+                    {categoriesFor(t.direction).map((c) => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
+                </td>
+                <td>{t.memo ?? t.merchant ?? ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {err && <p className="muted" style={{ marginTop: 8 }}>{err}</p>}
+    </div>
   );
 }
