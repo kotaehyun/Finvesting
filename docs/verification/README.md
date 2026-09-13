@@ -36,9 +36,9 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ | 2026-09-13 | Cursor(09-02), Claude 재확인 7패키지(web 포함, mobile 제외 — 리눅스 VM Node 22) |
-| core 테스트 (vitest) | ✅ 37개 (holdings-summary 4 · statement 6 · payroll 5 · trends 3 포함) | 2026-09-13 | Grok, Claude 교차 검증(node:test 셈) |
-| interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
+| 타입체크 (web 포함 8패키지) | ✅ | 2026-09-13 | Grok (`pnpm typecheck`), Claude VM 재확인 |
+| core 테스트 (vitest) | ✅ 48개 (quote-targets 8 · invested 3 · holdings-summary 4 포함) | 2026-09-13 | Grok |
+| interop 테스트 | ✅ 9개 | 2026-09-13 | Grok |
 | `pnpm db:generate` / `db:migrate` | ✅ `0002_yielding_paibok` (`pay_earnings`) 적용 | 2026-09-12 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
 | `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-08 `dev` 머지 후 Chrome: 순자산 3,635,000 | 2026-09-08 | Grok Chrome |
@@ -52,10 +52,11 @@
 | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
-| worker — Upbit BTC/ETH/SOL/XRP | ✅ 4 upsert | 2026-09-02 | 사용자 실행 |
+| worker — Upbit (보유·관심 ∪ UPBIT_TARGETS) | ❌ 대상 로직 변경 후 run:once 미실행 (Docker 꺼짐). 09-02는 고정 4종 4 upsert | 2026-09-02 | 사용자 실행(구버전) |
 | worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
-| worker — Yahoo (v3, SPY/QQQ/^GSPC/^IXIC) | ✅ 4/4 (v2는 429·지원종료 → v3 전환) | 2026-09-02 | 사용자 실행 |
+| worker — Yahoo (보유·관심 + KRW=X USDKRW) | ❌ 대상·환율 변경 후 run:once 미실행 (Docker 꺼짐). 09-02는 env 4종 4/4 | 2026-09-02 | 사용자 실행(구버전) |
+| 대시보드 투자자산 = 평가액+예수금 | ❌ 함수·문구만. overview tRPC·브라우저 미실행 | | |
 | worker — DART (계정명 매핑) | ⏸ 키·대상 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — EDGAR (태그·UA) | ⏸ `SEC_USER_AGENT` 없어 skip (`SEC_USER_AGENT not set`) | 2026-09-05 | Grok |
 
@@ -65,6 +66,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-13 | Cursor Grok (시세 대상·USDKRW·투자자산) | [2026-09-13-grok.md](./2026-09-13-grok.md) |
 | 2026-09-13 | Claude (Cowork, 종합 검토) | [2026-09-13-claude.md](./2026-09-13-claude.md) |
 | 2026-09-12 | Cursor Grok (투자내역) | [2026-09-12-grok-7.md](./2026-09-12-grok-7.md) |
 | 2026-09-12 | Cursor Grok (연봉 추이) | [2026-09-12-grok-6.md](./2026-09-12-grok-6.md) |

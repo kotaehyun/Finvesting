@@ -38,7 +38,7 @@
 - `db`는 `core`를 모른다. 스키마와 연결만.
 - `api`가 `db` + `core` + `ai` + `interop`를 조합한다. (파일 파싱·가져오기는 api가 interop 결과를 저장)
 - `web`/`mobile`은 `api`의 타입만 import, DB 직접 접근 금지.
-- `worker`는 `db`(+`ai` 임베딩)만 사용, `api`를 거치지 않는다.
+- `worker`는 `db` + `core`(수집 대상 매핑) + `ai` 임베딩. `api`를 거치지 않는다.
 
 ## 인증
 단일 사용자 모드. `DEFAULT_USER_ID`로 고정. 모든 사용자 데이터 테이블에 `user_id`가 있어 서비스화 시 인증만 붙이면 된다.

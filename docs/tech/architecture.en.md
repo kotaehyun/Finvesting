@@ -38,7 +38,7 @@ Converts external files to/from internal models (import bank/card/brokerage expo
 - `db` knows nothing about `core` — schema and connection only.
 - `api` composes `db` + `core` + `ai` + `interop` (file import is parsed by interop and stored by api).
 - `web` / `mobile` import only types from `api`; no direct DB access.
-- `worker` uses only `db` (+ `ai` for embeddings); it does not go through `api`.
+- `worker` uses `db` + `core` (quote-target mapping) + `ai` for embeddings; it does not go through `api`.
 
 ## Auth
 Single-user mode, fixed via `DEFAULT_USER_ID`. Every user-data table has `user_id`, so productizing only requires adding authentication.

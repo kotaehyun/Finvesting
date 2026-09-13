@@ -2,6 +2,26 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-13 — 시세 대상·USDKRW·투자자산 (feat/quote-targets)
+**한 일**
+- Claude 검토 1: `feat/financial-profile`에 09-05~09-12 작업 6커밋. `_to_delete/` 제외
+- 검토 2: 수집 대상 = trades∪watchlist, env는 합집합. KRX는 `.KS`/`.KQ`. ADR 0007
+- 검토 3: Yahoo `KRW=X` → `USDKRW` (ECOS가 같은 날짜를 덮어씀)
+- 검토 4: 투자자산 = 보유 평가액 + 증권·코인·연금 예수금 (`core/invested.ts`)
+
+**실행 확인**
+- `pnpm typecheck` 8패키지 통과. core 48 · interop 9
+- Docker 데몬이 꺼져 `run:once`·`trades.holdings` tRPC는 못 함
+
+**다음 할 일**
+1. Docker 켜고 `pnpm --filter @finvesting/worker run:once` → BTC 시세·USDKRW 확인
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 종목 재무제표·펀더멘털 화면
+4. 모바일 Expo 기동
+
+**막힌 것**
+- Docker 미기동. 검토 5~14 미반영. push·dev 머지는 사용자 지시 대기
+
 ## 2026-09-12 (11) — 프로필대장 투자내역 (feat/financial-profile)
 **한 일**
 - `/profile` 09 투자내역: 증권·코인·연금 **계좌별** 카드 + 주식/ETF/채권/펀드/코인/기타 소계·비중 + 보유·체결 그리드
