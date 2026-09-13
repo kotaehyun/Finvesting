@@ -7,4 +7,6 @@ export * from "./pay-earnings";
 export * from "./pay-trends";
 export * from "./savings";
 export * from "./holdings-summary";
+export * from "./quote-targets";
+export * from "./invested";
 export * from "./trends";

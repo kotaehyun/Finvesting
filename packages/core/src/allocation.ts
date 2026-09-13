@@ -7,7 +7,7 @@ export type AllocationInput = {
   monthlyNetIncome: number;
   monthlyFixedCost: number;
   liquidAssets: number;        // 현금 + 입출금 + 예적금
-  investedAssets: number;      // 주식·ETF·코인 등 평가액
+  investedAssets: number;      // 보유 평가액 + 증권·코인·연금 예수금
   emergencyFundMonths: number; // 목표 비상금 개월 수
   riskTolerance: RiskTolerance;
 };
