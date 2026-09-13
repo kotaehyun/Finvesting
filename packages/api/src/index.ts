@@ -4,6 +4,9 @@ import { dashboardRouter } from "./routers/dashboard";
 import { marketRouter } from "./routers/market";
 import { chatRouter } from "./routers/chat";
 import { transactionsRouter } from "./routers/transactions";
+import { profileRouter } from "./routers/profile";
+import { tradesRouter } from "./routers/trades";
+import { savingsRouter } from "./routers/savings";
 
 export const appRouter = router({
   accounts: accountsRouter,
@@ -11,6 +14,9 @@ export const appRouter = router({
   market: marketRouter,
   chat: chatRouter,
   transactions: transactionsRouter,
+  profile: profileRouter,
+  trades: tradesRouter,
+  savings: savingsRouter,
 });
 export type AppRouter = typeof appRouter;
 export { createContext } from "./trpc";
