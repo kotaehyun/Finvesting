@@ -37,9 +37,9 @@
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ | 2026-09-13 | Grok (`pnpm typecheck`), Claude VM 재확인 |
-| core 테스트 (vitest) | ✅ 48개 (quote-targets 8 · invested 3 · holdings-summary 4 포함) | 2026-09-13 | Grok |
+| core 테스트 (vitest) | ✅ 53개 (insurance-coverage 5 · quote-targets 8 · invested 3 포함) | 2026-09-13 | Grok |
 | interop 테스트 | ✅ 9개 | 2026-09-13 | Grok |
-| `pnpm db:generate` / `db:migrate` | ✅ `0002_yielding_paibok` (`pay_earnings`) 적용 | 2026-09-12 | Grok |
+| `pnpm db:generate` / `db:migrate` | ✅ `0005_free_blonde_phantom` (`insurance_policies`) 적용 | 2026-09-13 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
 | `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-08 `dev` 머지 후 Chrome: 순자산 3,635,000 | 2026-09-08 | Grok Chrome |
 | `/profile` 프로필대장 + `workspaceSave`/`previewPay` | ✅ 페이지 200, 저장 추가·삭제 원상복구, 4대보험 미리보기 숫자 확인. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
@@ -48,6 +48,7 @@
 | `/profile` 08 적금내역 | ✅ upsert 월10만·3.6%·12개월 단리 만기 1,223,400. 삭제 후 0건. 브라우저 클릭 미실행 | 2026-09-12 | Grok tRPC |
 | `/profile` 07 연봉 추이 12개월 | ✅ payTrend 12포인트. 9월 기본급 420만·세금 27.5만·보험 408,130. 그래프 클릭 미실행 | 2026-09-12 | Grok tRPC |
 | `/profile` 09 투자내역 (계좌·자산군) | ✅ 페이지 200. holdings byClass 6칸·byAccount 검증 코인·BTC 평가 108,852. 브라우저 클릭·복수 증권 체결은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 10 보험내역 (육각·칠각) | ✅ 페이지 200. 검증 실손 저장. 실손 100% · 암 60% · 사망 0%(부족 2.52억). 육각 중대질병 1억 | 2026-09-13 | Grok Chrome |
 | `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
 | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
 | `/chat` 대화 목록 12문항 | ✅ 5그룹 버튼. 「순자산 구성」 클릭 후 순자산 3,749,802·투자 104,802 인용 | 2026-09-13 | Grok Chrome |
@@ -67,6 +68,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-13 | Cursor Grok (보험 보장 레이더) | [2026-09-13-grok-4.md](./2026-09-13-grok-4.md) |
 | 2026-09-13 | Cursor Grok (투자 비서 대화 목록) | [2026-09-13-grok-3.md](./2026-09-13-grok-3.md) |
 | 2026-09-13 | Cursor Grok (워커 시세·USDKRW 실행) | [2026-09-13-grok-2.md](./2026-09-13-grok-2.md) |
 | 2026-09-13 | Cursor Grok (시세 대상·USDKRW·투자자산) | [2026-09-13-grok.md](./2026-09-13-grok.md) |

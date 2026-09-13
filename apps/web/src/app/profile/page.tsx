@@ -7,6 +7,7 @@ import { ComboChart } from "./combo-chart";
 import { PayYearSection } from "./pay-year";
 import { SavingsPanel, type SavingsHandle } from "./savings-panel";
 import { InvestPanel } from "./invest-panel";
+import { InsurancePanel, type InsuranceHandle } from "./insurance-panel";
 import {
   draftPayEarnings,
   payEarningGroupOf,
@@ -58,6 +59,7 @@ const MENUS = [
   { id: "books", no: "07", label: "급여상세 내역" },
   { id: "savings", no: "08", label: "적금내역" },
   { id: "invest", no: "09", label: "투자내역" },
+  { id: "insurance", no: "10", label: "보험내역" },
 ] as const;
 type MenuId = (typeof MENUS)[number]["id"];
 
@@ -183,6 +185,7 @@ function ProfileWorkspace() {
   const previewFile = trpc.profile.previewFile.useMutation();
   const accounts = trpc.accounts.list.useQuery();
   const holdingsQ = trpc.trades.holdings.useQuery(undefined, { enabled: menu === "invest" });
+  const insQ = trpc.insurance.list.useQuery(undefined, { enabled: menu === "insurance" });
   const txns = trpc.transactions.listAll.useQuery(
     { accountId: accountId || undefined, month, limit: 200 },
     { enabled: menu === "ledger" || menu === "trends" },
@@ -192,6 +195,7 @@ function ProfileWorkspace() {
   const updateAccount = trpc.accounts.update.useMutation();
   const utils = trpc.useUtils();
   const savRef = useRef<SavingsHandle>(null);
+  const insRef = useRef<InsuranceHandle>(null);
 
   const previewKey = useDebounced(`${gross}|${income}|${tax}|${health}`, 250);
   const [pg, pn, pt, ph] = previewKey.split("|");
@@ -246,6 +250,8 @@ function ProfileWorkspace() {
       accounts.refetch(), utils.dashboard.overview.invalidate(), utils.savings.list.invalidate(),
       utils.trades.holdings.invalidate(), utils.trades.list.invalidate(),
       savRef.current?.refetch() ?? Promise.resolve(),
+      insRef.current?.refetch() ?? Promise.resolve(),
+      utils.insurance.list.invalidate(),
     ]);
   }
 
@@ -264,6 +270,15 @@ function ProfileWorkspace() {
     if (menu === "savings") {
       try {
         await savRef.current?.save();
+        setDirty(false);
+      } catch (err) {
+        setMsg(err instanceof Error ? err.message : String(err));
+      }
+      return;
+    }
+    if (menu === "insurance") {
+      try {
+        await insRef.current?.save();
         setDirty(false);
       } catch (err) {
         setMsg(err instanceof Error ? err.message : String(err));
@@ -331,6 +346,9 @@ function ProfileWorkspace() {
     } else if (menu === "savings") {
       savRef.current?.create();
       return;
+    } else if (menu === "insurance") {
+      insRef.current?.create();
+      return;
     } else if (menu === "invest") {
       window.location.href = "/holdings";
       return;
@@ -347,6 +365,12 @@ function ProfileWorkspace() {
     if (menu === "invest") return;
     if (menu === "savings") {
       void Promise.resolve(savRef.current?.remove()).catch((err: unknown) => {
+        setMsg(err instanceof Error ? err.message : String(err));
+      });
+      return;
+    }
+    if (menu === "insurance") {
+      void Promise.resolve(insRef.current?.remove()).catch((err: unknown) => {
         setMsg(err instanceof Error ? err.message : String(err));
       });
       return;
@@ -493,7 +517,7 @@ function ProfileWorkspace() {
         <button type="button" onClick={onQuery} disabled={current.isFetching}>조회</button>
         <button type="button" className="primary" onClick={onSave} disabled={save.isPending}>저장</button>
         <button type="button" onClick={onNew}>신규</button>
-        <button type="button" onClick={onDelete} disabled={menu === "invest" || (menu === "savings" ? false : menu === "tax" ? !selTax : menu === "books" || menu === "master" ? !selEarn : !selRec)}>삭제</button>
+        <button type="button" onClick={onDelete} disabled={menu === "invest" || (menu === "savings" || menu === "insurance" ? false : menu === "tax" ? !selTax : menu === "books" || menu === "master" ? !selEarn : !selRec)}>삭제</button>
         <span className="sep" />
         <button type="button" onClick={() => downloadTemplate("recurring", "csv")}>CSV 양식</button>
         <button type="button" onClick={() => downloadTemplate("recurring", "xlsx")}>엑셀 양식</button>
@@ -826,6 +850,14 @@ function ProfileWorkspace() {
               />
             )}
             {menu === "invest" && <InvestPanel />}
+            {menu === "insurance" && (
+              <InsurancePanel
+                ref={insRef}
+                dirty={dirty}
+                onDirty={markDirty}
+                onMsg={setMsg}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -836,6 +868,9 @@ function ProfileWorkspace() {
         {pay && pay.net > 0 && <span>실수령 {won(pay.net)}</span>}
         {menu === "invest" && holdingsQ.data && (
           <span>투자 {holdingsQ.data.byAccount.length}계좌 · 보유 {holdingsQ.data.totals.openCount}건 · 평가 {won(holdingsQ.data.totals.marketValueKrw)}</span>
+        )}
+        {menu === "insurance" && insQ.data && (
+          <span>보험 {insQ.data.policies.length}건 · 월보험료 {won(insQ.data.policies.reduce((s, p) => s + p.monthlyPremium, 0))}</span>
         )}
         {dirty ? <span className="erp-dirty">미저장 변경 있음</span> : <span>저장됨</span>}
       </div>

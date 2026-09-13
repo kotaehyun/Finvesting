@@ -162,12 +162,21 @@ button.starter:hover:not(:disabled) { border-color: var(--accent); }
 .erp-chart-bar { fill: #3b6fb6; }
 .erp-chart-line { fill: none; stroke: #c2410c; stroke-width: 2; }
 .erp-chart-dot { fill: #c2410c; }
+.erp-radar-ring { fill: none; stroke: #d9dde3; stroke-width: 1; }
+.erp-radar-spoke { stroke: #d9dde3; stroke-width: 1; }
+.erp-radar-rec { fill: none; stroke: #3b6fb6; stroke-width: 1.6; }
+.erp-radar-cov { fill: rgba(59, 111, 182, 0.32); stroke: #1e3a5f; stroke-width: 1.6; }
+.erp-radar-label { font-size: 11px; fill: #1e3a5f; font-weight: 600; }
 @media (max-width: 900px) { .erp-chart-grid { grid-template-columns: 1fr; } }
 @media (prefers-color-scheme: dark) {
   .erp-chart-title { fill: #dbeafe; }
   .erp-chart-axis, .erp-chart-tick { fill: #9aa3ad; }
   .erp-chart-gridline { stroke: #3a4452; }
   .erp-chart-axisline { stroke: #9aa3ad; }
+  .erp-radar-ring, .erp-radar-spoke { stroke: #3a4452; }
+  .erp-radar-rec { stroke: #7aa7e0; }
+  .erp-radar-cov { fill: rgba(96, 165, 250, 0.28); stroke: #dbeafe; }
+  .erp-radar-label { fill: #dbeafe; }
 }
 @media (max-width: 800px) {
   .erp-body { grid-template-columns: 1fr; }

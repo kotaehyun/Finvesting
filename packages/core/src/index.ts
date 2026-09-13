@@ -10,3 +10,4 @@ export * from "./holdings-summary";
 export * from "./quote-targets";
 export * from "./invested";
 export * from "./trends";
+export * from "./insurance-coverage";

@@ -17,6 +17,7 @@
 | `accounts` | 계좌. `name` 통장 이름, `institution` 은행/증권사. `type`(checking/savings/installment/brokerage/crypto/card/cash/pension/loan)이 자산 배분 분류 기준. **`balance`는 예수금(현금)**. 증권·코인·연금은 보유 평가액과 별개. 입출금·예적금은 통장 잔액. `/profile` 통장내역에서 은행·통장을 구분해 보고 `accounts.update`로 수정 |
 | `savings_plans` | 예·적금 상품. 상품명·은행·종류(적금/예금)·연금리·단리/월복리·약정개월·월납(예금은 가입원금)·시작·만기·상품내용. 통장 `account_id`는 선택. `/profile` 08 적금내역 |
 | `savings_contributions` | 상품별 월 납입. `(plan_id, month)` 유니크. 금액은 numeric |
+| `insurance_policies` | 민영 보험 증권. 상품명·보험사·종류·월보험료·사망/암/뇌/심장/상해/후유장해 가입액·실손 여부. 4대보험과 별개. `/profile` 10 보험내역. 보장 분석은 `core/insurance-coverage.ts` (육각·칠각) |
 | `transactions` | 입출금 원장. `amount`는 항상 양수, `direction`(in/out/transfer)으로 방향. `category`로 수입/고정비/변동비/저축·투자 분류. CSV 가져오기는 입금=`other_income`, 출금=`uncategorized`. `/accounts`에서 `transactions.updateCategory`로 수정(입금은 수입 분류, 출금은 지출·저축 분류만). `source`는 `csv:<파서id>`, `raw`에 원본 행. 같은 계좌·날짜·금액·방향·메모는 재업로드 시 건너뜀 |
 
 카테고리 → 현금흐름 분류 매핑은 `packages/core/src/cashflow.ts`의 상수가 기준. 고정비에 `phone`·`income_tax`·`health_insurance` 포함. `/profile` 07 임금명세서는 근로기준법 시행령 제27조의2·고용노동부 작성 예시(지급|공제 양란, 매월지급·격월/부정기). 차변=지급, 대변=공제·보통예금(실수령). 급여전표 차변합=대변합=세전. 월 보통예금 여유=차변−대변. 추이(`core/trends.ts`) 소비는 이체·저축·투자·근로소득세를 뺀 출금. 통장내역은 `transactions.listAll`.
@@ -56,4 +57,5 @@ pnpm db:migrate    # 적용
 `0002_yielding_paibok`: `financial_profiles.pay_earnings` jsonb.
 `0003_curious_dreaming_celestial`: `savings_plans` · `savings_contributions`.
 `0004_big_captain_stacy`: `payroll_months`.
+`0005_free_blonde_phantom`: `insurance_policies`.
 pgvector 확장은 첫 마이그레이션 전에 `CREATE EXTENSION IF NOT EXISTS vector;` 필요 (seed/000_extensions.sql).
