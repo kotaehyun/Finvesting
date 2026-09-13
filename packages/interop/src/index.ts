@@ -1,6 +1,15 @@
 export * from "./types";
 export * from "./parse-file";
-export { genericBankImporter } from "./importers/generic-bank";
+export { rowsToDocx, docxToRows } from "./docx";
+export { genericBankImporter, BANK_CSV_HEADER } from "./importers/generic-bank";
+export {
+  parseRecurringCostCsv,
+  parseRecurringCostRows,
+  recurringCostsToCsv,
+  recurringCostsToXlsx,
+  recurringCostsToDocx,
+  RECURRING_CSV_HEADER,
+} from "./importers/recurring-costs";
 import { genericBankImporter } from "./importers/generic-bank";
 import { genericCsvExporter } from "./exporters/generic-csv";
 import type { TransactionImporter, TradeImporter, LedgerExporter } from "./types";

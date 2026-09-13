@@ -11,6 +11,8 @@ const COLS = {
   merchant: ["거래처", "상대", "받는분", "보낸분", "가맹점"],
   balance: ["잔액", "거래후잔액"],
 };
+export const BANK_CSV_HEADER = ["거래일", "입금", "출금", "내용", "잔액"] as const;
+
 const find = (headers: string[], keys: string[]) => headers.findIndex((h) => keys.some((k) => h.replace(/\s/g, "").includes(k)));
 
 export const genericBankImporter: TransactionImporter = {
