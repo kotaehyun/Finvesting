@@ -70,7 +70,7 @@ export default function ChatPage() {
           placeholder="예: 지금 환율·금리 상황에서 미국 ETF 추가 매수가 맞을까?"
           style={{ flex: 1 }}
         />
-        <button onClick={send} disabled={ask.isPending}>보내기</button>
+        <button type="button" onClick={() => send()} disabled={ask.isPending}>보내기</button>
       </div>
     </>
   );
