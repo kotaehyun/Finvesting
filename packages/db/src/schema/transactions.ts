@@ -7,7 +7,8 @@ export const txnDirection = pgEnum("txn_direction", ["in", "out", "transfer"]);
 // 소비/수입 분류. 배분 가이드(고정비·변동비·저축·투자)의 입력이 된다.
 export const txnCategory = pgEnum("txn_category", [
   "salary", "bonus", "interest", "dividend", "other_income",
-  "housing", "utilities", "insurance", "subscription",           // 고정비
+  "housing", "utilities", "insurance", "subscription", "phone", // 고정비
+  "income_tax", "health_insurance",                             // 공제
   "food", "transport", "shopping", "leisure", "health", "education", "misc", // 변동비
   "saving", "investment", "loan_repayment",                     // 저축·투자·상환
   "transfer", "uncategorized",

@@ -4,4 +4,5 @@ export * from "./transactions";
 export * from "./investments";
 export * from "./market";
 export * from "./profile";
+export * from "./savings";
 export * from "./fundamentals";

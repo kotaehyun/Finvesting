@@ -8,6 +8,34 @@
       "when": 1788335379089,
       "tag": "0000_blue_carlie_cooper",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789203232464,
+      "tag": "0001_breezy_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789205420664,
+      "tag": "0002_yielding_paibok",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789206238700,
+      "tag": "0003_curious_dreaming_celestial",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789206560209,
+      "tag": "0004_big_captain_stacy",
+      "breakpoints": true
     }
   ]
 }
