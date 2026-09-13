@@ -99,3 +99,62 @@ export function analyzeCoverage(policies: PolicyCoverage[], annualIncome: number
   const missing = axes.filter((a) => a.missing).sort((a, b) => a.ratio - b.ratio);
   return { axes, missing, weakest: missing[0] ?? null };
 }
+
+export type PolicyBrief = PolicyCoverage & {
+  name: string;
+  kind: string;
+  monthlyPremium: number;
+};
+
+function won(n: number) {
+  return `${Math.round(n).toLocaleString("ko-KR")}원`;
+}
+
+function axisLine(a: CoverageAxis) {
+  if (a.id === "medical") {
+    return `- ${a.label}: ${a.covered >= 1 ? "가입" : "미가입"} / 권장 가입`;
+  }
+  const pct = Math.round(a.ratio * 100);
+  return `- ${a.label}: 가입 ${won(a.covered)} / 권장 ${won(a.recommended)} / 부족 ${a.missing ? won(a.gap) : "없음"} (${pct}%)`;
+}
+
+/** LLM·화면에 넣는 보장 공백 요약. 숫자만, 상품명 추천 없음. */
+export function formatCoverageContext(
+  analysis: ReturnType<typeof analyzeCoverage>,
+  annualIncome: number,
+  policies: PolicyBrief[],
+): string {
+  const lines: string[] = [
+    `연소득(세전×12) ${annualIncome > 0 ? won(annualIncome) : "없음(권장액 0)"}`,
+    "권장액은 연소득 경험 규칙이며 공식 고시가 아니다. 4대보험(급여 공제)은 이 표에 없다.",
+  ];
+  if (policies.length) {
+    lines.push("가입 증권:");
+    for (const p of policies) {
+      const bits = [
+        p.name || "보험",
+        p.kind,
+        p.monthlyPremium > 0 ? `월 ${won(p.monthlyPremium)}` : "",
+        p.medical ? "실손" : "",
+        p.death > 0 ? `사망 ${won(p.death)}` : "",
+        p.cancer > 0 ? `암 ${won(p.cancer)}` : "",
+        p.brain > 0 ? `뇌 ${won(p.brain)}` : "",
+        p.heart > 0 ? `심장 ${won(p.heart)}` : "",
+        p.accident > 0 ? `상해 ${won(p.accident)}` : "",
+        p.disability > 0 ? `장해 ${won(p.disability)}` : "",
+      ].filter(Boolean);
+      lines.push(`- ${bits.join(" · ")}`);
+    }
+  } else {
+    lines.push("가입 증권 없음");
+  }
+  lines.push("축:");
+  lines.push(...analysis.axes.map(axisLine));
+  if (analysis.weakest) {
+    lines.push(`가장 약한 축: ${analysis.weakest.label} (${Math.round(analysis.weakest.ratio * 100)}%)`);
+    lines.push(`부족한 축(약한 순): ${analysis.missing.map((a) => a.label).join(", ") || "없음"}`);
+  } else {
+    lines.push("부족한 축 없음");
+  }
+  return lines.join("\n");
+}

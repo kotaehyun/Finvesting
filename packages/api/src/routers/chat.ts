@@ -4,6 +4,7 @@ import { news, macroIndicators } from "@finvesting/db";
 import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
 import { loadOverview } from "../lib/overview";
+import { loadCoverageSnapshot } from "../lib/insurance-coverage";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 
@@ -42,6 +43,7 @@ export const chatRouter = router({
         .from(macroIndicators)
         .innerJoin(latest, and(eq(macroIndicators.code, latest.code), eq(macroIndicators.date, latest.maxDate)));
 
+      const coverage = await loadCoverageSnapshot(ctx.db, ctx.userId);
       const { assets, cashflow, txnCount, month, guide, holdings: h, profile } = overview;
       const holdings = h.positions.length
         ? h.positions.map((p) => {
@@ -65,6 +67,9 @@ export const chatRouter = router({
           ? `근로소득세 ${won(profile.monthlyIncomeTax)} · 건보료 ${won(profile.monthlyHealthInsurance)} · 고정 세부 ${won(profile.recurringSum)}`
           : undefined,
         "보유 종목": holdings,
+        "보험 보장": coverage.policies.length || coverage.annualIncome > 0
+          ? coverage.contextHept
+          : undefined,
         "최근 뉴스": recentNews.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
         "거시지표": macro.map((m) => `- ${m.code} ${m.date}: ${m.value}${m.unit ?? ""}`).join("\n"),
       });

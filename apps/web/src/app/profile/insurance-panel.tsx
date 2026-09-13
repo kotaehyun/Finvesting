@@ -1,5 +1,6 @@
 "use client";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { trpc } from "@/lib/trpc";
 import { RadarChart } from "./radar-chart";
 
@@ -79,6 +80,8 @@ export const InsurancePanel = forwardRef<InsuranceHandle, {
   const list = trpc.insurance.list.useQuery();
   const upsert = trpc.insurance.upsert.useMutation();
   const removeMut = trpc.insurance.remove.useMutation();
+  const recommend = trpc.insurance.recommend.useMutation();
+  const [advice, setAdvice] = useState("");
 
   const [sel, setSel] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
@@ -292,6 +295,22 @@ export const InsurancePanel = forwardRef<InsuranceHandle, {
       <div className="erp-pills">
         <button type="button" className={shape === "hept" ? "on" : ""} onClick={() => setShape("hept")}>칠각형 (7축)</button>
         <button type="button" className={shape === "hex" ? "on" : ""} onClick={() => setShape("hex")}>육각형 (6축)</button>
+        <button
+          type="button"
+          className={recommend.isPending ? "on" : ""}
+          disabled={recommend.isPending}
+          onClick={() => {
+            setAdvice("");
+            recommend.mutateAsync({ shape })
+              .then((r) => setAdvice(r.advice))
+              .catch((err: unknown) => {
+                setAdvice("");
+                onMsg(err instanceof Error ? err.message : String(err));
+              });
+          }}
+        >
+          {recommend.isPending ? "추천 작성 중…" : "AI 추천"}
+        </button>
       </div>
       <div className="erp-chart-grid">
         <RadarChart
@@ -332,6 +351,14 @@ export const InsurancePanel = forwardRef<InsuranceHandle, {
         </div>
       </div>
       <p className="erp-hint" style={{ marginTop: 8 }}>월 보험료 합 {won(premiumSum)}</p>
+      {(recommend.isPending || advice) && (
+        <div className="erp-chart" style={{ marginTop: 12 }}>
+          <p className="erp-chart-title" style={{ margin: "4px 8px 8px" }}>AI 추천 (로컬 LLM)</p>
+          <p className="erp-hint">부족한 축의 우선순위입니다. 특정 보험사·상품을 고르지 않습니다. Ollama가 켜져 있어야 합니다.</p>
+          {recommend.isPending && !advice && <p className="erp-hint">생각 중…</p>}
+          {advice && <div className="md" style={{ padding: "0 8px 8px" }}><ReactMarkdown>{advice}</ReactMarkdown></div>}
+        </div>
+      )}
     </>
   );
 });

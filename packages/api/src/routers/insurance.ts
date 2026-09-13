@@ -1,11 +1,13 @@
 import { z } from "zod";
-import { and, desc, eq } from "drizzle-orm";
-import { financialProfiles, insurancePolicies } from "@finvesting/db";
-import { analyzeCoverage, type PolicyCoverage } from "@finvesting/core";
+import { and, eq } from "drizzle-orm";
+import { insurancePolicies } from "@finvesting/db";
+import { createProvider, INSURANCE_COVERAGE_SYSTEM, buildContextBlock } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
+import { loadCoverageSnapshot, toInsuranceClient } from "../lib/insurance-coverage";
 
 const kindZ = z.enum(["life", "health", "cancer", "critical", "accident", "disability", "property", "other"]);
 const monthZ = z.string().regex(/^\d{4}-\d{2}$/);
+const shapeZ = z.enum(["hex", "hept"]);
 
 const policyFields = z.object({
   id: z.string().uuid().optional(),
@@ -25,61 +27,36 @@ const policyFields = z.object({
   memo: z.string().max(2000).optional(),
 });
 
-function n(v: string | number | null | undefined) {
-  return v != null ? Number(v) : 0;
-}
-
-function toClient(row: typeof insurancePolicies.$inferSelect) {
-  return {
-    id: row.id,
-    name: row.name,
-    insurer: row.insurer,
-    kind: row.kind,
-    monthlyPremium: n(row.monthlyPremium),
-    deathAmount: n(row.deathAmount),
-    medicalCovered: row.medicalCovered,
-    cancerAmount: n(row.cancerAmount),
-    brainAmount: n(row.brainAmount),
-    heartAmount: n(row.heartAmount),
-    accidentAmount: n(row.accidentAmount),
-    disabilityAmount: n(row.disabilityAmount),
-    startMonth: row.startMonth,
-    endMonth: row.endMonth,
-    memo: row.memo,
-  };
-}
-
-function toCoverage(p: ReturnType<typeof toClient>): PolicyCoverage {
-  return {
-    death: p.deathAmount,
-    medical: p.medicalCovered,
-    cancer: p.cancerAmount,
-    brain: p.brainAmount,
-    heart: p.heartAmount,
-    accident: p.accidentAmount,
-    disability: p.disabilityAmount,
-  };
-}
-
 export const insuranceRouter = router({
   list: publicProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.select().from(insurancePolicies)
-      .where(eq(insurancePolicies.userId, ctx.userId))
-      .orderBy(desc(insurancePolicies.updatedAt));
-    const [profile] = await ctx.db.select({ monthlyGrossIncome: financialProfiles.monthlyGrossIncome })
-      .from(financialProfiles)
-      .where(eq(financialProfiles.userId, ctx.userId))
-      .limit(1);
-    const policies = rows.map(toClient);
-    const annualIncome = n(profile?.monthlyGrossIncome) * 12;
-    const coverages = policies.map(toCoverage);
+    const snap = await loadCoverageSnapshot(ctx.db, ctx.userId);
     return {
-      policies,
-      annualIncome,
-      hex: analyzeCoverage(coverages, annualIncome, "hex"),
-      hept: analyzeCoverage(coverages, annualIncome, "hept"),
+      policies: snap.policies,
+      annualIncome: snap.annualIncome,
+      hex: snap.hex,
+      hept: snap.hept,
     };
   }),
+
+  recommend: publicProcedure
+    .input(z.object({ shape: shapeZ.default("hept") }))
+    .mutation(async ({ ctx, input }) => {
+      const snap = await loadCoverageSnapshot(ctx.db, ctx.userId);
+      const analysis = input.shape === "hex" ? snap.hex : snap.hept;
+      const context = input.shape === "hex" ? snap.contextHex : snap.contextHept;
+      const llm = createProvider();
+      const advice = await llm.chat([
+        { role: "system", content: INSURANCE_COVERAGE_SYSTEM },
+        { role: "system", content: buildContextBlock({ "보장 공백": context }) },
+        { role: "user", content: "부족한 보장을 우선순위대로 설명해 주세요. 상품·보험사 이름은 대지 마세요." },
+      ]);
+      return {
+        advice,
+        provider: llm.name,
+        weakest: analysis.weakest,
+        missing: analysis.missing,
+      };
+    }),
 
   upsert: publicProcedure
     .input(policyFields)
@@ -106,7 +83,7 @@ export const insuranceRouter = router({
           .returning()
         : await ctx.db.insert(insurancePolicies).values({ ...values, userId: ctx.userId }).returning();
       if (!row) throw new Error("보험 증권을 찾을 수 없습니다");
-      return toClient(row);
+      return toInsuranceClient(row);
     }),
 
   remove: publicProcedure

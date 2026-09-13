@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzeCoverage, recommendedCoverages, sumCoverages } from "./insurance-coverage";
+import { analyzeCoverage, formatCoverageContext, recommendedCoverages, sumCoverages } from "./insurance-coverage";
 
 const empty = { death: 0, medical: false, cancer: 0, brain: 0, heart: 0, accident: 0, disability: 0 };
 
@@ -54,5 +54,22 @@ describe("analyzeCoverage", () => {
     expect(crit.recommended).toBe(100_000_000);
     expect(crit.missing).toBe(false);
     expect(r.axes.map((a) => a.id)).toEqual(["death", "medical", "cancer", "critical", "accident", "disability"]);
+  });
+});
+
+describe("formatCoverageContext", () => {
+  it("약한 축과 가입 증권을 한국어로 적는다", () => {
+    const policies = [{
+      ...empty, name: "검증 실손", kind: "health", monthlyPremium: 35_000,
+      medical: true, cancer: 30_000_000,
+    }];
+    const analysis = analyzeCoverage(policies, 50_400_000, "hept");
+    const text = formatCoverageContext(analysis, 50_400_000, policies);
+    expect(text).toContain("50,400,000원");
+    expect(text).toContain("검증 실손");
+    expect(text).toContain("가장 약한 축: 사망");
+    expect(text).toContain("실손: 가입");
+    expect(text).toContain("암:");
+    expect(text).not.toContain("삼성생명 종신");
   });
 });
