@@ -109,6 +109,9 @@ importers:
       '@finvesting/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@finvesting/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@finvesting/db':
         specifier: workspace:*
         version: link:../../packages/db

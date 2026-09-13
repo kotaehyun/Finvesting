@@ -27,8 +27,9 @@ export async function collectEcos() {
     for (const row of json.StatisticSearch?.row ?? []) {
       const t = row.TIME;
       const date = t.length === 8 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}` : `${t.slice(0, 4)}-${t.slice(4, 6)}-01`;
+      // ECOS가 있으면 같은 날짜의 yahoo USDKRW를 덮어쓴다.
       await db.insert(macroIndicators).values({ code: s.code, date, value: row.DATA_VALUE, unit: s.unit, source: "ecos" })
-        .onConflictDoUpdate({ target: [macroIndicators.code, macroIndicators.date], set: { value: row.DATA_VALUE, fetchedAt: new Date() } });
+        .onConflictDoUpdate({ target: [macroIndicators.code, macroIndicators.date], set: { value: row.DATA_VALUE, source: "ecos", fetchedAt: new Date() } });
       upserted++;
     }
   }

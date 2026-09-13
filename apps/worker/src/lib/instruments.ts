@@ -1,5 +1,6 @@
-import { and, eq } from "drizzle-orm";
-import { db, instruments, instrumentIdentifiers } from "@finvesting/db";
+import { and, eq, inArray } from "drizzle-orm";
+import { db, instruments, instrumentIdentifiers, trades, watchlist } from "@finvesting/db";
+import { parseEnvTargets, quoteCollectorFor, unionUnique, type InstrumentRef } from "@finvesting/core";
 
 type AssetClass = "stock" | "etf" | "bond" | "crypto" | "fund" | "other";
 
@@ -17,8 +18,35 @@ export async function ensureIdentifier(instrumentId: string, provider: string, e
   await db.insert(instrumentIdentifiers).values({ instrumentId, provider, externalId }).onConflictDoNothing();
 }
 
-// 수집 대상 목록: 관심 종목 + 보유 종목. 지금은 환경변수로 간단히, 이후 watchlist/trades 테이블에서 읽도록 교체.
-export function targetSymbols(envKey: string, fallback: string[]) {
-  const v = process.env[envKey];
-  return v ? v.split(",").map((s) => s.trim()).filter(Boolean) : fallback;
+// 수집 대상: trades(체결) ∪ watchlist(관심). env *_TARGETS는 있으면 합집합.
+export function targetSymbols(envKey: string, fallback: string[] = []) {
+  const fromEnv = parseEnvTargets(process.env[envKey]);
+  return fromEnv.length ? unionUnique(fromEnv, []) : fallback;
 }
+
+export async function loadHeldInstruments(): Promise<Array<InstrumentRef & { id: string; name: string; assetClass: string; currency: string }>> {
+  const tradeIds = await db.selectDistinct({ instrumentId: trades.instrumentId }).from(trades);
+  const watchIds = await db.selectDistinct({ instrumentId: watchlist.instrumentId }).from(watchlist);
+  const ids = [...new Set([...tradeIds, ...watchIds].map((r) => r.instrumentId))];
+  if (!ids.length) return [];
+  const rows = await db.select().from(instruments).where(inArray(instruments.id, ids));
+  return rows.map((r) => ({
+    id: r.id,
+    symbol: r.symbol,
+    market: r.market,
+    name: r.name,
+    assetClass: r.assetClass,
+    currency: r.currency,
+  }));
+}
+
+export async function loadQuoteTargets() {
+  const held = await loadHeldInstruments();
+  return {
+    held,
+    upbit: held.filter((h) => quoteCollectorFor(h.market) === "upbit"),
+    yahoo: held.filter((h) => quoteCollectorFor(h.market) === "yahoo"),
+  };
+}
+
+export { parseEnvTargets, quoteCollectorFor, unionUnique };
