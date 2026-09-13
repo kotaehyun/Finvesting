@@ -6,7 +6,8 @@
 ## 가져오기 (Import)
 | 대상 | 파일 | 파서 | 상태 |
 |---|---|---|---|
-| 은행 통장 거래내역 (공통) | CSV/XLSX | `importers/generic-bank.ts` — 헤더 이름으로 날짜/입금/출금/내용/잔액 컬럼 탐지. 웹 `/accounts` → `transactions.previewImport`/`commitImport` | 연결됨 |
+| 은행 통장 거래내역 (공통) | CSV/XLSX/DOCX | `importers/generic-bank.ts` + `fileToRows`. 웹 `/accounts`·`/profile` 통장내역 → `profile.previewFile` 변환 미리보기 후 `transactions.commitImport` | 연결됨 |
+| 고정비 세부내역 | CSV/XLSX/DOCX | `importers/recurring-costs.ts` — 헤더 이름·분류·금액·출금일·메모. 프로필대장 가져오기 → 변환 내용 표시 후 `recurringImport`. 같은 이름은 갱신. 내보내기 CSV·엑셀·워드 | 연결됨 |
 | 은행별 전용 (카카오뱅크, 토스, 국민, 신한 …) | 각 은행 내보내기 | 은행별 파서 — 실제 파일 샘플 받아서 작성 | 미구현 |
 | 카드 이용내역 | CSV/XLSX | 승인일·가맹점·금액·할부 | 미구현 |
 | 증권사 체결내역 (한투, 키움 …) | CSV/XLSX | `TradeImporter` | 미구현 |
@@ -14,8 +15,9 @@
 | 홈택스 자료 (연말정산 간소화 PDF/XLSX, 카드·현금영수증) | PDF/XLSX | 3단계 | 미구현 |
 | 급여대장 / 4대보험 고지 | XLSX | 4단계 | 미구현 |
 
-흐름: 파일 업로드 → `csvToRows`/`xlsxToRows` → `detectTransactionImporter` → 미리보기(중복·잔액 검증) → 사용자 확인 → `transactions` 저장(`source`에 파서 id, `raw`에 원본 행).
+흐름: 파일 업로드 → `fileToRows`(csv/`xlsxToRows`/`docxToRows`) → `detectTransactionImporter` 또는 고정비 헤더 → 변환 내용 표 → 사용자 확인 → 저장.
 인코딩: 국내 은행 CSV는 EUC-KR인 경우가 많음 — 업로드 시 `TextDecoder("euc-kr")` 시도 후 깨지면 UTF-8.
+워드: `.docx` 표만. 구형 `.doc`는 거절하고 docx로 저장하라고 안내.
 
 ## 내보내기 (Export)
 | 대상 | 형식 | 상태 |

@@ -36,12 +36,19 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ | 2026-09-02 | Cursor, Claude 재확인(7패키지, web 제외) |
-| core 테스트 (vitest) | ✅ 9개 (cashflow 2 + allocation 2 + portfolio 5, fx 포함) | 2026-09-02 | Cursor, Grok 재실행 |
+| 타입체크 (web 포함 8패키지) | ✅ | 2026-09-13 | Cursor(09-02), Claude 재확인 7패키지(web 포함, mobile 제외 — 리눅스 VM Node 22) |
+| core 테스트 (vitest) | ✅ 37개 (holdings-summary 4 · statement 6 · payroll 5 · trends 3 포함) | 2026-09-13 | Grok, Claude 교차 검증(node:test 셈) |
 | interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
-| `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
+| `pnpm db:generate` / `db:migrate` | ✅ `0002_yielding_paibok` (`pay_earnings`) 적용 | 2026-09-12 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-05 재확인: latestNews에 embedding/raw 없음 | 2026-09-05 | 사용자(09-02), Grok curl 재확인 |
+| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-08 `dev` 머지 후 Chrome: 순자산 3,635,000 | 2026-09-08 | Grok Chrome |
+| `/profile` 프로필대장 + `workspaceSave`/`previewPay` | ✅ 페이지 200, 저장 추가·삭제 원상복구, 4대보험 미리보기 숫자 확인. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 급여상세 차·대변 (보통예금 전표) | ✅ 차변 지급=대변 공제+보통예금=세전 4,200,000. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 임금명세서 고용노동부 예시 칸 | ✅ core 27 · statement 대변 라벨 소득세. 칸 클릭·수당 입력은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 08 적금내역 | ✅ upsert 월10만·3.6%·12개월 단리 만기 1,223,400. 삭제 후 0건. 브라우저 클릭 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 07 연봉 추이 12개월 | ✅ payTrend 12포인트. 9월 기본급 420만·세금 27.5만·보험 408,130. 그래프 클릭 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 09 투자내역 (계좌·자산군) | ✅ 페이지 200. holdings byClass 6칸·byAccount 검증 코인·BTC 평가 108,852. 브라우저 클릭·복수 증권 체결은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
 | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
@@ -58,6 +65,15 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-13 | Claude (Cowork, 종합 검토) | [2026-09-13-claude.md](./2026-09-13-claude.md) |
+| 2026-09-12 | Cursor Grok (투자내역) | [2026-09-12-grok-7.md](./2026-09-12-grok-7.md) |
+| 2026-09-12 | Cursor Grok (연봉 추이) | [2026-09-12-grok-6.md](./2026-09-12-grok-6.md) |
+| 2026-09-12 | Cursor Grok (적금내역) | [2026-09-12-grok-5.md](./2026-09-12-grok-5.md) |
+| 2026-09-12 | Cursor Grok (임금명세서 양식) | [2026-09-12-grok-4.md](./2026-09-12-grok-4.md) |
+| 2026-09-12 | Cursor Grok (급여상세 차대변) | [2026-09-12-grok-3.md](./2026-09-12-grok-3.md) |
+| 2026-09-12 | Cursor Grok (파일 변환·추이) | [2026-09-12-grok-2.md](./2026-09-12-grok-2.md) |
+| 2026-09-12 | Cursor Grok (프로필대장) | [2026-09-12-grok.md](./2026-09-12-grok.md) |
+| 2026-09-08 | Cursor Grok (dev 머지 후 실행) | [2026-09-08-grok.md](./2026-09-08-grok.md) |
 | 2026-09-05 | Cursor Grok (계좌·CSV) | [2026-09-05-grok-2.md](./2026-09-05-grok-2.md) |
 | 2026-09-05 | Cursor Grok (리뷰 반영) | [2026-09-05-grok.md](./2026-09-05-grok.md) |
 | 2026-09-02 | Cursor Grok (first-run 리뷰) | [2026-09-02-grok.md](./2026-09-02-grok.md) |

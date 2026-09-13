@@ -21,7 +21,7 @@
       │  apps/worker (cron)
       ▼
 [PostgreSQL] market_news · market_quotes · macro_indicators · economic_events
-             accounts · transactions · trades · financial_profiles
+             accounts · transactions · trades · financial_profiles · savings_plans
       │  packages/db (Drizzle)
       ▼
 [packages/api] tRPC 라우터 ── packages/core(계산) ── packages/ai(LLM)
