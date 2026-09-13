@@ -18,6 +18,7 @@
 ## 범위
 ### MVP 1단계 (현재)
 - Account + Investment: 계좌·거래·보유 종목 등록, 대시보드
+- 뉴스 전용 대시보드 `/news` (국내·해외 RSS, 제목·링크·요약만)
 - Market 수집: 뉴스 RSS, 업비트 시세, ECOS 거시지표 (worker)
 - AI 챗봇: 로컬 Ollama + 수집 데이터 컨텍스트
 ### 이후

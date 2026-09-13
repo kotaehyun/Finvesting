@@ -47,6 +47,15 @@ button.starter {
   border-radius: 8px; padding: 7px 12px; font-size: 13px; text-align: left;
 }
 button.starter:hover:not(:disabled) { border-color: var(--accent); }
+button.starter.on { border-color: var(--accent); color: var(--accent); }
+.news-board { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .news-board { grid-template-columns: 1fr; } }
+.news-list { margin-top: 8px; }
+.news-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.news-item:last-child { border-bottom: 0; }
+.news-item a { color: var(--fg); text-decoration: none; font-weight: 650; }
+.news-item a:hover { color: var(--accent); }
+.news-sum { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
 .arrow { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
 .arrow .chev { display: inline-block; width: 1em; text-align: center; }
 

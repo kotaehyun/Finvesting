@@ -43,7 +43,7 @@
 |---|---|---|
 | `market_quotes` | 일봉 시세 | (instrument_id, date) |
 | `macro_indicators` | 환율·기준금리·CPI·국채금리 등. `code`로 구분 | (code, date) |
-| `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용 | url |
+| `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용. 웹 `/news`는 `market.newsFeed`(lang·publisher 필터, embedding/raw 제외) | url |
 | `economic_events` | 경제 캘린더 | (title, scheduled_at) |
 
 ## 금액 타입

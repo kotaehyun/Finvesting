@@ -18,6 +18,7 @@ A personal finance work terminal that connects scattered account, card, brokerag
 ## Scope
 ### MVP phase 1 (current)
 - Account + Investment: register accounts, transactions, holdings; dashboard
+- News dashboard at `/news` (KR/global RSS; title, link, summary only)
 - Market collection: news RSS (KR + global), Upbit quotes, ECOS/FRED macro, Yahoo quotes & fundamentals, DART/EDGAR financial statements (worker)
 - AI chatbot: local Ollama + collected data as context
 ### Later

@@ -7,8 +7,8 @@
 ## 현재 구현
 | 소스 | 어댑터 | 방식 | 스케줄 | 키 | 저장 테이블 |
 |---|---|---|---|---|---|
-| 국내 뉴스 RSS — 한국경제·매일경제·연합뉴스 | `rss.ts` | RSS | 15분 | 불필요 | `market_news` (raw.lang=ko) |
-| 해외 뉴스 RSS — CNBC, MarketWatch, Fed·ECB 보도자료 | `rss.ts` | RSS | 15분 | 불필요 | `market_news` (raw.lang=en) |
+| 국내 뉴스 RSS — 한국경제·매일경제·연합뉴스 | `rss.ts` | RSS | 15분 | 불필요 | `market_news` (raw.lang=ko). 웹 `/news` |
+| 해외 뉴스 RSS — CNBC, MarketWatch, Fed·ECB 보도자료 | `rss.ts` | RSS | 15분 | 불필요 | `market_news` (raw.lang=en). 웹 `/news` |
 | 업비트 일봉 | `upbit.ts` | 공개 API. 대상 = 보유·관심 `market=UPBIT` ∪ `UPBIT_TARGETS`(있으면) | 5분 | 불필요 | `market_quotes` |
 | 한국은행 ECOS — 원/달러, 기준금리, CPI, 국고채3년 | `ecos.ts` | API | 09·18시 | `ECOS_API_KEY` | `macro_indicators` (USDKRW, BOK_BASE_RATE, CPI, KTB_3Y) |
 | 미국 FRED — 연방기금금리, CPI, 국채 2y/10y, 달러지수, 실업률, VIX | `fred.ts` | API | 07·19시 | `FRED_API_KEY` (무료) | `macro_indicators` (US_*, DXY_BROAD, VIX) |

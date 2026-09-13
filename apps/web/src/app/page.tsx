@@ -65,7 +65,7 @@ export default function Dashboard() {
           <div className="card"><h3>계좌</h3><div className="muted">등록된 계좌가 없습니다. <a href="/accounts">계좌·거래 가져오기</a></div></div>
         )}
       </div>
-      <h2>최근 뉴스</h2>
+      <h2>최근 뉴스 <a href="/news" className="muted" style={{ fontSize: 14, fontWeight: 600 }}>뉴스 대시보드 →</a></h2>
       <ul>{news.data?.map((n) => <li key={n.id}><a href={n.url} target="_blank" rel="noreferrer">{n.title}</a> <span className="muted">{n.publisher}</span></li>)}</ul>
     </>
   );
