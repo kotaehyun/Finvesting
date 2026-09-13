@@ -6,7 +6,10 @@ export type TxnLike = {
   category: string;
 };
 
-export const FIXED_COST_CATEGORIES = new Set(["housing", "utilities", "insurance", "subscription", "loan_repayment"]);
+export const FIXED_COST_CATEGORIES = new Set([
+  "housing", "utilities", "insurance", "subscription", "phone", "loan_repayment",
+  "income_tax", "health_insurance",
+]);
 export const SAVING_CATEGORIES = new Set(["saving", "investment"]);
 export const INCOME_CATEGORIES = new Set(["salary", "bonus", "interest", "dividend", "other_income"]);
 
