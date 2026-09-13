@@ -134,7 +134,7 @@ export default function HoldingsPage() {
   return (
     <>
       <h1>보유 · 체결</h1>
-      <p className="muted">매수·매도를 넣으면 평단·실현손익을 계산합니다. 워커가 모은 최근 종가가 있으면 평가손익도 표시합니다. 순자산의 투자 금액은 증권·코인 계좌 잔액과 평가액 중 큰 쪽입니다.</p>
+      <p className="muted">매수·매도를 넣으면 평단·실현손익을 계산합니다. 워커가 모은 최근 종가가 있으면 평가손익도 표시합니다. 순자산의 투자 금액은 보유 평가액과 증권·코인·연금 예수금의 합입니다.</p>
 
       <div className="card" style={{ marginBottom: 16 }}>
         <h3>체결 추가</h3>

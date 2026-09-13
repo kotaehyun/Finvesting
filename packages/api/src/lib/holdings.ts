@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { trades, instruments, quotes, macroIndicators, accounts, type Db } from "@finvesting/db";
 import { buildPositions, summarizeByAccount, summarizeByClass, unrealizedPnl, type Position } from "@finvesting/core";
 
+/** 최신 USDKRW. 소스는 구분하지 않는다 — 같은 날짜는 ECOS가 yahoo를 덮어쓴다. */
 export async function latestUsdKrw(db: Db) {
   const [row] = await db.select({ value: macroIndicators.value })
     .from(macroIndicators)

@@ -1,6 +1,6 @@
 import { and, eq, gte, lte } from "drizzle-orm";
 import { accounts, transactions, financialProfiles, recurringCosts, type Db } from "@finvesting/db";
-import { summarizeCashflow, monthlyBudgetGuide, resolvePay } from "@finvesting/core";
+import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets } from "@finvesting/core";
 import { loadHoldings } from "./holdings";
 
 export function currentKstMonth() {
@@ -28,11 +28,11 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
   const byType: Record<string, number> = {};
   for (const a of accts) byType[a.type] = (byType[a.type] ?? 0) + Number(a.balance);
   const liquid = (byType.cash ?? 0) + (byType.checking ?? 0) + (byType.savings ?? 0) + (byType.installment ?? 0);
-  const accountInvested = (byType.brokerage ?? 0) + (byType.crypto ?? 0) + (byType.pension ?? 0);
+  const brokerCash = brokerCashKrw(byType);
   const debt = (byType.card ?? 0) + (byType.loan ?? 0);
   const holdings = await loadHoldings(db, userId);
-  // 증권·코인 계좌 잔액과 체결 평가액이 겹치면 큰 쪽만 투자 자산으로 (이중 합산 방지)
-  const invested = Math.max(accountInvested, holdings.totals.marketValueKrw);
+  // 투자자산 = 보유 평가액 + 증권·코인·연금 예수금(계좌 balance)
+  const invested = investedAssets(holdings.totals.marketValueKrw, brokerCash);
 
   const cashflow = summarizeCashflow(txns.map((t) => ({ amount: Number(t.amount), direction: t.direction, category: t.category })));
 
@@ -57,7 +57,7 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
 
   return {
     month,
-    assets: { byType, liquid, invested, accountInvested, debt, net: liquid + invested - debt, accountCount: accts.length },
+    assets: { byType, liquid, invested, accountInvested: brokerCash, brokerCash, debt, net: liquid + invested - debt, accountCount: accts.length },
     holdings,
     cashflow,
     txnCount: txns.length,

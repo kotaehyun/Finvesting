@@ -20,7 +20,7 @@ export default function Dashboard() {
       <h1>{month} 대시보드</h1>
       <div className="grid">
         <div className="card"><h3>순자산</h3><div className="big">{won(assets.net)}</div>
-          <div className="muted">유동 {won(assets.liquid)} · 투자 {won(assets.invested)} · 부채 {won(assets.debt)}</div></div>
+          <div className="muted">유동 {won(assets.liquid)} · 투자 {won(assets.invested)} (평가+예수금) · 부채 {won(assets.debt)}</div></div>
         <div className="card"><h3>이번 달 수입</h3><div className="big">{won(cashflow.income)}</div></div>
         <div className="card"><h3>소비율 / 저축·투자율</h3><div className="big">{pct(cashflow.spendingRate)} / {pct(cashflow.savingRate)}</div>
           <div className="muted">이번 달 거래 고정 {won(cashflow.fixedCost)} · 변동비 {won(cashflow.variableCost)}</div></div>

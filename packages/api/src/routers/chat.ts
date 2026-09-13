@@ -53,7 +53,7 @@ export const chatRouter = router({
         : undefined;
       const context = buildContextBlock({
         "자산 현황": assets.accountCount
-          ? `${month} 순자산 ${won(assets.net)} (유동 ${won(assets.liquid)} · 투자 ${won(assets.invested)} · 부채 ${won(assets.debt)})`
+          ? `${month} 순자산 ${won(assets.net)} (유동 ${won(assets.liquid)} · 투자 ${won(assets.invested)}=보유평가+예수금 · 부채 ${won(assets.debt)})`
           : undefined,
         "이번 달 현금흐름": txnCount
           ? `수입 ${won(cashflow.income)} · 고정 ${won(cashflow.fixedCost)} · 변동 ${won(cashflow.variableCost)} · 저축·투자 ${won(cashflow.savingAndInvest)}`
