@@ -18,7 +18,10 @@
 ## 범위
 ### MVP 1단계 (현재)
 - Account + Investment: 계좌·거래·보유 종목 등록, 대시보드
-- 뉴스 전용 대시보드 `/news` (국내·해외 RSS, 제목·링크·요약만)
+- 뉴스 전용 대시보드 `/news` (국내·해외 + 경제·금융·시황·중앙은행, 제목·링크·요약만)
+- 오피니언·칼럼 대시보드 `/opinions` (국내 칼럼·애널리스트·해외 오피니언. 본문 X. 증권사 리포트 공개 RSS 없음)
+- 투자 대시보드 `/invest` (세계 지수 Yahoo + TradingView 위젯. Investing.com·Finviz는 링크만)
+- 종목 재무제표·감사의견 `/statements` (DART/EDGAR 숫자 + 의견. 기업정보·OpenDART·「재무제표를 읽는 사람들」은 링크만. 본문 X. 로컬 LLM 읽어주기)
 - Market 수집: 뉴스 RSS, 업비트 시세, ECOS 거시지표 (worker)
 - AI 챗봇: 로컬 Ollama + 수집 데이터 컨텍스트
 ### 이후

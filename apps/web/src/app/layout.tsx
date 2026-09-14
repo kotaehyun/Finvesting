@@ -13,8 +13,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/">Finvesting</a>
             <a href="/accounts">계좌</a>
             <a href="/holdings">보유</a>
+            <a href="/invest">투자</a>
+            <a href="/statements">재무제표</a>
             <a href="/profile">프로필대장</a>
             <a href="/news">뉴스</a>
+            <a href="/opinions">오피니언</a>
             <a href="/chat">Chat</a>
           </nav>
           <main className="main">{children}</main>

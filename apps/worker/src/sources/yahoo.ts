@@ -1,11 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { db, quotes, fundamentals, macroIndicators } from "@finvesting/db";
-import { parseEnvTargets, yahooTickersFor } from "@finvesting/core";
+import { parseEnvTargets, unionUnique, worldIndexYahooTickers, yahooTickersFor } from "@finvesting/core";
 import { ensureInstrument, ensureIdentifier, loadQuoteTargets } from "../lib/instruments";
 
 // Yahoo Finance — 비공식 라이브러리 yahoo-finance2 v3 (v2는 2025년 지원 종료).
 // 개인 사용은 사실상 문제없으나 서비스화 시 정식 데이터 공급자로 교체 필요.
-// 대상 = 보유·관심(NASDAQ|NYSE|AMEX|US|KRX|KOSDAQ) + env YAHOO_TARGETS(있으면 합집합).
+// 대상 = 보유·관심 + YAHOO_TARGETS + 세계 지수(core/world-indices).
 // KRX는 005930.KS 실패 시 .KQ 재시도. KIS는 이번 범위 아님.
 // USDKRW: KRW=X를 macro_indicators에 source=yahoo로 넣는다.
 // 같은 (code, date)에 ECOS가 있으면 덮어쓰지 않는다. ECOS 수집이 있으면 source=ecos로 갱신한다.
@@ -68,7 +68,7 @@ export async function collectYahoo() {
   const { yahoo } = await loadQuoteTargets();
   const jobs: Job[] = yahoo.map((inst) => ({ tickers: yahooTickersFor(inst.market, inst.symbol), inst }));
   const seen = new Set(jobs.flatMap((j) => j.tickers.map((t) => t.toUpperCase())));
-  for (const sym of parseEnvTargets(process.env.YAHOO_TARGETS)) {
+  for (const sym of unionUnique(parseEnvTargets(process.env.YAHOO_TARGETS), worldIndexYahooTickers())) {
     if (seen.has(sym.toUpperCase())) continue;
     if (sym.toUpperCase() === "KRW=X") continue;
     seen.add(sym.toUpperCase());
@@ -95,9 +95,11 @@ export async function collectYahoo() {
         ? { id: job.inst.id }
         : await ensureInstrument({
           symbol: ticker,
-          market: "US",
+          market: ticker.startsWith("^") || ticker.includes("=") ? "INDEX" : "US",
           name: String(q.shortName ?? q.longName ?? ticker),
-          assetClass: assetClass === "bond" || assetClass === "crypto" || assetClass === "fund" || assetClass === "other" || assetClass === "etf" ? assetClass : "stock",
+          assetClass: ticker.startsWith("^") || ticker.includes("=")
+            ? "other"
+            : (assetClass === "bond" || assetClass === "crypto" || assetClass === "fund" || assetClass === "other" || assetClass === "etf" ? assetClass : "stock"),
           currency: String(q.currency ?? "USD"),
         });
       await ensureIdentifier(inst.id, "yahoo", ticker);

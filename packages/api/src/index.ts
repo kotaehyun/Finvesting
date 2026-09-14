@@ -8,6 +8,7 @@ import { profileRouter } from "./routers/profile";
 import { tradesRouter } from "./routers/trades";
 import { savingsRouter } from "./routers/savings";
 import { insuranceRouter } from "./routers/insurance";
+import { statementsRouter } from "./routers/statements";
 
 export const appRouter = router({
   accounts: accountsRouter,
@@ -19,6 +20,7 @@ export const appRouter = router({
   trades: tradesRouter,
   savings: savingsRouter,
   insurance: insuranceRouter,
+  statements: statementsRouter,
 });
 export type AppRouter = typeof appRouter;
 export { createContext } from "./trpc";

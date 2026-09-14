@@ -8,6 +8,7 @@ const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
 export default function Dashboard() {
   const { data, isLoading, error } = trpc.dashboard.overview.useQuery();
   const news = trpc.market.latestNews.useQuery({ limit: 10 });
+  const opinions = trpc.market.latestOpinions.useQuery({ limit: 6 });
   const [fixedOpen, setFixedOpen] = useState(false);
 
   if (isLoading) return <p>불러오는 중…</p>;
@@ -65,8 +66,12 @@ export default function Dashboard() {
           <div className="card"><h3>계좌</h3><div className="muted">등록된 계좌가 없습니다. <a href="/accounts">계좌·거래 가져오기</a></div></div>
         )}
       </div>
+      <h2>투자 시장 <a href="/invest" className="muted" style={{ fontSize: 14, fontWeight: 600 }}>투자 대시보드 →</a></h2>
+      <p className="muted">세계 지수·트레이딩뷰 차트·스크리너·경제캘린더. Investing.com·Finviz는 원문 링크.</p>
       <h2>최근 뉴스 <a href="/news" className="muted" style={{ fontSize: 14, fontWeight: 600 }}>뉴스 대시보드 →</a></h2>
       <ul>{news.data?.map((n) => <li key={n.id}><a href={n.url} target="_blank" rel="noreferrer">{n.title}</a> <span className="muted">{n.publisher}</span></li>)}</ul>
+      <h2>오피니언 · 칼럼 <a href="/opinions" className="muted" style={{ fontSize: 14, fontWeight: 600 }}>오피니언 대시보드 →</a></h2>
+      <ul>{opinions.data?.map((n) => <li key={n.id}><a href={n.url} target="_blank" rel="noreferrer">{n.title}</a> <span className="muted">{n.publisher}</span></li>)}</ul>
     </>
   );
 }

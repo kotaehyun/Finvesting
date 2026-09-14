@@ -1,10 +1,12 @@
 import { z } from "zod";
-import { and, eq, sql } from "drizzle-orm";
-import { news, macroIndicators } from "@finvesting/db";
+import { and, eq, inArray, notInArray, or, sql } from "drizzle-orm";
+import { news, macroIndicators, quotes, instruments } from "@finvesting/db";
+import { ANALYST_TITLE_RE, allOpinionSources, worldIndexByYahoo, worldIndexYahooTickers } from "@finvesting/core";
 import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
 import { loadOverview } from "../lib/overview";
 import { loadCoverageSnapshot } from "../lib/insurance-coverage";
+import { listStatementInstruments, loadStatementBundle } from "../lib/statements";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 
@@ -22,8 +24,29 @@ export const chatRouter = router({
       const recentNews = await ctx.db
         .select({ t: news.title, p: news.publisher, s: news.summary })
         .from(news)
+        .where(notInArray(news.source, allOpinionSources()))
         .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
         .limit(15);
+      const recentOpinions = await ctx.db
+        .select({ t: news.title, p: news.publisher, s: news.summary })
+        .from(news)
+        .where(or(inArray(news.source, allOpinionSources()), sql`${news.title} ~ ${ANALYST_TITLE_RE.source}`))
+        .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
+        .limit(8);
+      const indexInsts = await ctx.db.select({
+        id: instruments.id,
+        symbol: instruments.symbol,
+        name: instruments.name,
+        currency: instruments.currency,
+      }).from(instruments).where(inArray(instruments.symbol, worldIndexYahooTickers()));
+      const indexLines: string[] = [];
+      for (const inst of indexInsts) {
+        const [q] = await ctx.db.select({ date: quotes.date, close: quotes.close })
+          .from(quotes).where(eq(quotes.instrumentId, inst.id)).orderBy(sql`${quotes.date} DESC`).limit(1);
+        if (!q) continue;
+        const meta = worldIndexByYahoo(inst.symbol);
+        indexLines.push(`- ${meta?.label ?? inst.name} ${inst.symbol} ${q.date}: ${q.close} ${inst.currency}`);
+      }
 
       const latest = ctx.db
         .select({
@@ -45,6 +68,15 @@ export const chatRouter = router({
 
       const coverage = await loadCoverageSnapshot(ctx.db, ctx.userId);
       const { assets, cashflow, txnCount, month, guide, holdings: h, profile } = overview;
+      const stmtInsts = await listStatementInstruments(ctx.db);
+      const holdingIds = new Set(h.positions.map((p) => p.instrumentId));
+      const stmtTargets = stmtInsts.filter((i) => holdingIds.has(i.id)).slice(0, 3);
+      const fallback = stmtTargets.length ? stmtTargets : [];
+      const stmtBlocks: string[] = [];
+      for (const it of fallback) {
+        const b = await loadStatementBundle(ctx.db, it.id);
+        if (b?.context) stmtBlocks.push(b.context);
+      }
       const holdings = h.positions.length
         ? h.positions.map((p) => {
           const px = p.lastPrice != null ? ` 현재 ${p.lastPrice}` : " 시세 없음";
@@ -70,7 +102,10 @@ export const chatRouter = router({
         "보험 보장": coverage.policies.length || coverage.annualIncome > 0
           ? coverage.contextHept
           : undefined,
+        "재무제표·감사": stmtBlocks.length ? stmtBlocks.join("\n\n") : undefined,
         "최근 뉴스": recentNews.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
+        "오피니언·칼럼": recentOpinions.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
+        "세계 지수": indexLines.length ? indexLines.join("\n") : undefined,
         "거시지표": macro.map((m) => `- ${m.code} ${m.date}: ${m.value}${m.unit ?? ""}`).join("\n"),
       });
 

@@ -18,7 +18,10 @@ A personal finance work terminal that connects scattered account, card, brokerag
 ## Scope
 ### MVP phase 1 (current)
 - Account + Investment: register accounts, transactions, holdings; dashboard
-- News dashboard at `/news` (KR/global RSS; title, link, summary only)
+- News dashboard at `/news` (KR/global plus economy/finance/markets/central-bank; title, link, summary only)
+- Opinion/column dashboard at `/opinions` (KR columns, analyst takes, global opinion; title/link/summary only; no sell-side report RSS)
+- Investment dashboard at `/invest` (Yahoo world indices + TradingView widgets; Investing.com and Finviz as outbound links only)
+- Statements & audit opinion at `/statements` (DART/EDGAR numbers + opinion; official lookup and “재무제표를 읽는 사람들” as outbound links only; no report body; local LLM reading)
 - Market collection: news RSS (KR + global), Upbit quotes, ECOS/FRED macro, Yahoo quotes & fundamentals, DART/EDGAR financial statements (worker)
 - AI chatbot: local Ollama + collected data as context
 ### Later

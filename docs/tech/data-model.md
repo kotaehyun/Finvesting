@@ -34,16 +34,17 @@
 ## 재무제표·펀더멘털 (worker가 채움)
 | 테이블 | 역할 | 유니크 |
 |---|---|---|
-| `financial_statements` | 기간별 재무제표. `statement`(income/balance/cashflow), `fiscal_period`(FY/Q1~Q4), `items` jsonb에 표준 키(revenue, operating_income, net_income, eps_diluted, total_assets, total_liabilities, total_equity, cfo). 원본은 `raw` | (instrument, fy, period, statement, consolidated, source) |
+| `financial_statements` | 기간별 재무제표. `statement`(income/balance/cashflow), `fiscal_period`(FY/Q1~Q4), `items` jsonb에 표준 키(revenue, operating_income, net_income, eps_diluted, total_assets, total_liabilities, total_equity, cfo). 원본은 `raw`. 웹 `/statements` | (instrument, fy, period, statement, consolidated, source) |
+| `audit_reports` | DART 정기보고서 감사인·감사의견·강조사항·핵심감사사항. 본문(PDF/XML)은 저장하지 않음. 화면은 의견 + 회계법인·DART 링크. KAM/강조는 저장만 하고 전문을 나열하지 않음 | (instrument, fy, report_code, source) |
 | `instrument_fundamentals` | 일 단위 지표 스냅샷: 시총, PER, forward PER, PBR, EPS, ROE, 배당수익률, TTM 매출·순이익, 부채비율, 베타. 소스별 추가 지표는 `extra` | (instrument, date, source) |
 | `instrument_identifiers` | 외부 식별자 매핑 — dart corp_code, sec CIK, yahoo 티커, kis 코드 | (provider, external_id) |
 
 ## 시장 데이터 (worker가 채움)
 | 테이블 | 역할 | 유니크 |
 |---|---|---|
-| `market_quotes` | 일봉 시세 | (instrument_id, date) |
+| `market_quotes` | 일봉 시세. 세계 지수는 `instruments.market=INDEX` (`core/world-indices`). 웹 `/invest` | (instrument_id, date) |
 | `macro_indicators` | 환율·기준금리·CPI·국채금리 등. `code`로 구분 | (code, date) |
-| `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용. 웹 `/news`는 `market.newsFeed`(lang·publisher 필터, embedding/raw 제외) | url |
+| `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용. `/news`=`newsFeed`(오피니언 소스 제외). `/opinions`=`opinionFeed`(전용 RSS + 제목 투자의견). 뉴스 분류 `core/news-category`, 오피니언 `core/opinion-category` | url |
 | `economic_events` | 경제 캘린더 | (title, scheduled_at) |
 
 ## 금액 타입
@@ -58,4 +59,5 @@ pnpm db:migrate    # 적용
 `0003_curious_dreaming_celestial`: `savings_plans` · `savings_contributions`.
 `0004_big_captain_stacy`: `payroll_months`.
 `0005_free_blonde_phantom`: `insurance_policies`.
+`0006_absent_jetstream`: `audit_reports`.
 pgvector 확장은 첫 마이그레이션 전에 `CREATE EXTENSION IF NOT EXISTS vector;` 필요 (seed/000_extensions.sql).

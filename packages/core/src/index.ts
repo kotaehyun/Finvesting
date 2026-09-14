@@ -11,3 +11,8 @@ export * from "./quote-targets";
 export * from "./invested";
 export * from "./trends";
 export * from "./insurance-coverage";
+export * from "./news-category";
+export * from "./opinion-category";
+export * from "./financial-statements";
+export * from "./disclosure-links";
+export * from "./world-indices";

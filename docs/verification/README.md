@@ -37,9 +37,9 @@
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ | 2026-09-13 | Grok (`pnpm typecheck`), Claude VM 재확인 |
-| core 테스트 (vitest) | ✅ 53개 (insurance-coverage 5 · quote-targets 8 · invested 3 포함) | 2026-09-13 | Grok |
+| core 테스트 (vitest) | ✅ 79개 (world-indices 2 · opinion-category 6 포함) | 2026-09-13 | Grok |
 | interop 테스트 | ✅ 9개 | 2026-09-13 | Grok |
-| `pnpm db:generate` / `db:migrate` | ✅ `0005_free_blonde_phantom` (`insurance_policies`) 적용 | 2026-09-13 | Grok |
+| `pnpm db:generate` / `db:migrate` | ✅ `0006_absent_jetstream` (`audit_reports`) 적용 | 2026-09-13 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
 | `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-08 `dev` 머지 후 Chrome: 순자산 3,635,000 | 2026-09-08 | Grok Chrome |
 | `/profile` 프로필대장 + `workspaceSave`/`previewPay` | ✅ 페이지 200, 저장 추가·삭제 원상복구, 4대보험 미리보기 숫자 확인. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
@@ -50,7 +50,10 @@
 | `/profile` 09 투자내역 (계좌·자산군) | ✅ 페이지 200. holdings byClass 6칸·byAccount 검증 코인·BTC 평가 108,852. 브라우저 클릭·복수 증권 체결은 미실행 | 2026-09-12 | Grok tRPC |
 | `/profile` 10 보험내역 (육각·칠각) | ✅ 페이지 200. 검증 실손 저장. 실손 100% · 암 60% · 사망 0%(부족 2.52억). 육각 중대질병 1억 | 2026-09-13 | Grok Chrome |
 | `/profile` 10 AI 추천 (`insurance.recommend`) | ✅ tRPC·브라우저. 사망→뇌·심장·상해·장해→암. 실손 됨. ~46–56초 | 2026-09-13 | Grok Ollama |
-| `/news` 뉴스 대시보드 | ✅ 페이지 200. feed 885(672/213). 국내·해외 필터 브라우저 | 2026-09-13 | Grok Chrome |
+| `/news` 뉴스 대시보드 | ✅ 페이지 200. feed 907(694/213). 분류 534/160/167/46. 오피니언 언론 없음 | 2026-09-13 | Grok Chrome |
+| `/opinions` 오피니언·칼럼 | ✅ 143=66/32/45. RSS 5피드 수집. 3열·애널리스트 필터 브라우저 | 2026-09-13 | Grok Chrome |
+| `/invest` 투자 대시보드 | ✅ 페이지 200. TV iframe 6. Yahoo 지수 10종. SA 6건 | 2026-09-13 | Grok Chrome |
+| `/statements` 재무제표·감사 | ✅ 페이지 200. 조회 카드 + drcr·DART 개황 클릭 확인. list 0. 읽어주기 실데이터 미실행 | 2026-09-13 | Grok Chrome |
 | `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
 | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
 | `/chat` 대화 목록 12문항 | ✅ 5그룹 버튼. 「순자산 구성」 클릭 후 순자산 3,749,802·투자 104,802 인용 | 2026-09-13 | Grok Chrome |
@@ -70,6 +73,11 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-13 | Cursor Grok (투자 대시보드) | [2026-09-13-grok-11.md](./2026-09-13-grok-11.md) |
+| 2026-09-13 | Cursor Grok (오피니언 대시보드) | [2026-09-13-grok-10.md](./2026-09-13-grok-10.md) |
+| 2026-09-13 | Cursor Grok (조회·해설 사이트) | [2026-09-13-grok-9.md](./2026-09-13-grok-9.md) |
+| 2026-09-13 | Cursor Grok (재무제표 읽어주기) | [2026-09-13-grok-8.md](./2026-09-13-grok-8.md) |
+| 2026-09-13 | Cursor Grok (뉴스 카테고리) | [2026-09-13-grok-7.md](./2026-09-13-grok-7.md) |
 | 2026-09-13 | Cursor Grok (뉴스 대시보드) | [2026-09-13-grok-6.md](./2026-09-13-grok-6.md) |
 | 2026-09-13 | Cursor Grok (보험 AI 추천) | [2026-09-13-grok-5.md](./2026-09-13-grok-5.md) |
 | 2026-09-13 | Cursor Grok (보험 보장 레이더) | [2026-09-13-grok-4.md](./2026-09-13-grok-4.md) |

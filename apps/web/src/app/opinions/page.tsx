@@ -1,17 +1,15 @@
 "use client";
 import { useMemo, useState } from "react";
-import { keepPreviousData } from "@tanstack/react-query";
 import {
-  NEWS_CATEGORIES,
-  newsCategoriesForLang,
-  newsCategoryLabel,
-  newsCategoryLang,
-  type NewsCategoryId,
+  OPINION_CATEGORIES,
+  opinionCategoriesForLang,
+  opinionCategoryLabel,
+  type OpinionCategoryId,
 } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
 
 type LangFilter = "all" | "ko" | "en";
-type CatFilter = "all" | NewsCategoryId;
+type CatFilter = "all" | OpinionCategoryId;
 
 function fmtAt(v: Date | string | null | undefined) {
   if (!v) return "";
@@ -26,21 +24,22 @@ function fmtAt(v: Date | string | null | undefined) {
   });
 }
 
-export default function NewsDashboard() {
+export default function OpinionsDashboard() {
   const [lang, setLang] = useState<LangFilter>("all");
   const [category, setCategory] = useState<CatFilter>("all");
   const [publisher, setPublisher] = useState("");
   const [q, setQ] = useState("");
   const focused = category !== "all" || Boolean(publisher);
-  const feed = trpc.market.newsFeed.useQuery({
+  const feed = trpc.market.opinionFeed.useQuery({
     limit: focused || lang !== "all" ? 80 : 40,
     lang: lang === "all" ? undefined : lang,
     category: category === "all" ? undefined : category,
     publisher: publisher || undefined,
-  }, { placeholderData: keepPreviousData });
+  });
 
   const items = useMemo(() => {
-    const rows = feed.data?.items ?? [];
+    let rows = feed.data?.items ?? [];
+    if (category !== "all") rows = rows.filter((n) => n.category === category);
     const needle = q.trim().toLowerCase();
     if (!needle) return rows;
     return rows.filter((n) =>
@@ -48,32 +47,37 @@ export default function NewsDashboard() {
       || (n.summary ?? "").toLowerCase().includes(needle)
       || (n.publisher ?? "").toLowerCase().includes(needle),
     );
-  }, [feed.data?.items, q]);
+  }, [feed.data?.items, q, category]);
 
   const stats = feed.data?.stats;
   const publishers = feed.data?.publishers ?? [];
-  const catStats = stats?.categories ?? NEWS_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: 0 }));
+  const catStats = stats?.categories ?? OPINION_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: 0 }));
   const boardCats = category === "all"
-    ? newsCategoriesForLang(lang === "all" ? undefined : lang)
-    : NEWS_CATEGORIES.filter((c) => c.id === category);
+    ? opinionCategoriesForLang(lang === "all" ? undefined : lang)
+    : OPINION_CATEGORIES.filter((c) => c.id === category);
   const splitBoard = category === "all" && !publisher && !q.trim();
 
   function pickLang(next: LangFilter) {
     setLang(next);
     setPublisher("");
-    if (category !== "all" && next !== "all" && newsCategoryLang(category) !== next) setCategory("all");
+    if (next === "ko" && category === "global_opinion") setCategory("all");
+    if (next === "en" && category === "kr_column") setCategory("all");
   }
 
   function pickCategory(next: CatFilter) {
     setCategory(next);
     setPublisher("");
-    if (next !== "all") setLang(newsCategoryLang(next));
+    if (next === "kr_column") setLang("ko");
+    if (next === "global_opinion") setLang("en");
   }
 
   return (
     <>
-      <h1>뉴스 대시보드</h1>
-      <p className="muted">수집한 제목·링크·요약만 보여 줍니다. 본문은 저장하지 않습니다. 원문은 제목을 누르면 열립니다. 분류는 피드(한경 금융·매경/연합 경제·해외 시황·중앙은행)입니다.</p>
+      <h1>오피니언 · 칼럼</h1>
+      <p className="muted">
+        속보와 분리합니다. 한경·연합 오피니언, FT·Project Syndicate, Seeking Alpha 제목·링크·요약만 둡니다.
+        증권사 리포트 공개 RSS는 없어서, 국내 뉴스 제목의 애널리스트·목표가·투자의견만 같이 모읍니다. 본문은 저장하지 않습니다.
+      </p>
       <div className="grid" style={{ margin: "12px 0 16px" }}>
         <button type="button" className={`card news-stat${lang === "all" && category === "all" ? " on" : ""}`} onClick={() => { setLang("all"); setCategory("all"); setPublisher(""); }}>
           <h3>전체</h3>
@@ -103,7 +107,7 @@ export default function NewsDashboard() {
           </button>
         ))}
         <span className="muted" aria-hidden>|</span>
-        {NEWS_CATEGORIES.map((c) => (
+        {OPINION_CATEGORIES.map((c) => (
           <button
             key={c.id}
             type="button"
@@ -122,7 +126,7 @@ export default function NewsDashboard() {
       </div>
       {publishers.length > 0 && (
         <div className="starter-list" style={{ marginBottom: 16 }}>
-          <button type="button" className={`starter${!publisher ? " on" : ""}`} onClick={() => setPublisher("")}>언론 전체</button>
+          <button type="button" className={`starter${!publisher ? " on" : ""}`} onClick={() => setPublisher("")}>출처 전체</button>
           {publishers.map((p) => (
             <button
               key={p.publisher}
@@ -137,11 +141,13 @@ export default function NewsDashboard() {
       )}
       {feed.isLoading && <p className="muted">불러오는 중…</p>}
       {feed.error && <p>오류: {feed.error.message}</p>}
-      {!feed.isLoading && !items.length && <p className="muted">조건에 맞는 뉴스가 없습니다. worker RSS 수집 후 다시 조회하세요.</p>}
+      {!feed.isLoading && !items.length && (
+        <p className="muted">조건에 맞는 칼럼이 없습니다. worker RSS 수집 후 다시 조회하세요.</p>
+      )}
       {splitBoard ? (
-        <div className="news-board">
+        <div className="opinion-board">
           {boardCats.map((c) => (
-            <NewsCol
+            <OpinionCol
               key={c.id}
               title={c.label}
               rows={items.filter((n) => n.category === c.id)}
@@ -149,8 +155,8 @@ export default function NewsDashboard() {
           ))}
         </div>
       ) : (
-        <NewsCol
-          title={publisher || (category !== "all" ? newsCategoryLabel(category) : lang === "ko" ? "국내" : lang === "en" ? "해외" : "검색")}
+        <OpinionCol
+          title={publisher || (category !== "all" ? opinionCategoryLabel(category) : lang === "ko" ? "국내" : lang === "en" ? "해외" : "검색")}
           rows={items}
         />
       )}
@@ -158,7 +164,7 @@ export default function NewsDashboard() {
   );
 }
 
-function NewsCol({ title, rows }: {
+function OpinionCol({ title, rows }: {
   title: string;
   rows: Array<{ id: string; title: string; url: string; publisher: string | null; publishedAt: Date | string | null; summary: string | null }>;
 }) {

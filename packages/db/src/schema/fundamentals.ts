@@ -49,3 +49,23 @@ export const instrumentIdentifiers = pgTable("instrument_identifiers", {
   provider: text("provider").notNull(),  // "dart" | "sec" | "yahoo" | "kis"
   externalId: text("external_id").notNull(), // corp_code / CIK / ticker
 }, (t) => [uniqueIndex("ident_uq").on(t.provider, t.externalId), index("ident_instrument_idx").on(t.instrumentId)]);
+
+// DART 정기보고서 감사인·감사의견. 감사보고서 본문(PDF/XML)은 저장하지 않는다.
+export const auditReports = pgTable("audit_reports", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  instrumentId: uuid("instrument_id").notNull().references(() => instruments.id),
+  fiscalYear: integer("fiscal_year").notNull(),
+  reportCode: text("report_code").notNull().default("11011"), // 11011 사업보고서
+  auditor: text("auditor"),
+  opinion: text("opinion"),
+  emphasis: text("emphasis"),
+  keyAuditMatters: text("key_audit_matters"),
+  receiptNo: text("receipt_no"),
+  settledOn: date("settled_on"),
+  source: text("source").notNull(),
+  raw: jsonb("raw"),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("audit_uq").on(t.instrumentId, t.fiscalYear, t.reportCode, t.source),
+  index("audit_instrument_idx").on(t.instrumentId),
+]);

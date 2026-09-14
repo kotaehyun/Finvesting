@@ -2,6 +2,101 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-13 (11) — 투자 대시보드 (feat/invest-dashboard)
+**한 일**
+- `/invest`: TradingView 공식 위젯(티커·개요·히트맵·차트·스크리너·캘린더). 시세 저장 없음
+- Investing.com·Finviz는 원문 링크만 (크롤링 안 함). Seeking Alpha는 기존 RSS
+- Yahoo 세계 지수 10종 항상 수집 (`core/world-indices`). ADR 0009
+
+**실행 확인**
+- core 79 · api/worker typecheck 통과. web은 기존 ReactMarkdown JSX 오류(invest 파일 아님)
+- yahoo 10/10 upsert. indexBoard KOSPI 6909.91 등. `/invest` 200. TV iframe 6. SA 6건
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- Investing.com 페이지 403(Cloudflare). 전일 대비는 시세 2일치 있어야 함
+
+## 2026-09-13 (10) — 오피니언·칼럼 대시보드 (feat/opinions-dashboard)
+**한 일**
+- `/opinions`를 뉴스와 분리. 열: 국내 칼럼 · 애널리스트 · 해외 오피니언
+- RSS: 한경 오피니언, 연합 오피니언, Seeking Alpha, Project Syndicate, FT Opinion (2026-09-13 GET 확인)
+- 매경은 공식 RSS 목록에 오피니언 없음. 증권사 리포트 공개 RSS 없음 → 국내 뉴스 제목의 목표가·투자의견만 애널리스트 열
+- `/news`·홈 최근 뉴스는 오피니언 소스 제외. 챗에 칼럼 8건 + 스타터
+
+**실행 확인**
+- core 77 · typecheck 통과
+- worker rss 신규 163. 오피니언 피드 50+16+30+20+25
+- opinionFeed 143 (칼럼 66 · 애널리스트 32 · 해외 45). newsFeed 907 (오피니언 언론 없음)
+- 브라우저 `/opinions` 3열, 애널리스트=SA+한경 목표가 2건. `/` 오피니언 섹션. 한경 원문 탭은 522 timeout
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 증권사 리서치 센터 공개 RSS 없음. 매경 오피니언 RSS 없음
+
+## 2026-09-13 (9) — 기업정보 조회 + 재무제표 읽어주는 사이트 참조
+**한 일**
+- `/statements`에 DART 기업개황·기업정보·회사별 공시·OpenDART 재무조회·감사보고서 검색 링크
+- 해설은 「재무제표를 읽는 사람들」(`drcr.co.kr`) 참조만. 본문 저장 없음
+- 감사의견은 의견 한 줄 + 회계법인 홈·DART 원문. KAM/강조 전문은 나열하지 않음
+- `core/disclosure-links.ts`
+
+**실행 확인**
+- core 71 · typecheck 통과
+- `/statements` 200. 조회 6링크. 해설 `drcr.co.kr`·DART 기업개황 클릭 확인. list 0
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- DART 키 없으면 수집·실데이터 읽어주기·감사인 링크는 skip. EDGAR는 감사의견 API 없음
+
+## 2026-09-13 (8) — 재무제표 읽어주기 + 감사의견 (feat/statements-reader)
+**한 일**
+- `/statements`: 수집된 종목의 손익·재무상태·현금흐름 + DART 감사인·의견·강조·핵심감사사항
+- 「읽어주기」=`statements.explain`. 유튜브·증권사 해설은 저장하지 않음. 감사보고서 본문(PDF)도 저장하지 않음
+- `audit_reports`. worker `accnutAdtorNmNdAdtOpinion`. 챗에 보유 종목 재무·감사 주입, 대화 목록 2문항
+
+**실행 확인**
+- core 66 · typecheck 통과. migrate `0006_absent_jetstream`
+- DART skip(키 없음). `/statements` 200 빈 안내. 챗에 읽어줘·감사의견 버튼
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- DART 키 없으면 수집·실데이터 읽어주기는 skip. EDGAR는 감사의견 API 없음
+
+## 2026-09-13 (7) — 뉴스 카테고리 분할 (feat/news-dashboard)
+**한 일**
+- `/news`를 국내·해외뿐 아니라 **국내 경제 · 국내 금융 · 해외 시황 · 중앙은행** 열로 나눔
+- 분류는 RSS 태그(173건만 있음)가 아니라 `source` → `core/news-category`. 한경=금융, 매경·연합=경제, CNBC·MW=시황, Fed·ECB=중앙은행
+- `market.newsFeed`에 `category` 필터. 전체 보기일 때 분류별 최근 40건씩
+
+**실행 확인**
+- core 60(news-category 6) · api/web/worker typecheck
+- newsFeed 885 = 경제 513 · 금융 159 · 시황 167 · 중앙은행 46
+- 브라우저 4열. 국내 금융=한경만. 해외=시황+중앙은행. 중앙은행=ECB·Fed 46
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 종목별 뉴스 매핑·RAG는 없음. 기사 본문 분류는 하지 않음
+
 ## 2026-09-13 (6) — 뉴스 전용 대시보드 (feat/news-dashboard)
 **한 일**
 - `/news`: 국내·해외 2열, 언론 필터, 제목 검색. 제목·링크·요약만 (본문 없음)

@@ -1,4 +1,4 @@
-import { db, financialStatements } from "@finvesting/db";
+import { db, financialStatements, auditReports } from "@finvesting/db";
 import { ensureInstrument, ensureIdentifier, targetSymbols } from "../lib/instruments";
 
 // 금융감독원 DART Open API — 한국 상장사 재무제표 (공식, 무료 키). https://opendart.fss.or.kr
@@ -57,6 +57,71 @@ export async function collectDart() {
       }).onConflictDoUpdate({ target: [financialStatements.instrumentId, financialStatements.fiscalYear, financialStatements.fiscalPeriod, financialStatements.statement, financialStatements.consolidated, financialStatements.source], set: { items, fetchedAt: new Date() } });
       upserted++;
     }
+    const audit = await upsertDartAudit(key, inst.id, t.corp, year);
+    if (audit) upserted += audit;
   }
   return { upserted };
+}
+
+function dartText(v: unknown, max = 4000) {
+  if (typeof v !== "string") return null;
+  const s = v.replace(/\s+/g, " ").trim();
+  if (!s || s === "-") return null;
+  return s.slice(0, max);
+}
+
+function dartDate(v: unknown) {
+  if (typeof v !== "string") return null;
+  const m = v.trim().match(/^(\d{4})[.\-](\d{2})[.\-](\d{2})$/);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+}
+
+// 회계감사인·감사의견. 본문은 저장하지 않음. https://opendart.fss.or.kr/api/accnutAdtorNmNdAdtOpinion.json
+async function upsertDartAudit(key: string, instrumentId: string, corp: string, year: number) {
+  const url = `https://opendart.fss.or.kr/api/accnutAdtorNmNdAdtOpinion.json?crtfc_key=${key}&corp_code=${corp}&bsns_year=${year}&reprt_code=11011`;
+  const res = await fetch(url);
+  if (!res.ok) { console.warn(`dart audit ${corp}: ${res.status}`); return 0; }
+  const json = (await res.json()) as {
+    status: string;
+    message?: string;
+    list?: Array<{
+      bsns_year?: string;
+      adtor?: string;
+      adt_opinion?: string;
+      emphs_matter?: string;
+      core_adt_matter?: string;
+      adt_reprt_spcmnt_matter?: string;
+      rcept_no?: string;
+      stlm_dt?: string;
+    }>;
+  };
+  if (json.status !== "000") { console.warn(`dart audit ${corp}: ${json.message}`); return 0; }
+  const row = json.list?.[0];
+  if (!row) return 0;
+  await db.insert(auditReports).values({
+    instrumentId,
+    fiscalYear: year,
+    reportCode: "11011",
+    auditor: dartText(row.adtor, 80),
+    opinion: dartText(row.adt_opinion, 80),
+    emphasis: dartText(row.emphs_matter) ?? dartText(row.adt_reprt_spcmnt_matter),
+    keyAuditMatters: dartText(row.core_adt_matter),
+    receiptNo: dartText(row.rcept_no, 20),
+    settledOn: dartDate(row.stlm_dt),
+    source: "dart",
+    raw: { bsns_year: row.bsns_year, rcept_no: row.rcept_no },
+  }).onConflictDoUpdate({
+    target: [auditReports.instrumentId, auditReports.fiscalYear, auditReports.reportCode, auditReports.source],
+    set: {
+      auditor: dartText(row.adtor, 80),
+      opinion: dartText(row.adt_opinion, 80),
+      emphasis: dartText(row.emphs_matter) ?? dartText(row.adt_reprt_spcmnt_matter),
+      keyAuditMatters: dartText(row.core_adt_matter),
+      receiptNo: dartText(row.rcept_no, 20),
+      settledOn: dartDate(row.stlm_dt),
+      raw: { bsns_year: row.bsns_year, rcept_no: row.rcept_no },
+      fetchedAt: new Date(),
+    },
+  });
+  return 1;
 }
