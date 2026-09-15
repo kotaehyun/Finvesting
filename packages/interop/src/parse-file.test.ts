@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileToRows, rowsToXlsx, toIsoDate, toNumber } from "./parse-file";
+import { fileToRows, rowsToXlsx, toIsoDate, toNumber, parseOptionalNumber } from "./parse-file";
 import { docxToRows, rowsToDocx } from "./docx";
 import { genericBankImporter } from "./importers/generic-bank";
 import { parseRecurringCostRows, recurringCostsToDocx, recurringCostsToXlsx } from "./importers/recurring-costs";
@@ -19,6 +19,15 @@ describe("toNumber", () => {
   });
 });
 
+describe("parseOptionalNumber", () => {
+  it("빈 칸은 undefined, 숫자는 파싱한다", () => {
+    expect(parseOptionalNumber("")).toBeUndefined();
+    expect(parseOptionalNumber("  ")).toBeUndefined();
+    expect(parseOptionalNumber("1,234원")).toBe(1234);
+    expect(parseOptionalNumber("0")).toBe(0);
+  });
+});
+
 describe("genericBankImporter", () => {
   it("안내문 다음의 헤더를 찾아 입출금을 파싱한다", () => {
     const rows = [
@@ -32,6 +41,14 @@ describe("genericBankImporter", () => {
     expect(r.rows).toHaveLength(2);
     expect(r.rows[0]).toMatchObject({ direction: "in", amount: 1_000_000, date: "2026-09-01" });
     expect(r.rows[1]).toMatchObject({ direction: "out", amount: 12_000, date: "2026-09-02" });
+  });
+
+  it("잔액 칸이 비면 0원이 아니라 없음으로 둔다", () => {
+    const r = genericBankImporter.parse([
+      ["거래일", "입금", "출금", "내용", "잔액"],
+      ["2026.09.01", "1000", "", "이체", ""],
+    ]);
+    expect(r.rows[0]?.balanceAfter).toBeUndefined();
   });
 });
 

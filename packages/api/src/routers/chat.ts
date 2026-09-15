@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { and, eq, inArray, notInArray, or, sql } from "drizzle-orm";
 import { news, macroIndicators, quotes, instruments } from "@finvesting/db";
-import { ANALYST_TITLE_RE, allOpinionSources, worldIndexByYahoo, worldIndexYahooTickers } from "@finvesting/core";
+import { ANALYST_TITLE_RE, allOpinionSources, formatFundamentalsContext, formatInvestStyleContext, signedWon, worldIndexByYahoo, worldIndexYahooTickers } from "@finvesting/core";
 import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
 import { loadOverview } from "../lib/overview";
 import { loadCoverageSnapshot } from "../lib/insurance-coverage";
+import { loadLatestFundamentals } from "../lib/fundamentals";
+import { loadInvestAdvice } from "../lib/invest-advice";
 import { listStatementInstruments, loadStatementBundle } from "../lib/statements";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
@@ -67,7 +69,15 @@ export const chatRouter = router({
         .innerJoin(latest, and(eq(macroIndicators.code, latest.code), eq(macroIndicators.date, latest.maxDate)));
 
       const coverage = await loadCoverageSnapshot(ctx.db, ctx.userId);
+      const investAdvice = await loadInvestAdvice(ctx.db, ctx.userId, Promise.resolve(overview));
       const { assets, cashflow, txnCount, month, guide, holdings: h, profile } = overview;
+      const fundRows = await loadLatestFundamentals(ctx.db);
+      const fundById = new Map(fundRows.map((r) => [r.instrumentId, r]));
+      const fundBlocks = h.positions
+        .map((p) => fundById.get(p.instrumentId))
+        .filter((r): r is NonNullable<typeof r> => Boolean(r))
+        .slice(0, 5)
+        .map(formatFundamentalsContext);
       const stmtInsts = await listStatementInstruments(ctx.db);
       const holdingIds = new Set(h.positions.map((p) => p.instrumentId));
       const stmtTargets = stmtInsts.filter((i) => holdingIds.has(i.id)).slice(0, 3);
@@ -80,7 +90,7 @@ export const chatRouter = router({
       const holdings = h.positions.length
         ? h.positions.map((p) => {
           const px = p.lastPrice != null ? ` 현재 ${p.lastPrice}` : " 시세 없음";
-          const pnl = p.pnlKrw != null ? ` 평가손익 ${won(p.pnlKrw)}` : "";
+          const pnl = p.pnlKrw != null ? ` 평가손익 ${signedWon(p.pnlKrw)}` : "";
           const acct = p.accountName ? `${p.accountName} · ` : "";
           return `- ${acct}${p.symbol} ${p.name}: ${p.quantity} ${p.currency} 평단 ${p.avgCost}${px}${pnl}`;
         }).join("\n")
@@ -102,7 +112,9 @@ export const chatRouter = router({
         "보험 보장": coverage.policies.length || coverage.annualIncome > 0
           ? coverage.contextHept
           : undefined,
+        "투자성향·조언": formatInvestStyleContext(investAdvice),
         "재무제표·감사": stmtBlocks.length ? stmtBlocks.join("\n\n") : undefined,
+        "펀더멘털": fundBlocks.length ? fundBlocks.join("\n\n") : undefined,
         "최근 뉴스": recentNews.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
         "오피니언·칼럼": recentOpinions.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
         "세계 지수": indexLines.length ? indexLines.join("\n") : undefined,

@@ -17,11 +17,17 @@ A personal finance work terminal that connects scattered account, card, brokerag
 
 ## Scope
 ### MVP phase 1 (current)
-- Account + Investment: register accounts, transactions, holdings; dashboard
-- News dashboard at `/news` (KR/global plus economy/finance/markets/central-bank; title, link, summary only)
+- Account + Investment: register accounts, transactions, holdings
+- Home `/`: current net worth, selected-month spending and saving/investing outflows, monthly cash flow, follow-ups, three news items. Past months do not present today’s balances as that month’s net worth. There is no month-end snapshot table. **Unrealized P&L uses a signed `+`/`−` and Korean red-up / blue-down** (same as index cells)
+- News dashboard at `/news` (KR/global plus economy/finance/realty/markets/crypto/FX/central-bank; title, link, summary only)
 - Opinion/column dashboard at `/opinions` (KR columns, analyst takes, global opinion; title/link/summary only; no sell-side report RSS)
-- Investment dashboard at `/invest` (Yahoo world indices + TradingView widgets; Investing.com and Finviz as outbound links only)
+- Investment dashboard at `/invest` (indices, bitcoin, commodities, FX, company search that adds a watchlist, holdings; links out to markets and realty)
+- Markets `/markets` (World Bank inflation and BIS policy-rate cells, volume heatmap, KRX flow links, crypto/FX heatmaps and news, technical analysis, company search)
+- Realty `/realty` (nationwide 3D municipalities; metro bank household loans; BOK weighted-average and COFIX rate table; occupancy vs lease-trade wolse share; card NPL and revolving; vacancy excluding owner-use/free occupancy, empty homes by type, PIR/Gini; repayment, court-auction filings, CRE NPL and shop yields; top-decile net-worth share plus gift/inherit/trust channels with no celebrity or executive names; corporate comprehensive-tax channel; ethics disclosures only — no grade-4 registry; census age vs marriage/newlywed facts on rumor cards; listing-type slots; Hankyung RSS; refresh refetches news and loans)
 - Statements & audit opinion at `/statements` (DART/EDGAR numbers + opinion; official lookup and “재무제표를 읽는 사람들” as outbound links only; no report body; local LLM reading)
+- Yahoo Fundamentals table at `/fundamentals` (English column labels; daily market-cap, PE, PB, ROE, yield snapshot; separate from statements)
+- Profile pay details (menu 07): monthly wage slip plus **year-end** MOL-style annual slip and tax-base worksheet (not a Hometax filing)
+- Profile investment style & advice (`/profile` menu 10, after holdings; questionnaire maps to risk tolerance; no product picks)
 - Market collection: news RSS (KR + global), Upbit quotes, ECOS/FRED macro, Yahoo quotes & fundamentals, DART/EDGAR financial statements (worker)
 - AI chatbot: local Ollama + collected data as context
 ### Later

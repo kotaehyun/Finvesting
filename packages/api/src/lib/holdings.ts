@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { trades, instruments, quotes, macroIndicators, accounts, type Db } from "@finvesting/db";
-import { buildPositions, summarizeByAccount, summarizeByClass, unrealizedPnl, type Position } from "@finvesting/core";
+import { buildPositions, summarizeByAccount, summarizeByClass, summarizeByCurrency, unrealizedPnl, unrealizedPnlContribution, type Position } from "@finvesting/core";
 
 /** 최신 USDKRW. 소스는 구분하지 않는다 — 같은 날짜는 ECOS가 yahoo를 덮어쓴다. */
 export async function latestUsdKrw(db: Db) {
@@ -135,6 +135,12 @@ export async function loadHoldings(db: Db, userId: string) {
     pnlKrw: p.pnlKrw,
   }));
   const byClass = summarizeByClass(open.length ? summaryRows.filter((r) => r.quantity > 0) : []);
+  const byCurrency = summarizeByCurrency(open.map((p) => ({
+    quantity: p.quantity,
+    currency: p.currency,
+    marketValueKrw: p.marketValueKrw,
+  })));
+  const pnlContribution = unrealizedPnlContribution(open);
   const byAccount = summarizeByAccount(
     summaryRows,
     accts.map((a) => ({
@@ -146,5 +152,5 @@ export async function loadHoldings(db: Db, userId: string) {
     })),
   );
 
-  return { positions: open, closed, totals, byClass, byAccount, tradeCount: tradeRows.length, usdkrw };
+  return { positions: open, closed, totals, byClass, byCurrency, pnlContribution, byAccount, tradeCount: tradeRows.length, usdkrw };
 }

@@ -17,7 +17,7 @@
 
 ## Data flow
 ```
-[External] RSS · Upbit · ECOS · FRED · Yahoo · DART · EDGAR · (KIS, Naver, crawlers)
+[External] RSS · Upbit · ECOS · FRED · Yahoo · DART · EDGAR · World Bank · BIS · (KIS, Naver, crawlers)
       │  apps/worker (cron)
       ▼
 [PostgreSQL] market_news · market_quotes · macro_indicators · economic_events · financial_statements
@@ -43,7 +43,10 @@ Converts external files to/from internal models (import bank/card/brokerage expo
 ## Auth
 Single-user mode, fixed via `DEFAULT_USER_ID`. Every user-data table has `user_id`, so productizing only requires adding authentication.
 
+## Web type resolution
+`apps/web/tsconfig.json` pins `@types/react` 19 via `typeRoots` and `paths`. Mobile Expo’s `@types/react` 18 leaking through Next `styled-jsx` breaks JSX component types. Do not hide this with type assertions.
+
 ## Runtime
 - Local: `pnpm dev` (web + worker together), Docker Postgres
-- Mobile: Expo Go on the same Wi-Fi, calling the MacBook's IP on port 3000
+- Mobile: Expo Go on the same Wi-Fi, calling the MacBook's IP on port 3000. Default `pnpm dev:web` binds `127.0.0.1` only. Use `pnpm --filter @finvesting/web dev:lan` (`0.0.0.0`) for a phone. The API has no auth.
 - As a service: web on Vercel/container, worker as one container, DB on Supabase/RDS — swap `DATABASE_URL` only, no code change

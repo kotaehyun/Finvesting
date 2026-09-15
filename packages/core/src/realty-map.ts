@@ -1,0 +1,206 @@
+// 수도권 시·구 중심점. 좌표는 OSM Nominatim 검색(2026-09-15). 행정 중심이지 필지·동 경계가 아님.
+import {
+  realtyMetroFromKostatCode,
+  realtyMetroLabel,
+  type RealtyMetroId,
+} from "./realty-loans";
+import {
+  REALTY_REGULATED_GYEONGGI,
+  type RealtyTone,
+} from "./realty-ref";
+
+export type RealtyMapKind = "regulated" | "overcrowded" | "growth" | "nature";
+
+export type RealtyMapPoint = {
+  id: string;
+  label: string;
+  lat: number;
+  lng: number;
+  kind: RealtyMapKind;
+  tone: RealtyTone;
+  /** 2026-07-01 추가 규제 */
+  fresh?: boolean;
+  note: string;
+};
+
+const REGULATED_NOTES: Record<string, string> = {
+  seoul: "서울 25구 전역. 투기과열·조정대상·토허(아파트 등). 고대출 규칙이 붙습니다.",
+  gwacheon: "투기과열·조정대상. 효력 2025-10-16.",
+  gwangmyeong: "투기과열·조정대상. 효력 2025-10-16.",
+  bundang: "투기과열·조정대상. 효력 2025-10-16.",
+  sujeong: "투기과열·조정대상. 효력 2025-10-16.",
+  jungwon: "투기과열·조정대상. 효력 2025-10-16.",
+  yeongtong: "투기과열·조정대상. 효력 2025-10-16. 수원 권선구는 이 목록에 없습니다.",
+  jangan: "투기과열·조정대상. 효력 2025-10-16. 수원 권선구는 이 목록에 없습니다.",
+  paldal: "투기과열·조정대상. 효력 2025-10-16. 수원 권선구는 이 목록에 없습니다.",
+  dongan: "투기과열·조정대상. 효력 2025-10-16. 안양 만안구는 이 목록에 없습니다.",
+  suji: "투기과열·조정대상. 효력 2025-10-16. 용인 처인구는 이 목록에 없습니다.",
+  uiwang: "투기과열·조정대상. 효력 2025-10-16.",
+  hanam: "투기과열·조정대상. 효력 2025-10-16.",
+  dongtan: "2026-07-01 추가. 화성 전체가 아니라 동탄구입니다.",
+  giheung: "2026-07-01 추가. 용인 처인구는 빠집니다.",
+  guri: "2026-07-01 추가.",
+};
+
+const REGULATED_COORDS: Record<string, readonly [number, number]> = {
+  seoul: [37.566679, 126.978291],
+  gwacheon: [37.428904, 126.988166],
+  gwangmyeong: [37.478548, 126.864394],
+  guri: [37.593595, 127.129792],
+  hanam: [37.539302, 127.214941],
+  uiwang: [37.344908, 126.968986],
+  bundang: [37.3826, 127.1188],
+  sujeong: [37.450339, 127.146293],
+  jungwon: [37.4307, 127.137],
+  yeongtong: [37.2593, 127.0466],
+  jangan: [37.303764, 127.010525],
+  paldal: [37.274994, 127.016142],
+  dongan: [37.392314, 126.951309],
+  suji: [37.322293, 127.097211],
+  giheung: [37.2801, 127.1148],
+  dongtan: [37.187207, 127.0984],
+};
+
+const CONTEXT: readonly RealtyMapPoint[] = [
+  { id: "incheon", label: "인천", lat: 37.456, lng: 126.7052, kind: "overcrowded", tone: "info", note: "과밀억제(강화·옹진·서구 일부 등 제외). 규제지역 목록은 아님." },
+  { id: "uijeongbu", label: "의정부", lat: 37.738075, lng: 127.033967, kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  { id: "goyang", label: "고양", lat: 37.658186, lng: 126.831945, kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  { id: "bucheon", label: "부천", lat: 37.501442, lng: 126.766014, kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  { id: "gunpo", label: "군포", lat: 37.361523, lng: 126.934903, kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  { id: "siheung", label: "시흥", lat: 37.379889, lng: 126.803226, kind: "overcrowded", tone: "info", note: "과밀억제(반월 제외). 규제지역 목록은 아님." },
+  { id: "namyangju", label: "남양주", lat: 37.63594, lng: 127.216505, kind: "overcrowded", tone: "info", note: "일부 동만 과밀. 규제지역 목록은 아님." },
+  { id: "ansan", label: "안산", lat: 37.321715, lng: 126.83086, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  { id: "osan", label: "오산", lat: 37.149938, lng: 127.077463, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  { id: "pyeongtaek", label: "평택", lat: 36.992497, lng: 127.112717, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  { id: "paju", label: "파주", lat: 37.759896, lng: 126.78015, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  { id: "yangju", label: "양주", lat: 37.784931, lng: 127.045777, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  { id: "hwaseong", label: "화성(시)", lat: 37.199465, lng: 126.831263, kind: "growth", tone: "info", note: "성장관리. 규제·고대출은 동탄구만." },
+  { id: "gapyeong", label: "가평", lat: 37.8314, lng: 127.5098, kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
+  { id: "yangpyeong", label: "양평", lat: 37.4916, lng: 127.4875, kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
+  { id: "yeoju", label: "여주", lat: 37.29829, lng: 127.637033, kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
+];
+
+function regulatedPoint(id: string, label: string, since: "2025-10-16" | "2026-07-01"): RealtyMapPoint {
+  const xy = REGULATED_COORDS[id];
+  if (!xy) throw new Error(`missing coords: ${id}`);
+  const fresh = since === "2026-07-01";
+  return {
+    id,
+    label,
+    lat: xy[0],
+    lng: xy[1],
+    kind: "regulated",
+    tone: fresh ? "danger" : "warn",
+    fresh,
+    note: REGULATED_NOTES[id] ?? `투기과열·조정대상. 효력 ${since}.`,
+  };
+}
+
+export const REALTY_MAP_POINTS: readonly RealtyMapPoint[] = [
+  regulatedPoint("seoul", "서울 25구", "2025-10-16"),
+  ...REALTY_REGULATED_GYEONGGI.map((p) => regulatedPoint(p.id, p.label, p.since)),
+  ...CONTEXT,
+];
+
+export const REALTY_MAP_VIEW = {
+  lat: 36.35,
+  lng: 127.85,
+  zoom: 6,
+} as const;
+
+export function realtyMapPoint(id: string): RealtyMapPoint | undefined {
+  return REALTY_MAP_POINTS.find((p) => p.id === id);
+}
+
+export function realtyMapRegulatedIds(): readonly string[] {
+  return REALTY_MAP_POINTS.filter((p) => p.kind === "regulated").map((p) => p.id);
+}
+
+export type RealtyPlanKind = RealtyMapKind | "other" | "out";
+
+export type RealtyPlanStyle = {
+  id: string;
+  label: string;
+  short: string;
+  kind: RealtyPlanKind;
+  tone: RealtyTone | "muted";
+  metro: RealtyMetroId;
+  fresh?: boolean;
+  hatch?: boolean;
+  note: string;
+};
+
+const GY_PLAN: Record<string, Omit<RealtyPlanStyle, "short" | "metro">> = {
+  수원시장안구: { id: "jangan", label: "수원 장안구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.jangan! },
+  수원시권선구: { id: "gwonsun", label: "수원 권선구", kind: "overcrowded", tone: "info", note: "과밀억제. 규제지역 목록에 없음." },
+  수원시팔달구: { id: "paldal", label: "수원 팔달구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.paldal! },
+  수원시영통구: { id: "yeongtong", label: "수원 영통구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.yeongtong! },
+  성남시수정구: { id: "sujeong", label: "성남 수정구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.sujeong! },
+  성남시중원구: { id: "jungwon", label: "성남 중원구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.jungwon! },
+  성남시분당구: { id: "bundang", label: "성남 분당구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.bundang! },
+  의정부시: { id: "uijeongbu", label: "의정부", kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  안양시만안구: { id: "manan", label: "안양 만안구", kind: "overcrowded", tone: "info", note: "과밀억제. 규제지역은 동안구만." },
+  안양시동안구: { id: "dongan", label: "안양 동안구", kind: "regulated", tone: "warn", note: REGULATED_NOTES.dongan! },
+  부천시: { id: "bucheon", label: "부천", kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  광명시: { id: "gwangmyeong", label: "광명", kind: "regulated", tone: "warn", note: REGULATED_NOTES.gwangmyeong! },
+  평택시: { id: "pyeongtaek", label: "평택", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  안산시상록구: { id: "ansan", label: "안산 상록", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  안산시단원구: { id: "ansan-danwon", label: "안산 단원", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  고양시덕양구: { id: "goyang", label: "고양 덕양", kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  고양시일산동구: { id: "goyang-ildong", label: "고양 일산동", kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  고양시일산서구: { id: "goyang-ilseo", label: "고양 일산서", kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  과천시: { id: "gwacheon", label: "과천", kind: "regulated", tone: "warn", note: REGULATED_NOTES.gwacheon! },
+  구리시: { id: "guri", label: "구리", kind: "regulated", tone: "danger", fresh: true, note: REGULATED_NOTES.guri! },
+  남양주시: { id: "namyangju", label: "남양주", kind: "overcrowded", tone: "info", note: "일부 동만 과밀. 규제지역 목록은 아님." },
+  오산시: { id: "osan", label: "오산", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  시흥시: { id: "siheung", label: "시흥", kind: "overcrowded", tone: "info", note: "과밀억제(반월 제외). 규제지역 목록은 아님." },
+  군포시: { id: "gunpo", label: "군포", kind: "overcrowded", tone: "info", note: "과밀억제권역. 규제지역 목록은 아님." },
+  의왕시: { id: "uiwang", label: "의왕", kind: "regulated", tone: "warn", note: REGULATED_NOTES.uiwang! },
+  하남시: { id: "hanam", label: "하남", kind: "regulated", tone: "warn", note: REGULATED_NOTES.hanam! },
+  용인시처인구: { id: "cheoin", label: "용인 처인", kind: "growth", tone: "info", note: "처인구는 규제지역 목록에 없음." },
+  용인시기흥구: { id: "giheung", label: "용인 기흥", kind: "regulated", tone: "danger", fresh: true, note: REGULATED_NOTES.giheung! },
+  용인시수지구: { id: "suji", label: "용인 수지", kind: "regulated", tone: "warn", note: REGULATED_NOTES.suji! },
+  파주시: { id: "paju", label: "파주", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  화성시: { id: "hwaseong", label: "화성", kind: "growth", tone: "info", hatch: true, note: "성장관리. 규제·고대출은 동탄구만. 이 도면은 2018 시군구라 동탄구 면이 없습니다." },
+  양주시: { id: "yangju", label: "양주", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
+  여주시: { id: "yeoju", label: "여주", kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
+  가평군: { id: "gapyeong", label: "가평", kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
+  양평군: { id: "yangpyeong", label: "양평", kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
+};
+
+function shortName(name: string): string {
+  return name.replace(/^수원시|^성남시|^안양시|^안산시|^고양시|^용인시/, "");
+}
+
+/** 통계청 2018 시군구 이름 → 도면 색. 동탄구 면은 원본에 없음. 수도권 밖은 회색. */
+export function realtyPlanFromKostat(code: string, name: string): RealtyPlanStyle {
+  const metro = realtyMetroFromKostatCode(code);
+  if (!metro) {
+    return { id: `other-${code}`, label: name, short: name, kind: "other", tone: "muted", metro: "seoul", note: "시도 코드를 모름." };
+  }
+  if (metro === "seoul") {
+    return { id: "seoul", label: `서울 ${name}`, short: name, kind: "regulated", tone: "warn", metro, note: REGULATED_NOTES.seoul! };
+  }
+  if (metro === "incheon") {
+    if (name === "강화군" || name === "옹진군") {
+      return { id: name === "강화군" ? "ganghwa" : "ongjin", label: `인천 ${name}`, short: name, kind: "out", tone: "muted", metro, note: "과밀억제권역에서 제외. 규제지역 아님." };
+    }
+    const n = name === "남구" ? "남구(미추홀)" : name;
+    return { id: "incheon", label: `인천 ${n}`, short: n, kind: "overcrowded", tone: "info", metro, note: "과밀억제(강화·옹진·서구 일부 등 제외). 규제지역 목록은 아님." };
+  }
+  if (metro === "gyeonggi") {
+    const hit = GY_PLAN[name];
+    if (hit) return { ...hit, short: shortName(name), metro };
+    return { id: `gyeonggi-${code}`, label: name, short: name, kind: "other", tone: "muted", metro, note: "이 도면의 규제·권역 목록에 없음." };
+  }
+  const head = realtyMetroLabel(metro);
+  return {
+    id: metro,
+    label: `${head} ${name}`,
+    short: name,
+    kind: "other",
+    tone: "muted",
+    metro,
+    note: "수도권 규제·정비권역 밖. 예금은행 가계대출은 광역시도 단위입니다.",
+  };
+}

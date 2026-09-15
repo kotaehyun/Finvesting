@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { trpc } from "@/lib/trpc";
 import { assetClassLabel } from "@finvesting/core";
+import { InvestTrail } from "../invest-trail";
+import { Pnl } from "../pnl";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 const qty = (n: number) => {
@@ -135,6 +137,7 @@ export default function HoldingsPage() {
     <>
       <h1>보유 · 체결</h1>
       <p className="muted">매수·매도를 넣으면 평단·실현손익을 계산합니다. 워커가 모은 최근 종가가 있으면 평가손익도 표시합니다. 순자산의 투자 금액은 보유 평가액과 증권·코인·연금 예수금의 합입니다.</p>
+      <InvestTrail current="holdings" />
 
       <div className="card" style={{ marginBottom: 16 }}>
         <h3>체결 추가</h3>
@@ -187,7 +190,7 @@ export default function HoldingsPage() {
         <h3>보유</h3>
         {!h?.positions.length && <p className="muted">아직 열린 포지션이 없습니다.</p>}
         {h && h.totals.openCount > 0 && (
-          <p className="muted">평가 {won(h.totals.marketValueKrw)} · 원가 {won(h.totals.costKrw)} · 평가손익 {won(h.totals.pnlKrw)}{h.totals.missingQuote ? ` · 시세 없는 종목 ${h.totals.missingQuote}` : ""}</p>
+          <p className="muted">평가 {won(h.totals.marketValueKrw)} · 원가 {won(h.totals.costKrw)} · 평가손익 <Pnl n={h.totals.pnlKrw} />{h.totals.missingQuote ? ` · 시세 없는 종목 ${h.totals.missingQuote}` : ""}</p>
         )}
         {!!h?.positions.length && (
           <div className="table-wrap">
@@ -203,7 +206,7 @@ export default function HoldingsPage() {
                     <td>{money(p.avgCost, p.currency)}</td>
                     <td>{p.lastPrice != null ? `${money(p.lastPrice, p.currency)}` : "없음"}{p.lastDate ? <span className="muted"> {p.lastDate}</span> : null}</td>
                     <td>{p.marketValueKrw != null ? won(p.marketValueKrw) : "—"}</td>
-                    <td>{p.pnlKrw != null ? `${won(p.pnlKrw)} (${((p.pnlRate ?? 0) * 100).toFixed(1)}%)` : "—"}</td>
+                    <td>{p.pnlKrw != null ? <Pnl n={p.pnlKrw} rate={p.pnlRate ?? 0} /> : "—"}</td>
                   </tr>
                 ))}
               </tbody>

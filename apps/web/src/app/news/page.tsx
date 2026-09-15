@@ -73,7 +73,7 @@ export default function NewsDashboard() {
   return (
     <>
       <h1>뉴스 대시보드</h1>
-      <p className="muted">수집한 제목·링크·요약만 보여 줍니다. 본문은 저장하지 않습니다. 원문은 제목을 누르면 열립니다. 분류는 피드(한경 금융·매경/연합 경제·해외 시황·중앙은행)입니다.</p>
+      <p className="muted">수집한 제목·링크·요약만 보여 줍니다. 본문은 저장하지 않습니다. 분류는 피드(한경 금융·매경/연합 경제·한경 부동산·해외 시황·크립토·외환·중앙은행)입니다.</p>
       <div className="grid" style={{ margin: "12px 0 16px" }}>
         <button type="button" className={`card news-stat${lang === "all" && category === "all" ? " on" : ""}`} onClick={() => { setLang("all"); setCategory("all"); setPublisher(""); }}>
           <h3>전체</h3>

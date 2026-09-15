@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { accounts, instruments, trades } from "@finvesting/db";
 import { buildPositions } from "@finvesting/core";
 import { router, publicProcedure } from "../trpc";
@@ -92,15 +92,41 @@ export const tradesRouter = router({
         if (usdkrw) fxRate = usdkrw;
       }
 
-      if (input.side === "sell") {
-        const existing = await ctx.db.select().from(trades)
-          .where(and(eq(trades.userId, ctx.userId), eq(trades.accountId, input.accountId)))
-          .orderBy(trades.tradedAt);
-        const pos = buildPositions(existing.map(toTradeLike)).get(input.instrumentId);
-        const have = pos?.quantity ?? 0;
-        if (input.quantity > have) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: `매도 수량이 보유(${have})보다 많습니다` });
-        }
+      const existing = await ctx.db.select().from(trades)
+        .where(and(eq(trades.userId, ctx.userId), eq(trades.accountId, input.accountId)))
+        .orderBy(asc(trades.tradedAt), asc(trades.id));
+      const next = [
+        ...existing.map((t) => ({ ...toTradeLike(t), tradedAt: t.tradedAt, id: t.id })),
+        {
+          instrumentId: input.instrumentId,
+          side: input.side,
+          quantity: input.quantity,
+          price: input.price,
+          fee: input.fee,
+          tax: input.tax,
+          fxRate,
+          tradedAt,
+          id: "new",
+        },
+      ].sort((a, b) => {
+        const dt = a.tradedAt.getTime() - b.tradedAt.getTime();
+        return dt !== 0 ? dt : a.id.localeCompare(b.id);
+      });
+      try {
+        buildPositions(next.map((t) => ({
+          instrumentId: t.instrumentId,
+          side: t.side,
+          quantity: t.quantity,
+          price: t.price,
+          fee: t.fee,
+          tax: t.tax,
+          fxRate: t.fxRate ?? undefined,
+        })));
+      } catch (e) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: e instanceof Error ? e.message : "체결 순서가 올바르지 않습니다",
+        });
       }
 
       const [row] = await ctx.db.insert(trades).values({
@@ -122,9 +148,20 @@ export const tradesRouter = router({
   remove: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [row] = await ctx.db.select({ id: trades.id }).from(trades)
+      const [row] = await ctx.db.select().from(trades)
         .where(and(eq(trades.id, input.id), eq(trades.userId, ctx.userId)));
       if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "체결을 찾을 수 없습니다" });
+      const remaining = await ctx.db.select().from(trades)
+        .where(and(eq(trades.userId, ctx.userId), eq(trades.accountId, row.accountId)))
+        .orderBy(asc(trades.tradedAt), asc(trades.id));
+      try {
+        buildPositions(remaining.filter((t) => t.id !== input.id).map(toTradeLike));
+      } catch (e) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: e instanceof Error ? `이 체결을 지우면 이후 매도가 성립하지 않습니다. ${e.message}` : "이 체결을 지울 수 없습니다",
+        });
+      }
       await ctx.db.delete(trades).where(eq(trades.id, input.id));
       return { id: input.id };
     }),

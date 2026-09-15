@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { trpc } from "@/lib/trpc";
 import { categoriesFor, categoryLabel, type TxnCategoryId } from "@/lib/categories";
 import { ComboChart } from "./combo-chart";
@@ -8,6 +8,7 @@ import { PayYearSection } from "./pay-year";
 import { SavingsPanel, type SavingsHandle } from "./savings-panel";
 import { InvestPanel } from "./invest-panel";
 import { InsurancePanel, type InsuranceHandle } from "./insurance-panel";
+import { InvestStylePanel, type InvestStyleHandle } from "./invest-style-panel";
 import {
   draftPayEarnings,
   payEarningGroupOf,
@@ -59,7 +60,8 @@ const MENUS = [
   { id: "books", no: "07", label: "급여상세 내역" },
   { id: "savings", no: "08", label: "적금내역" },
   { id: "invest", no: "09", label: "투자내역" },
-  { id: "insurance", no: "10", label: "보험내역" },
+  { id: "style", no: "10", label: "투자성향" },
+  { id: "insurance", no: "11", label: "보험내역" },
 ] as const;
 type MenuId = (typeof MENUS)[number]["id"];
 
@@ -142,7 +144,10 @@ export default function ProfilePage() {
 
 function ProfileWorkspace() {
   const search = useSearchParams();
-  const initialMenu = MENUS.some((m) => m.id === search.get("menu")) ? search.get("menu") as MenuId : "master";
+  const router = useRouter();
+  const pathname = usePathname();
+  const menuParam = search.get("menu");
+  const initialMenu = MENUS.some((m) => m.id === menuParam) ? menuParam as MenuId : "master";
 
   const [menu, setMenu] = useState<MenuId>(initialMenu);
   const [month, setMonth] = useState(currentMonth);
@@ -196,6 +201,7 @@ function ProfileWorkspace() {
   const utils = trpc.useUtils();
   const savRef = useRef<SavingsHandle>(null);
   const insRef = useRef<InsuranceHandle>(null);
+  const styleRef = useRef<InvestStyleHandle>(null);
 
   const previewKey = useDebounced(`${gross}|${income}|${tax}|${health}`, 250);
   const [pg, pn, pt, ph] = previewKey.split("|");
@@ -207,6 +213,22 @@ function ProfileWorkspace() {
   }, { enabled: Number(pg) > 0 || Number(pn) > 0 });
 
   function markDirty() { setDirty(true); setMsg(""); }
+
+  useEffect(() => {
+    const next: MenuId = MENUS.some((m) => m.id === menuParam) ? (menuParam as MenuId) : "master";
+    setMenu((cur) => (cur === next ? cur : next));
+  }, [menuParam]);
+
+  function goMenu(id: MenuId) {
+    setMenu(id);
+    const currentId = menuParam ?? "master";
+    if (currentId === id) return;
+    const next = new URLSearchParams(search.toString());
+    if (id === "master") next.delete("menu");
+    else next.set("menu", id);
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   function applyServer() {
     const p = current.data;
@@ -252,6 +274,8 @@ function ProfileWorkspace() {
       savRef.current?.refetch() ?? Promise.resolve(),
       insRef.current?.refetch() ?? Promise.resolve(),
       utils.insurance.list.invalidate(),
+      utils.profile.investAdvice.invalidate(),
+      styleRef.current?.refetch() ?? Promise.resolve(),
     ]);
   }
 
@@ -279,6 +303,15 @@ function ProfileWorkspace() {
     if (menu === "insurance") {
       try {
         await insRef.current?.save();
+        setDirty(false);
+      } catch (err) {
+        setMsg(err instanceof Error ? err.message : String(err));
+      }
+      return;
+    }
+    if (menu === "style") {
+      try {
+        await styleRef.current?.save();
         setDirty(false);
       } catch (err) {
         setMsg(err instanceof Error ? err.message : String(err));
@@ -339,7 +372,7 @@ function ProfileWorkspace() {
       const row = emptyTax(month);
       setTaxRows((rows) => [...rows, row]);
       setSelTax(row.key);
-      setMenu("tax");
+      goMenu("tax");
     } else if (menu === "books" || menu === "master") {
       addEarnRow();
       return;
@@ -349,14 +382,17 @@ function ProfileWorkspace() {
     } else if (menu === "insurance") {
       insRef.current?.create();
       return;
+    } else if (menu === "style") {
+      styleRef.current?.create();
+      return;
     } else if (menu === "invest") {
-      window.location.href = "/holdings";
+      router.push("/holdings");
       return;
     } else {
       const row = emptyRec();
       setRecRows((rows) => [...rows.filter((r) => r.name.trim() || r.amount), row]);
       setSelRec(row.key);
-      setMenu("fixed");
+      goMenu("fixed");
     }
     markDirty();
   }
@@ -371,6 +407,12 @@ function ProfileWorkspace() {
     }
     if (menu === "insurance") {
       void Promise.resolve(insRef.current?.remove()).catch((err: unknown) => {
+        setMsg(err instanceof Error ? err.message : String(err));
+      });
+      return;
+    }
+    if (menu === "style") {
+      void Promise.resolve(styleRef.current?.remove()).catch((err: unknown) => {
         setMsg(err instanceof Error ? err.message : String(err));
       });
       return;
@@ -418,8 +460,8 @@ function ProfileWorkspace() {
       const r = await previewFile.mutateAsync({ filename: f.name, contentBase64 });
       setLastUpload({ filename: f.name, contentBase64 });
       setFilePreview(r);
-      if (r.detected === "bank") setMenu("ledger");
-      else if (r.detected === "recurring") setMenu("fixed");
+      if (r.detected === "bank") goMenu("ledger");
+      else if (r.detected === "recurring") goMenu("fixed");
       setMsg(`변환 ${r.kind} · ${r.rowCount}행 · 인식 ${r.detected === "bank" ? "통장" : r.detected === "recurring" ? "고정비" : "표"}`);
     } catch (err) {
       setMsg(err instanceof Error ? err.message : String(err));
@@ -433,7 +475,7 @@ function ProfileWorkspace() {
       setDirty(false);
       setFilePreview(null);
       await refresh();
-      setMenu("fixed");
+      goMenu("fixed");
       setMsg(`고정비 가져오기: 추가 ${r.inserted} · 갱신 ${r.updated}`);
     } catch (err) {
       setMsg(err instanceof Error ? err.message : String(err));
@@ -442,7 +484,7 @@ function ProfileWorkspace() {
 
   async function importBankFromPreview() {
     if (!filePreview?.bank.rows.length) return;
-    if (!accountId) { setMsg("통장내역에서 계좌를 고른 뒤 가져오세요"); setMenu("ledger"); return; }
+    if (!accountId) { setMsg("통장내역에서 계좌를 고른 뒤 가져오세요"); goMenu("ledger"); return; }
     try {
       const r = await commitBank.mutateAsync({
         accountId,
@@ -451,7 +493,7 @@ function ProfileWorkspace() {
       });
       setFilePreview(null);
       await refresh();
-      setMenu("ledger");
+      goMenu("ledger");
       setMsg(`통장 가져오기: 저장 ${r.inserted} · 중복 ${r.duplicate}`);
     } catch (err) {
       setMsg(err instanceof Error ? err.message : String(err));
@@ -517,7 +559,7 @@ function ProfileWorkspace() {
         <button type="button" onClick={onQuery} disabled={current.isFetching}>조회</button>
         <button type="button" className="primary" onClick={onSave} disabled={save.isPending}>저장</button>
         <button type="button" onClick={onNew}>신규</button>
-        <button type="button" onClick={onDelete} disabled={menu === "invest" || (menu === "savings" || menu === "insurance" ? false : menu === "tax" ? !selTax : menu === "books" || menu === "master" ? !selEarn : !selRec)}>삭제</button>
+        <button type="button" onClick={onDelete} disabled={menu === "invest" || (menu === "savings" || menu === "insurance" || menu === "style" ? false : menu === "tax" ? !selTax : menu === "books" || menu === "master" ? !selEarn : !selRec)}>삭제</button>
         <span className="sep" />
         <button type="button" onClick={() => downloadTemplate("recurring", "csv")}>CSV 양식</button>
         <button type="button" onClick={() => downloadTemplate("recurring", "xlsx")}>엑셀 양식</button>
@@ -540,7 +582,7 @@ function ProfileWorkspace() {
         <nav className="erp-menu" aria-label="프로필대장 메뉴">
           <h2>메뉴</h2>
           {MENUS.map((m) => (
-            <button key={m.id} type="button" className={menu === m.id ? "on" : ""} onClick={() => setMenu(m.id)}>
+            <button key={m.id} type="button" className={menu === m.id ? "on" : ""} onClick={() => goMenu(m.id)}>
               {m.no} {m.label}
             </button>
           ))}
@@ -593,6 +635,11 @@ function ProfileWorkspace() {
                       <select value={risk} onChange={(e) => { setRisk(e.target.value as RiskId); markDirty(); }}>
                         {RISKS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
                       </select>
+                    </Prop>
+                    <Prop label="투자">
+                      <button type="button" className="link" onClick={() => goMenu("invest")}>09 투자내역</button>
+                      {" · "}
+                      <button type="button" className="link" onClick={() => goMenu("style")}>10 투자성향·조언</button>
                     </Prop>
                     <Prop label="계산 실수령"><span className="ro">{pay && pay.net > 0 ? won(pay.net) : "—"}</span></Prop>
                   </tbody>
@@ -824,7 +871,7 @@ function ProfileWorkspace() {
                   deductions={deductionRows(pay)}
                   net={pay && pay.gross > 0 ? Math.max(0, (earnRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) || pay.gross) - pay.withholdTotal) : undefined}
                 />
-                {st && <PayYearSection points={st.payTrend} year={st.payYear} />}
+                {st && <PayYearSection points={st.payTrend} year={st.payYear} monthlyPension={pay?.nationalPension ?? 0} />}
                 {st && (
                   <>
                     <h3 style={{ marginTop: 20 }}>급여전표 — {month}</h3>
@@ -858,6 +905,13 @@ function ProfileWorkspace() {
                 onMsg={setMsg}
               />
             )}
+            {menu === "style" && (
+              <InvestStylePanel
+                ref={styleRef}
+                onDirty={markDirty}
+                onMsg={setMsg}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -872,6 +926,7 @@ function ProfileWorkspace() {
         {menu === "insurance" && insQ.data && (
           <span>보험 {insQ.data.policies.length}건 · 월보험료 {won(insQ.data.policies.reduce((s, p) => s + p.monthlyPremium, 0))}</span>
         )}
+        {menu === "style" && <span>투자성향 설문 · 저장 시 배분 성향 반영</span>}
         {dirty ? <span className="erp-dirty">미저장 변경 있음</span> : <span>저장됨</span>}
       </div>
     </div>

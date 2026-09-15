@@ -1,5 +1,5 @@
 import type { TransactionImporter, ParsedTransaction } from "../types";
-import { toNumber, toIsoDate } from "../parse-file";
+import { toNumber, parseOptionalNumber, toIsoDate } from "../parse-file";
 
 // 범용 통장 내보내기 파서: 헤더에서 날짜/입금/출금/내용/잔액 컬럼을 이름으로 찾는다.
 // 은행별 전용 파서는 detect가 더 구체적인 것을 먼저 등록.
@@ -35,7 +35,7 @@ export const genericBankImporter: TransactionImporter = {
       out.push({
         date, amount: inAmt || outAmt, direction: inAmt ? "in" : "out",
         memo: ix.memo >= 0 ? r[ix.memo] : undefined, merchant: ix.merchant >= 0 ? r[ix.merchant] : undefined,
-        balanceAfter: ix.balance >= 0 ? toNumber(r[ix.balance] ?? "") : undefined,
+        balanceAfter: ix.balance >= 0 ? parseOptionalNumber(r[ix.balance] ?? "") : undefined,
         raw: Object.fromEntries(headers.map((k, j) => [k, r[j] ?? ""])),
       });
     });

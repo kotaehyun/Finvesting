@@ -26,7 +26,10 @@
 - 윈도우: 미정
 
 ## 다음 할 일
-1. 종목 재무제표·펀더멘털 화면 (DART/EDGAR/Yahoo)
-2. ECOS·FRED·DART 키 발급 → 거시지표·재무제표 수집 검증
-3. Expo 모바일 기동 확인, 윈도우 경로 정하고 clone
+1. ECOS·FRED·DART 키 발급 → 거시지표·재무제표 수집 검증
+2. Expo 모바일 기동 확인, 윈도우 경로 정하고 clone
+3. Financial Timeline
 4. 뉴스 임베딩 RAG
+
+## 2026-09-14 추가
+- Yahoo 펀더멘털 표 `/fundamentals`, 프로필 10 투자성향·조언 (`invest_style`, 09 다음). 관련 화면 링크 줄. 브랜치 `feat/yahoo-fundamentals`, 미커밋.

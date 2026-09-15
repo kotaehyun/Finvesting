@@ -2,6 +2,8 @@
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { assetClassLabel, summarizeByClass } from "@finvesting/core";
+import { InvestTrail } from "../invest-trail";
+import { Pnl } from "../pnl";
 
 const ACCOUNT_TYPES: Record<string, string> = {
   brokerage: "증권",
@@ -56,9 +58,9 @@ export function InvestPanel() {
       <h3>투자내역</h3>
       <p className="erp-hint">
         증권·코인·연금 계좌를 모두 모아 주식·ETF·채권·펀드·코인을 봅니다. 카드를 누르면 그 계좌만.
-        {" "}
-        <a href="/holdings">체결 입력은 보유 화면</a>
+        체결 입력은 보유 화면, 성향·조언은 바로 아래 링크로 이어집니다.
       </p>
+      <InvestTrail current="invest" variant="erp" />
 
       <div className="erp-accts">
         <button
@@ -119,7 +121,7 @@ export function InvestPanel() {
               <td className="ro num">{c.count}</td>
               <td className="ro num">{won(c.costKrw)}</td>
               <td className="ro num">{won(c.marketValueKrw)}</td>
-              <td className="ro num">{won(c.pnlKrw)}</td>
+              <td className="ro num"><Pnl n={c.pnlKrw} /></td>
               <td className="ro num">{pct(c.weight)}</td>
               <td className="ro">
                 <span className="erp-bar" aria-hidden><i style={{ width: `${Math.round(c.weight * 100)}%` }} /></span>
@@ -133,7 +135,7 @@ export function InvestPanel() {
             <td className="num">{classSummary.reduce((s, c) => s + c.count, 0)}</td>
             <td className="num">{won(classSummary.reduce((s, c) => s + c.costKrw, 0))}</td>
             <td className="num">{won(classSummary.reduce((s, c) => s + c.marketValueKrw, 0))}</td>
-            <td className="num">{won(classSummary.reduce((s, c) => s + c.pnlKrw, 0))}</td>
+            <td className="num"><Pnl n={classSummary.reduce((s, c) => s + c.pnlKrw, 0)} /></td>
             <td className="num">100%</td>
             <td />
           </tr>
@@ -169,7 +171,7 @@ export function InvestPanel() {
               <td className="ro num">{money(p.avgCost, p.currency)}</td>
               <td className="ro num">{p.lastPrice != null ? money(p.lastPrice, p.currency) : "없음"}{p.lastDate ? ` ${p.lastDate}` : ""}</td>
               <td className="ro num">{p.marketValueKrw != null ? won(p.marketValueKrw) : "—"}</td>
-              <td className="ro num">{p.pnlKrw != null ? `${won(p.pnlKrw)} (${pct(p.pnlRate ?? 0)})` : "—"}</td>
+              <td className="ro num">{p.pnlKrw != null ? <Pnl n={p.pnlKrw} rate={p.pnlRate ?? 0} /> : "—"}</td>
             </tr>
           ))}
           {!rows.length && (
@@ -182,7 +184,7 @@ export function InvestPanel() {
               <td colSpan={3}>합계 {totals.count}건</td>
               <td colSpan={4} />
               <td className="num">{won(totals.marketValueKrw)}</td>
-              <td className="num">{won(totals.pnlKrw)}</td>
+              <td className="num"><Pnl n={totals.pnlKrw} /></td>
             </tr>
           </tfoot>
         )}

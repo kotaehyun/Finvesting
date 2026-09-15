@@ -12,4 +12,6 @@ export const db = g.__finvestingDb ?? drizzle(sql, { schema });
 g.__finvestingSql = sql;
 g.__finvestingDb = db;
 export type Db = typeof db;
+export type DbTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type DbClient = Db | DbTx;
 export * from "./schema/index";

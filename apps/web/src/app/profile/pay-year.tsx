@@ -1,3 +1,4 @@
+import { PAY_EARNING_GROUP_LABEL, yearEndSettlement, yearEndWageSlip } from "@finvesting/core";
 import { ComboChart } from "./combo-chart";
 
 export type PayYearPoint = {
@@ -16,9 +17,17 @@ function won(n: number) {
   return `${Math.round(n).toLocaleString("ko-KR")}원`;
 }
 
-export function PayYearSection({ points, year }: { points: PayYearPoint[]; year?: PayYearPoint }) {
+export function PayYearSection({
+  points, year, monthlyPension = 0,
+}: {
+  points: PayYearPoint[];
+  year?: PayYearPoint;
+  monthlyPension?: number;
+}) {
   if (!points.length) return null;
   const y = year;
+  const payMonths = points.filter((p) => p.gross > 0).length;
+  const annualPension = monthlyPension * payMonths;
   return (
     <>
       <h3 style={{ marginTop: 20 }}>연봉 추이 — 최근 12개월</h3>
@@ -77,6 +86,101 @@ export function PayYearSection({ points, year }: { points: PayYearPoint[]; year?
             </tr>
           </tfoot>
         )}
+      </table>
+      {y && y.gross > 0 && <YearEndBlock year={y} annualPension={annualPension} />}
+    </>
+  );
+}
+
+function YearEndBlock({ year, annualPension }: { year: PayYearPoint; annualPension: number }) {
+  const slip = yearEndWageSlip(year);
+  const settle = yearEndSettlement(year, annualPension);
+  const earnGroups = (["monthly", "irregular", "custom"] as const).map((g) => ({
+    g,
+    rows: slip.earnings.filter((r) => r.group === g),
+  })).filter((x) => x.rows.length);
+  const lines: Array<{ group: string; span: number; name: string; amount: number } | null> = [];
+  for (const { g, rows } of earnGroups) {
+    rows.forEach((r, i) => {
+      lines.push({
+        group: i === 0 ? PAY_EARNING_GROUP_LABEL[g] : "",
+        span: i === 0 ? rows.length : 0,
+        name: r.name,
+        amount: r.amount,
+      });
+    });
+  }
+  const n = Math.max(lines.length, slip.deductions.length);
+  return (
+    <>
+      <h3 style={{ marginTop: 20 }}>연말정산 — 연간 임금명세서</h3>
+      <p className="erp-hint">
+        근로기준법 시행령 제27조의2 · 고용노동부 임금명세서 작성 예시(지급|공제 양란)의 12개월 합입니다.
+        수당·상여는 월 합계만 모읍니다. 홈택스 제출서가 아니며 부양가족·의료비·카드 공제는 없습니다.
+      </p>
+      <div className="erp-slip">
+        <table className="erp-grid">
+          <thead>
+            <tr>
+              <th style={{ width: 120 }}>구분</th>
+              <th>임금 항목</th>
+              <th className="num" style={{ width: 140 }}>지급 금액</th>
+              <th>공제 항목</th>
+              <th className="num" style={{ width: 140 }}>공제 금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: n }, (_, i) => {
+              const line = lines[i];
+              const d = slip.deductions[i];
+              return (
+                <tr key={line?.name ?? d?.name ?? i}>
+                  {line?.span ? <td className="ro" rowSpan={line.span}>{line.group}</td> : !line ? <td className="ro" /> : null}
+                  <td className="ro">{line?.name ?? ""}</td>
+                  <td className="ro num">{line && line.amount ? won(line.amount) : line ? "" : ""}</td>
+                  <td className="ro">{d?.name ?? ""}</td>
+                  <td className="ro num">{d && d.amount ? won(d.amount) : d ? "" : ""}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td className="ro" colSpan={2}>지급액 계</td>
+              <td className="ro num">{won(slip.payTotal)}</td>
+              <td className="ro">공제액 계</td>
+              <td className="ro num">{won(slip.deductTotal)}</td>
+            </tr>
+            <tr>
+              <td className="ro" colSpan={3}>실수령액</td>
+              <td className="ro" colSpan={2}>{won(slip.net)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <h3 style={{ marginTop: 16 }}>연말정산 — 과세표준 기초</h3>
+      <p className="erp-hint">
+        소득세법 제47조 근로소득공제 · 본인 기본공제 150만. 국민연금 공제는 세전이 있는 달 × 현재 월 국민연금입니다.
+        기납부세액은 12개월 세금 합입니다. 결정세액·환급은 간이세액표가 없어 계산하지 않습니다.
+      </p>
+      <table className="erp-grid">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>근거</th>
+            <th className="num">금액</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td className="ro">총급여</td><td className="ro">12개월 세전 합</td><td className="ro num">{won(settle.annualGross)}</td></tr>
+          <tr><td className="ro">근로소득공제</td><td className="ro">소득세법 제47조</td><td className="ro num">{won(settle.earnedIncomeDeduction)}</td></tr>
+          <tr><td className="ro">근로소득금액</td><td className="ro">총급여 − 근로소득공제</td><td className="ro num">{won(settle.earnedIncome)}</td></tr>
+          <tr><td className="ro">본인 기본공제</td><td className="ro">150만원</td><td className="ro num">{won(settle.personalExemption)}</td></tr>
+          <tr><td className="ro">연금보험료공제</td><td className="ro">세전 있는 달의 국민연금 합(현재 월 × 달 수)</td><td className="ro num">{settle.pensionDeduction ? won(settle.pensionDeduction) : "—"}</td></tr>
+          <tr><td className="ro">소득세 과세표준</td><td className="ro">근로소득금액 − 공제</td><td className="ro num">{won(settle.taxableBase)}</td></tr>
+          <tr><td className="ro">기납부 소득세·지방세</td><td className="ro">12개월 세금 합</td><td className="ro num">{won(settle.prepaidTax)}</td></tr>
+          <tr><td className="ro">기납부 4대보험</td><td className="ro">12개월 보험 합</td><td className="ro num">{won(settle.prepaidInsurance)}</td></tr>
+        </tbody>
       </table>
     </>
   );

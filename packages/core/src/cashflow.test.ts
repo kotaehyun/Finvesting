@@ -24,4 +24,21 @@ describe("summarizeCashflow", () => {
     expect(s.savingRate).toBe(0);
     expect(s.spendingRate).toBe(0);
   });
+
+  it("입금 other_income·출금 uncategorized는 수입·소비에 들어가고, 둘 다 transfer면 빠진다", () => {
+    const inflated = summarizeCashflow([
+      { amount: 100_000, direction: "out", category: "uncategorized" },
+      { amount: 100_000, direction: "in", category: "other_income" },
+    ]);
+    expect(inflated.income).toBe(100_000);
+    expect(inflated.variableCost).toBe(100_000);
+
+    const moved = summarizeCashflow([
+      { amount: 100_000, direction: "out", category: "transfer" },
+      { amount: 100_000, direction: "in", category: "transfer" },
+    ]);
+    expect(moved.income).toBe(0);
+    expect(moved.variableCost).toBe(0);
+    expect(moved.net).toBe(0);
+  });
 });

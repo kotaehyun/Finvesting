@@ -29,7 +29,8 @@ pnpm db:up                       # Postgres + pgvector
 psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db/seed/000_extensions.sql
 pnpm db:generate && pnpm db:migrate
 psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db/seed/001_default_user.sql
-pnpm dev:web                     # http://localhost:3000
+pnpm dev:web                     # http://127.0.0.1:3000 (로컬만)
+# 같은 Wi‑Fi의 폰에서 볼 때만: pnpm --filter @finvesting/web dev:lan  → 0.0.0.0:3000
 pnpm dev:worker                  # 또는 pnpm --filter @finvesting/worker run:once 로 1회 수집
 ```
 

@@ -1,0 +1,200 @@
+// 유튜브·커뮤니티에서 자주 도는 말 vs 공식 근거. 특정 채널을 긁지 않는다.
+// 기사 제목 키워드만 매칭. 본문 저장 금지. 매수 권유가 아님.
+
+export type RealtyClaimVerdict = "overstated" | "partial" | "needs-source";
+
+export type RealtyClaimFact = { label: string; value: string };
+
+export type RealtyClaim = {
+  id: string;
+  buzz: string;
+  official: string;
+  verdict: RealtyClaimVerdict;
+  verdictLabel: string;
+  tags: readonly string[];
+  facts?: readonly RealtyClaimFact[];
+};
+
+export const REALTY_CLAIM_MIX = {
+  apt: 5,
+  other: 5,
+  note: "아파트 5 : 다가구·빌라·연립 5는 공식 목표가 아닙니다. 서울을 전부 아파트로 바꿀 수 없다는 구성 관점입니다.",
+} as const;
+
+export const REALTY_CLAIMS: readonly RealtyClaim[] = [
+  {
+    id: "supply-short",
+    buzz: "서울은 집이 절대적으로 부족해서 무조건 더 지어야 한다",
+    official:
+      "서울은 기성시가지·개발제한구역이라 새 택지가 거의 없습니다. ‘공급 부족’을 물량 하나로 단정하면 택지 한계를 빠뜨립니다. 인구감소지역 89곳(행안부)은 서울이 아닙니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["공급", "부족", "서울", "물량", "공급난"],
+    facts: [
+      { label: "인구감소지역", value: "89곳(서울 없음)" },
+      { label: "서울 합계출산율", value: "0.63" },
+    ],
+  },
+  {
+    id: "rebuild",
+    buzz: "재건축만 하면 물량이 확 늘어난다",
+    official:
+      "재건축은 기존 가구를 허물고 다시 짓습니다. 용적률·기부채납·조합 일정 때문에 순증가가 기대보다 작을 수 있습니다. 사업장마다 달라서 전국 숫자를 지어내지 않습니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["재건축", "재개발", "입주물량", "분양"],
+    facts: [{ label: "순증가", value: "사업장마다 다름" }],
+  },
+  {
+    id: "all-apt",
+    buzz: "서울을 전부 아파트로 바꾸면 된다",
+    official:
+      "용도지역과 기존 다가구·연립 주거를 한 유형으로 바꿀 수 없습니다. 아파트만 늘리라는 말은 주거 구성을 무시합니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["아파트", "빌라", "연립", "다가구"],
+    facts: [{ label: "구성 관점", value: "아파트 5 : 다가구·빌라 5" }],
+  },
+  {
+    id: "jeonse-safe",
+    buzz: "전세는 보증금이 안전하다",
+    official:
+      "전세보증사고와 전세대출 규제가 있습니다. 점유 임차(전월세)는 38.0%, 2026년 1–7월 전월세 거래 중 월세는 68.3%입니다. ‘안전’이라고 단정하지 않습니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["전세", "보증금", "전세사기", "전세대출", "월세"],
+    facts: [
+      { label: "점유 임차", value: "38.0%" },
+      { label: "거래 월세", value: "68.3%" },
+      { label: "규제지역 전세대출", value: "1주택 DSR" },
+    ],
+  },
+  {
+    id: "birth-demand",
+    buzz: "출산이 줄어도 서울 수요는 안 줄어든다",
+    official:
+      "합계출산율 전국 0.80·서울 0.63은 전 연령 평균입니다. 혼인율은 30–34세가 최고(여 57.6·남 53.9, 인구 1천 명당)이고, 모 평균 출산연령은 33.8세입니다. 30대 미혼율은 54.7%입니다.",
+    verdict: "partial",
+    verdictLabel: "일부만",
+    tags: ["출산", "저출산", "인구", "소멸", "혼인", "평균"],
+    facts: [
+      { label: "TFR", value: "0.80" },
+      { label: "모 출산연령", value: "33.8세" },
+      { label: "30대 미혼", value: "54.7%" },
+    ],
+  },
+  {
+    id: "elite-seoul",
+    buzz: "돈 있는 사람·고위공직자는 지방에 안 산다 / 무조건 서울만 산다",
+    official:
+      "공직자윤리법 공개만 봅니다. 4급은 재산등록이지 공개가 아닙니다. 2026-03-26 관보 기준 광역단체장 16명 중 6명이 관할이 아닌 서울·경기에 주택이 있습니다. 연예인·사적 자산가 명단은 없습니다. 법인 명의는 종부세 법인 집계로만 봅니다.",
+    verdict: "partial",
+    verdictLabel: "일부만",
+    tags: ["공직자", "재산공개", "자산가", "종부세", "법인", "연예인", "임원"],
+    facts: [
+      { label: "광역단체장", value: "16명 중 6명 관할 밖 수도권" },
+      { label: "4급", value: "등록≠공개" },
+    ],
+  },
+  {
+    id: "vacancy-ok",
+    buzz: "상가 공실은 없다 / 서울만 비어 있다",
+    official:
+      "한국부동산원 공실은 임대계약이 없고 자가·무상임대로도 안 쓰는 면적입니다. 법인이 자가로 쓰면 공실이 아닙니다. 전국 중대형 상가 13.8%·오피스 8.7%. 아파트 빈집은 총조사 7.1%(전체 8.5%)입니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["공실", "상가", "오피스", "빈집", "법인"],
+    facts: [
+      { label: "중대형 상가", value: "13.8%" },
+      { label: "아파트 빈집", value: "7.1%" },
+      { label: "자가·무상", value: "공실 아님" },
+    ],
+  },
+  {
+    id: "pir-ok",
+    buzz: "소득 대비 집값 부담은 없다",
+    official:
+      "전국 자가 PIR 6.3배는 전 가구 중위입니다. 청년(19–34)·신혼(혼인 7년 이하) PIR은 6.0배, 고령은 9.1배입니다. 청년 자가점유는 12.2%, 신혼은 43.9%입니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["소득", "PIR", "주거비", "지니", "청년", "신혼"],
+    facts: [
+      { label: "전국 PIR", value: "6.3배" },
+      { label: "청년·신혼 PIR", value: "6.0배" },
+      { label: "청년 자가점유", value: "12.2%" },
+    ],
+  },
+  {
+    id: "corp-name",
+    buzz: "고액 자산가·연예인은 법인 명의로 집을 산다",
+    official:
+      "실명 추적은 없습니다. 상위 10% 순자산 점유 46.1%. 주택분 종부세 법인은 인원 약 11%·세액 약 53%. 증여세 18.2만 건, 상속세 2.3만 명. 연예 기사·등기는 데이터가 아닙니다.",
+    verdict: "partial",
+    verdictLabel: "일부만",
+    tags: ["법인", "명의", "투기", "급매", "증여", "상속", "자산가", "연예인", "임원"],
+    facts: [
+      { label: "상위 10%", value: "순자산 46.1%" },
+      { label: "법인 세액", value: "약 53%" },
+      { label: "증여세", value: "18.2만 건" },
+    ],
+  },
+  {
+    id: "fire-auction",
+    buzz: "급매·압류·유찰이 전국에서 터진다",
+    official:
+      "포털 급매 호수는 공식이 아닙니다. 대법원 2025 경매신청 12만 1,261건(역대 최다). 이 중 HUG 전세보증 회수 사건이 약 10%입니다. 유찰률 월별은 법원 원문. 민간 사이트를 긁지 않습니다.",
+    verdict: "partial",
+    verdictLabel: "일부만",
+    tags: ["급매", "급매물", "압류", "유찰", "경매", "연체"],
+    facts: [
+      { label: "경매신청 2025", value: "12.1만건" },
+      { label: "HUG 비중", value: "약 10%" },
+    ],
+  },
+  {
+    id: "avg-trap",
+    buzz: "전국 평균만 보면 시장을 알 수 있다",
+    official:
+      "인구 최빈은 50대(16.7%)·중위연령 46.8세입니다. 혼인율 최고는 30–34세, 출산은 모 33.8세입니다. 청년 자가점유 12.2%는 전체 58.4%와 다릅니다. 평균은 시장 중심이 아닙니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["평균", "연령", "30대", "신혼", "소비"],
+    facts: [
+      { label: "인구 최빈", value: "50대 16.7%" },
+      { label: "30+40대", value: "28.3%" },
+      { label: "혼인 피크", value: "30–34세" },
+    ],
+  },
+  {
+    id: "young-leverage",
+    buzz: "영끌은 이미 끝났다 / 청년은 집이 없다",
+    official:
+      "한은 고위험가구(DSR 40% 초과·자산대비부채 100% 초과)에서 청년 비중은 2020년 22.6%에서 2025년 3월 34.9%입니다. 서울 아파트 매매 30대 이하 39.5%(2025.10–11)는 거래 비중이지 잔액이 아닙니다.",
+    verdict: "partial",
+    verdictLabel: "일부만",
+    tags: ["영끌", "청년", "DSR", "고위험", "2030"],
+    facts: [
+      { label: "고위험 청년", value: "34.9%" },
+      { label: "고위험가구", value: "45.9만" },
+    ],
+  },
+  {
+    id: "small-bldg",
+    buzz: "아파트만 위험하고 꼬마빌딩·중형빌딩은 괜찮다",
+    official:
+      "꼬마빌딩 전용 시계열은 없습니다. 기업 부동산업 대출 연체 3.01%는 전체 업종 2.09%보다 높고 잔액 비중은 23.9%입니다. 비주택 RTI 1.5배. 소규모 상가 분기 투자수익률 0.81%는 오피스 1.74%보다 낮습니다.",
+    verdict: "overstated",
+    verdictLabel: "과장",
+    tags: ["꼬마빌딩", "빌딩", "상가", "임대업", "RTI", "부채"],
+    facts: [
+      { label: "부동산업 연체", value: "3.01%" },
+      { label: "비주택 RTI", value: "1.5배" },
+      { label: "소규모 상가 수익", value: "0.81%" },
+    ],
+  },
+];
+
+export function realtyClaimsForTitle(title: string): RealtyClaim[] {
+  const t = title.replace(/\s+/g, "");
+  return REALTY_CLAIMS.filter((c) => c.tags.some((tag) => t.includes(tag)));
+}

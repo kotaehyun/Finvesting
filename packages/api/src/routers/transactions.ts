@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { accounts, transactions } from "@finvesting/db";
+import { pickLatestBalance, shouldApplyImportedBalance } from "@finvesting/core";
 import { router, publicProcedure } from "../trpc";
 import { parseUpload } from "../lib/parse-upload";
 
@@ -24,12 +25,12 @@ const txnCategory = z.enum([
   "transfer", "uncategorized",
 ]);
 
-const IN_CATEGORIES = new Set(["salary", "bonus", "interest", "dividend", "other_income", "uncategorized"]);
+const IN_CATEGORIES = new Set(["salary", "bonus", "interest", "dividend", "other_income", "uncategorized", "transfer"]);
 const OUT_CATEGORIES = new Set([
   "housing", "utilities", "insurance", "subscription", "phone",
   "income_tax", "health_insurance",
   "food", "transport", "shopping", "leisure", "health", "education", "misc",
-  "saving", "investment", "loan_repayment", "uncategorized",
+  "saving", "investment", "loan_repayment", "uncategorized", "transfer",
 ]);
 
 function categoryFor(direction: "in" | "out") {
@@ -105,7 +106,11 @@ export const transactionsRouter = router({
       if (!allowedCategories(row.direction).has(input.category)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: row.direction === "in" ? "입금은 수입 분류만 선택할 수 있습니다" : "출금은 지출·저축 분류만 선택할 수 있습니다",
+          message: row.direction === "in"
+            ? "입금은 수입 또는 이체 분류만 선택할 수 있습니다"
+            : row.direction === "out"
+              ? "출금은 지출·저축 또는 이체 분류만 선택할 수 있습니다"
+              : "이체 분류만 선택할 수 있습니다",
         });
       }
       const [updated] = await ctx.db.update(transactions)
@@ -146,27 +151,40 @@ export const transactionsRouter = router({
         return true;
       });
 
-      for (let i = 0; i < toInsert.length; i += 200) {
-        const chunk = toInsert.slice(i, i + 200);
-        await ctx.db.insert(transactions).values(chunk.map((r) => ({
-          userId: ctx.userId,
-          accountId: input.accountId,
-          date: r.date,
-          amount: String(r.amount),
-          direction: r.direction,
-          category: categoryFor(r.direction),
-          merchant: r.merchant ?? undefined,
-          memo: r.memo ?? undefined,
-          source: `csv:${input.detected}`,
-          raw: r.raw,
-        })));
-      }
+      const latestExistingDate = existing.reduce<string | null>((max, e) => {
+        const d = String(e.date);
+        return max == null || d > max ? d : max;
+      }, null);
+      const picked = pickLatestBalance(input.rows);
+      const applyBalance = picked != null && shouldApplyImportedBalance(picked.date, latestExistingDate);
 
-      const lastBal = [...input.rows].reverse().find((r) => r.balanceAfter != null);
-      if (lastBal?.balanceAfter != null) {
-        await ctx.db.update(accounts).set({ balance: String(lastBal.balanceAfter) }).where(eq(accounts.id, input.accountId));
-      }
+      return ctx.db.transaction(async (tx) => {
+        for (let i = 0; i < toInsert.length; i += 200) {
+          const chunk = toInsert.slice(i, i + 200);
+          await tx.insert(transactions).values(chunk.map((r) => ({
+            userId: ctx.userId,
+            accountId: input.accountId,
+            date: r.date,
+            amount: String(r.amount),
+            direction: r.direction,
+            category: categoryFor(r.direction),
+            merchant: r.merchant ?? undefined,
+            memo: r.memo ?? undefined,
+            source: `csv:${input.detected}`,
+            raw: r.raw,
+          })));
+        }
 
-      return { inserted: toInsert.length, duplicate: input.rows.length - toInsert.length, balanceUpdated: lastBal?.balanceAfter ?? null };
+        if (applyBalance && picked) {
+          await tx.update(accounts).set({ balance: String(picked.balanceAfter) }).where(eq(accounts.id, input.accountId));
+        }
+
+        return {
+          inserted: toInsert.length,
+          duplicate: input.rows.length - toInsert.length,
+          balanceUpdated: applyBalance && picked ? picked.balanceAfter : null,
+          balanceDate: applyBalance && picked ? picked.date : null,
+        };
+      });
     }),
 });

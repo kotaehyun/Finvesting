@@ -4,12 +4,23 @@ import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
 
 // pnpm --filter 실행 시 cwd는 apps/worker. 저장소 루트 .env를 읽는다.
-// 이 파일 위치: apps/worker/src/lib → 루트까지 4단계
+function findEnv(start: string) {
+  let dir = start;
+  for (let i = 0; i < 8; i++) {
+    const p = resolve(dir, ".env");
+    if (existsSync(p)) return p;
+    const parent = resolve(dir, "..");
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
 const here = dirname(fileURLToPath(import.meta.url));
-const rootEnv = resolve(here, "../../../../.env");
-if (existsSync(rootEnv)) config({ path: rootEnv });
-else config(); // 폴백: cwd의 .env
+const rootEnv = findEnv(here) ?? findEnv(process.cwd());
+if (rootEnv) config({ path: rootEnv });
+else config();
 
 if (!process.env.DATABASE_URL) {
-  console.warn(`[env] DATABASE_URL not set. looked for ${rootEnv}`);
+  console.warn("[env] DATABASE_URL not set");
 }

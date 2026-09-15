@@ -86,6 +86,73 @@ export function summarizeByClass(rows: HoldingSummaryRow[]): ClassSummary[] {
   return ASSET_CLASSES.map((id) => buckets.get(id)!);
 }
 
+export type CurrencySummary = {
+  currency: string;
+  count: number;
+  pricedCount: number;
+  marketValueKrw: number | null;
+  weight: number | null;
+};
+
+/** 시세가 있는 종목만 비중을 계산한다. 시세 없는 통화를 0%로 넣지 않는다. */
+export function summarizeByCurrency(
+  rows: Array<{ quantity: number; currency: string; marketValueKrw: number | null }>,
+): CurrencySummary[] {
+  const open = rows.filter((r) => r.quantity > 0);
+  const buckets = new Map<string, { count: number; pricedCount: number; marketValueKrw: number }>();
+  for (const r of open) {
+    const b = buckets.get(r.currency) ?? { count: 0, pricedCount: 0, marketValueKrw: 0 };
+    b.count += 1;
+    if (r.marketValueKrw != null) {
+      b.pricedCount += 1;
+      b.marketValueKrw += r.marketValueKrw;
+    }
+    buckets.set(r.currency, b);
+  }
+  const pricedTotal = [...buckets.values()].reduce((s, b) => s + (b.pricedCount > 0 ? b.marketValueKrw : 0), 0);
+  return [...buckets.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([currency, b]) => ({
+      currency,
+      count: b.count,
+      pricedCount: b.pricedCount,
+      marketValueKrw: b.pricedCount > 0 ? b.marketValueKrw : null,
+      weight: b.pricedCount > 0 && pricedTotal > 0 ? b.marketValueKrw / pricedTotal : null,
+    }));
+}
+
+export type PnlContribution = {
+  instrumentId: string;
+  symbol: string;
+  name: string;
+  pnlKrw: number;
+  marketValueKrw: number;
+};
+
+/** 평가손익만. 시세 없는 종목·실현손익은 넣지 않는다. */
+export function unrealizedPnlContribution(
+  rows: Array<{
+    instrumentId: string;
+    symbol: string;
+    name: string;
+    quantity: number;
+    pnlKrw: number | null;
+    marketValueKrw: number | null;
+  }>,
+): PnlContribution[] {
+  return rows
+    .filter((r): r is typeof r & { pnlKrw: number; marketValueKrw: number } =>
+      r.quantity > 0 && r.pnlKrw != null && r.marketValueKrw != null)
+    .map((r) => ({
+      instrumentId: r.instrumentId,
+      symbol: r.symbol,
+      name: r.name,
+      pnlKrw: r.pnlKrw,
+      marketValueKrw: r.marketValueKrw,
+    }))
+    .sort((a, b) => Math.abs(b.pnlKrw) - Math.abs(a.pnlKrw));
+}
+
 export function summarizeByAccount(
   rows: HoldingSummaryRow[],
   accounts: Array<{ id: string; name: string; institution: string | null; type: string; balance: number }>,

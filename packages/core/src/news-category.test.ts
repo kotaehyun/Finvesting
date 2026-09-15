@@ -19,8 +19,9 @@ describe("newsCategoryForSource", () => {
     expect(newsCategoryForSource("rss:cnbc-top")).toBe("global_markets");
     expect(newsCategoryForSource("rss:cnbc-markets")).toBe("global_markets");
     expect(newsCategoryForSource("rss:marketwatch")).toBe("global_markets");
-    expect(newsCategoryForSource("rss:fed-press")).toBe("central_bank");
-    expect(newsCategoryForSource("rss:ecb-press")).toBe("central_bank");
+    expect(newsCategoryForSource("rss:coindesk")).toBe("crypto");
+    expect(newsCategoryForSource("rss:fxstreet")).toBe("fx");
+    expect(newsCategoryForSource("rss:hankyung-realestate")).toBe("realty");
   });
 
   it("모르는 소스는 other", () => {
@@ -36,8 +37,8 @@ describe("news category helpers", () => {
   });
 
   it("언어로 분류를 가른다", () => {
-    expect(newsCategoriesForLang("ko").map((c) => c.id)).toEqual(["kr_economy", "kr_finance"]);
-    expect(newsCategoriesForLang("en").map((c) => c.id)).toEqual(["global_markets", "central_bank"]);
+    expect(newsCategoriesForLang("ko").map((c) => c.id)).toEqual(["kr_economy", "kr_finance", "realty"]);
+    expect(newsCategoriesForLang("en").map((c) => c.id)).toEqual(["global_markets", "crypto", "fx", "central_bank"]);
     expect(newsCategoriesForLang().map((c) => c.id)).toEqual(NEWS_CATEGORIES.map((c) => c.id));
   });
 

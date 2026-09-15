@@ -42,7 +42,8 @@ export type TxnCategoryId =
   | "transfer";
 
 export function categoriesFor(direction: "in" | "out" | "transfer") {
-  if (direction === "in") return INCOME_CATEGORIES;
-  if (direction === "out") return OUTGO_CATEGORIES;
-  return [{ id: "transfer", label: "이체" }] as const;
+  const transfer = { id: "transfer", label: "이체" } as const;
+  if (direction === "in") return [...INCOME_CATEGORIES, transfer];
+  if (direction === "out") return [...OUTGO_CATEGORIES, transfer];
+  return [transfer];
 }

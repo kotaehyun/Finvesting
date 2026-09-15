@@ -37,6 +37,14 @@ export function toNumber(s: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+/** 빈 칸은 0이 아니라 없음. 잔액 컬럼용. */
+export function parseOptionalNumber(s: string): number | undefined {
+  const t = String(s).trim();
+  if (!t) return undefined;
+  const n = Number(t.replace(/[,원\s]/g, ""));
+  return Number.isFinite(n) ? n : undefined;
+}
+
 export function rowsToXlsx(rows: string[][], sheetName = "Sheet1"): Uint8Array {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);

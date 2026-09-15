@@ -26,11 +26,12 @@ export type CashflowSummary = {
 export function summarizeCashflow(txns: TxnLike[]): CashflowSummary {
   let income = 0, fixedCost = 0, variableCost = 0, savingAndInvest = 0;
   for (const t of txns) {
+    if (t.category === "transfer" || t.direction === "transfer") continue;
     if (t.direction === "in" && INCOME_CATEGORIES.has(t.category)) income += t.amount;
     else if (t.direction === "out") {
       if (SAVING_CATEGORIES.has(t.category)) savingAndInvest += t.amount;
       else if (FIXED_COST_CATEGORIES.has(t.category)) fixedCost += t.amount;
-      else if (t.category !== "transfer") variableCost += t.amount;
+      else variableCost += t.amount;
     }
   }
   const spent = fixedCost + variableCost;

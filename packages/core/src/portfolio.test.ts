@@ -25,6 +25,17 @@ describe("buildPositions", () => {
     expect(r.avgFxRate).toBe(1);
   });
 
+  it("매수가 없는 매도나 보유보다 많은 매도는 오류다", () => {
+    expect(() => buildPositions([
+      { instrumentId: "a", side: "sell", quantity: 1, price: 100 },
+      { instrumentId: "a", side: "buy", quantity: 1, price: 100 },
+    ])).toThrow(/매도 수량/);
+    expect(() => buildPositions([
+      { instrumentId: "a", side: "buy", quantity: 1, price: 100 },
+      { instrumentId: "a", side: "sell", quantity: 2, price: 120 },
+    ])).toThrow(/매도 수량/);
+  });
+
   it("해외 자산: 매입 환율을 가중평균하고 매도 시 환차손익을 원화 실현손익에 반영한다", () => {
     const r = buildPositions([
       { instrumentId: "aapl", side: "buy", quantity: 1, price: 100, fxRate: 1300 },

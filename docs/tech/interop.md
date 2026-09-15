@@ -6,7 +6,7 @@
 ## 가져오기 (Import)
 | 대상 | 파일 | 파서 | 상태 |
 |---|---|---|---|
-| 은행 통장 거래내역 (공통) | CSV/XLSX/DOCX | `importers/generic-bank.ts` + `fileToRows`. 웹 `/accounts`·`/profile` 통장내역 → `profile.previewFile` 변환 미리보기 후 `transactions.commitImport` | 연결됨 |
+| 은행 통장 거래내역 (공통) | CSV/XLSX/DOCX | `importers/generic-bank.ts` + `fileToRows`. 웹 `/accounts`·`/profile` 통장내역 → `profile.previewFile` 변환 미리보기 후 `transactions.commitImport`. 빈 잔액 칸은 0원이 아니라 없음. 저장은 DB 트랜잭션. 잔액은 가장 늦은 거래일의 값만, 기존 최신 거래보다 오래된 파일이면 잔액 미갱신 | 연결됨 |
 | 고정비 세부내역 | CSV/XLSX/DOCX | `importers/recurring-costs.ts` — 헤더 이름·분류·금액·출금일·메모. 프로필대장 가져오기 → 변환 내용 표시 후 `recurringImport`. 같은 이름은 갱신. 내보내기 CSV·엑셀·워드 | 연결됨 |
 | 은행별 전용 (카카오뱅크, 토스, 국민, 신한 …) | 각 은행 내보내기 | 은행별 파서 — 실제 파일 샘플 받아서 작성 | 미구현 |
 | 카드 이용내역 | CSV/XLSX | 승인일·가맹점·금액·할부 | 미구현 |

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
-import { financialProfiles, recurringCosts, incomeTaxMonths, type Db } from "@finvesting/db";
-import { resolvePay } from "@finvesting/core";
+import { financialProfiles, recurringCosts, incomeTaxMonths, type DbClient } from "@finvesting/db";
+import { resolvePay, parseInvestStyle, investStyleScore, suggestedRiskFromScore } from "@finvesting/core";
 import { upsertPayrollMonth } from "../lib/pay-trends";
 import {
   parseRecurringCostRows,
@@ -16,6 +16,8 @@ import {
   rowsToXlsx,
   rowsToDocx,
 } from "@finvesting/interop";
+import { loadInvestAdvice } from "../lib/invest-advice";
+import { createProvider, INVEST_STYLE_SYSTEM, buildContextBlock } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
 import { currentKstMonth } from "../lib/overview";
 import { loadStatement } from "../lib/statement";
@@ -30,6 +32,13 @@ const payEarningFields = z.object({
   amount: z.number().min(0),
 });
 
+const investStyleFields = z.object({
+  horizon: z.string().max(20),
+  experience: z.string().max(20),
+  lossOk: z.string().max(20),
+  goal: z.string().max(20),
+});
+
 const profileFields = z.object({
   monthlyGrossIncome: z.number().min(0).optional(),
   monthlyNetIncome: z.number().min(0).optional(),
@@ -39,6 +48,7 @@ const profileFields = z.object({
   emergencyFundMonths: z.number().int().min(1).max(36).default(6),
   riskTolerance: riskTolerance.default("moderate"),
   payEarnings: z.array(payEarningFields).max(40).optional(),
+  investStyle: investStyleFields.optional(),
 });
 
 const recurringFields = z.object({
@@ -75,11 +85,12 @@ function toClient(row: typeof financialProfiles.$inferSelect) {
     emergencyFundMonths: row.emergencyFundMonths,
     riskTolerance: row.riskTolerance,
     payEarnings,
+    investStyle: parseInvestStyle(row.investStyle),
     resolved: pay,
   };
 }
 
-async function upsertTaxMonth(db: Db, userId: string, month: string, amount: number) {
+async function upsertTaxMonth(db: DbClient, userId: string, month: string, amount: number) {
   const [existing] = await db.select({ id: incomeTaxMonths.id })
     .from(incomeTaxMonths).where(and(eq(incomeTaxMonths.userId, userId), eq(incomeTaxMonths.month, month)));
   if (existing) {
@@ -89,7 +100,7 @@ async function upsertTaxMonth(db: Db, userId: string, month: string, amount: num
   }
 }
 
-async function saveProfile(db: Db, userId: string, input: z.infer<typeof profileFields>, month = currentKstMonth()) {
+async function saveProfile(db: DbClient, userId: string, input: z.infer<typeof profileFields>, month = currentKstMonth()) {
   const hasEarnings = input.payEarnings !== undefined;
   const earnings = (input.payEarnings ?? []).filter((e) => e.name.trim() && e.amount > 0);
   const earnSum = earnings.reduce((s, e) => s + e.amount, 0);
@@ -114,6 +125,9 @@ async function saveProfile(db: Db, userId: string, input: z.infer<typeof profile
     ...(hasEarnings ? {
       payEarnings: earnings.length ? earnings.map((e) => ({ name: e.name.trim(), amount: Math.round(e.amount) })) : null,
     } : {}),
+    ...(input.investStyle
+      ? { investStyle: parseInvestStyle(input.investStyle) }
+      : {}),
   };
   const [existing] = await db.select({ id: financialProfiles.id })
     .from(financialProfiles).where(eq(financialProfiles.userId, userId));
@@ -129,6 +143,39 @@ export const profileRouter = router({
   get: publicProcedure.query(async ({ ctx }) => {
     const [row] = await ctx.db.select().from(financialProfiles).where(eq(financialProfiles.userId, ctx.userId));
     return row ? toClient(row) : null;
+  }),
+
+  investAdvice: publicProcedure.query(({ ctx }) => loadInvestAdvice(ctx.db, ctx.userId)),
+
+  upsertInvestStyle: publicProcedure
+    .input(investStyleFields)
+    .mutation(async ({ ctx, input }) => {
+      const answers = parseInvestStyle(input);
+      const score = investStyleScore(answers);
+      const [existing] = await ctx.db.select().from(financialProfiles)
+        .where(eq(financialProfiles.userId, ctx.userId)).limit(1);
+      const riskTolerance = score != null
+        ? suggestedRiskFromScore(score)
+        : (existing?.riskTolerance === "conservative" || existing?.riskTolerance === "aggressive"
+          ? existing.riskTolerance
+          : "moderate");
+      const values = { investStyle: answers, riskTolerance };
+      const [row] = existing
+        ? await ctx.db.update(financialProfiles).set(values)
+          .where(eq(financialProfiles.userId, ctx.userId)).returning()
+        : await ctx.db.insert(financialProfiles).values({ ...values, userId: ctx.userId }).returning();
+      return { profile: toClient(row!), advice: await loadInvestAdvice(ctx.db, ctx.userId) };
+    }),
+
+  investRecommend: publicProcedure.mutation(async ({ ctx }) => {
+    const advice = await loadInvestAdvice(ctx.db, ctx.userId);
+    const llm = createProvider();
+    const text = await llm.chat([
+      { role: "system", content: INVEST_STYLE_SYSTEM },
+      { role: "system", content: buildContextBlock({ "투자성향·조언": advice.bullets.map((b) => `- ${b}`).join("\n") }) },
+      { role: "user", content: "성향과 보유를 비교해 우선순위로 설명해 주세요. 특정 종목·상품 매수는 단정하지 마세요." },
+    ]);
+    return { advice: text, provider: llm.name, suggestedRisk: advice.suggestedRisk };
   }),
 
   statement: publicProcedure
@@ -208,9 +255,9 @@ export const profileRouter = router({
       taxMonths: z.array(z.object({ month: monthStr, amount: z.number().min(0) })).max(120).default([]),
       deleteTaxIds: z.array(z.string().uuid()).max(120).default([]),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => ctx.db.transaction(async (tx) => {
       if (input.deleteRecurringIds.length) {
-        await ctx.db.delete(recurringCosts).where(and(
+        await tx.delete(recurringCosts).where(and(
           eq(recurringCosts.userId, ctx.userId),
           inArray(recurringCosts.id, input.deleteRecurringIds),
         ));
@@ -225,27 +272,27 @@ export const profileRouter = router({
           isActive: true,
         };
         if (row.id) {
-          const [updated] = await ctx.db.update(recurringCosts).set(values)
+          const [updated] = await tx.update(recurringCosts).set(values)
             .where(and(eq(recurringCosts.id, row.id), eq(recurringCosts.userId, ctx.userId))).returning();
           if (!updated) throw new Error(`고정 항목을 찾을 수 없습니다: ${row.name}`);
         } else {
-          await ctx.db.insert(recurringCosts).values({ ...values, userId: ctx.userId });
+          await tx.insert(recurringCosts).values({ ...values, userId: ctx.userId });
         }
       }
       if (input.deleteTaxIds.length) {
-        await ctx.db.delete(incomeTaxMonths).where(and(
+        await tx.delete(incomeTaxMonths).where(and(
           eq(incomeTaxMonths.userId, ctx.userId),
           inArray(incomeTaxMonths.id, input.deleteTaxIds),
         ));
       }
       for (const t of input.taxMonths) {
-        await upsertTaxMonth(ctx.db, ctx.userId, t.month, t.amount);
+        await upsertTaxMonth(tx, ctx.userId, t.month, t.amount);
       }
       const profile = input.profile
-        ? await saveProfile(ctx.db, ctx.userId, input.profile, input.month ?? currentKstMonth())
+        ? await saveProfile(tx, ctx.userId, input.profile, input.month ?? currentKstMonth())
         : null;
       return { ok: true as const, profile };
-    }),
+    })),
 
   recurringUpsert: publicProcedure
     .input(recurringFields)

@@ -14,6 +14,7 @@ export const financialProfiles = pgTable("financial_profiles", {
   riskTolerance: text("risk_tolerance").notNull().default("moderate"), // conservative|moderate|aggressive
   targetAllocation: jsonb("target_allocation"), // { cash:0.1, deposit:0.3, stock:0.5, crypto:0.1 } 등 사용자 지정
   payEarnings: jsonb("pay_earnings"), // [{ name:"기본급", amount:3200000 }, { name:"식대", amount:200000 }]
+  investStyle: jsonb("invest_style"), // { horizon, experience, lossOk, goal } 설문. core/invest-style
   ...timestamps,
 });
 

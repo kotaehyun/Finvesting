@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summarizeByAccount, summarizeByClass } from "./holdings-summary";
+import { summarizeByAccount, summarizeByClass, summarizeByCurrency, unrealizedPnlContribution } from "./holdings-summary";
 
 const row = (o: Partial<{ accountId: string; assetClass: string; quantity: number; marketValueKrw: number | null; costKrw: number; pnlKrw: number | null }>) => ({
   accountId: "a",
@@ -58,5 +58,31 @@ describe("summarizeByAccount", () => {
     expect(r[0]!.marketValueKrw).toBe(10);
     expect(r[0]!.weight).toBe(1);
     expect(r[1]!.count).toBe(0);
+  });
+});
+
+describe("summarizeByCurrency", () => {
+  it("시세 없는 통화는 비중 0%로 채우지 않는다", () => {
+    const r = summarizeByCurrency([
+      { quantity: 1, currency: "KRW", marketValueKrw: 100 },
+      { quantity: 1, currency: "USD", marketValueKrw: null },
+    ]);
+    expect(r.find((x) => x.currency === "KRW")).toMatchObject({ count: 1, pricedCount: 1, weight: 1 });
+    expect(r.find((x) => x.currency === "USD")).toMatchObject({ count: 1, pricedCount: 0, marketValueKrw: null, weight: null });
+  });
+
+  it("보유가 없으면 빈 배열", () => {
+    expect(summarizeByCurrency([])).toEqual([]);
+  });
+});
+
+describe("unrealizedPnlContribution", () => {
+  it("평가손익이 있는 종목만 절댓값 순으로 돌린다", () => {
+    const r = unrealizedPnlContribution([
+      { instrumentId: "a", symbol: "AAA", name: "A", quantity: 1, pnlKrw: 10, marketValueKrw: 110 },
+      { instrumentId: "b", symbol: "BBB", name: "B", quantity: 1, pnlKrw: -40, marketValueKrw: 60 },
+      { instrumentId: "c", symbol: "CCC", name: "C", quantity: 1, pnlKrw: null, marketValueKrw: null },
+    ]);
+    expect(r.map((x) => x.symbol)).toEqual(["BBB", "AAA"]);
   });
 });

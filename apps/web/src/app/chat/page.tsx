@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { trpc } from "@/lib/trpc";
 import { CHAT_STARTERS } from "./starters";
@@ -10,6 +10,11 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const ask = trpc.chat.ask.useMutation();
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setInput(q);
+  }, []);
 
   async function send(text = input) {
     const q = text.trim();

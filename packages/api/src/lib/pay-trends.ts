@@ -1,5 +1,5 @@
 import { and, eq, gte, lte } from "drizzle-orm";
-import { payrollMonths, incomeTaxMonths, financialProfiles, type Db } from "@finvesting/db";
+import { payrollMonths, incomeTaxMonths, financialProfiles, type Db, type DbClient } from "@finvesting/db";
 import {
   buildPayTrends,
   payTrendMonths,
@@ -27,7 +27,7 @@ function fromRow(r: typeof payrollMonths.$inferSelect): PayTrendPoint {
 }
 
 export async function upsertPayrollMonth(
-  db: Db,
+  db: DbClient,
   userId: string,
   month: string,
   pay: {

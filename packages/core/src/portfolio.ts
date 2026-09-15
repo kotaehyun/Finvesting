@@ -35,7 +35,10 @@ export function buildPositions(trades: TradeLike[]): Map<string, Position> {
       p.avgCost = newQty > 0 ? (prevCost + addCost) / newQty : 0;
       p.quantity = newQty;
     } else {
-      const qty = Math.min(t.quantity, p.quantity);
+      if (t.quantity > p.quantity) {
+        throw new Error(`매도 수량이 보유(${p.quantity})보다 많습니다`);
+      }
+      const qty = t.quantity;
       const pnl = (t.price - p.avgCost) * qty - fee;
       p.realizedPnl += pnl;
       // 원화: 매도금액×매도환율 − 매입원가×매입환율

@@ -20,6 +20,10 @@ const FEEDS: Array<{
   { id: "marketwatch", url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", publisher: "MarketWatch", lang: "en", board: "news" },
   { id: "fed-press", url: "https://www.federalreserve.gov/feeds/press_all.xml", publisher: "Federal Reserve", lang: "en", board: "news" },
   { id: "ecb-press", url: "https://www.ecb.europa.eu/rss/press.html", publisher: "ECB", lang: "en", board: "news" },
+  { id: "coindesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/", publisher: "CoinDesk", lang: "en", board: "news" },
+  { id: "cointelegraph", url: "https://cointelegraph.com/rss", publisher: "Cointelegraph", lang: "en", board: "news" },
+  { id: "fxstreet", url: "https://www.fxstreet.com/rss/news", publisher: "FXStreet", lang: "en", board: "news" },
+  { id: "hankyung-realestate", url: "https://www.hankyung.com/feed/realestate", publisher: "한국경제 부동산", lang: "ko", board: "news" },
   // 오피니언 — 2026-09-13 GET으로 확인. 매경은 공식 RSS 목록에 오피니언 없음.
   { id: "hankyung-opinion", url: "https://www.hankyung.com/feed/opinion", publisher: "한국경제 오피니언", lang: "ko", board: "opinion" },
   { id: "yonhap-opinion", url: "https://www.yna.co.kr/rss/opinion.xml", publisher: "연합뉴스 오피니언", lang: "ko", board: "opinion" },

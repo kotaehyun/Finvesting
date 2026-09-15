@@ -18,6 +18,11 @@
 ## 목록
 | 날짜 | 제목 | 상태 |
 |---|---|---|
+| 2026-09-15 | MapLibre GeoJSON 워커 URL (Next) | 해결 |
+| 2026-09-14 | TradingView technical-analysis S&P 「데이터 없음」 | 해결 (`SP:SPX`) |
+| 2026-09-14 | 웹 React 19 / 모바일 React 18 타입 충돌 | 해결 |
+| 2026-09-14 | TradingView iframe contentWindow is not available | 해결 |
+| 2026-09-14 | TradingView symbol-overview 「잘못된 심볼」 | 해결 |
 | 2026-09-02 | File 'expo/tsconfig.base' not found | 해결 |
 | 2026-09-02 | 대시보드 월 종료일 Postgres date 오류 | 해결 |
 | 2026-09-02 | drizzle-kit `Cannot find module ./common.js` + `url: undefined` | 해결 |

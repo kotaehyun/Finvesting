@@ -7,6 +7,8 @@ import { collectFred } from "./sources/fred";
 import { collectYahoo } from "./sources/yahoo";
 import { collectDart } from "./sources/dart";
 import { collectEdgar } from "./sources/edgar";
+import { collectWorldBankInflation } from "./sources/worldbank";
+import { collectBisPolicyRates } from "./sources/bis";
 
 // 수집 스케줄 (KST). 각 소스는 실패해도 다른 소스에 영향 없음.
 const jobs: Array<[string, string, () => Promise<unknown>]> = [
@@ -17,6 +19,8 @@ const jobs: Array<[string, string, () => Promise<unknown>]> = [
   ["Yahoo 미국시세",  "*/30 * * * *", collectYahoo],     // 30분마다
   ["DART 재무제표",   "0 3 * * 1",    collectDart],      // 매주 월 03시
   ["EDGAR 재무제표",  "0 4 * * 1",    collectEdgar],     // 매주 월 04시
+  ["세계은행 물가",   "0 8 * * 1",    collectWorldBankInflation], // 매주 월 08시
+  ["BIS 정책금리",    "0 8 * * 1,4",  collectBisPolicyRates],     // 월·목 08시
 ];
 
 async function run(name: string, fn: () => Promise<unknown>) {

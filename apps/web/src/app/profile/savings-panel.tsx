@@ -221,7 +221,12 @@ export const SavingsPanel = forwardRef<SavingsHandle, {
   return (
     <>
       <h3>적금내역</h3>
-      <p className="erp-hint">상품명·금리·내용과 월 납입을 적습니다. 만기 이자는 세전 추정(중도해지·우대조건 없음). 저장해야 반영됩니다.</p>
+      <p className="erp-hint">
+        상품명·금리·내용과 월 납입을 적습니다. 만기 이자는 세전 추정(중도해지·우대조건 없음). 저장해야 반영됩니다.
+        {" "}<a href="/profile?menu=invest">09 투자내역</a>
+        {" · "}
+        <a href="/profile?menu=style">10 투자성향</a>
+      </p>
       <table className="erp-grid">
         <thead>
           <tr>

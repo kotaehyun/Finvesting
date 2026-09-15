@@ -17,7 +17,7 @@ function Dashboard() {
     <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}>
       <Text style={{ fontSize: 22, fontWeight: "700" }}>{data.month}</Text>
       <View style={{ borderWidth: 1, borderColor: "#8884", borderRadius: 10, padding: 14 }}>
-        <Text style={{ opacity: 0.7 }}>순자산</Text>
+        <Text style={{ opacity: 0.7 }}>현재 순자산</Text>
         <Text style={{ fontSize: 24, fontWeight: "700" }}>{won(data.assets.net)}</Text>
       </View>
       <View style={{ borderWidth: 1, borderColor: "#8884", borderRadius: 10, padding: 14 }}>

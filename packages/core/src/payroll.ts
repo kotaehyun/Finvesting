@@ -69,18 +69,23 @@ export function emptyIncomeTaxBase(): IncomeTaxBase {
 }
 
 /** 과세표준 ≈ 총급여 − 근로소득공제 − 본인 기본공제 − 국민연금(연). 다른 소득공제는 없음. */
-export function incomeTaxBaseFromMonthly(monthlyGross: number, monthlyPension = 0): IncomeTaxBase {
-  const monthly = Math.max(0, Math.floor(Number(monthlyGross) || 0));
-  const annualGross = monthly * 12;
-  const deduction = earnedIncomeDeduction(annualGross);
-  const earnedIncome = Math.max(0, annualGross - deduction);
-  const pensionDeduction = Math.max(0, Math.floor(Number(monthlyPension) || 0)) * 12;
+export function incomeTaxBaseFromAnnual(annualGross: number, annualPension = 0): IncomeTaxBase {
+  const g = Math.max(0, Math.floor(Number(annualGross) || 0));
+  const deduction = earnedIncomeDeduction(g);
+  const earnedIncome = Math.max(0, g - deduction);
+  const pensionDeduction = Math.max(0, Math.floor(Number(annualPension) || 0));
   const taxableBase = Math.max(0, earnedIncome - BASIC_PERSONAL_EXEMPTION - pensionDeduction);
   return {
-    annualGross, earnedIncomeDeduction: deduction, earnedIncome,
+    annualGross: g, earnedIncomeDeduction: deduction, earnedIncome,
     personalExemption: BASIC_PERSONAL_EXEMPTION, pensionDeduction,
     taxableBase, monthlyTaxableBase: truncWon(taxableBase / 12),
   };
+}
+
+export function incomeTaxBaseFromMonthly(monthlyGross: number, monthlyPension = 0): IncomeTaxBase {
+  const monthly = Math.max(0, Math.floor(Number(monthlyGross) || 0));
+  const pension = Math.max(0, Math.floor(Number(monthlyPension) || 0));
+  return incomeTaxBaseFromAnnual(monthly * 12, pension * 12);
 }
 
 export function statutoryWithholding(grossIncome: number, nationalTax = 0): StatutoryWithholding {

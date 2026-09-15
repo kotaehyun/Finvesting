@@ -50,6 +50,13 @@
       "when": 1789291724502,
       "tag": "0006_absent_jetstream",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789372475190,
+      "tag": "0007_cloudy_star_brand",
+      "breakpoints": true
     }
   ]
 }

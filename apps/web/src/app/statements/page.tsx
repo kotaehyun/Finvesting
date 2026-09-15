@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { FS_ITEM_LABELS, FS_STATEMENT_LABELS, lookupServices } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
+import { InvestTrail } from "../invest-trail";
 
 const won = (n: number, currency: string) =>
   currency === "KRW"
@@ -42,7 +43,9 @@ export default function StatementsPage() {
       <p className="muted">
         숫자는 DART/EDGAR 표준 항목만 둡니다. 기업개황·재무조회·감사보고서는 공식 사이트로 엽니다.
         해설은 「재무제표를 읽는 사람들」을 참조하고, 본문은 저장하지 않습니다.
+        Yahoo 시총·PER 표는 Fundamentals입니다.
       </p>
+      <InvestTrail current="statements" />
       <LookupCard query={picked?.symbol || picked?.name} />
       {list.isLoading && <p className="muted">불러오는 중…</p>}
       {list.data && !list.data.length && (
