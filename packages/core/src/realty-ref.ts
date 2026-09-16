@@ -147,11 +147,11 @@ export const REALTY_MIND = {
       id: "regulated",
       label: "규제지역",
       tone: "warn" as const,
-      summary: "투기과열 · 조정대상. 여기 들어가면 오른쪽 고대출 규칙이 붙습니다.",
+      summary: "투기과열 · 조정대상. 여기 들어가면 오른쪽 대출규제 규칙이 붙습니다.",
     },
     {
       id: "loan",
-      label: "고대출 위험군",
+      label: "대출규제 위험군",
       tone: "danger" as const,
       summary: "규제지역·수도권에서 한도가 확 줄어드는 경우. 매수 권유가 아닙니다.",
     },

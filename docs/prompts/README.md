@@ -18,6 +18,7 @@
 | [13-data-source.md](./13-data-source.md) | 수집 소스(어댑터) 추가 |
 | [14-ai-chatbot.md](./14-ai-chatbot.md) | 챗봇·프롬프트·RAG 작업 |
 | [20-code-review.md](./20-code-review.md) | 코드 리뷰 (review/ 연동) |
+| [21-ledger-correctness-fixes.md](./21-ledger-correctness-fixes.md) | 2026-09-15 금융 원장 오류 5건 수정·회귀 검증 |
 | [90-session-end.md](./90-session-end.md) | 세션 종료 — 문서 갱신 |
 | [conventions.md](./conventions.md) | 코딩 컨벤션 (프롬프트에서 참조) |
 
@@ -26,3 +27,5 @@
 |---|---|---|
 | 2026-09-02 | 초기 작성 | |
 | 2026-09-02 | 부트스트랩·세션 종료에 `docs/verification/` 기록 단계 추가 | 모델별 검증 여부를 구분하기 위해 |
+
+| 2026-09-15 | 금융 원장 오류 5건 수정 프롬프트 추가 | 리뷰 재현 사례·완료 조건·데이터 보존 정책 인계 |

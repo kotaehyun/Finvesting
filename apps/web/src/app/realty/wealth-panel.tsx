@@ -4,7 +4,6 @@ import {
   REALTY_WEALTH_GIFT,
   REALTY_WEALTH_LINKS,
   REALTY_WEALTH_METHODS,
-  REALTY_WEALTH_PRIVACY,
   REALTY_WEALTH_SHARE,
   REALTY_WEALTH_TRUST,
   fmtManPeople,
@@ -24,107 +23,163 @@ export function RealtyWealthPanel() {
 
   return (
     <div className="wealth-panel">
-      <p className="muted" style={{ margin: "0 0 10px" }}>{REALTY_WEALTH_PRIVACY}</p>
+      {/* 1. 자산 분위별 집중도 및 실물자산 비중 */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>💎</span> 순자산 분위별 편중도 및 실물자산 비중
+          </h4>
+          <span className="realty-subblock-source">{w.source} ({w.asOf})</span>
+        </div>
+        <div className="sub-kpi-grid">
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>👑</span> 상위 10% 순자산 점유율
+            </div>
+            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{w.topShare}%</div>
+            <p className="sub-kpi-sub">전년비 +{w.topShareDeltaPp}%p 상승 · 하위 50% 순자산 총합 {w.bottom50Share}%</p>
+          </div>
 
-      <h4 style={{ margin: "0 0 6px" }}>자산 비중(분위)</h4>
-      <p className="muted" style={{ margin: "0 0 8px" }}>
-        {w.source}. {w.asOf}. {w.note}
-      </p>
-      <div className="official-kpis">
-        <div className="index-cell">
-          <div className="muted">상위 10% 순자산</div>
-          <div className="big" style={{ fontSize: 20 }}>{w.topShare}%</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>전년 +{w.topShareDeltaPp}%p · 하위 50% 합 {w.bottom50Share}%</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">10분위 평균 순자산</div>
-          <div className="big" style={{ fontSize: 20 }}>{formatManwon(w.topAvgMan)}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>1분위 {formatManwon(w.bottomAvgMan)} · 전체 평균 {formatManwon(w.avgNetMan)}</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">실물 비중</div>
-          <div className="big" style={{ fontSize: 20 }}>{w.realShare}%</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>금융 {w.finShare}% · 부동산 보유가구 {w.realHoldHh}%</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">순자산 지니</div>
-          <div className="big" style={{ fontSize: 20 }}>{w.giniNet}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>전년 {w.giniNetPrev} · 10억 이상 가구 {w.over10eok}%</p>
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>💰</span> 10분위 평균 순자산
+            </div>
+            <div className="sub-kpi-val highlight">{formatManwon(w.topAvgMan)}</div>
+            <p className="sub-kpi-sub">전체 가구 평균 {formatManwon(w.avgNetMan)} (1분위 {formatManwon(w.bottomAvgMan)})</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>🏠</span> 자산 내 실물(부동산) 비중
+            </div>
+            <div className="sub-kpi-val highlight">{w.realShare}%</div>
+            <p className="sub-kpi-sub">금융자산 비중 {w.finShare}% · 부동산 실보유 가구 {w.realHoldHh}%</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>📊</span> 순자산 지니계수
+            </div>
+            <div className="sub-kpi-val">{w.giniNet}</div>
+            <p className="sub-kpi-sub">전년 {w.giniNetPrev} · 10억원 이상 자산 보유가구 {w.over10eok}%</p>
+          </div>
         </div>
       </div>
 
-      <h4 style={{ margin: "16px 0 6px" }}>이동 방식(채널)</h4>
-      <p className="muted" style={{ margin: "0 0 8px" }}>
-        누가 옮겼는지가 아니라 어떤 창구로 집계되는지만 봅니다. 법정 공개 고위공직 증가분은 저축·주식 {o.netPct}% · 공시가 {o.appraisalPct}%입니다.
-      </p>
-      <div className="official-kpis">
-        <div className="index-cell">
-          <div className="muted">법인 종부세 세액</div>
-          <div className="big" style={{ fontSize: 20 }}>{fmtPct(ntsCgtCorpTaxShare())}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>인원 {fmtPct(ntsCgtCorpPeopleShare())} · {fmtManPeople(c.corpPeople)}</p>
+      {/* 2. 부의 이전 및 세무 거래 채널 (증여·상속·종부세) */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>🔄</span> 부의 이전 및 과세 채널 (종부세·증여·상속)
+          </h4>
+          <span className="realty-subblock-source">국세청 종합부동산세 및 상속·증여세 확정 통계</span>
         </div>
-        <div className="index-cell">
-          <div className="muted">다주택 종부세</div>
-          <div className="big" style={{ fontSize: 20 }}>{fmtManPeople(c.multiPeople)}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>1주택 {fmtManPeople(c.singlePeople)} · 서울 소재 {c.seoulSharePct}%</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">증여세</div>
-          <div className="big" style={{ fontSize: 20 }}>{(g.giftCases / 10_000).toFixed(1)}만 건</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>{g.giftTaxEok.toLocaleString("ko-KR")}억 · 상속·증여 세액 중 {(giftTaxShareOfEstate() * 100).toFixed(1)}%</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">상속세</div>
-          <div className="big" style={{ fontSize: 20 }}>{fmtManPeople(g.inheritPeople)}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>{g.inheritTaxEok.toLocaleString("ko-KR")}억 · {g.note}</p>
-        </div>
-      </div>
-      <div className="official-kpis" style={{ marginTop: 12 }}>
-        <div className="index-cell">
-          <div className="muted">부동산신탁사 수탁</div>
-          <div className="big" style={{ fontSize: 20 }}>{t.realtyJo}조</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>전체 신탁 {t.allJo}조 중 {t.realtyShare}% · {t.note}</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">공개직 증가 요인</div>
-          <div className="big" style={{ fontSize: 20 }}>순재산 {o.netPct}%</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>저축·주식 {formatManwon(o.netMan)} · 공시가 {formatManwon(o.appraisalMan)} · 법정 공개분만</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">공개직 명의</div>
-          <div className="big" style={{ fontSize: 20 }}>본인 {formatManwon(o.selfMan)}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>배우자 {formatManwon(o.spouseMan)} · 기타가족 {formatManwon(o.kinMan)} · 1인 평균</p>
+        <div className="sub-kpi-grid">
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>🏢</span> 법인 종부세 세액 비중
+            </div>
+            <div className="sub-kpi-val highlight">{fmtPct(ntsCgtCorpTaxShare())}</div>
+            <p className="sub-kpi-sub">인원 비중 {fmtPct(ntsCgtCorpPeopleShare())} ({fmtManPeople(c.corpPeople)})</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>👥</span> 다주택 종부세 납세자
+            </div>
+            <div className="sub-kpi-val">{fmtManPeople(c.multiPeople)}</div>
+            <p className="sub-kpi-sub">1주택자 {fmtManPeople(c.singlePeople)} · 서울 소재 납세자 {c.seoulSharePct}%</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>🎁</span> 연간 증여세 결정 건수
+            </div>
+            <div className="sub-kpi-val highlight">{(g.giftCases / 10_000).toFixed(1)}만 건</div>
+            <p className="sub-kpi-sub">세액 {g.giftTaxEok.toLocaleString("ko-KR")}억원 (상속·증여 총세액의 {(giftTaxShareOfEstate() * 100).toFixed(1)}%)</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>📜</span> 연간 상속세 과세 인원
+            </div>
+            <div className="sub-kpi-val">{fmtManPeople(g.inheritPeople)}</div>
+            <p className="sub-kpi-sub">총 세액 {g.inheritTaxEok.toLocaleString("ko-KR")}억원 · 피상속인 기준</p>
+          </div>
         </div>
       </div>
 
-      <h4 style={{ margin: "16px 0 6px" }}>채널 표</h4>
-      <div className="table-wrap">
-        <table className="realty-table">
-          <thead>
-            <tr>
-              <th>방식</th>
-              <th>넣기</th>
-              <th>내용</th>
-            </tr>
-          </thead>
-          <tbody>
-            {REALTY_WEALTH_METHODS.map((row) => (
-              <tr key={row.id}>
-                <td>{row.label}</td>
-                <td>{row.putLabel}</td>
-                <td>{row.how}</td>
+      {/* 3. 신탁 및 공직자 명의 구조 */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>🏛️</span> 부동산 신탁 수탁고 및 자산 등록 구조
+          </h4>
+          <span className="realty-subblock-source">금융투자협회 신탁통계 & 인사혁신처 공직윤리시스템</span>
+        </div>
+        <div className="sub-kpi-grid">
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>🏦</span> 부동산신탁사 수탁고
+            </div>
+            <div className="sub-kpi-val highlight">{t.realtyJo}조원</div>
+            <p className="sub-kpi-sub">전체 신탁 {t.allJo}조원 중 {t.realtyShare}% 차지 (담보·개발 신탁 등)</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>📈</span> 공직자 재산 증가 주요인
+            </div>
+            <div className="sub-kpi-val">순재산 {o.netPct}%</div>
+            <p className="sub-kpi-sub">저축·주식 등 {formatManwon(o.netMan)} (공시가 상승분 {formatManwon(o.appraisalMan)})</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>👤</span> 공직자 평균 명의 구조
+            </div>
+            <div className="sub-kpi-val">본인 {formatManwon(o.selfMan)}</div>
+            <p className="sub-kpi-sub">배우자 {formatManwon(o.spouseMan)} · 직계가족 {formatManwon(o.kinMan)} (1인 평균 기준)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. 자산 이동 채널 요약 표 & 공식 링크 */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>📋</span> 자산 이전 채널별 통계 산출 방식
+          </h4>
+          <span className="realty-subblock-source">공식 공표 데이터 산출 기준</span>
+        </div>
+        <div className="table-wrap">
+          <table className="realty-table">
+            <thead>
+              <tr>
+                <th>이전 방식</th>
+                <th>공식 집계 창구</th>
+                <th>통계적 정의 및 처리</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="starter-list" style={{ marginTop: 10 }}>
-        <a className="starter" href={REALTY_WEALTH_LINKS.survey} target="_blank" rel="noreferrer">가계금융복지조사</a>
-        <a className="starter" href={REALTY_WEALTH_LINKS.gift} target="_blank" rel="noreferrer">상속·증여세</a>
-        <a className="starter" href={REALTY_WEALTH_LINKS.tasis} target="_blank" rel="noreferrer">TASIS</a>
-        <a className="starter" href={REALTY_WEALTH_LINKS.trust} target="_blank" rel="noreferrer">신탁업 실적</a>
-        <a className="starter" href={REALTY_WEALTH_LINKS.rebBuyer} target="_blank" rel="noreferrer">거래주체별</a>
-        <a className="starter" href={REALTY_WEALTH_LINKS.dart} target="_blank" rel="noreferrer">DART</a>
+            </thead>
+            <tbody>
+              {REALTY_WEALTH_METHODS.map((row) => (
+                <tr key={row.id}>
+                  <td style={{ fontWeight: 650 }}>{row.label}</td>
+                  <td><span className="zone-chip">{row.putLabel}</span></td>
+                  <td>{row.how}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="starter-list" style={{ marginTop: 14 }}>
+          <a className="starter" href={REALTY_WEALTH_LINKS.survey} target="_blank" rel="noreferrer">가계금융복지조사</a>
+          <a className="starter" href={REALTY_WEALTH_LINKS.gift} target="_blank" rel="noreferrer">상속·증여세 통계</a>
+          <a className="starter" href={REALTY_WEALTH_LINKS.tasis} target="_blank" rel="noreferrer">국세통계포털 TASIS</a>
+          <a className="starter" href={REALTY_WEALTH_LINKS.trust} target="_blank" rel="noreferrer">신탁업 실적 공시</a>
+          <a className="starter" href={REALTY_WEALTH_LINKS.rebBuyer} target="_blank" rel="noreferrer">부동산원 거래주체별</a>
+          <a className="starter" href={REALTY_WEALTH_LINKS.dart} target="_blank" rel="noreferrer">전자공시 DART</a>
+        </div>
       </div>
     </div>
   );

@@ -2,8 +2,11 @@ import { desc, eq } from "drizzle-orm";
 import { fundamentals, instruments, type Db } from "@finvesting/db";
 import {
   parseFundamentalExtra,
-  type FundamentalSnapshot,
+  FALLBACK_FUNDAMENTAL_ROWS,
+  type FundamentalBoardRow,
 } from "@finvesting/core";
+
+export type { FundamentalBoardRow };
 
 function num(v: string | null | undefined): number | null {
   if (v == null) return null;
@@ -11,14 +14,9 @@ function num(v: string | null | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export type FundamentalBoardRow = FundamentalSnapshot & {
-  instrumentId: string;
-  market: string;
-  assetClass: string;
-};
-
 export async function loadLatestFundamentals(db: Db): Promise<FundamentalBoardRow[]> {
-  const rows = await db.select({
+  try {
+    const rows = await db.select({
     instrumentId: fundamentals.instrumentId,
     date: fundamentals.date,
     source: fundamentals.source,
@@ -72,5 +70,8 @@ export async function loadLatestFundamentals(db: Db): Promise<FundamentalBoardRo
       extra: parseFundamentalExtra(r.extra),
     });
   }
-  return out;
+    return out.length > 0 ? out : FALLBACK_FUNDAMENTAL_ROWS;
+  } catch {
+    return FALLBACK_FUNDAMENTAL_ROWS;
+  }
 }

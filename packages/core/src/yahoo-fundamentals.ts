@@ -50,6 +50,215 @@ export type FundamentalSnapshot = {
   extra: FundamentalExtra;
 };
 
+export type FundamentalBoardRow = FundamentalSnapshot & {
+  instrumentId: string;
+  market: string;
+  assetClass: string;
+};
+
+export function isKoreanSymbol(symbol: string): boolean {
+  const s = symbol.trim().toUpperCase();
+  return s.endsWith(".KS") || s.endsWith(".KQ") || /^\d{6}$/.test(s);
+}
+
+export function extractKoreanCode(symbol: string): string | null {
+  const s = symbol.trim().toUpperCase();
+  const match = s.match(/^(\d{6})/);
+  return (match && match[1]) ? match[1] : null;
+}
+
+export function statementsUrl(symbol: string): string {
+  const code = extractKoreanCode(symbol);
+  const q = code ?? symbol.trim();
+  return `/statements?q=${encodeURIComponent(q)}`;
+}
+
+export type MarketRegion = "all" | "us" | "kr";
+
+export function marketRegionFor(symbol: string, market?: string): "us" | "kr" | "other" {
+  if (isKoreanSymbol(symbol) || market?.toUpperCase() === "KRX") return "kr";
+  const m = market?.toUpperCase();
+  if (m === "US" || m === "NASDAQ" || m === "NYSE" || !symbol.includes(".")) return "us";
+  return "other";
+}
+
+export type FundamentalSignal = {
+  id: string;
+  label: string;
+  tone: "positive" | "info" | "warn" | "accent";
+};
+
+export function evaluateFundamentalSignals(
+  row: Pick<FundamentalSnapshot, "pbr" | "per" | "roe" | "dividendYield" | "debtToEquity">,
+): FundamentalSignal[] {
+  const signals: FundamentalSignal[] = [];
+  if (row.pbr != null && row.pbr > 0 && row.pbr < 1.0) {
+    signals.push({ id: "low_pbr", label: "저PBR <1.0", tone: "accent" });
+  }
+  if (row.roe != null && row.roe >= 0.15) {
+    signals.push({ id: "high_roe", label: "우량ROE ≥15%", tone: "positive" });
+  }
+  if (row.dividendYield != null && row.dividendYield >= 4.0) {
+    signals.push({ id: "high_div", label: "고배당 ≥4%", tone: "info" });
+  }
+  if (row.debtToEquity != null && row.debtToEquity > 200) {
+    signals.push({ id: "high_debt", label: "부채주의 >200%", tone: "warn" });
+  }
+  return signals;
+}
+
+export function fiftyTwoWeekPosition(low?: number, high?: number, current?: number): number | null {
+  if (low == null || high == null || current == null) return null;
+  if (high <= low) return null;
+  const pos = ((current - low) / (high - low)) * 100;
+  return Math.min(100, Math.max(0, Math.round(pos)));
+}
+
+export const FALLBACK_FUNDAMENTAL_ROWS: FundamentalBoardRow[] = [
+  {
+    instrumentId: "fallback-aapl",
+    symbol: "AAPL",
+    name: "Apple Inc.",
+    market: "US",
+    assetClass: "stock",
+    currency: "USD",
+    date: "2026-09-15",
+    source: "yahoo",
+    marketCap: 3450000000000,
+    per: 34.2,
+    forwardPer: 30.5,
+    pbr: 48.2,
+    eps: 6.75,
+    roe: 1.4875,
+    dividendYield: 0.44,
+    revenueTtm: 391000000000,
+    netIncomeTtm: 101000000000,
+    debtToEquity: 152.3,
+    beta: 1.08,
+    extra: {
+      fiftyTwoWeekLow: 164.08,
+      fiftyTwoWeekHigh: 237.23,
+      ytdReturn: 18.5,
+      averageVolume: 48500000,
+      quoteType: "EQUITY",
+    },
+  },
+  {
+    instrumentId: "fallback-msft",
+    symbol: "MSFT",
+    name: "Microsoft Corporation",
+    market: "US",
+    assetClass: "stock",
+    currency: "USD",
+    date: "2026-09-15",
+    source: "yahoo",
+    marketCap: 3220000000000,
+    per: 35.8,
+    forwardPer: 31.2,
+    pbr: 11.5,
+    eps: 11.8,
+    roe: 0.385,
+    dividendYield: 0.72,
+    revenueTtm: 245000000000,
+    netIncomeTtm: 88100000000,
+    debtToEquity: 42.1,
+    beta: 0.91,
+    extra: {
+      fiftyTwoWeekLow: 366.5,
+      fiftyTwoWeekHigh: 468.35,
+      ytdReturn: 14.2,
+      averageVolume: 21500000,
+      quoteType: "EQUITY",
+    },
+  },
+  {
+    instrumentId: "fallback-nvda",
+    symbol: "NVDA",
+    name: "NVIDIA Corporation",
+    market: "US",
+    assetClass: "stock",
+    currency: "USD",
+    date: "2026-09-15",
+    source: "yahoo",
+    marketCap: 3050000000000,
+    per: 52.4,
+    forwardPer: 40.1,
+    pbr: 51.2,
+    eps: 2.25,
+    roe: 1.15,
+    dividendYield: 0.03,
+    revenueTtm: 96300000000,
+    netIncomeTtm: 53000000000,
+    debtToEquity: 18.5,
+    beta: 1.68,
+    extra: {
+      fiftyTwoWeekLow: 45.0,
+      fiftyTwoWeekHigh: 140.76,
+      ytdReturn: 135.0,
+      averageVolume: 65000000,
+      quoteType: "EQUITY",
+    },
+  },
+  {
+    instrumentId: "fallback-005930",
+    symbol: "005930.KS",
+    name: "삼성전자",
+    market: "KRX",
+    assetClass: "stock",
+    currency: "KRW",
+    date: "2026-09-15",
+    source: "yahoo",
+    marketCap: 410000000000000,
+    per: 14.2,
+    forwardPer: 10.8,
+    pbr: 0.98,
+    eps: 4650,
+    roe: 0.082,
+    dividendYield: 2.35,
+    revenueTtm: 300000000000000,
+    netIncomeTtm: 35000000000000,
+    debtToEquity: 26.4,
+    beta: 0.95,
+    extra: {
+      fiftyTwoWeekLow: 56000,
+      fiftyTwoWeekHigh: 88800,
+      ytdReturn: -12.4,
+      averageVolume: 18000000,
+      quoteType: "EQUITY",
+    },
+  },
+  {
+    instrumentId: "fallback-spy",
+    symbol: "SPY",
+    name: "SPDR S&P 500 ETF Trust",
+    market: "US",
+    assetClass: "etf",
+    currency: "USD",
+    date: "2026-09-15",
+    source: "yahoo",
+    marketCap: 580000000000,
+    per: null,
+    forwardPer: null,
+    pbr: null,
+    eps: null,
+    roe: null,
+    dividendYield: 1.22,
+    revenueTtm: null,
+    netIncomeTtm: null,
+    debtToEquity: null,
+    beta: 1.0,
+    extra: {
+      fiftyTwoWeekLow: 410.0,
+      fiftyTwoWeekHigh: 565.0,
+      ytdReturn: 18.2,
+      netExpenseRatio: 0.0945,
+      netAssets: 580000000000,
+      averageVolume: 52000000,
+      quoteType: "ETF",
+    },
+  },
+];
+
 export function yahooSavesFundamentals(assetClass: string, quoteType?: string | null): boolean {
   const qt = (quoteType ?? "").toUpperCase();
   if (qt === "EQUITY" || qt === "ETF") return true;

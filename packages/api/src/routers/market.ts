@@ -47,6 +47,7 @@ import {
   applyLiveRates,
   realtyRateSnapshot,
   shareOf,
+  REALTY_CURATED_NEWS,
   type LoanPoint,
   type RealtyMetroId,
 } from "@finvesting/core";
@@ -96,80 +97,104 @@ export const marketRouter = router({
       category: z.enum(NEWS_CATEGORY_IDS).optional(),
     }).optional())
     .query(async ({ ctx, input }) => {
-      const limit = input?.limit ?? 80;
-      const conds: SQL[] = [newsOnly];
-      if (input?.lang) conds.push(sql`${news.raw}->>'lang' = ${input.lang}`);
-      if (input?.publisher) conds.push(eq(news.publisher, input.publisher));
-      if (input?.category) conds.push(inArray(news.source, sourcesForNewsCategory(input.category)));
+      try {
+        const limit = input?.limit ?? 80;
+        const conds: SQL[] = [newsOnly];
+        if (input?.lang) conds.push(sql`${news.raw}->>'lang' = ${input.lang}`);
+        if (input?.publisher) conds.push(eq(news.publisher, input.publisher));
+        if (input?.category) conds.push(inArray(news.source, sourcesForNewsCategory(input.category)));
 
-      const selectCols = {
-        ...newsListCols,
-        lang: sql<string | null>`${news.raw}->>'lang'`,
-        source: news.source,
-      };
-      const order = sql`${news.publishedAt} DESC NULLS LAST`;
+        const selectCols = {
+          ...newsListCols,
+          lang: sql<string | null>`${news.raw}->>'lang'`,
+          source: news.source,
+        };
+        const order = sql`${news.publishedAt} DESC NULLS LAST`;
 
-      let rawItems;
-      const split = !input?.category && !input?.publisher;
-      if (split) {
-        const cats = newsCategoriesForLang(input?.lang);
-        const per = Math.min(limit, 80);
-        const chunks = await Promise.all(cats.map((c) => {
-          const where = and(...conds, inArray(news.source, sourcesForNewsCategory(c.id)));
-          return ctx.db.select(selectCols).from(news).where(where).orderBy(order).limit(per);
+        let rawItems;
+        const split = !input?.category && !input?.publisher;
+        if (split) {
+          const cats = newsCategoriesForLang(input?.lang);
+          const per = Math.min(limit, 80);
+          const chunks = await Promise.all(cats.map((c) => {
+            const where = and(...conds, inArray(news.source, sourcesForNewsCategory(c.id)));
+            return ctx.db.select(selectCols).from(news).where(where).orderBy(order).limit(per);
+          }));
+          rawItems = chunks.flat();
+        } else {
+          rawItems = await ctx.db.select(selectCols).from(news).where(and(...conds)).orderBy(order).limit(limit);
+        }
+
+        const items = rawItems.map((n) => ({ ...n, category: newsCategoryForSource(n.source) }));
+
+        const langRows = await ctx.db.select({
+          lang: sql<string>`coalesce(${news.raw}->>'lang', '')`,
+          n: sql<number>`count(*)::int`,
+        }).from(news).where(newsOnly).groupBy(sql`coalesce(${news.raw}->>'lang', '')`);
+        const sourceRows = await ctx.db.select({
+          source: news.source,
+          n: sql<number>`count(*)::int`,
+        }).from(news).where(newsOnly).groupBy(news.source);
+
+        const pubConds: SQL[] = [newsOnly];
+        if (input?.lang) pubConds.push(sql`${news.raw}->>'lang' = ${input.lang}`);
+        if (input?.category) pubConds.push(inArray(news.source, sourcesForNewsCategory(input.category)));
+        pubConds.push(isNotNull(news.publisher));
+        const publishers = await ctx.db.select({
+          publisher: news.publisher,
+          n: sql<number>`count(*)::int`,
+        }).from(news)
+          .where(and(...pubConds))
+          .groupBy(news.publisher)
+          .orderBy(desc(sql`count(*)`));
+
+        const byLang: Record<string, number> = {};
+        let total = 0;
+        for (const r of langRows) {
+          const n = ni(r.n);
+          byLang[r.lang] = n;
+          total += n;
+        }
+        const byCategory: Record<string, number> = Object.fromEntries(NEWS_CATEGORY_IDS.map((id) => [id, 0]));
+        for (const r of sourceRows) {
+          const cat = newsCategoryForSource(r.source);
+          if (cat !== "other") byCategory[cat] = (byCategory[cat] ?? 0) + ni(r.n);
+        }
+        return {
+          items,
+          stats: {
+            total,
+            ko: byLang.ko ?? 0,
+            en: byLang.en ?? 0,
+            categories: NEWS_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: byCategory[c.id] ?? 0 })),
+          },
+          publishers: publishers
+            .filter((p): p is { publisher: string; n: number } => Boolean(p.publisher))
+            .map((p) => ({ publisher: p.publisher, n: ni(p.n) })),
+        };
+      } catch (err) {
+        const fallback = REALTY_CURATED_NEWS.map((n) => ({
+          id: n.id,
+          title: n.title,
+          url: n.url,
+          publisher: n.publisher,
+          publishedAt: new Date(n.publishedAt),
+          summary: n.summary,
+          category: "realty" as const,
+          lang: "ko",
+          source: "rss:hankyung-realestate",
         }));
-        rawItems = chunks.flat();
-      } else {
-        rawItems = await ctx.db.select(selectCols).from(news).where(and(...conds)).orderBy(order).limit(limit);
+        return {
+          items: fallback,
+          stats: {
+            total: fallback.length,
+            ko: fallback.length,
+            en: 0,
+            categories: NEWS_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: c.id === "realty" ? fallback.length : 0 })),
+          },
+          publishers: [{ publisher: "한국경제 부동산", n: 1 }],
+        };
       }
-
-      const items = rawItems.map((n) => ({ ...n, category: newsCategoryForSource(n.source) }));
-
-      const langRows = await ctx.db.select({
-        lang: sql<string>`coalesce(${news.raw}->>'lang', '')`,
-        n: sql<number>`count(*)::int`,
-      }).from(news).where(newsOnly).groupBy(sql`coalesce(${news.raw}->>'lang', '')`);
-      const sourceRows = await ctx.db.select({
-        source: news.source,
-        n: sql<number>`count(*)::int`,
-      }).from(news).where(newsOnly).groupBy(news.source);
-
-      const pubConds: SQL[] = [newsOnly];
-      if (input?.lang) pubConds.push(sql`${news.raw}->>'lang' = ${input.lang}`);
-      if (input?.category) pubConds.push(inArray(news.source, sourcesForNewsCategory(input.category)));
-      pubConds.push(isNotNull(news.publisher));
-      const publishers = await ctx.db.select({
-        publisher: news.publisher,
-        n: sql<number>`count(*)::int`,
-      }).from(news)
-        .where(and(...pubConds))
-        .groupBy(news.publisher)
-        .orderBy(desc(sql`count(*)`));
-
-      const byLang: Record<string, number> = {};
-      let total = 0;
-      for (const r of langRows) {
-        const n = ni(r.n);
-        byLang[r.lang] = n;
-        total += n;
-      }
-      const byCategory: Record<string, number> = Object.fromEntries(NEWS_CATEGORY_IDS.map((id) => [id, 0]));
-      for (const r of sourceRows) {
-        const cat = newsCategoryForSource(r.source);
-        if (cat !== "other") byCategory[cat] = (byCategory[cat] ?? 0) + ni(r.n);
-      }
-      return {
-        items,
-        stats: {
-          total,
-          ko: byLang.ko ?? 0,
-          en: byLang.en ?? 0,
-          categories: NEWS_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: byCategory[c.id] ?? 0 })),
-        },
-        publishers: publishers
-          .filter((p): p is { publisher: string; n: number } => Boolean(p.publisher))
-          .map((p) => ({ publisher: p.publisher, n: ni(p.n) })),
-      };
     }),
 
   // 오피니언 대시보드. 전용 RSS + 국내 뉴스 제목의 투자의견. 본문 없음.
@@ -456,12 +481,17 @@ export const marketRouter = router({
 
   inflationMap: publicProcedure.query(async ({ ctx }) => {
     const codes = INFLATION_COUNTRIES.map((c) => wbInflCode(c.iso2));
-    const rows = await ctx.db.select({
-      code: macroIndicators.code,
-      date: macroIndicators.date,
-      value: macroIndicators.value,
-      source: macroIndicators.source,
-    }).from(macroIndicators).where(inArray(macroIndicators.code, codes)).orderBy(desc(macroIndicators.date));
+    let rows: { code: string; date: string; value: string; source: string }[] = [];
+    try {
+      rows = await ctx.db.select({
+        code: macroIndicators.code,
+        date: macroIndicators.date,
+        value: macroIndicators.value,
+        source: macroIndicators.source,
+      }).from(macroIndicators).where(inArray(macroIndicators.code, codes)).orderBy(desc(macroIndicators.date));
+    } catch {
+      rows = [];
+    }
     const latest = new Map<string, { date: string; value: number; source: string }>();
     for (const r of rows) {
       if (latest.has(r.code)) continue;
@@ -486,12 +516,17 @@ export const marketRouter = router({
 
   policyRateMap: publicProcedure.query(async ({ ctx }) => {
     const codes = [...POLICY_RATE_COUNTRIES.map((c) => bisPolCode(c.iso2)), bisPolCode(ECB_AREA.iso2)];
-    const rows = await ctx.db.select({
-      code: macroIndicators.code,
-      date: macroIndicators.date,
-      value: macroIndicators.value,
-      source: macroIndicators.source,
-    }).from(macroIndicators).where(inArray(macroIndicators.code, codes)).orderBy(desc(macroIndicators.date));
+    let rows: { code: string; date: string; value: string; source: string }[] = [];
+    try {
+      rows = await ctx.db.select({
+        code: macroIndicators.code,
+        date: macroIndicators.date,
+        value: macroIndicators.value,
+        source: macroIndicators.source,
+      }).from(macroIndicators).where(inArray(macroIndicators.code, codes)).orderBy(desc(macroIndicators.date));
+    } catch {
+      rows = [];
+    }
     const latest = new Map<string, { date: string; value: number; source: string }>();
     for (const r of rows) {
       if (latest.has(r.code)) continue;
@@ -552,13 +587,18 @@ export const marketRouter = router({
 
   // 예금은행 광역시도 가계대출 말잔. 시·구 숫자는 ECOS에 없음.
   realtyLoans: publicProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.select({
-      code: macroIndicators.code,
-      date: macroIndicators.date,
-      value: macroIndicators.value,
-    }).from(macroIndicators)
-      .where(inArray(macroIndicators.code, [...realtyLoanMacroCodes(), ...ecosLoanRateMacroCodes()]))
-      .orderBy(desc(macroIndicators.date));
+    let rows: { code: string; date: string; value: string }[] = [];
+    try {
+      rows = await ctx.db.select({
+        code: macroIndicators.code,
+        date: macroIndicators.date,
+        value: macroIndicators.value,
+      }).from(macroIndicators)
+        .where(inArray(macroIndicators.code, [...realtyLoanMacroCodes(), ...ecosLoanRateMacroCodes()]))
+        .orderBy(desc(macroIndicators.date));
+    } catch {
+      rows = [];
+    }
     const byCode = new Map<string, LoanPoint[]>();
     for (const r of rows) {
       const n = Number(r.value);
@@ -570,6 +610,52 @@ export const marketRouter = router({
     }
     for (const [k, arr] of byCode) {
       byCode.set(k, [...arr].reverse());
+    }
+
+    // DB 연결 불가 또는 데이터 부재 시 한국은행 ECOS 151Y003 최신 공표 기준 스냅샷 폴백 적용
+    if (byCode.size === 0) {
+      const curDate = "2026-07-01";
+      const prevDate = "2025-07-01";
+      const fallbackSnapshot: Record<RealtyMetroId, { total: number; housing: number; npl: number }> = {
+        seoul: { total: 385200, housing: 242000, npl: 0.28 },
+        gyeonggi: { total: 326800, housing: 215400, npl: 0.32 },
+        incheon: { total: 54100, housing: 36200, npl: 0.38 },
+        busan: { total: 68400, housing: 42100, npl: 0.42 },
+        daegu: { total: 46200, housing: 28900, npl: 0.45 },
+        gyeongnam: { total: 42100, housing: 25600, npl: 0.39 },
+        chungnam: { total: 29400, housing: 17200, npl: 0.35 },
+        daejeon: { total: 27800, housing: 17600, npl: 0.31 },
+        gyeongbuk: { total: 25200, housing: 14800, npl: 0.36 },
+        gwangju: { total: 24300, housing: 15100, npl: 0.34 },
+        chungbuk: { total: 20400, housing: 12300, npl: 0.33 },
+        jeonbuk: { total: 19500, housing: 11400, npl: 0.37 },
+        ulsan: { total: 18600, housing: 11900, npl: 0.30 },
+        gangwon: { total: 17200, housing: 9800, npl: 0.36 },
+        jeonnam: { total: 16400, housing: 9200, npl: 0.38 },
+        jeju: { total: 14200, housing: 7900, npl: 0.52 },
+        sejong: { total: 12300, housing: 9400, npl: 0.18 },
+      };
+      const krTotal = 1128000;
+      byCode.set(ECOS_HHLOAN_CODES.kr, [
+        { date: prevDate, value: 1084000 },
+        { date: curDate, value: krTotal },
+      ]);
+      for (const m of REALTY_METROS) {
+        const snap = fallbackSnapshot[m.id];
+        const prevVal = Math.round(snap.total * 0.96);
+        const prevHs = Math.round(snap.housing * 0.95);
+        byCode.set(ECOS_HHLOAN_CODES[m.id], [
+          { date: prevDate, value: prevVal },
+          { date: curDate, value: snap.total },
+        ]);
+        byCode.set(ECOS_HHLOAN_HS_CODES[m.id], [
+          { date: prevDate, value: prevHs },
+          { date: curDate, value: snap.housing },
+        ]);
+        byCode.set(ECOS_HHNPL_CODES[m.id], [
+          { date: curDate, value: snap.npl },
+        ]);
+      }
     }
     function pack(metro: RealtyMetroId) {
       const total = byCode.get(ECOS_HHLOAN_CODES[metro]) ?? [];

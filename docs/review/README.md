@@ -29,3 +29,4 @@ AI 도구가 리뷰하면 반드시 여기에 남기고, 반영 여부를 표시
 | 2026-09-13 | feat/financial-profile 작업 트리 + 현황·기획 종합 | Claude (Cowork) | 1~4 반영 (`feat/quote-targets`). 5~14 미반영 |
 | 2026-09-02 | feat/first-run 머지 후 dev | Cursor (Grok) | 1–6, 8–10, 12 반영. 7·11 보류, 13 크롤러 예정 |
 | 2026-09-02 | 스캐폴딩 전 폴더 | Cursor (검토: Claude) | 1–19, 21–23 반영, 20 보류(cheerio 크롤러 예정) |
+| 2026-09-15 | 금융 원장 재검토 | Codex | [기록](./2026-09-15-codex-ledger.md). P1 3건 재현, 기존 P2 2건 미해결 |

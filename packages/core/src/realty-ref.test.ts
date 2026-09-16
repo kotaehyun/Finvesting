@@ -35,7 +35,7 @@ describe("realty ref", () => {
     expect(fresh.every((p) => p.since === "2026-07-01")).toBe(true);
   });
 
-  it("고대출 위험군에 LTV·한도·DSR이 있고 마인드맵 가지가 셋이다", () => {
+  it("대출규제 위험군에 LTV·한도·DSR이 있고 마인드맵 가지가 셋이다", () => {
     const ids = REALTY_LOAN_RISKS.map((r) => r.id);
     expect(ids).toContain("ltv");
     expect(ids).toContain("cap");

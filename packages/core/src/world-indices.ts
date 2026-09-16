@@ -79,7 +79,7 @@ export function tvTickerTapeSymbols() {
 }
 
 /** symbol-overview는 [표시이름, 심볼|기간]. 티커 테이프 [proName, title]과 순서가 반대다. */
-export function tvSymbolOverviewSymbols() {
+export function tvSymbolOverviewSymbols(): [string, string][] {
   return tvTickerTapeSymbols().map((s) => [s.title, `${s.proName}|1D`]);
 }
 

@@ -24,7 +24,7 @@ export type RealtyMapPoint = {
 };
 
 const REGULATED_NOTES: Record<string, string> = {
-  seoul: "서울 25구 전역. 투기과열·조정대상·토허(아파트 등). 고대출 규칙이 붙습니다.",
+  seoul: "서울 25구 전역. 투기과열·조정대상·토허(아파트 등). 대출규제 규칙이 붙습니다.",
   gwacheon: "투기과열·조정대상. 효력 2025-10-16.",
   gwangmyeong: "투기과열·조정대상. 효력 2025-10-16.",
   bundang: "투기과열·조정대상. 효력 2025-10-16.",
@@ -74,7 +74,7 @@ const CONTEXT: readonly RealtyMapPoint[] = [
   { id: "pyeongtaek", label: "평택", lat: 36.992497, lng: 127.112717, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
   { id: "paju", label: "파주", lat: 37.759896, lng: 126.78015, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
   { id: "yangju", label: "양주", lat: 37.784931, lng: 127.045777, kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
-  { id: "hwaseong", label: "화성(시)", lat: 37.199465, lng: 126.831263, kind: "growth", tone: "info", note: "성장관리. 규제·고대출은 동탄구만." },
+  { id: "hwaseong", label: "화성(시)", lat: 37.199465, lng: 126.831263, kind: "growth", tone: "info", note: "성장관리. 규제·대출규제는 동탄구만." },
   { id: "gapyeong", label: "가평", lat: 37.8314, lng: 127.5098, kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
   { id: "yangpyeong", label: "양평", lat: 37.4916, lng: 127.4875, kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
   { id: "yeoju", label: "여주", lat: 37.29829, lng: 127.637033, kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
@@ -161,7 +161,7 @@ const GY_PLAN: Record<string, Omit<RealtyPlanStyle, "short" | "metro">> = {
   용인시기흥구: { id: "giheung", label: "용인 기흥", kind: "regulated", tone: "danger", fresh: true, note: REGULATED_NOTES.giheung! },
   용인시수지구: { id: "suji", label: "용인 수지", kind: "regulated", tone: "warn", note: REGULATED_NOTES.suji! },
   파주시: { id: "paju", label: "파주", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
-  화성시: { id: "hwaseong", label: "화성", kind: "growth", tone: "info", hatch: true, note: "성장관리. 규제·고대출은 동탄구만. 이 도면은 2018 시군구라 동탄구 면이 없습니다." },
+  화성시: { id: "hwaseong", label: "화성", kind: "growth", tone: "info", hatch: true, note: "성장관리. 규제·대출규제는 동탄구만. 이 도면은 2018 시군구라 동탄구 면이 없습니다." },
   양주시: { id: "yangju", label: "양주", kind: "growth", tone: "info", note: "성장관리권역(별표). 규제지역 목록은 아님." },
   여주시: { id: "yeoju", label: "여주", kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },
   가평군: { id: "gapyeong", label: "가평", kind: "nature", tone: "info", note: "자연보전권역(별표). 규제지역 목록은 아님." },

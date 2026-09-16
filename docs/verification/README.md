@@ -36,17 +36,17 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ 통과. 웹은 `@types/react` 19만 해석 | 2026-09-14 | Grok |
-| core 테스트 (vitest) | ✅ 139개 통과 | 2026-09-15 | Grok |
+| 타입체크 (web 포함 8패키지) | ✅ 통과. 웹은 `@types/react` 19만 해석 | 2026-09-16 | Gemini |
+| core 테스트 (vitest) | ✅ 45개 파일 147개 테스트 전건 통과 | 2026-09-16 | Gemini |
 | interop 테스트 | ✅ 11개 통과 | 2026-09-14 | Grok |
 | `pnpm db:generate` / `db:migrate` | ✅ `0007_cloudy_star_brand` (`invest_style`) 적용 | 2026-09-14 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/`·`/invest` 포함 13 라우트 | 2026-09-14 | Grok |
+| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/fundamentals` 포함 15 라우트 빌드 통과 | 2026-09-16 | Gemini |
 | 홈 `/` 개편 (월 선택·현금흐름·확인할 일) | ✅ 데스크톱. 평가손익 **+7,382원** 빨강. 2026-08은 현재 순자산 구분·거래 없음 문구. 모바일 390px 스택. 빈 계정 온보딩은 DB에 계좌 있어 미확인 | 2026-09-15 | Grok Chrome |
 | `/invest` 투자 대시보드 | ✅ 검색 관심 추가 AAPL 332.27 USD. 평가손익 `+7,382원` 빨강 | 2026-09-15 | Grok Chrome |
-| `/fundamentals` Yahoo 펀더멘털 표 | ✅ 영문 칸. AAPL/MSFT/SPY. ROE 148.8%·배당 0.33% | 2026-09-15 | Grok Chrome |
+| `/fundamentals` Yahoo 펀더멘털 표 | ✅ 4대 KPI 요약 바롬터, 자산군/시장 다중 필터, 전 컬럼 정렬, 저PBR/우량ROE 뱃지, 52주 게이지, 네이버/DART/AI 링크 연동 및 DB 오프라인 방어 폴백 확인 | 2026-09-16 | Gemini |
 | `/markets` 시장 (물가·금리·거래량·수급링크·크립토/외환·TA) | ✅ 인플레 16칸. BIS 금리 17칸(한 2.75·미 3.63·튀르키예 37). 히트맵·뉴스 | 2026-09-14 | Grok Chrome |
-| `/realty` 부동산 | ✅ 전월세 점유 임차 38%·거래 월세 68.3%. 카드 연체 1.54·카드대출 3.35·리볼빙 12.1%(6.88조). 공실·빈집·연체·경매 이전 확인. 이번 세션 데이터 업데이트는 newsFeed/realtyLoans 500. ECOS 키 skip | 2026-09-15 | Grok Chrome |
+| `/realty` 부동산 | ✅ tRPC 500 에러 완전 해소(200 OK). ECOS 151Y003 스냅샷 폴백. 개인회생·파산 원인별 통계, 경매 유찰률 4대 카드, 뉴스 그리드, 대출규제 3D 맵 정상 렌더링 확인 | 2026-09-16 | Gemini Playwright |
 | `/profile` 프로필대장 + `workspaceSave`/`previewPay` | ✅ 페이지 200, 저장 추가·삭제 원상복구, 4대보험 미리보기 숫자 확인. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
 | `/profile` 급여상세 차·대변 (보통예금 전표) | ✅ 차변 지급=대변 공제+보통예금=세전 4,200,000. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
 | `/profile` 임금명세서 고용노동부 예시 칸 | ✅ core 27 · statement 대변 라벨 소득세. 칸 클릭·수당 입력은 미실행 | 2026-09-12 | Grok tRPC |
@@ -77,11 +77,12 @@
 | Yahoo 기업 검색 | ✅ `005930`→005930.KS. Chrome `AAPL`→Apple Inc. 나스닥. 한글 회사명 Yahoo 400 | 2026-09-14 | Grok Chrome 재기동 |
 
 | 모바일 Expo 기동 + 루트 .env 로드 | ❌ 미실행 | | |
-| 윈도우 환경 전체 | ❌ 경로 미정 | | |
+| 윈도우 환경 전체 | ✅ `pnpm install`, core 139개·interop 11개 테스트, 8개 패키지 typecheck, build, dev:web 브라우저 렌더 확인 (DB는 Docker 미기동) | 2026-09-15 | Gemini |
 
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-09-15 | Gemini (맥 최신 작업 윈도우 교차 검증) | [2026-09-15-gemini.md](./2026-09-15-gemini.md) |
 | 2026-09-15 | Codex (백엔드·AI 방향 문서화) | [2026-09-15-codex.md](./2026-09-15-codex.md) |
 | 2026-09-15 | Cursor Grok (관심·Fundamentals·연말정산) | [2026-09-15-grok-2.md](./2026-09-15-grok-2.md) |
 | 2026-09-15 | Cursor Grok (평가손익 부호·색) | [2026-09-15-grok.md](./2026-09-15-grok.md) |
@@ -121,3 +122,9 @@
 | 2026-09-02 | Claude (Cowork, 스캐폴딩) | [2026-09-02-claude.md](./2026-09-02-claude.md) |
 | 2026-09-02 | Cursor | [2026-09-02-cursor.md](./2026-09-02-cursor.md) |
 | 2026-09-02 | Claude (Cowork, 리뷰 검토) | [2026-09-02-claude-2.md](./2026-09-02-claude-2.md) |
+
+## 2026-09-15 Codex 교차 검증
+| 항목 | 상태 | 기록 |
+|---|---|---|
+| Windows 타입 검사 / 단위 테스트 | ✅ 8패키지 / 150개 통과 | [기록](./2026-09-15-codex-2.md) |
+| 금융 원장 경계 사례 | ⚠️ 소수 매도·동일 시각 정렬·하루치 잔액 오류 재현 | [리뷰](../review/2026-09-15-codex-ledger.md) |

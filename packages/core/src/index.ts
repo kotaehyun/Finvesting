@@ -42,3 +42,5 @@ export * from "./yahoo-fundamentals";
 export * from "./invest-style";
 export * from "./signed-amount";
 export * from "./year-end-pay";
+export * from "./realty-news";
+export * from "./realty-bankruptcy";

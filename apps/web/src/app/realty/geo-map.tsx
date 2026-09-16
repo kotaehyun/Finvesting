@@ -34,7 +34,7 @@ function fillOf(s: RealtyPlanStyle) {
 }
 
 function kindLabel(s: RealtyPlanStyle) {
-  if (s.kind === "regulated") return s.fresh ? "규제 · 고대출 · 7/1" : "규제 · 고대출";
+  if (s.kind === "regulated") return s.fresh ? "규제 · 대출규제 · 7/1" : "규제 · 대출규제";
   if (s.kind === "overcrowded") return "과밀억제";
   if (s.kind === "growth") return s.hatch ? "성장관리 · 동탄만 규제" : "성장관리";
   if (s.kind === "nature") return "자연보전";
@@ -275,7 +275,7 @@ export function RealtyGeoMap({
               metro: "gyeonggi",
               label: dongtan.label,
               short: "동탄구",
-              kindLabel: "규제 · 고대출 · 7/1",
+              kindLabel: "규제 · 대출규제 · 7/1",
               note: dongtan.note,
             });
           }
@@ -340,7 +340,7 @@ export function RealtyGeoMap({
                   placeId: "dongtan",
                   code: "dongtan",
                   label: dongtan.label,
-                  kindLabel: "규제 · 고대출 · 7/1",
+                  kindLabel: "규제 · 대출규제 · 7/1",
                   note: dongtan.note,
                 },
                 geometry: { type: "Point", coordinates: [dongtan.lng, dongtan.lat] },
@@ -404,7 +404,7 @@ export function RealtyGeoMap({
               const d = REALTY_MAP_POINTS.find((x) => x.id === "dongtan");
               if (d) {
                 map.easeTo({ center: [d.lng, d.lat], zoom: 10.4, pitch: 48, bearing: -16, duration: 700 });
-                openPop([d.lng, d.lat], d.label, "규제 · 고대출 · 7/1", d.note);
+                openPop([d.lng, d.lat], d.label, "규제 · 대출규제 · 7/1", d.note);
               }
               return;
             }
@@ -480,7 +480,7 @@ export function RealtyGeoMap({
     <div className="realty-map-wrap">
       <div ref={el} className="realty-geo realty-plan" role="img" aria-label="전국 부동산 3D 도면" />
       <div className="realty-map-legend">
-        <div><span className="dot danger" />고대출·7/1</div>
+        <div><span className="dot danger" />대출규제·7/1</div>
         <div><span className="dot warn" />규제지역</div>
         <div><span className="dot info" />과밀억제</div>
         <div><span className="dot growth" />성장관리</div>

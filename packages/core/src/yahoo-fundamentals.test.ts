@@ -7,7 +7,14 @@ import {
   parseFundamentalExtra,
   yahooQuoteUrl,
   yahooSavesFundamentals,
+  isKoreanSymbol,
+  statementsUrl,
+  marketRegionFor,
+  evaluateFundamentalSignals,
+  fiftyTwoWeekPosition,
+  FALLBACK_FUNDAMENTAL_ROWS,
 } from "./yahoo-fundamentals";
+import { naverStockUrl } from "./yahoo-search";
 
 describe("yahooSavesFundamentals", () => {
   it("주식·ETF만 저장한다", () => {
@@ -67,3 +74,49 @@ describe("parse / context / url", () => {
     expect(yahooQuoteUrl("")).toBe("https://finance.yahoo.com/");
   });
 });
+
+describe("한국 종목 및 시장 판별", () => {
+  it("코스피/코스닥 심볼을 식별하고 네이버 및 statements URL을 만든다", () => {
+    expect(isKoreanSymbol("005930.KS")).toBe(true);
+    expect(isKoreanSymbol("035720.KQ")).toBe(true);
+    expect(isKoreanSymbol("000660")).toBe(true);
+    expect(isKoreanSymbol("AAPL")).toBe(false);
+
+    expect(naverStockUrl("005930.KS")).toBe("https://stock.naver.com/domestic/stock/005930/price");
+    expect(naverStockUrl("AAPL")).toBeNull();
+
+    expect(statementsUrl("005930.KS")).toBe("/statements?q=005930");
+    expect(statementsUrl("AAPL")).toBe("/statements?q=AAPL");
+
+    expect(marketRegionFor("005930.KS")).toBe("kr");
+    expect(marketRegionFor("AAPL")).toBe("us");
+    expect(marketRegionFor("NESN.SW", "SWX")).toBe("other");
+  });
+});
+
+describe("투자 신호 및 52주 게이지", () => {
+  it("저PBR, 우량ROE, 고배당, 고부채 신호를 평가한다", () => {
+    const signals = evaluateFundamentalSignals({
+      pbr: 0.85,
+      per: 12.0,
+      roe: 0.18,
+      dividendYield: 4.5,
+      debtToEquity: 250,
+    });
+    expect(signals.map((s) => s.id)).toEqual(["low_pbr", "high_roe", "high_div", "high_debt"]);
+  });
+
+  it("52주 주가 위치 비율을 계산한다", () => {
+    expect(fiftyTwoWeekPosition(100, 200, 150)).toBe(50);
+    expect(fiftyTwoWeekPosition(100, 200, 90)).toBe(0);
+    expect(fiftyTwoWeekPosition(100, 200, 210)).toBe(100);
+    expect(fiftyTwoWeekPosition(undefined, 200, 150)).toBeNull();
+  });
+
+  it("폴백 펀더멘털 행이 5개 이상 존재하고 유효하다", () => {
+    expect(FALLBACK_FUNDAMENTAL_ROWS.length).toBeGreaterThanOrEqual(5);
+    expect(FALLBACK_FUNDAMENTAL_ROWS.some((r) => r.symbol === "AAPL")).toBe(true);
+    expect(FALLBACK_FUNDAMENTAL_ROWS.some((r) => r.symbol === "005930.KS")).toBe(true);
+  });
+});
+

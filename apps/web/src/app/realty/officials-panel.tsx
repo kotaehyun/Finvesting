@@ -11,91 +11,118 @@ export function RealtyOfficialsPanel() {
   const a = REALTY_OFFICIAL_ASSET;
   return (
     <div className="official-panel">
-      <p className="muted" style={{ margin: "0 0 10px" }}>
-        사적 자산가·재벌·연예인·임원 명단은 없습니다. 4급 이상은 재산등록이지 공개가 아닙니다. 종부세 집계에서 고위공직자만 빼는 표도 없습니다.
-        아래 성명은 공직자윤리법상 재산공개 대상(광역단체장)뿐입니다.
-        {a.source}. 기준 {a.asOf}, 공개 {a.published}. 사이트는 긁지 않습니다.
-      </p>
-      <div className="official-kpis">
-        <div className="index-cell">
-          <div className="muted">공개 대상</div>
-          <div className="big" style={{ fontSize: 20 }}>{a.count.toLocaleString("ko-KR")}명</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>행정부 관할. 국회·법원은 같은 시스템에서 따로.</p>
+      {/* 1. 고위공직자 재산 등록 및 증가 핵심 지표 블록 */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>🎖️</span> 고위공직자 정기 재산 변동 통계
+          </h4>
+          <span className="realty-subblock-source">{a.source} (공개일 {a.published})</span>
         </div>
-        <div className="index-cell">
-          <div className="muted">1인 평균</div>
-          <div className="big" style={{ fontSize: 20 }}>{formatManwon(a.avgMan)}</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>직전 {formatManwon(a.prevAvgMan)} → {formatManwon(a.deltaMan)} 증가</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">재산 증가</div>
-          <div className="big" style={{ fontSize: 20 }}>{a.upPct}%</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>{a.up.toLocaleString("ko-KR")}명 증가 · {a.down.toLocaleString("ko-KR")}명 감소</p>
-        </div>
-        <div className="index-cell">
-          <div className="muted">증가 요인</div>
-          <div className="big" style={{ fontSize: 18 }}>순재산 {a.netPct}%</div>
-          <p className="muted" style={{ margin: "6px 0 0" }}>저축·주식 {formatManwon(a.netMan)} · 공시가 {formatManwon(a.appraisalMan)}</p>
+        <div className="sub-kpi-grid">
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>👥</span> 공개 대상 고위공직자
+            </div>
+            <div className="sub-kpi-val highlight">{a.count.toLocaleString("ko-KR")}명</div>
+            <p className="sub-kpi-sub">정부공직자윤리위원회 관할 행정부 고위직</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>💰</span> 1인당 평균 신고재산
+            </div>
+            <div className="sub-kpi-val highlight">{formatManwon(a.avgMan)}</div>
+            <p className="sub-kpi-sub">전년 {formatManwon(a.prevAvgMan)} 대비 +{formatManwon(a.deltaMan)} 증가</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>📈</span> 재산 증가자 비율
+            </div>
+            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{a.upPct}%</div>
+            <p className="sub-kpi-sub">증가 {a.up.toLocaleString("ko-KR")}명 · 감소 {a.down.toLocaleString("ko-KR")}명</p>
+          </div>
+
+          <div className="sub-kpi-card">
+            <div className="sub-kpi-title">
+              <span>📊</span> 재산 증가 주원인
+            </div>
+            <div className="sub-kpi-val">순재산 {a.netPct}%</div>
+            <p className="sub-kpi-sub">저축·투자 등 {formatManwon(a.netMan)} (공시가 상승분 {formatManwon(a.appraisalMan)})</p>
+          </div>
         </div>
       </div>
 
-      <h4 style={{ margin: "16px 0 6px" }}>광역단체장 주택 방향</h4>
-      <p className="muted" style={{ margin: "0 0 8px" }}>
-        {REALTY_OFFICIAL_METRO_HEADS}명(대구 공석 제외). 관할이 아닌 서울·경기 주택 {realtyOfficialCapitalAwayCount()}명.
-        개인 총액 순위가 아니라 소재 방향입니다. 원문은 관보.
-      </p>
-      <div className="table-wrap">
-        <table className="realty-table">
-          <thead>
-            <tr>
-              <th>방향</th>
-              <th className="num">인원</th>
-              <th>설명</th>
-            </tr>
-          </thead>
-          <tbody>
-            {REALTY_OFFICIAL_FLOW_ROWS.map((r) => (
-              <tr key={r.id}>
-                <td>{r.label}</td>
-                <td className="num">{r.count}</td>
-                <td>{r.note}</td>
+      {/* 2. 광역단체장 주택 보유 분포 */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>🏛️</span> 광역단체장 주택 소재지 분포 분석
+          </h4>
+          <span className="realty-subblock-source">관보 공시 기준 (총 {REALTY_OFFICIAL_METRO_HEADS}명)</span>
+        </div>
+        <div className="table-wrap">
+          <table className="realty-table">
+            <thead>
+              <tr>
+                <th>분포 유형</th>
+                <th className="num">인원</th>
+                <th>설명</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {REALTY_OFFICIAL_FLOW_ROWS.map((r) => (
+                <tr key={r.id}>
+                  <td style={{ fontWeight: 600 }}>{r.label}</td>
+                  <td className="num">{r.count}</td>
+                  <td>{r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <h4 style={{ margin: "16px 0 6px" }}>확인된 소재</h4>
-      <div className="table-wrap">
-        <table className="realty-table">
-          <thead>
-            <tr>
-              <th>직위</th>
-              <th>성명</th>
-              <th>관할</th>
-              <th>주택 소재</th>
-              <th>명의</th>
-              <th>방향</th>
-            </tr>
-          </thead>
-          <tbody>
-            {REALTY_OFFICIAL_HOUSES.map((h) => (
-              <tr key={`${h.office}-${h.name}`}>
-                <td>{h.office}</td>
-                <td>{h.name}</td>
-                <td>{h.metroLabel}</td>
-                <td>{h.house}</td>
-                <td>{h.title}</td>
-                <td>{h.flowLabel}</td>
+      {/* 3. 관할 외 수도권 주택 보유 현황 */}
+      <div className="realty-subblock-card">
+        <div className="realty-subblock-head">
+          <h4 className="realty-subblock-title">
+            <span>📍</span> 관할 외 수도권 주택 보유 공직자 명단
+          </h4>
+          <span className="realty-subblock-source">대한민국 전자관보 공시</span>
+        </div>
+        <div className="table-wrap">
+          <table className="realty-table">
+            <thead>
+              <tr>
+                <th>직위</th>
+                <th>성명</th>
+                <th>관할 구역</th>
+                <th>주택 소재지</th>
+                <th>소유 명의</th>
+                <th>방향</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="starter-list" style={{ marginTop: 10 }}>
-        <a className="starter" href={a.url} target="_blank" rel="noreferrer">인사혁신처 보도</a>
-        <a className="starter" href={a.peti} target="_blank" rel="noreferrer">공직윤리시스템</a>
-        <a className="starter" href={a.gwanbo} target="_blank" rel="noreferrer">전자관보</a>
+            </thead>
+            <tbody>
+              {REALTY_OFFICIAL_HOUSES.map((h) => (
+                <tr key={`${h.office}-${h.name}`}>
+                  <td style={{ fontWeight: 600 }}>{h.office}</td>
+                  <td>{h.name}</td>
+                  <td>{h.metroLabel}</td>
+                  <td>{h.house}</td>
+                  <td>{h.title}</td>
+                  <td><span className="zone-chip warn">{h.flowLabel}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="starter-list" style={{ marginTop: 12 }}>
+          <a className="starter" href={a.url} target="_blank" rel="noreferrer">인사혁신처 보도자료</a>
+          <a className="starter" href={a.peti} target="_blank" rel="noreferrer">공직윤리시스템</a>
+          <a className="starter" href={a.gwanbo} target="_blank" rel="noreferrer">대한민국 전자관보</a>
+        </div>
       </div>
     </div>
   );
