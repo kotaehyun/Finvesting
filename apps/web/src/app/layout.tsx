@@ -19,9 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/statements">재무제표</a>
             <a href="/fundamentals">Fundamentals</a>
             <a href="/profile">프로필대장</a>
+            <a href="/erp">업무</a>
             <a href="/news">뉴스</a>
             <a href="/opinions">오피니언</a>
-            <a href="/chat">Chat</a>
+            <a href="/chat">투자 봇AI</a>
           </nav>
           <main className="main">{children}</main>
         </Providers>

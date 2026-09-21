@@ -9,6 +9,8 @@ import { SavingsPanel, type SavingsHandle } from "./savings-panel";
 import { InvestPanel } from "./invest-panel";
 import { InsurancePanel, type InsuranceHandle } from "./insurance-panel";
 import { InvestStylePanel, type InvestStyleHandle } from "./invest-style-panel";
+import { TaxBooksPanel } from "./tax-books-panel";
+import { YearEndPanel } from "./year-end-panel";
 import {
   draftPayEarnings,
   payEarningGroupOf,
@@ -62,6 +64,8 @@ const MENUS = [
   { id: "invest", no: "09", label: "투자내역" },
   { id: "style", no: "10", label: "투자성향" },
   { id: "insurance", no: "11", label: "보험내역" },
+  { id: "yearEnd", no: "12", label: "연말정산" },
+  { id: "taxBooks", no: "13", label: "양도·배당" },
 ] as const;
 type MenuId = (typeof MENUS)[number]["id"];
 
@@ -291,6 +295,14 @@ function ProfileWorkspace() {
       setMsg("체결은 보유 화면에서 입력합니다.");
       return;
     }
+    if (menu === "yearEnd") {
+      setMsg("연말정산 업무는 조회입니다. 월 명세는 07에서 저장합니다.");
+      return;
+    }
+    if (menu === "taxBooks") {
+      setMsg("양도·배당은 조회·가계 CSV만 있습니다. 연말정산은 12, 급여는 07입니다.");
+      return;
+    }
     if (menu === "savings") {
       try {
         await savRef.current?.save();
@@ -388,6 +400,8 @@ function ProfileWorkspace() {
     } else if (menu === "invest") {
       router.push("/holdings");
       return;
+    } else if (menu === "taxBooks" || menu === "yearEnd") {
+      return;
     } else {
       const row = emptyRec();
       setRecRows((rows) => [...rows.filter((r) => r.name.trim() || r.amount), row]);
@@ -398,7 +412,7 @@ function ProfileWorkspace() {
   }
 
   function onDelete() {
-    if (menu === "invest") return;
+    if (menu === "invest" || menu === "yearEnd" || menu === "taxBooks") return;
     if (menu === "savings") {
       void Promise.resolve(savRef.current?.remove()).catch((err: unknown) => {
         setMsg(err instanceof Error ? err.message : String(err));
@@ -550,16 +564,19 @@ function ProfileWorkspace() {
     <div className="erp">
       <div className="erp-titlebar">
         <h1>프로필대장 <span className="path">재무관리 › {menuLabel}</span></h1>
-        <label>
-          기준월
-          <input type="month" value={month} onChange={(e) => { setMonth(e.target.value); setDirty(false); }} />
-        </label>
+        <div className="wehago-title-meta">
+          <a href="/erp">사업·프리랜서 업무</a>
+          <label>
+            기준월
+            <input type="month" value={month} onChange={(e) => { setMonth(e.target.value); setDirty(false); }} />
+          </label>
+        </div>
       </div>
       <div className="erp-toolbar">
         <button type="button" onClick={onQuery} disabled={current.isFetching}>조회</button>
         <button type="button" className="primary" onClick={onSave} disabled={save.isPending}>저장</button>
         <button type="button" onClick={onNew}>신규</button>
-        <button type="button" onClick={onDelete} disabled={menu === "invest" || (menu === "savings" || menu === "insurance" || menu === "style" ? false : menu === "tax" ? !selTax : menu === "books" || menu === "master" ? !selEarn : !selRec)}>삭제</button>
+        <button type="button" onClick={onDelete} disabled={menu === "invest" || menu === "yearEnd" || menu === "taxBooks" || (menu === "savings" || menu === "insurance" || menu === "style" ? false : menu === "tax" ? !selTax : menu === "books" || menu === "master" ? !selEarn : !selRec)}>삭제</button>
         <span className="sep" />
         <button type="button" onClick={() => downloadTemplate("recurring", "csv")}>CSV 양식</button>
         <button type="button" onClick={() => downloadTemplate("recurring", "xlsx")}>엑셀 양식</button>
@@ -620,7 +637,7 @@ function ProfileWorkspace() {
             {menu === "master" && (
               <>
                 <h3>기본정보</h3>
-                <p className="erp-hint">세전·국세를 넣고 저장하면 4대보험·지방세·실수령을 계산합니다. 세후를 비우면 세전−공제입니다.</p>
+                <p className="erp-hint">이 대장은 근로자 기준입니다. 세전·국세를 넣고 저장하면 4대보험·지방세·실수령을 계산합니다. 사업·프리랜서 매출·부가세는 <a href="/erp">업무</a> 화면입니다.</p>
                 <table className="erp-props">
                   <tbody>
                     <Prop label="세전 월 소득"><Num value={gross} onChange={(v) => { setGross(v); markDirty(); }} placeholder="기본급+수당+상여 합" /></Prop>
@@ -871,7 +888,7 @@ function ProfileWorkspace() {
                   deductions={deductionRows(pay)}
                   net={pay && pay.gross > 0 ? Math.max(0, (earnRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) || pay.gross) - pay.withholdTotal) : undefined}
                 />
-                {st && <PayYearSection points={st.payTrend} year={st.payYear} monthlyPension={pay?.nationalPension ?? 0} />}
+                {st && <PayYearSection points={st.payTrend} year={st.payYear} />}
                 {st && (
                   <>
                     <h3 style={{ marginTop: 20 }}>급여전표 — {month}</h3>
@@ -912,6 +929,14 @@ function ProfileWorkspace() {
                 onMsg={setMsg}
               />
             )}
+            {menu === "yearEnd" && (
+              <YearEndPanel
+                points={st?.payTrend ?? []}
+                year={st?.payYear}
+                monthlyPension={pay?.nationalPension ?? 0}
+              />
+            )}
+            {menu === "taxBooks" && <TaxBooksPanel />}
           </div>
         </div>
       </div>
@@ -927,6 +952,8 @@ function ProfileWorkspace() {
           <span>보험 {insQ.data.policies.length}건 · 월보험료 {won(insQ.data.policies.reduce((s, p) => s + p.monthlyPremium, 0))}</span>
         )}
         {menu === "style" && <span>투자성향 설문 · 저장 시 배분 성향 반영</span>}
+        {menu === "yearEnd" && <span>근로자 연말정산 업무 · 홈택스 제출 아님</span>}
+        {menu === "taxBooks" && <span>양도·배당 · 세율표 · 가계 CSV</span>}
         {dirty ? <span className="erp-dirty">미저장 변경 있음</span> : <span>저장됨</span>}
       </div>
     </div>
