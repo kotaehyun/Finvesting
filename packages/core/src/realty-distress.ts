@@ -79,18 +79,15 @@ export const REALTY_YOUNG_LEVERAGE = {
 
 export const REALTY_AUCTION = {
   asOf: "2025",
-  source: "대법원 경매신청 및 법원경매정보",
+  source: "대법원 경매신청(보도 인용)",
   filed: 121_261,
   filed2024: 119_312,
   filed2023: 101_150,
-  failRateKr: 68.4,
-  failRateSudoApt: 59.2,
-  failRateNonCapital: 73.8,
   hug: 11_663,
   hugShare: 10,
   hugRecover: 71.5,
   hugRecoverPrev: 29.7,
-  note: "대법원 경매신청 12.1만건 및 전국 평균 유찰률 68.4%(매각률 31.6%). 세부 물건별은 법원경매정보 원문.",
+  note: "신청 건수입니다. 유찰·매각률 월별은 법원경매정보 원문. 민간 사이트를 긁지 않습니다.",
 } as const;
 
 export const REALTY_CRE_YIELD = {
@@ -155,8 +152,4 @@ export function emptyAptShare(): number {
 
 export function auctionYoyPct(): number {
   return ((REALTY_AUCTION.filed - REALTY_AUCTION.filed2024) / REALTY_AUCTION.filed2024) * 100;
-}
-
-export function auctionFailRate(): number {
-  return REALTY_AUCTION.failRateKr;
 }

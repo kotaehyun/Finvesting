@@ -6,6 +6,9 @@ import {
   unionUnique,
   upbitMarketCode,
   yahooTickersFor,
+  yahooBoardMarket,
+  yahooBoardSymbol,
+  DEFAULT_YAHOO_STOCKS,
 } from "./quote-targets";
 
 describe("parseEnvTargets / unionUnique", () => {
@@ -51,6 +54,13 @@ describe("yahooTickersFor", () => {
 
   it("이미 접미가 있으면 그대로", () => {
     expect(yahooTickersFor("KRX", "035420.KQ")).toEqual(["035420.KQ"]);
+  });
+
+  it("카카오는 코스피 .KS를 우선한다", () => {
+    expect(yahooBoardMarket("035720.KS")).toBe("KRX");
+    expect(yahooBoardSymbol("035720.KS")).toBe("035720");
+    expect(yahooTickersFor("KRX", yahooBoardSymbol("035720.KS"))).toEqual(["035720.KS", "035720.KQ"]);
+    expect(DEFAULT_YAHOO_STOCKS).toContain("035720.KS");
   });
 });
 

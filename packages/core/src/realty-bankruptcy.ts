@@ -1,69 +1,87 @@
-// 법원 개인회생·개인파산 및 채무 불이행 원인별 통계
-// 대법원 사법연감, 서울회생법원 실무통계, 신용회복위원회 및 금융투자협회 공표 자료
+// 개인회생·파산은 법원통계월보 신청 건수, 파탄원인은 서울회생법원 중복응답.
+// 주담대 전용 비중·미수금 일별 잔액·면책률은 공표 칸.
 
 export type BankruptcyCause = {
-  id: "living" | "mortgage" | "investment" | "business";
+  id: "living" | "income" | "business" | "invest";
   label: string;
-  share: number; // 전체 비중 (%)
-  youthShare: number; // 2030 청년층 비중 (%)
+  share: number;
   description: string;
-  icon: string;
 };
 
+/** 서울회생법원 2025 상반기 개인파산 파탄원인. 복수 응답이라 합이 100이 아니다. 주담대 항목 없음. */
 export const REALTY_BANKRUPTCY_CAUSES: readonly BankruptcyCause[] = [
   {
     id: "living",
-    label: "생계비·생활대금 부족",
-    share: 42.6,
-    youthShare: 31.5,
-    description: "고물가·실질소득 정체로 인한 생활비 카드대출·소액신용대출 누적 및 돌려막기",
-    icon: "🛒",
-  },
-  {
-    id: "mortgage",
-    label: "무리한 주담대·영끌 원리금 상환 부담",
-    share: 24.3,
-    youthShare: 28.4,
-    description: "고금리 지속에 따른 DSR 한계 초과 및 주택구입 담보대출 원리금 상환 불능",
-    icon: "🏠",
-  },
-  {
-    id: "investment",
-    label: "주식 미수금·반대매매 및 레버리지 투자 손실",
-    share: 17.8,
-    youthShare: 38.2,
-    description: "증권사 위탁매매 미수금 미결제, 신용융자 강제 반대매매 및 가상자산 투자 실패",
-    icon: "📉",
+    label: "생활비 지출 증가",
+    share: 46.65,
+    description: "서울회생법원 개인파산 파탄원인 1위. 카드·소액대출 돌려막기와는 다른 조사입니다.",
   },
   {
     id: "business",
-    label: "사업 실패 및 소상공인 폐업 부채",
-    share: 15.3,
-    youthShare: 1.9,
-    description: "내수 부진·임대료 부담에 따른 자영업 매출 급감 및 사업자대출 연체",
-    icon: "🏪",
+    label: "사업 실패·사업소득 감소",
+    share: 42.92,
+    description: "자영업 매출·사업소득 감소. 생활비와 동시에 고를 수 있습니다.",
+  },
+  {
+    id: "income",
+    label: "실직·근로소득 감소",
+    share: 40.91,
+    description: "근로소득 공백. 생활비 항목과 겹칩니다.",
+  },
+  {
+    id: "invest",
+    label: "투자(주식 등) 실패·사기",
+    share: 13.55,
+    description: "주식·사기 피해. 금투협 미수금 잔액과는 다른 설문입니다.",
   },
 ] as const;
 
 export const REALTY_INSOLVENCY_STATS = {
-  asOf: "2025/2026 공표",
-  source: "대법원 사법연감 · 서울회생법원 · 금융투자협회",
-  // 개인회생 & 개인파산
-  rehabilitationFiled: 125_482, // 개인회생 신청 건수
-  rehabilitationYoyPct: 18.4, // 전년비 증가율 (%)
-  bankruptcyFiled: 41_250, // 개인파산 신청 건수
-  bankruptcyImmunityRate: 85.3, // 법원 면책 인용률 (%)
-  totalInsolvencyFiled: 166_732, // 총 도산 신청
-  // 주식 미수금 및 반대매매
-  stockMarginReceivablesEok: 8_940, // 위탁매매 미수금 잔액 (억원)
-  stockDailyForcedSaleEok: 128, // 일평균 강제 반대매매 규모 (억원)
-  // 신용회복위원회
-  debtAdjustmentCount: 185_200, // 신용회복위원회 채무조정(워크아웃) 접수 건수
+  asOf: "2025",
+  causeAsOf: "2025 상반기",
+  source: "법원통계월보 · 서울회생법원 개인파산 통계조사",
+  rehabilitationFiled: 149_146,
+  rehabilitationFiledPrev: 129_499,
+  bankruptcyFiled: 40_908,
+  bankruptcyFiledPrev: 40_104,
+  /** 2024 확정자. 접수가 아님. */
+  debtAdjustmentAsOf: "2024",
+  debtAdjustmentSettled: 174_841,
+  debtAdjustmentSource: "신용회복위원회(국회 제출)",
+  causeNote: "파탄원인은 중복응답입니다. 합이 100%가 아니고, 주담대·영끌 전용 칸은 없습니다.",
 } as const;
 
 export const REALTY_INSOLVENCY_LINKS = {
-  scourtInsolvency: "https://www.scourt.go.kr/",
+  scourtInsolvency: "https://www.scourt.go.kr/portal/news/NewsViewAction.work?gubun=6&seqnum=2860",
   slbCourt: "https://slb.scourt.go.kr/",
+  slbPdf: "https://slb.scourt.go.kr/rel/information/statistics/stat_file02.pdf",
   ccrs: "https://www.ccrs.or.kr/",
   kofiaMisu: "https://freesis.kofia.or.kr/",
 } as const;
+
+export const REALTY_INSOLVENCY_SLOTS = [
+  {
+    id: "margin",
+    label: "위탁매매 미수금",
+    need: "금투협 일별. 고정 스냅샷을 넣지 않습니다.",
+  },
+  {
+    id: "forced-sale",
+    label: "반대매매",
+    need: "금투협 일별. 일평균을 지어내지 않습니다.",
+  },
+  {
+    id: "discharge",
+    label: "파산 면책 인용률",
+    need: "사법연감 원문 칸. 확인 전 숫자를 넣지 않습니다.",
+  },
+] as const;
+
+export function insolvencyFiledTotal(): number {
+  return REALTY_INSOLVENCY_STATS.rehabilitationFiled + REALTY_INSOLVENCY_STATS.bankruptcyFiled;
+}
+
+export function rehabilitationYoyPct(): number {
+  const s = REALTY_INSOLVENCY_STATS;
+  return ((s.rehabilitationFiled - s.rehabilitationFiledPrev) / s.rehabilitationFiledPrev) * 100;
+}

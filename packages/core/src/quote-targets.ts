@@ -63,6 +63,23 @@ export function yahooTickersFor(market: string, symbol: string): string[] {
   return [s];
 }
 
+/** 펀더멘털 표에 항상 넣는 국내 종목. env YAHOO_TARGETS에 합친다. 카카오 = 코스피 035720. */
+export const DEFAULT_YAHOO_STOCKS = ["035720.KS"] as const;
+
+export function yahooBoardMarket(ticker: string): string {
+  const t = ticker.trim();
+  if (/\.KQ$/i.test(t)) return "KOSDAQ";
+  if (/\.KS$/i.test(t)) return "KRX";
+  if (t.startsWith("^") || t.includes("=")) return "INDEX";
+  return "US";
+}
+
+export function yahooBoardSymbol(ticker: string): string {
+  const t = ticker.trim();
+  const m = t.toUpperCase().match(/^(\d{6})\.(KS|KQ)$/);
+  return m?.[1] ?? t;
+}
+
 export function splitByCollector(rows: InstrumentRef[]): { upbit: InstrumentRef[]; yahoo: InstrumentRef[] } {
   const upbit: InstrumentRef[] = [];
   const yahoo: InstrumentRef[] = [];

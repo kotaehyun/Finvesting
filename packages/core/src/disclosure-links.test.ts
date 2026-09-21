@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { auditorSite, dartCompanyPopupUrl, dartViewerUrl, lookupServices } from "./disclosure-links";
+import {
+  auditorSite,
+  dartCompanyPopupUrl,
+  dartViewerUrl,
+  edgarCompanyUrl,
+  filingVenueFor,
+  lookupServices,
+} from "./disclosure-links";
 
 describe("dart URLs", () => {
   it("접수번호로 뷰어를 연다", () => {
@@ -25,12 +32,46 @@ describe("auditorSite", () => {
   });
 });
 
+describe("filingVenueFor", () => {
+  it("한글·6자리·KS/KQ는 DART", () => {
+    expect(filingVenueFor("삼성전자")).toBe("dart");
+    expect(filingVenueFor("005930")).toBe("dart");
+    expect(filingVenueFor("005930.KS")).toBe("dart");
+    expect(filingVenueFor("035420.KQ")).toBe("dart");
+  });
+
+  it("미국 티커는 EDGAR", () => {
+    expect(filingVenueFor("AAPL")).toBe("edgar");
+    expect(filingVenueFor("BRK.B")).toBe("edgar");
+  });
+
+  it("그 외는 other", () => {
+    expect(filingVenueFor("BTC-USD")).toBe("other");
+  });
+});
+
 describe("lookupServices", () => {
-  it("기업개황·재무조회·읽어주는 사이트를 같이 준다", () => {
+  it("한국 조회는 DART와 국내 해설만", () => {
     const ids = lookupServices("삼성전자").map((s) => s.id);
     expect(ids).toContain("dart-overview");
     expect(ids).toContain("opendart-fnltt");
     expect(ids).toContain("fs-reading");
+    expect(ids).not.toContain("edgar-company");
     expect(lookupServices("삼성전자").find((s) => s.id === "fs-reading")?.url).toBe("https://www.drcr.co.kr/");
+  });
+
+  it("미국 티커는 EDGAR만, 국내 해설 없음", () => {
+    const ids = lookupServices("AAPL").map((s) => s.id);
+    expect(ids).toContain("edgar-company");
+    expect(ids).toContain("edgar-search");
+    expect(ids).not.toContain("fs-reading");
+    expect(ids).not.toContain("dart-overview");
+    expect(lookupServices("AAPL").find((s) => s.id === "edgar-company")?.url).toBe(edgarCompanyUrl("AAPL"));
+    expect(edgarCompanyUrl("BRK.B")).toContain("CIK=BRK.B");
+  });
+
+  it("빈 조회는 DART·EDGAR·국내 해설을 같이 둔다", () => {
+    const ids = lookupServices().map((s) => s.id);
+    expect(ids).toEqual(["dart-overview", "edgar-search", "fs-reading"]);
   });
 });

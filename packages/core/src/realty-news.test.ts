@@ -1,24 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { REALTY_CURATED_NEWS } from "./realty-news";
-import { REALTY_AUCTION, auctionFailRate } from "./realty-distress";
+import { REALTY_NEWS_FEEDS } from "./realty-news";
+import { REALTY_AUCTION, REALTY_DISTRESS_SLOTS } from "./realty-distress";
 
 describe("realty news and auction fail rate", () => {
-  it("공식 언론사 부동산 피드는 헤드라인과 요약만 가지며 본문은 저장하지 않는다", () => {
-    expect(REALTY_CURATED_NEWS.length).toBeGreaterThan(0);
-    for (const item of REALTY_CURATED_NEWS) {
-      expect(item.title).toBeTruthy();
+  it("부동산 뉴스는 RSS·원문 링크만 두고 제목을 만들지 않는다", () => {
+    expect(REALTY_NEWS_FEEDS.length).toBeGreaterThan(0);
+    for (const item of REALTY_NEWS_FEEDS) {
       expect(item.url).toMatch(/^https?:\/\//);
-      expect(item.publisher).toBeTruthy();
-      expect(item.summary).toBeTruthy();
-      // Rule 7: Never store full news article bodies
-      expect((item as Record<string, unknown>).body).toBeUndefined();
-      expect((item as Record<string, unknown>).content).toBeUndefined();
+      expect(item.label).toBeTruthy();
     }
   });
 
-  it("법원 경매 통계에 유찰률 지표가 포함된다", () => {
-    expect(REALTY_AUCTION.failRateKr).toBeGreaterThan(50);
-    expect(REALTY_AUCTION.failRateSudoApt).toBeGreaterThan(50);
-    expect(auctionFailRate()).toBe(REALTY_AUCTION.failRateKr);
+  it("경매 유찰률은 칸이고 신청 건수만 숫자다", () => {
+    expect(REALTY_AUCTION.filed).toBe(121_261);
+    expect(REALTY_DISTRESS_SLOTS.some((s) => s.id === "fail")).toBe(true);
+    expect("failRateKr" in REALTY_AUCTION).toBe(false);
   });
 });

@@ -1,8 +1,8 @@
 // Yahoo 종목 검색 결과 정규화. 시세는 저장하지 않고, 검색 응답의 제목·심볼·거래소만 쓴다.
 // 뉴스 배열은 쓰지 않는다(본문·요약 저장 금지).
 
-import { dartCompanyPopupUrl } from "./disclosure-links";
-import { yahooQuoteUrl } from "./yahoo-fundamentals";
+import { dartCompanyPopupUrl, edgarCompanyUrl, filingVenueFor } from "./disclosure-links";
+import { extractKoreanCode, naverQuoteUrl, yahooQuoteUrl } from "./yahoo-fundamentals";
 
 export type YahooSearchHit = {
   symbol: string;
@@ -12,17 +12,15 @@ export type YahooSearchHit = {
   yahooUrl: string;
   naverUrl: string | null;
   dartUrl: string | null;
+  edgarUrl: string | null;
 };
 
 export function krStockCode(symbol: string): string | null {
-  const m = symbol.trim().toUpperCase().match(/^(\d{6})\.(KS|KQ)$/);
-  return m?.[1] ?? null;
+  return extractKoreanCode(symbol);
 }
 
 export function naverStockUrl(symbol: string): string | null {
-  const code = krStockCode(symbol);
-  if (!code) return null;
-  return `https://stock.naver.com/domestic/stock/${code}/price`;
+  return naverQuoteUrl(symbol);
 }
 
 type RawQuote = {
@@ -116,6 +114,7 @@ export function parseYahooSearchQuotes(json: unknown, limit = 8): YahooSearchHit
       yahooUrl: yahooQuoteUrl(symbol),
       naverUrl: naverStockUrl(symbol),
       dartUrl: code ? dartCompanyPopupUrl(code) : null,
+      edgarUrl: filingVenueFor(symbol) === "edgar" ? edgarCompanyUrl(symbol) : null,
     });
   }
   return out;

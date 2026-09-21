@@ -54,7 +54,43 @@ export type FundamentalBoardRow = FundamentalSnapshot & {
   instrumentId: string;
   market: string;
   assetClass: string;
+  lastPrice: number | null;
+  lastPriceDate: string | null;
+  lastPriceSource: string | null;
 };
+
+export type DataLoadStatus = "ok" | "empty" | "unavailable";
+
+export type FundamentalsBoard = {
+  status: DataLoadStatus;
+  items: FundamentalBoardRow[];
+};
+
+export const MONEY_FUNDAMENTAL_SORT_KEYS = ["marketCap", "revenueTtm", "netIncomeTtm", "eps"] as const;
+
+export function isMoneyFundamentalSortKey(key: string): boolean {
+  return (MONEY_FUNDAMENTAL_SORT_KEYS as readonly string[]).includes(key);
+}
+
+/** 조회 q와 종목 심볼을 같은 키로. 005930.KS와 005930은 같다. */
+export function instrumentQueryKey(symbol: string): string {
+  const s = symbol.trim();
+  if (!s) return "";
+  return (extractKoreanCode(s) ?? s).toUpperCase();
+}
+
+export function matchInstrumentQuery<T extends { symbol: string }>(items: T[], q: string): T | undefined {
+  const key = instrumentQueryKey(q);
+  if (!key) return undefined;
+  return items.find((i) => instrumentQueryKey(i.symbol) === key);
+}
+
+export function fiftyTwoWeekGauge(row: {
+  extra: Pick<FundamentalExtra, "fiftyTwoWeekLow" | "fiftyTwoWeekHigh">;
+  lastPrice: number | null;
+}): number | null {
+  return fiftyTwoWeekPosition(row.extra.fiftyTwoWeekLow, row.extra.fiftyTwoWeekHigh, row.lastPrice ?? undefined);
+}
 
 export function isKoreanSymbol(symbol: string): boolean {
   const s = symbol.trim().toUpperCase();
@@ -63,8 +99,8 @@ export function isKoreanSymbol(symbol: string): boolean {
 
 export function extractKoreanCode(symbol: string): string | null {
   const s = symbol.trim().toUpperCase();
-  const match = s.match(/^(\d{6})/);
-  return (match && match[1]) ? match[1] : null;
+  const match = s.match(/^(\d{6})(\.(KS|KQ))?$/);
+  return match?.[1] ?? null;
 }
 
 export function statementsUrl(symbol: string): string {
@@ -76,8 +112,8 @@ export function statementsUrl(symbol: string): string {
 export type MarketRegion = "all" | "us" | "kr";
 
 export function marketRegionFor(symbol: string, market?: string): "us" | "kr" | "other" {
-  if (isKoreanSymbol(symbol) || market?.toUpperCase() === "KRX") return "kr";
   const m = market?.toUpperCase();
+  if (isKoreanSymbol(symbol) || m === "KRX" || m === "KOSDAQ") return "kr";
   if (m === "US" || m === "NASDAQ" || m === "NYSE" || !symbol.includes(".")) return "us";
   return "other";
 }
@@ -114,151 +150,6 @@ export function fiftyTwoWeekPosition(low?: number, high?: number, current?: numb
   return Math.min(100, Math.max(0, Math.round(pos)));
 }
 
-export const FALLBACK_FUNDAMENTAL_ROWS: FundamentalBoardRow[] = [
-  {
-    instrumentId: "fallback-aapl",
-    symbol: "AAPL",
-    name: "Apple Inc.",
-    market: "US",
-    assetClass: "stock",
-    currency: "USD",
-    date: "2026-09-15",
-    source: "yahoo",
-    marketCap: 3450000000000,
-    per: 34.2,
-    forwardPer: 30.5,
-    pbr: 48.2,
-    eps: 6.75,
-    roe: 1.4875,
-    dividendYield: 0.44,
-    revenueTtm: 391000000000,
-    netIncomeTtm: 101000000000,
-    debtToEquity: 152.3,
-    beta: 1.08,
-    extra: {
-      fiftyTwoWeekLow: 164.08,
-      fiftyTwoWeekHigh: 237.23,
-      ytdReturn: 18.5,
-      averageVolume: 48500000,
-      quoteType: "EQUITY",
-    },
-  },
-  {
-    instrumentId: "fallback-msft",
-    symbol: "MSFT",
-    name: "Microsoft Corporation",
-    market: "US",
-    assetClass: "stock",
-    currency: "USD",
-    date: "2026-09-15",
-    source: "yahoo",
-    marketCap: 3220000000000,
-    per: 35.8,
-    forwardPer: 31.2,
-    pbr: 11.5,
-    eps: 11.8,
-    roe: 0.385,
-    dividendYield: 0.72,
-    revenueTtm: 245000000000,
-    netIncomeTtm: 88100000000,
-    debtToEquity: 42.1,
-    beta: 0.91,
-    extra: {
-      fiftyTwoWeekLow: 366.5,
-      fiftyTwoWeekHigh: 468.35,
-      ytdReturn: 14.2,
-      averageVolume: 21500000,
-      quoteType: "EQUITY",
-    },
-  },
-  {
-    instrumentId: "fallback-nvda",
-    symbol: "NVDA",
-    name: "NVIDIA Corporation",
-    market: "US",
-    assetClass: "stock",
-    currency: "USD",
-    date: "2026-09-15",
-    source: "yahoo",
-    marketCap: 3050000000000,
-    per: 52.4,
-    forwardPer: 40.1,
-    pbr: 51.2,
-    eps: 2.25,
-    roe: 1.15,
-    dividendYield: 0.03,
-    revenueTtm: 96300000000,
-    netIncomeTtm: 53000000000,
-    debtToEquity: 18.5,
-    beta: 1.68,
-    extra: {
-      fiftyTwoWeekLow: 45.0,
-      fiftyTwoWeekHigh: 140.76,
-      ytdReturn: 135.0,
-      averageVolume: 65000000,
-      quoteType: "EQUITY",
-    },
-  },
-  {
-    instrumentId: "fallback-005930",
-    symbol: "005930.KS",
-    name: "삼성전자",
-    market: "KRX",
-    assetClass: "stock",
-    currency: "KRW",
-    date: "2026-09-15",
-    source: "yahoo",
-    marketCap: 410000000000000,
-    per: 14.2,
-    forwardPer: 10.8,
-    pbr: 0.98,
-    eps: 4650,
-    roe: 0.082,
-    dividendYield: 2.35,
-    revenueTtm: 300000000000000,
-    netIncomeTtm: 35000000000000,
-    debtToEquity: 26.4,
-    beta: 0.95,
-    extra: {
-      fiftyTwoWeekLow: 56000,
-      fiftyTwoWeekHigh: 88800,
-      ytdReturn: -12.4,
-      averageVolume: 18000000,
-      quoteType: "EQUITY",
-    },
-  },
-  {
-    instrumentId: "fallback-spy",
-    symbol: "SPY",
-    name: "SPDR S&P 500 ETF Trust",
-    market: "US",
-    assetClass: "etf",
-    currency: "USD",
-    date: "2026-09-15",
-    source: "yahoo",
-    marketCap: 580000000000,
-    per: null,
-    forwardPer: null,
-    pbr: null,
-    eps: null,
-    roe: null,
-    dividendYield: 1.22,
-    revenueTtm: null,
-    netIncomeTtm: null,
-    debtToEquity: null,
-    beta: 1.0,
-    extra: {
-      fiftyTwoWeekLow: 410.0,
-      fiftyTwoWeekHigh: 565.0,
-      ytdReturn: 18.2,
-      netExpenseRatio: 0.0945,
-      netAssets: 580000000000,
-      averageVolume: 52000000,
-      quoteType: "ETF",
-    },
-  },
-];
-
 export function yahooSavesFundamentals(assetClass: string, quoteType?: string | null): boolean {
   const qt = (quoteType ?? "").toUpperCase();
   if (qt === "EQUITY" || qt === "ETF") return true;
@@ -267,10 +158,66 @@ export function yahooSavesFundamentals(assetClass: string, quoteType?: string | 
   return ac === "stock" || ac === "etf";
 }
 
+export const NAVER_STOCK_HOME = "https://stock.naver.com/market/stock/kr";
+export const YAHOO_HOME = "https://finance.yahoo.com/";
+export const KAKAOPAYSEC_HOME = "https://kakaopaysec.com/";
+
+export type FundamentalLookup = {
+  id: string;
+  label: string;
+  url: string;
+  primary: boolean;
+};
+
+/** 국내 펀더멘털 조회는 네이버 증권. 해외는 Yahoo. 공시(DART/EDGAR)는 재무제표 화면. */
 export function yahooQuoteUrl(symbol: string) {
   const s = symbol.trim();
-  if (!s) return "https://finance.yahoo.com/";
+  if (!s) return YAHOO_HOME;
   return `https://finance.yahoo.com/quote/${encodeURIComponent(s)}`;
+}
+
+export function yahooKeyStatisticsUrl(symbol: string) {
+  const s = symbol.trim();
+  if (!s) return YAHOO_HOME;
+  return `https://finance.yahoo.com/quote/${encodeURIComponent(s)}/key-statistics`;
+}
+
+export function naverQuoteUrl(symbol: string): string | null {
+  const code = extractKoreanCode(symbol);
+  if (!code) return null;
+  return `https://stock.naver.com/domestic/stock/${code}/price`;
+}
+
+export function fundamentalLookups(symbol: string, market?: string): FundamentalLookup[] {
+  const region = marketRegionFor(symbol, market);
+  if (region === "kr") {
+    const naver = naverQuoteUrl(symbol) ?? NAVER_STOCK_HOME;
+    return [
+      { id: "naver", label: "네이버", url: naver, primary: true },
+      { id: "kakaopaysec", label: "카카오페이증권", url: KAKAOPAYSEC_HOME, primary: false },
+    ];
+  }
+  return [
+    { id: "yahoo", label: "Yahoo", url: yahooQuoteUrl(symbol), primary: true },
+    { id: "yahoo-stats", label: "Yahoo 통계", url: yahooKeyStatisticsUrl(symbol), primary: false },
+  ];
+}
+
+export function fundamentalVenueLookups(region: MarketRegion): FundamentalLookup[] {
+  if (region === "kr") {
+    return [
+      { id: "naver-home", label: "네이버 증권 (국내)", url: NAVER_STOCK_HOME, primary: true },
+      { id: "kakaopaysec", label: "카카오페이증권", url: KAKAOPAYSEC_HOME, primary: false },
+    ];
+  }
+  if (region === "us") {
+    return [{ id: "yahoo-home", label: "Yahoo Finance (해외)", url: YAHOO_HOME, primary: true }];
+  }
+  return [
+    { id: "naver-home", label: "네이버 증권 (국내)", url: NAVER_STOCK_HOME, primary: true },
+    { id: "kakaopaysec", label: "카카오페이증권", url: KAKAOPAYSEC_HOME, primary: false },
+    { id: "yahoo-home", label: "Yahoo Finance (해외)", url: YAHOO_HOME, primary: false },
+  ];
 }
 
 function asNum(v: unknown): number | undefined {
