@@ -8,6 +8,7 @@
 6. 패키지 의존 규칙(`docs/tech/architecture.md`)을 지킨다: core는 순수, web/mobile은 DB 직접 접근 금지.
 7. 금액은 `numeric` 문자열 ↔ `Number()` 변환. 뉴스 본문은 저장하지 않는다.
 8. 언어: 문서·주석은 한국어, 식별자는 영어. 패키지 매니저는 pnpm만.
+9. 세무 화면은 법령 문언만 보수적으로 읽는다. 애매하면 근로소득(소득세법 제20조·제129조 제1항 제1호). 절세 특강·유튜브 해석을 넣지 않는다. ADR 0040.
 
 ---
 
@@ -21,4 +22,5 @@
 6. Follow the package dependency rules in `docs/tech/architecture.md`: `core` is pure; `web`/`mobile` never access the DB directly.
 7. Money: `numeric` string ↔ `Number()`. Never store full news article bodies.
 8. Language: docs and comments in Korean (core docs mirrored as `*.en.md`), identifiers in English. Package manager: pnpm only.
-9. Branches: never commit directly to `main` or `dev`. Work only on `feat|fix|docs|chore/<name>` branches; push and merge only when the user says so (`docs/tech/git-workflow.md`).
+9. Tax screens read statute text conservatively. If the employment relationship is unclear, treat it as earned income (ITA Art. 20 / 129(1)(1)). Do not put YouTube tax-saving tips on screen. ADR 0040.
+10. Branches: never commit directly to `main` or `dev`. Work only on `feat|fix|docs|chore/<name>` branches; push and merge only when the user says so (`docs/tech/git-workflow.md`).

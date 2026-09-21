@@ -6,10 +6,10 @@
 | 테이블 | 역할 |
 |---|---|
 | `users` | 단일 사용자로 시작. 서비스화 대비 |
-| `financial_profiles` | 세전/세후 월소득, 근로소득세, 건보료, 기타 고정비, 비상금 개월, 위험 성향. `pay_earnings` jsonb: 임금 구성항목. `invest_style` jsonb: 투자기간·경험·손실감수·목적 설문 (`core/invest-style`). 웹 `/profile` 01 기본정보 · 10 투자성향. 세후가 없으면 세전−세금−건보. 배분 가이드의 고정비 = 기타 고정비 + `recurring_costs` 합 |
+| `financial_profiles` | 세전/세후 월소득, 근로소득세, 건보료, 기타 고정비, 비상금 개월, 위험 성향. `pay_earnings` jsonb: 임금 구성항목. `invest_style` jsonb: 투자기간·경험·손실감수·목적 설문 (`core/invest-style`). 웹 `/profile` 01 기본정보 · 10 투자성향. **근로자 대장.** 사업 역할 컬럼은 아직 없음(ADR 0034·0036). 세후가 없으면 세전−세금−건보. 배분 가이드의 고정비 = 기타 고정비 + `recurring_costs` 합 |
 | `recurring_costs` | 매달 빠져나가는 고정 세부내역 (휴대폰, 공과금, 주거 등). `/profile` 고정비 그리드에서 인라인 수정. CSV 가져오기/내보내기 (`이름,분류,금액,출금일,메모`). `profile.workspaceSave`로 기본정보·고정비·세액을 한 번에 저장 |
 | `income_tax_months` | 근로소득세 월별 추이. 프로필 저장 시 해당 월 upsert. 거래 `income_tax`와 합쳐 그래프. `/profile` 추이 메뉴는 세액·소비·저축·투자 막대+선(X=월, Y=금액) |
-| `payroll_months` | 월 급여 스냅샷(기본급·수당·상여·그 밖·세전·세금·보험·실수령). 프로필 저장 시 기준월 upsert. `/profile` 07 연봉 추이 12개월 그래프+상세표 + 연말정산(고용노동부 연 합 명세·과세표준 기초, ADR 0013) |
+| `payroll_months` | 월 급여 스냅샷(기본급·수당·상여·그 밖·세전·세금·보험·실수령). 프로필 저장 시 기준월 upsert. `/profile` 07 연봉 추이 12개월 그래프+상세표 + 연말정산(고용노동부 연 합 명세·과세표준 기초, ADR 0013). 12 연말정산 공제 창은 화면 시산만(ADR 0037). `/erp`는 인격별 화면(ADR 0038·0042). 분개·별지 제50호·제54호·부가세·면세·수출입·직원명부·건보 자격취득·종소세·법인세 시산은 테이블 없음(ADR 0035–0037·0043–0046) |
 
 ## 계좌·거래 (Account)
 | 테이블 | 역할 |
@@ -29,22 +29,22 @@
 |---|---|
 | `instruments` | 종목 마스터. `(symbol, market)` **유니크**. 시세·뉴스·보유가 모두 참조. 워커 `ensureInstrument` 또는 `trades.ensureInstrument`로 생성 |
 | `trades` | 체결 원장. 보유 수량·평단·실현손익은 저장하지 않고 `core/portfolio.ts`로 계산. **계좌별**로 포지션을 나눔(같은 종목이 증권사마다 있으면 행이 둘). 자산군·계좌 소계는 `core/holdings-summary.ts`, 통화 비중·평가손익 기여도도 같은 파일. 웹 `/holdings`에서 입력, `/profile` 09 투자내역에서 전체·계좌·주식/ETF/채권/펀드/코인을 조회. 평가손익은 종목 최근 `market_quotes.close` (해외는 `USDKRW`가 있으면 원화 환산). 화면 표시는 `core/signed-amount.ts`로 `+`/`−`와 한국식 적청(상승 빨강·하락 파랑). 추가·삭제 시 해당 계좌 체결을 시간순으로 다시 계산해 어느 시점에도 매도가 보유를 넘지 않게 한다. **대시보드 투자자산 = 보유 평가액 + 증권·코인·연금 예수금** (`core/invested.ts`) |
-| `investment_incomes` | 배당·이자 수취 (세금·현금흐름 양쪽에 사용) |
+| `investment_incomes` | 배당·이자 수취 (세금·현금흐름 양쪽에 사용). `/profile` 12는 해당 연 합만. 세율 추정·입력 UI 없음 |
 | `research_notes` | 종목 노트, 매수/매도 근거 |
 | `watchlist` | 관심 종목. `user_id` → `users.id` FK. 워커 수집 대상. 웹 검색에서 `market.watchAdd` / 목록에서 삭제 |
 
 ## 재무제표·펀더멘털 (worker가 채움)
 | 테이블 | 역할 | 유니크 |
 |---|---|---|
-| `financial_statements` | 기간별 재무제표. `statement`(income/balance/cashflow), `fiscal_period`(FY/Q1~Q4), `items` jsonb에 표준 키(revenue, operating_income, net_income, eps_diluted, total_assets, total_liabilities, total_equity, cfo). 원본은 `raw`. 웹 `/statements` | (instrument, fy, period, statement, consolidated, source) |
+| `financial_statements` | 기간별 재무제표. `statement`(income/balance/cashflow), `fiscal_period`(FY/Q1~Q4), `items` jsonb에 표준 키(revenue, operating_income, net_income, eps_diluted, total_assets, total_liabilities, total_equity, cfo). 원본은 `raw`. 웹 `/statements` 목록은 `{status, items}`. 0건 empty, DB 오류 unavailable. 고정 샘플 없음 | (instrument, fy, period, statement, consolidated, source) |
 | `audit_reports` | DART 정기보고서 감사인·감사의견·강조사항·핵심감사사항. 본문(PDF/XML)은 저장하지 않음. 화면은 의견 + 회계법인·DART 링크. KAM/강조는 저장만 하고 전문을 나열하지 않음 | (instrument, fy, report_code, source) |
-| `instrument_fundamentals` | 일 단위 지표 스냅샷: 시총, PER, forward PER, PBR, EPS, ROE, 배당수익률, TTM 매출·순이익, 부채비율, 베타. 소스별 추가 지표는 `extra`. 웹 `/fundamentals`. Yahoo 단위: 배당수익률=퍼센트 숫자, ROE=비율, D/E=×100 (2026-09-14 AAPL 확인) | (instrument, date, source) |
+| `instrument_fundamentals` | 일 단위 지표 스냅샷: 시총, PER, forward PER, PBR, EPS, ROE, 배당수익률, TTM 매출·순이익, 부채비율, 베타. 소스별 추가 지표는 `extra`. 웹 `/fundamentals`는 `{status, items}`. 0건은 empty, DB 오류는 unavailable. 고정 샘플 없음. 52주 게이지 종가는 `market_quotes` 최신 close. Yahoo 단위: 배당수익률=퍼센트 숫자, ROE=비율, D/E=×100 (2026-09-14 AAPL 확인) | (instrument, date, source) |
 | `instrument_identifiers` | 외부 식별자 매핑 — dart corp_code, sec CIK, yahoo 티커, kis 코드 | (provider, external_id) |
 
 ## 시장 데이터 (worker가 채움)
 | 테이블 | 역할 | 유니크 |
 |---|---|---|
-| `macro_indicators` | 환율·기준금리·CPI·국채금리 등. `code`로 구분. 환율: USDKRW 등. 인플레이션 맵: `WB_INFL_KR`. 금리 맵: `BIS_POL_KR`. 부동산 시도 가계대출: `ECOS_HHLOAN_SE` 등(십억원, 시·구 아님). 예금은행 가중평균 대출금리: `ECOS_LOAN_NEW_HH` 등(%). 웹 `/invest` 환율 · `/markets` 물가·금리 · `/realty` 대출 그래프·금리 표 | (code, date) |
+| `macro_indicators` | 환율·기준금리·CPI·국채금리 등. `code`로 구분. 환율: USDKRW 등. 인플레이션 맵: `WB_INFL_KR`. 금리 맵: `BIS_POL_KR`. 부동산 시도 가계대출: `ECOS_HHLOAN_SE` 등(십억원, 시·구 아님). 예금은행 가중평균 대출금리: `ECOS_LOAN_NEW_HH` 등(%). 금투협 증시자금: `KOFIA_INVESTOR_DEPOSIT`·`KOFIA_CREDIT`(백만원. 미수금은 메인 HTML에 있을 때만 `KOFIA_MARGIN`). 웹 `/invest` 환율·증시자금 · `/markets` 물가·금리 · `/realty` 대출 그래프·금리 표 | (code, date) |
 | `market_quotes` | 일봉 시세. 세계 지수는 `instruments.market=INDEX`, 비트코인 Yahoo는 `CRYPTO`(`BTC-USD`). 업비트 BTC는 원화 칸. 웹 `/invest` | (instrument_id, date) |
 | `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용. `/news`=`newsFeed`(오피니언 소스 제외). `/opinions`=`opinionFeed`(전용 RSS + 제목 투자의견). `/markets` 크립토·외환, `/realty` 한경 부동산. 뉴스 분류 `core/news-category`(realty·crypto·fx 포함), 오피니언 `core/opinion-category` | url |
 | `economic_events` | 경제 캘린더 | (title, scheduled_at) |

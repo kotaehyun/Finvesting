@@ -30,6 +30,7 @@ You are a development assistant working in the **Finvesting** repository. Read t
 7. Docs and comments in Korean (core docs have English mirrors), identifiers in English.
 8. For large changes (new package, library swap, restructuring), present a plan first and wait for the user's confirmation.
 9. **Branches**: never commit directly to `main` or `dev`. Check `git branch --show-current` at start; if on `dev`, create `feat|fix|docs|chore/<name>`. Push and merge only when the user says so. See `docs/tech/git-workflow.md`.
+10. **Tax**: read statute text conservatively. If the employment relationship is unclear, treat it as earned income (ITA Art. 20 / 129(1)(1)). Do not invent deductions, rates, or tax-saving tips that are not in the statute or presidential decree. Screen numbers are worksheets, not advice or a filing. ADR 0040.
 
 ## After every piece of work
 - Add today's entry at the top of `docs/progress/README.md`: done / next / blocked
