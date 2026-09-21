@@ -516,7 +516,7 @@
 
 ## 2026-09-15 — 백엔드·AI 확장 방향 문서화 (Codex)
 **한 일**
-- [ADR 0025](../tech/decisions/0025-backend-ai-evolution.md): 현재 스택 유지, 단계적 RAG, 별도 서버 재검토 조건 기록.
+- [ADR 0049](../tech/decisions/0049-backend-ai-evolution.md) (구 0025 중복 번호): 현재 스택 유지, 단계적 RAG, 별도 서버 재검토 조건 기록.
 - Java는 필수 조건이 아니며 Python·Spring·FastAPI·LangChain·LangGraph 도입도 미결정임을 명시.
 - AI 기술 문서와 ADR 목록 연결. 제품 코드·DB·설정·의존성 변경 없음.
 
