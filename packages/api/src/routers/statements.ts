@@ -4,7 +4,14 @@ import { router, publicProcedure } from "../trpc";
 import { listStatementInstruments, loadStatementBundle } from "../lib/statements";
 
 export const statementsRouter = router({
-  list: publicProcedure.query(({ ctx }) => listStatementInstruments(ctx.db)),
+  list: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const items = await listStatementInstruments(ctx.db);
+      return { status: items.length ? "ok" as const : "empty" as const, items };
+    } catch {
+      return { status: "unavailable" as const, items: [] };
+    }
+  }),
 
   get: publicProcedure
     .input(z.object({

@@ -9,6 +9,7 @@ import { collectDart } from "./sources/dart";
 import { collectEdgar } from "./sources/edgar";
 import { collectWorldBankInflation } from "./sources/worldbank";
 import { collectBisPolicyRates } from "./sources/bis";
+import { collectKofiaFunds } from "./sources/kofia";
 
 // 수집 스케줄 (KST). 각 소스는 실패해도 다른 소스에 영향 없음.
 const jobs: Array<[string, string, () => Promise<unknown>]> = [
@@ -16,11 +17,12 @@ const jobs: Array<[string, string, () => Promise<unknown>]> = [
   ["업비트 시세",     "*/5 * * * *",  collectUpbit],     // 5분마다
   ["ECOS 거시지표",   "0 9,18 * * *", collectEcos],      // 하루 2회
   ["FRED 미국지표",   "0 7,19 * * *", collectFred],      // 하루 2회 (미국 장 마감 후 반영)
-  ["Yahoo 미국시세",  "*/30 * * * *", collectYahoo],     // 30분마다
+  ["Yahoo 시세",  "*/30 * * * *", collectYahoo],     // 30분마다. 카카오 035720.KS 포함
   ["DART 재무제표",   "0 3 * * 1",    collectDart],      // 매주 월 03시
   ["EDGAR 재무제표",  "0 4 * * 1",    collectEdgar],     // 매주 월 04시
   ["세계은행 물가",   "0 8 * * 1",    collectWorldBankInflation], // 매주 월 08시
   ["BIS 정책금리",    "0 8 * * 1,4",  collectBisPolicyRates],     // 월·목 08시
+  ["금투협 증시자금", "0 8,18 * * 1-5", collectKofiaFunds],        // 평일 08·18시. 메인 HTML
 ];
 
 async function run(name: string, fn: () => Promise<unknown>) {

@@ -8,7 +8,7 @@ import {
   REALTY_REGULATED_NOTE,
   REALTY_REGULATED_SEOUL,
   REALTY_ZONES,
-  REALTY_CURATED_NEWS,
+  REALTY_NEWS_FEEDS,
   metroHeightScale,
   realtyMetroForPlace,
 } from "@finvesting/core";
@@ -55,7 +55,7 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function RealtyPage() {
   const news = trpc.market.newsFeed.useQuery({ category: "realty", limit: 12 });
-  const displayNews = (news.data?.items && news.data.items.length > 0) ? news.data.items : REALTY_CURATED_NEWS;
+  const displayNews = news.data?.items ?? [];
   const loans = trpc.market.realtyLoans.useQuery();
   const [activeTab, setActiveTab] = useState<TabId>("debt");
   const [zones, regulated, loan] = REALTY_MIND.branches;
@@ -64,6 +64,7 @@ export default function RealtyPage() {
   const [focusCode, setFocusCode] = useState<string | null>(null);
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshNote, setRefreshNote] = useState<{ kind: "ok" | "fail"; text: string } | null>(null);
 
   const onFocus = (id: string, label: string, code?: string) => {
     setFocusId(id);
@@ -90,9 +91,25 @@ export default function RealtyPage() {
 
   async function refreshData() {
     setRefreshing(true);
+    setRefreshNote(null);
     try {
-      await Promise.all([news.refetch(), loans.refetch()]);
+      const [n, l] = await Promise.all([news.refetch(), loans.refetch()]);
+      if (n.error || l.error || n.isError || l.isError) {
+        setRefreshNote({ kind: "fail", text: "저장된 데이터를 불러오지 못했습니다." });
+        return;
+      }
+      if (n.data?.status === "unavailable" || l.data?.status === "unavailable") {
+        setRefreshNote({ kind: "fail", text: "DB 연결 불가. 저장된 데이터를 불러올 수 없습니다." });
+        return;
+      }
+      const bits = ["화면 데이터를 다시 불러왔습니다."];
+      if (l.data?.asOf) bits.push(`대출 기준일 ${l.data.asOf}`);
+      if (l.data?.status === "empty") bits.push("저장된 대출 수치가 없습니다.");
+      if ((n.data?.items.length ?? 0) === 0) bits.push("저장된 부동산 뉴스가 없습니다.");
       setRefreshedAt(new Date());
+      setRefreshNote({ kind: "ok", text: bits.join(" ") });
+    } catch {
+      setRefreshNote({ kind: "fail", text: "저장된 데이터를 불러오지 못했습니다." });
     } finally {
       setRefreshing(false);
     }
@@ -112,17 +129,26 @@ export default function RealtyPage() {
         </div>
         <div className="row">
           <button type="button" className="starter" onClick={() => void refreshData()} disabled={refreshing}>
-            {refreshing ? "동기화 중…" : "실시간 데이터 새로고침"}
+            {refreshing ? "불러오는 중…" : "저장된 데이터 다시 불러오기"}
           </button>
           <a className="starter" href="/markets">시장 지표</a>
           <a className="starter" href="/invest">투자 대시보드</a>
         </div>
       </div>
 
-      {refreshedAt && (
+      {refreshNote && (
         <p className="muted" style={{ margin: "-6px 0 16px", fontSize: 13 }}>
-          ✅ {fmtAt(refreshedAt)} 최신 공표 통계 동기화 완료
+          {refreshNote.kind === "fail" ? "⚠ " : ""}
+          {refreshNote.text}
+          {refreshNote.kind === "ok" && refreshedAt ? ` (${fmtAt(refreshedAt)})` : ""}
+          {" "}정적 칸(금리 카드 등)은 이 버튼으로 바뀌지 않습니다.
         </p>
+      )}
+      {loans.data?.status === "unavailable" && !refreshNote && (
+        <p className="muted" style={{ margin: "-6px 0 16px", fontSize: 13 }}>대출 수치: DB 연결 불가. 숫자를 만들지 않습니다.</p>
+      )}
+      {loans.data?.status === "empty" && !refreshNote && (
+        <p className="muted" style={{ margin: "-6px 0 16px", fontSize: 13 }}>저장된 시도 가계대출이 없습니다. worker ECOS 수집을 확인하세요.</p>
       )}
 
       {/* 📌 최상단 핵심 4대 바롬터 KPI 바 */}
@@ -479,12 +505,17 @@ export default function RealtyPage() {
                 <span className="realty-block-icon">📰</span>
                 <div>
                   <h3 className="realty-block-title">부동산 주요 뉴스 피드</h3>
-                  <p className="realty-block-desc">공식 언론사 부동산 주요 동향 (뉴스 본문은 저장하지 않습니다).</p>
+                  <p className="realty-block-desc">worker가 모은 RSS 제목·링크·요약만. 없으면 칸입니다.</p>
                 </div>
               </div>
               <span className="realty-block-badge">실시간 피드</span>
             </div>
             {news.isLoading && <p className="muted" style={{ margin: "4px 0 12px" }}>최신 피드 실시간 동기화 중…</p>}
+            {!news.isLoading && displayNews.length === 0 && (
+              <p className="muted" style={{ margin: "4px 0 12px" }}>
+                수집된 부동산 뉴스가 없습니다. DB가 꺼져 있으면 제목을 만들지 않습니다.
+              </p>
+            )}
             <div className="realty-news-grid">
               {displayNews.slice(0, 6).map((n) => (
                 <a
@@ -507,6 +538,11 @@ export default function RealtyPage() {
                     <span>↗</span>
                   </div>
                 </a>
+              ))}
+            </div>
+            <div className="starter-list" style={{ marginTop: 12 }}>
+              {REALTY_NEWS_FEEDS.map((l) => (
+                <a key={l.id} className="starter" href={l.url} target="_blank" rel="noreferrer">{l.label}</a>
               ))}
             </div>
           </section>

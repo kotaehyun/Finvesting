@@ -1,17 +1,15 @@
 "use client";
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import {
   FUNDAMENTAL_FIELDS,
   evaluateFundamentalSignals,
-  fiftyTwoWeekPosition,
+  fiftyTwoWeekGauge,
   formatExtraValue,
   formatFundamentalValue,
-  isKoreanSymbol,
+  fundamentalLookups,
+  fundamentalVenueLookups,
+  isMoneyFundamentalSortKey,
   marketRegionFor,
-  naverStockUrl,
-  statementsUrl,
-  yahooQuoteUrl,
   type FundamentalBoardRow,
   type FundamentalFieldId,
   type MarketRegion,
@@ -39,42 +37,51 @@ export default function FundamentalsPage() {
   const [assetFilter, setAssetFilter] = useState<AssetFilter>("all");
   const [marketFilter, setMarketFilter] = useState<MarketRegion>("all");
   const [q, setQ] = useState("");
-  const [sortKey, setSortKey] = useState<string>("marketCap");
+  const [sortKey, setSortKey] = useState<string>("date");
   const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const rows: FundamentalBoardRow[] = board.data?.items ?? [];
+  const loadStatus = board.data?.status;
+
+  useEffect(() => {
+    if (marketFilter === "all" && isMoneyFundamentalSortKey(sortKey)) {
+      setSortKey("date");
+      setSortDir("desc");
+    }
+  }, [marketFilter, sortKey]);
 
   const filteredRows = useMemo(() => {
-    const items: FundamentalBoardRow[] = board.data ?? [];
     const needle = q.trim().toLowerCase();
 
-    return items.filter((r) => {
+    return rows.filter((r) => {
       if (assetFilter !== "all" && r.assetClass !== assetFilter) return false;
       if (marketFilter !== "all" && marketRegionFor(r.symbol, r.market) !== marketFilter) return false;
       if (!needle) return true;
       return `${r.symbol} ${r.name} ${r.market}`.toLowerCase().includes(needle);
     });
-  }, [board.data, assetFilter, marketFilter, q]);
+  }, [rows, assetFilter, marketFilter, q]);
 
   const sortedRows = useMemo(() => {
     const arr = [...filteredRows];
+    const key = marketFilter === "all" && isMoneyFundamentalSortKey(sortKey) ? "date" : sortKey;
     arr.sort((a, b) => {
       let va: number | string | null | undefined = null;
       let vb: number | string | null | undefined = null;
 
-      if (sortKey === "symbol") {
+      if (key === "symbol") {
         va = a.symbol;
         vb = b.symbol;
-      } else if (sortKey === "date") {
+      } else if (key === "date") {
         va = a.date;
         vb = b.date;
-      } else if (sortKey === "ytdReturn") {
+      } else if (key === "ytdReturn") {
         va = a.extra.ytdReturn;
         vb = b.extra.ytdReturn;
-      } else if (sortKey === "netExpenseRatio") {
+      } else if (key === "netExpenseRatio") {
         va = a.extra.netExpenseRatio;
         vb = b.extra.netExpenseRatio;
       } else {
-        va = (a as Record<string, unknown>)[sortKey] as number | null | undefined;
-        vb = (b as Record<string, unknown>)[sortKey] as number | null | undefined;
+        va = (a as Record<string, unknown>)[key] as number | null | undefined;
+        vb = (b as Record<string, unknown>)[key] as number | null | undefined;
       }
 
       // Nulls always sort to the end
@@ -91,7 +98,7 @@ export default function FundamentalsPage() {
       return sortDir === "asc" ? na - nb : nb - na;
     });
     return arr;
-  }, [filteredRows, sortKey, sortDir]);
+  }, [filteredRows, sortKey, sortDir, marketFilter]);
 
   // 상단 4대 밸류에이션 통계 계산 (현재 표시 중인 주식 기준)
   const stats = useMemo(() => {
@@ -109,6 +116,7 @@ export default function FundamentalsPage() {
   }, [sortedRows]);
 
   function toggleSort(key: string) {
+    if (marketFilter === "all" && isMoneyFundamentalSortKey(key)) return;
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -126,10 +134,30 @@ export default function FundamentalsPage() {
     <div className="fund-page">
       <h1>Fundamentals · 기업 펀더멘털 대시보드</h1>
       <p className="muted">
-        Yahoo Finance 공식 일간 스냅샷 기반 밸류에이션 분석 터미널입니다.
-        DART 및 SEC 정기보고서 전문과 외부 감사인의 감사의견은 Statements에서 확인하실 수 있습니다.
+        {marketFilter === "kr"
+          ? "국내 종목 조회는 네이버 증권입니다. 표 숫자는 Yahoo 일 스냅샷입니다."
+          : marketFilter === "us"
+            ? "해외 종목 조회는 Yahoo Finance입니다. 표 숫자는 Yahoo 일 스냅샷입니다."
+            : "국내는 네이버 증권, 해외는 Yahoo Finance로 조회합니다. 표 숫자는 Yahoo 일 스냅샷입니다."}
+        {" "}공시 3표·감사의견은 재무제표 화면입니다.
+        {marketFilter === "all" && " 전체 시장에서는 시총·매출·순익·EPS를 통화가 달라 크기 비교하지 않습니다. 미국 또는 국내 필터 후에 정렬하세요."}
       </p>
       <InvestTrail current="fundamentals" />
+      <section className="card" style={{ margin: "0 0 16px" }}>
+        <h3>펀더멘털 조회</h3>
+        <p className="muted">
+          {marketFilter === "kr"
+            ? "한국 상장사만 네이버 시세와 카카오페이증권 홈으로 엽니다. Yahoo·EDGAR는 붙이지 않습니다."
+            : marketFilter === "us"
+              ? "미국·해외 종목만 Yahoo로 엽니다. 네이버·DART·카카오페이증권은 붙이지 않습니다."
+              : "시장 필터로 국내·해외 조회 창구가 갈립니다. 카카오(035720)는 수집 기본 종목입니다."}
+        </p>
+        <div className="starter-list">
+          {fundamentalVenueLookups(marketFilter).map((s) => (
+            <a key={s.id} className="starter" href={s.url} target="_blank" rel="noreferrer">{s.label}</a>
+          ))}
+        </div>
+      </section>
 
       {/* 1. 상단 4대 밸류에이션 바롬터 KPI 카드 */}
       <div className="fund-kpi-grid">
@@ -205,21 +233,26 @@ export default function FundamentalsPage() {
         />
       </div>
 
-      {board.isLoading && <p className="muted">데이터를 동기화하고 있습니다…</p>}
+      {board.isLoading && <p className="muted">데이터를 불러오는 중…</p>}
       {board.error && <p className="warn">오류가 발생했습니다: {board.error.message}</p>}
-
-      {board.data && !board.data.length && (
+      {loadStatus === "unavailable" && (
+        <div className="card" style={{ padding: 24, textAlign: "center", margin: "20px 0" }}>
+          <p style={{ fontSize: 15, marginBottom: 8 }}>DB 연결 불가</p>
+          <p className="muted" style={{ fontSize: 13, margin: 0 }}>펀더멘털 스냅샷을 불러올 수 없습니다. Postgres가 켜져 있는지 확인하세요. 고정 샘플은 쓰지 않습니다.</p>
+        </div>
+      )}
+      {loadStatus === "empty" && (
         <div className="card" style={{ padding: 24, textAlign: "center", margin: "20px 0" }}>
           <p className="muted" style={{ fontSize: 15, marginBottom: 12 }}>
-            수집된 펀더멘털 스냅샷이 없습니다. 관심 종목을 추가하거나 worker를 기동해 주세요.
+            수집된 펀더멘털 스냅샷이 없습니다. 관심 종목을 추가한 뒤 worker로 Yahoo를 모으세요.
           </p>
           <p className="muted" style={{ fontSize: 13 }}>
-            <code>pnpm --filter @finvesting/worker run:once</code> 명령어로 시세를 즉시 수집할 수 있습니다.
+            <code>pnpm --filter @finvesting/worker run:once</code>
           </p>
         </div>
       )}
 
-      {board.data && board.data.length > 0 && !sortedRows.length && (
+      {loadStatus === "ok" && !sortedRows.length && (
         <p className="muted">선택한 필터 조건에 부합하는 종목이 없습니다.</p>
       )}
 
@@ -245,6 +278,8 @@ export default function FundamentalsPage() {
                       type="button"
                       className={`sort-btn${sortKey === f.id ? " active" : ""}`}
                       onClick={() => toggleSort(f.id)}
+                      disabled={marketFilter === "all" && isMoneyFundamentalSortKey(f.id)}
+                      title={marketFilter === "all" && isMoneyFundamentalSortKey(f.id) ? "전체 시장에서는 통화가 다른 금액을 정렬하지 않습니다" : undefined}
                     >
                       {f.label}{sortIndicator(f.id)}
                     </button>
@@ -266,32 +301,26 @@ export default function FundamentalsPage() {
             <tbody>
               {sortedRows.map((r) => {
                 const signals = evaluateFundamentalSignals(r);
-                const naverUrl = naverStockUrl(r.symbol);
-                const stUrl = statementsUrl(r.symbol);
-                const chatPrompt = `${r.name}(${r.symbol})의 펀더멘털 수치와 밸류에이션을 분석하고 투자 매력도를 평가해줘.`;
+                const lookups = fundamentalLookups(r.symbol, r.market);
+                const primary = lookups.find((l) => l.primary) ?? lookups[0];
+                const extras = lookups.filter((l) => !l.primary);
 
                 const low = r.extra.fiftyTwoWeekLow;
                 const high = r.extra.fiftyTwoWeekHigh;
-                const rangePct = fiftyTwoWeekPosition(low, high, low != null && high != null ? (low + high) / 2 : undefined);
+                const rangePct = fiftyTwoWeekGauge(r);
 
                 return (
                   <tr key={r.instrumentId}>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
-                        <a href={yahooQuoteUrl(r.symbol)} target="_blank" rel="noreferrer" style={{ fontWeight: 700, fontSize: 15 }}>
+                        <a href={primary?.url} target="_blank" rel="noreferrer" style={{ fontWeight: 700, fontSize: 15 }}>
                           {r.symbol}
                         </a>
-                        {naverUrl && (
-                          <a href={naverUrl} target="_blank" rel="noreferrer" className="fund-link-pill" title="네이버 증권 시세 바로가기">
-                            네이버
+                        {extras.map((l) => (
+                          <a key={l.id} href={l.url} target="_blank" rel="noreferrer" className="fund-link-pill" title={l.label}>
+                            {l.label}
                           </a>
-                        )}
-                        <Link href={stUrl} className="fund-link-pill" title="DART/EDGAR 재무제표 및 감사의견 열람">
-                          재무제표
-                        </Link>
-                        <Link href={`/chat?q=${encodeURIComponent(chatPrompt)}`} className="fund-link-pill" title="AI 투자비서에게 종목 분석 질문">
-                          AI 분석
-                        </Link>
+                        ))}
                       </div>
 
                       <div className="muted" style={{ marginTop: 2 }}>
@@ -326,9 +355,19 @@ export default function FundamentalsPage() {
                             : "—"}
                         </span>
                         {rangePct != null && (
-                          <div className="fund-range-bar" title={`52주 범위 내 위치: 약 ${rangePct}%`}>
-                            <div className="fund-range-fill" style={{ width: `${rangePct}%` }} />
-                          </div>
+                          <>
+                            <div
+                              className="fund-range-bar"
+                              title={`종가 ${r.lastPrice?.toLocaleString()} ${r.currency} · ${r.lastPriceDate ?? ""} · ${r.lastPriceSource ?? ""} · 52주 위치 ${rangePct}%`}
+                            >
+                              <div className="fund-range-fill" style={{ width: `${rangePct}%` }} />
+                            </div>
+                            <span className="muted" style={{ fontSize: 11 }}>
+                              {r.lastPrice?.toLocaleString()} {r.currency}
+                              {r.lastPriceDate ? ` · ${r.lastPriceDate}` : ""}
+                              {r.lastPriceSource ? ` · ${r.lastPriceSource}` : ""}
+                            </span>
+                          </>
                         )}
                       </div>
                     </td>
