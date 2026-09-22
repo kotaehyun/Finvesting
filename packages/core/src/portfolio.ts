@@ -11,6 +11,35 @@ export type TradeLike = {
   fxRate?: number;    // 종목통화→KRW. 원화 자산은 생략(=1)
 };
 
+export type TradeReplayItem = TradeLike & {
+  id?: string;
+  tradedAt: Date | string;
+  createdAt?: Date | string | null;
+};
+
+/** 동일 시각 체결의 경제적 순서(매수 우선) 및 영속적 순서(등록 시점, id) 보장 */
+export function compareTradesForReplay(a: TradeReplayItem, b: TradeReplayItem): number {
+  const timeA = a.tradedAt instanceof Date ? a.tradedAt.getTime() : new Date(a.tradedAt).getTime();
+  const timeB = b.tradedAt instanceof Date ? b.tradedAt.getTime() : new Date(b.tradedAt).getTime();
+  const dt = timeA - timeB;
+  if (dt !== 0) return dt;
+
+  // 1. 동일 시각에는 매수(buy)가 매도(sell)보다 먼저여야 경제적으로 유효
+  if (a.side !== b.side) {
+    return a.side === "buy" ? -1 : 1;
+  }
+
+  // 2. 동일 side일 경우 시스템 등록일시(createdAt) 순
+  const createdA = a.createdAt ? (a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()) : Infinity;
+  const createdB = b.createdAt ? (b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()) : Infinity;
+  if (createdA !== createdB) return createdA - createdB;
+
+  // 3. 결정적 타이 브레이커 (id)
+  const idA = a.id ?? "";
+  const idB = b.id ?? "";
+  return idA.localeCompare(idB);
+}
+
 export type Position = {
   instrumentId: string;
   quantity: number;
@@ -19,6 +48,13 @@ export type Position = {
   realizedPnl: number;    // 종목 통화 기준
   realizedPnlKrw: number; // 매도 시점 환율로 환산한 원화 실현손익 (환차손익 포함)
 };
+
+export const QUANTITY_SCALE = 8;
+export const QUANTITY_EPSILON = 1e-8;
+
+export function roundQuantity(qty: number): number {
+  return Math.round((qty + Number.EPSILON) * 1e8) / 1e8;
+}
 
 export function buildPositions(trades: TradeLike[]): Map<string, Position> {
   const pos = new Map<string, Position>();
@@ -29,22 +65,29 @@ export function buildPositions(trades: TradeLike[]): Map<string, Position> {
     if (t.side === "buy") {
       const prevCost = p.avgCost * p.quantity;
       const addCost = t.price * t.quantity + fee;
-      const newQty = p.quantity + t.quantity;
+      const newQty = roundQuantity(p.quantity + t.quantity);
       // 환율도 매입금액 가중평균
       p.avgFxRate = newQty > 0 ? (prevCost * p.avgFxRate + addCost * fx) / (prevCost + addCost || 1) : 1;
       p.avgCost = newQty > 0 ? (prevCost + addCost) / newQty : 0;
       p.quantity = newQty;
     } else {
-      if (t.quantity > p.quantity) {
+      const diff = t.quantity - p.quantity;
+      if (diff > QUANTITY_EPSILON / 2) {
         throw new Error(`매도 수량이 보유(${p.quantity})보다 많습니다`);
       }
-      const qty = t.quantity;
+      const isFullSell = Math.abs(diff) <= QUANTITY_EPSILON / 2;
+      const qty = isFullSell ? p.quantity : t.quantity;
       const pnl = (t.price - p.avgCost) * qty - fee;
       p.realizedPnl += pnl;
       // 원화: 매도금액×매도환율 − 매입원가×매입환율
       p.realizedPnlKrw += (t.price * qty - fee) * fx - p.avgCost * qty * p.avgFxRate;
-      p.quantity -= qty;
-      if (p.quantity === 0) { p.avgCost = 0; p.avgFxRate = 1; }
+      if (isFullSell) {
+        p.quantity = 0;
+        p.avgCost = 0;
+        p.avgFxRate = 1;
+      } else {
+        p.quantity = roundQuantity(p.quantity - qty);
+      }
     }
     pos.set(t.instrumentId, p);
   }

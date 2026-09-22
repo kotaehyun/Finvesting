@@ -2,12 +2,13 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { accounts, transactions } from "@finvesting/db";
-import { pickLatestBalance, shouldApplyImportedBalance } from "@finvesting/core";
+import { pickLatestBalance, shouldApplyImportedBalance, filterDuplicateTransactions } from "@finvesting/core";
 import { router, publicProcedure } from "../trpc";
 import { parseUpload } from "../lib/parse-upload";
 
 const parsedRow = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().nullish(),
   amount: z.number().positive(),
   direction: z.enum(["in", "out"]),
   merchant: z.string().nullish(),
@@ -41,10 +42,6 @@ function allowedCategories(direction: "in" | "out" | "transfer") {
   if (direction === "in") return IN_CATEGORIES;
   if (direction === "out") return OUT_CATEGORIES;
   return new Set(["transfer"]);
-}
-
-function dupKey(r: { date: string; amount: number | string; direction: string; memo?: string | null; merchant?: string | null }) {
-  return `${r.date}|${Number(r.amount)}|${r.direction}|${r.memo ?? ""}|${r.merchant ?? ""}`;
 }
 
 export const transactionsRouter = router({
@@ -142,14 +139,7 @@ export const transactionsRouter = router({
         date: transactions.date, amount: transactions.amount, direction: transactions.direction,
         memo: transactions.memo, merchant: transactions.merchant,
       }).from(transactions).where(and(eq(transactions.userId, ctx.userId), eq(transactions.accountId, input.accountId)));
-      const seen = new Set(existing.map((e) => dupKey({ ...e, date: String(e.date) })));
-
-      const toInsert = input.rows.filter((r) => {
-        const k = dupKey(r);
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      });
+      const toInsert = filterDuplicateTransactions(input.rows, existing);
 
       const latestExistingDate = existing.reduce<string | null>((max, e) => {
         const d = String(e.date);

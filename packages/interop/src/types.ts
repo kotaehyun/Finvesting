@@ -3,6 +3,7 @@
 
 export type ParsedTransaction = {
   date: string;                 // YYYY-MM-DD
+  time?: string;                // HH:mm:ss (있으면 동일 일자 잔액/순서 정밀 판정에 사용)
   amount: number;               // 양수
   direction: "in" | "out";
   merchant?: string;

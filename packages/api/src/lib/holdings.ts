@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { trades, instruments, quotes, macroIndicators, accounts, type Db } from "@finvesting/db";
-import { buildPositions, summarizeByAccount, summarizeByClass, summarizeByCurrency, unrealizedPnl, unrealizedPnlContribution, type Position } from "@finvesting/core";
+import { buildPositions, compareTradesForReplay, summarizeByAccount, summarizeByClass, summarizeByCurrency, unrealizedPnl, unrealizedPnlContribution, type Position } from "@finvesting/core";
 
 /** 최신 USDKRW. 소스는 구분하지 않는다 — 같은 날짜는 ECOS가 yahoo를 덮어쓴다. */
 export async function latestUsdKrw(db: Db) {
@@ -56,7 +56,9 @@ function currentFx(currency: string, usdkrw: number | null, avgFxRate: number) {
 }
 
 export async function loadHoldings(db: Db, userId: string) {
-  const tradeRows = await db.select().from(trades).where(eq(trades.userId, userId)).orderBy(asc(trades.tradedAt));
+  const tradeRows = await db.select().from(trades)
+    .where(eq(trades.userId, userId))
+    .orderBy(asc(trades.tradedAt), asc(trades.createdAt), asc(trades.id));
   const accts = await db.select().from(accounts).where(eq(accounts.userId, userId));
   const acctMap = new Map(accts.map((a) => [a.id, a]));
 
@@ -69,7 +71,10 @@ export async function loadHoldings(db: Db, userId: string) {
 
   const all: Array<Position & { accountId: string }> = [];
   for (const [accountId, rows] of tradesByAccount) {
-    const posMap = buildPositions(rows.map(toTradeLike));
+    const sorted = rows
+      .map((t) => ({ ...toTradeLike(t), tradedAt: t.tradedAt, createdAt: t.createdAt, id: t.id }))
+      .sort(compareTradesForReplay);
+    const posMap = buildPositions(sorted);
     for (const p of posMap.values()) all.push({ ...p, accountId });
   }
 

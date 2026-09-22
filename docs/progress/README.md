@@ -2,6 +2,35 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-21 (25) — 금융 원장(Ledger) 핵심 오류 5건 완전 해결 및 단위/회귀 테스트 구축 (Gemini)
+**한 일**
+- **금융 원장 핵심 결함 5건(Codex 리뷰 및 21-ledger-correctness-fixes.md) 전면 해결**:
+  1. **[P1] 소수 수량 전량 매도 실패 버그 해결 (`packages/core/src/portfolio.ts`)**:
+     - JS 부동소수점(`0.3 - 0.1 = 0.19999999999999998`)과 DB `numeric(24, 8)` 간의 불일치로 인한 전량 매도 거절 버그 수정.
+     - `QUANTITY_SCALE = 8`, `QUANTITY_EPSILON = 1e-8`, `roundQuantity` 유틸리티 도입. 전량 매도 허용오차(`Math.abs(diff) <= QUANTITY_EPSILON / 2`) 판정 적용하여 잔량 0 및 `avgCost=0`, `avgFxRate=1` 초기화.
+  2. **[P1] 동일 시각 체결 순서 불일치 방지 (`packages/core/src/portfolio.ts`, `packages/api`)**:
+     - `tradedAt` 동일 시 UUID 사전순 정렬로 인해 매도가 매수보다 먼저 처리되어 잔고 부족 에러가 발생하던 문제 해결.
+     - `compareTradesForReplay` 순수 함수 신설 (`tradedAt` -> `side === 'buy'` 우선 -> `createdAt` -> `id` 결정적 타이 브레이커).
+     - `packages/api/src/routers/trades.ts`(추가/삭제 시 잔여 수량 검증) 및 `packages/api/src/lib/holdings.ts`(포트폴리오 보유량 계산)에 일원화 적용.
+  3. **[P1] 하루치 내림차순 통장 잔액 오선택 방지 (`packages/core/src/account-balance.ts`, `packages/interop`)**:
+     - 일별 역순(내림차순) 정렬 CSV/XLS 파싱 시 첫 행(과거 잔액)이 최신 잔액으로 잘못 선택되던 결함 수정.
+     - `detectOrder`(날짜/시간/거래금액 역산 판별) 구현 및 `pickLatestBalance`에서 `time` 및 `explicitOrder` 지원. 모호한 단일 일자 상이한 잔액은 `null` 반환하여 오선택 방지.
+     - `packages/interop/src/types.ts` 및 `generic-bank.ts`에 거래 시간(`time`) 필드 파싱 연동.
+  4. **[P2] 정상 반복 거래 중복 삭제 방지 (`packages/core/src/transactions-filter.ts`, `packages/api`)**:
+     - 동일 날짜/금액의 정상적인 연속 결제(예: 카페 2잔 개별 결제)를 단순 Set으로 필터링하여 1건만 남기고 유실하던 문제 해결.
+     - 멀티셋(빈도수 카운트 맵) 기반 순수 함수 `filterDuplicateTransactions` 신설 및 `transactions.commitImport`에 적용. 정상 반복 결제 보존 및 재업로드 시 0건 추가 보장.
+  5. **[P2] 외화 계좌 원화 단순 합산 왜곡 해결 (`packages/core/src/currency-convert.ts`, `packages/api`)**:
+     - USD 등 외화 잔액을 환율 변환 없이 KRW 잔액과 1:1 단순 합산하던 총자산 계산 왜곡 수정.
+     - `convertAccountBalances` 순수 함수 신설. 환율 적용 원화 환산, 통화별 분리 집계(`byCurrency`), 환율 누락 시 미환산 계좌 안전 격리.
+     - `packages/api/src/lib/overview.ts`에서 최신 USD/KRW 매매기준율 연동 및 프론트엔드 호환 구조 확장.
+- **검증**:
+  - `pnpm --filter @finvesting/core --filter @finvesting/interop test`: 49개 파일 170개 단위/회귀 테스트 **전건 100% PASS** (신규 테스트 23건 추가).
+  - `pnpm typecheck`: 8개 모노레포 패키지 **100% ALL PASS** (0 errors).
+  - `pnpm --filter @finvesting/web build`: 15개 전체 라우트 Next.js 15 프로덕션 빌드 성공.
+- **문서 동기화**:
+  - `docs/review/2026-09-15-codex-ledger.md`: 5대 지적사항 상태 "✅ 반영 완료 (2026-09-21 Gemini)" 갱신.
+  - `docs/verification/2026-09-21-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
+
 ## 2026-09-16 (24) — 펀더멘털(/fundamentals) 스크리너 고도화, 밸류에이션 바롬터 및 DB 오프라인 방어 폴백 구축 (Gemini)
 **한 일**
 - **상단 4대 밸류에이션 KPI 요약 카드 바롬터 구축**:

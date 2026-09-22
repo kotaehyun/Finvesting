@@ -36,12 +36,12 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ 통과. 웹은 `@types/react` 19만 해석 | 2026-09-16 | Gemini |
-| core 테스트 (vitest) | ✅ 45개 파일 147개 테스트 전건 통과 | 2026-09-16 | Gemini |
-| interop 테스트 | ✅ 11개 통과 | 2026-09-14 | Grok |
+| 타입체크 (web 포함 8패키지) | ✅ 통과 (0 errors). 8개 전체 패키지 일괄 통과 | 2026-09-21 | Gemini |
+| core 테스트 (vitest) | ✅ 48개 파일 159개 단위/회귀 테스트 전건 통과 (금융 원장 5대 오류 검증 포함) | 2026-09-21 | Gemini |
+| interop 테스트 | ✅ 1개 파일 11개 테스트 전건 통과 | 2026-09-21 | Gemini |
 | `pnpm db:generate` / `db:migrate` | ✅ `0007_cloudy_star_brand` (`invest_style`) 적용 | 2026-09-14 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/fundamentals` 포함 15 라우트 빌드 통과 | 2026-09-16 | Gemini |
+| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/fundamentals` 포함 15 라우트 빌드 통과 | 2026-09-21 | Gemini |
 | 홈 `/` 개편 (월 선택·현금흐름·확인할 일) | ✅ 데스크톱. 평가손익 **+7,382원** 빨강. 2026-08은 현재 순자산 구분·거래 없음 문구. 모바일 390px 스택. 빈 계정 온보딩은 DB에 계좌 있어 미확인 | 2026-09-15 | Grok Chrome |
 | `/invest` 투자 대시보드 | ✅ 검색 관심 추가 AAPL 332.27 USD. 평가손익 `+7,382원` 빨강 | 2026-09-15 | Grok Chrome |
 | `/fundamentals` Yahoo 펀더멘털 표 | ✅ 4대 KPI 요약 바롬터, 자산군/시장 다중 필터, 전 컬럼 정렬, 저PBR/우량ROE 뱃지, 52주 게이지, 네이버/DART/AI 링크 연동 및 DB 오프라인 방어 폴백 확인 | 2026-09-16 | Gemini |
