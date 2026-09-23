@@ -19,7 +19,7 @@ describe("realty rates", () => {
     expect(REALTY_COFIX.fresh).toBe(3.18);
     expect(REALTY_COFIX.out).toBe(3.05);
     const rows = realtyRateSnapshot();
-    expect(rows.find((r) => r.id === "newMort")?.label).toBe("주택담보대출");
+    expect(rows.find((r: any) => r.id === "newMort")?.label).toBe("주택담보대출");
     expect(matchEcosLoanRateItem("121Y006", "주택담보대출")?.code).toBe("ECOS_LOAN_NEW_MORT");
     expect(matchEcosLoanRateItem("121Y006", "서울")).toBeNull();
     expect(ecosLoanRateMacroCodes()).toContain("BOK_BASE_RATE");
@@ -29,7 +29,7 @@ describe("realty rates", () => {
       BOK_BASE_RATE: { date: "2026-08-27", value: 3 },
       KTB_3Y: { date: "2026-09-14", value: 2.91 },
     });
-    expect(live.find((r) => r.id === "ktb")?.rate).toBe(2.91);
-    expect(applyLiveRates(rows, { ECOS_LOAN_NEW_MORT: { date: "2026-06-01", value: 9 } }).find((r) => r.id === "newMort")?.rate).toBe(4.48);
+    expect(live.find((r: any) => r.id === "ktb")?.rate).toBe(2.91);
+    expect(applyLiveRates(rows, { ECOS_LOAN_NEW_MORT: { date: "2026-06-01", value: 9 } }).find((r: any) => r.id === "newMort")?.rate).toBe(4.48);
   });
 });

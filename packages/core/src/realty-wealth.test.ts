@@ -16,8 +16,8 @@ describe("realty wealth", () => {
     expect(REALTY_WEALTH_TRUST.realtyJo).toBe(457.5);
     expect(giftTaxShareOfEstate()).toBeCloseTo(54_828 / (89_345 + 54_828), 5);
     expect(realtyTrustShareOfAll()).toBeCloseTo(457.5 / 1_516.5, 5);
-    expect(REALTY_WEALTH_METHODS.find((m) => m.id === "celeb")?.put).toBe("never");
-    expect(REALTY_WEALTH_METHODS.find((m) => m.id === "exec")?.put).toBe("slot");
-    expect(REALTY_WEALTH_METHODS.find((m) => m.id === "gift")?.put).toBe("in");
+    expect(REALTY_WEALTH_METHODS.find((m: any) => m.id === "celeb")?.put).toBe("never");
+    expect(REALTY_WEALTH_METHODS.find((m: any) => m.id === "exec")?.put).toBe("slot");
+    expect(REALTY_WEALTH_METHODS.find((m: any) => m.id === "gift")?.put).toBe("in");
   });
 });

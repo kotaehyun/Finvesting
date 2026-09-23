@@ -1,0 +1,124 @@
+{
+  "defaults": {
+    "asOf": "2026-01-01",
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": "2026-12-31",
+    "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+    "sourceUrl": "https://www.moel.go.kr/",
+    "article": "고용산재보험료징수법 시행령 제12조",
+    "verifiedBy": "미검증",
+    "verifiedOn": null
+  },
+  "minWage2026": {
+    "hourly": 10320,
+    "monthly209": 2156880,
+    "source": "고용노동부 고시 제2025-47호"
+  },
+  "eiStabilityBands": [
+    {
+      "id": "under150",
+      "label": "상시 150명 미만",
+      "rateBp": 25,
+      "decree": "제12조 제1항 제1호 가목"
+    },
+    {
+      "id": "priority150",
+      "label": "150명 이상 우선지원대상기업",
+      "rateBp": 45,
+      "decree": "나목"
+    },
+    {
+      "id": "mid",
+      "label": "150명 이상 1,000명 미만(우선지원 제외)",
+      "rateBp": 65,
+      "decree": "다목"
+    },
+    {
+      "id": "large",
+      "label": "1,000명 이상·국가·지자체",
+      "rateBp": 85,
+      "decree": "라목"
+    }
+  ],
+  "industrialAccidentNote": "산재보험요율은 업종별 고시입니다. 숫자를 만들지 않습니다.",
+  "entries": [
+    {
+      "id": "minWage2026.hourly",
+      "value": 10320,
+      "unit": "",
+      "asOf": "2026-01-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-12-31",
+      "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+      "sourceUrl": "https://www.moel.go.kr/",
+      "article": "고용산재보험료징수법 시행령 제12조",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "minWage2026.monthly209",
+      "value": 2156880,
+      "unit": "",
+      "asOf": "2026-01-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-12-31",
+      "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+      "sourceUrl": "https://www.moel.go.kr/",
+      "article": "고용산재보험료징수법 시행령 제12조",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "eiStabilityBands[0].rateBp",
+      "value": 25,
+      "unit": "",
+      "asOf": "2026-01-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-12-31",
+      "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+      "sourceUrl": "https://www.moel.go.kr/",
+      "article": "고용산재보험료징수법 시행령 제12조",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "eiStabilityBands[1].rateBp",
+      "value": 45,
+      "unit": "",
+      "asOf": "2026-01-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-12-31",
+      "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+      "sourceUrl": "https://www.moel.go.kr/",
+      "article": "고용산재보험료징수법 시행령 제12조",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "eiStabilityBands[2].rateBp",
+      "value": 65,
+      "unit": "",
+      "asOf": "2026-01-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-12-31",
+      "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+      "sourceUrl": "https://www.moel.go.kr/",
+      "article": "고용산재보험료징수법 시행령 제12조",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "eiStabilityBands[3].rateBp",
+      "value": 85,
+      "unit": "",
+      "asOf": "2026-01-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-12-31",
+      "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
+      "sourceUrl": "https://www.moel.go.kr/",
+      "article": "고용산재보험료징수법 시행령 제12조",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    }
+  ]
+}

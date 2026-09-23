@@ -1,49 +1,14 @@
 // 국세 집계로 본 고가주택 소재 경향. 개인 납세·자산 조회는 세법상 불가.
 // 고위공직자를 집계에서 뺄 수 없다. 종부세 고지는 기재부, 표는 국세통계포털(TASIS).
+import dataFile from "../data/realty/nts.json";
+import { assertDataFile } from "./load-data";
+
+assertDataFile(dataFile as any, "realty/nts.json");
+
 
 import { shareOf, type RealtyMetroId } from "./realty-loans";
 
-export const REALTY_NTS_CGT = {
-  asOf: "2025-06-01",
-  published: "2025-11-26",
-  source: "기획재정부 2025년도 종합부동산세 고지",
-  url: "https://eiec.kdi.re.kr/policy/materialView.do?num=273945",
-  yonhap: "https://www.yna.co.kr/view/AKR20251126121900002",
-  nts: "https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7733&mi=40375",
-  tasis: "https://tasis.nts.go.kr/",
-  transfer: "https://www.data.go.kr/data/15118234/fileData.do",
-  luxury: "https://www.data.go.kr/data/15118939/fileData.do",
-  housingPeople: 540_000,
-  housingTaxEok: 17_000,
-  housingYoyPeople: 80_000,
-  housingYoyPct: 17.3,
-  housingTaxYoyPct: 6.3,
-  totalPeople: 629_000,
-  totalTaxEok: 53_000,
-  totalYoyPct: 14.8,
-  totalTaxYoyPct: 6.1,
-  landPeople: 110_000,
-  personalPeople: 481_000,
-  personalYoyPct: 19.9,
-  personalTaxEok: 7_718,
-  personalTaxYoyPct: 32.5,
-  singlePeople: 151_000,
-  singleYoyPct: 17.8,
-  singleTaxEok: 1_679,
-  multiPeople: 330_000,
-  multiYoyPct: 20.9,
-  multiTaxEok: 6_039,
-  corpPeople: 59_000,
-  corpPeopleDelta: -146,
-  corpYoyPct: -0.2,
-  corpTaxEok: 9_000,
-  corpTaxDeltaEok: -883,
-  corpTaxYoyPct: -8.6,
-  /** 개인 1인당 평균 고지세액. 원 */
-  avgWon: 1_606_000,
-  sudoSharePct: 83.7,
-  seoulSharePct: 60.7,
-} as const;
+export const REALTY_NTS_CGT = (dataFile as any).exports.REALTY_NTS_CGT as any;
 
 export type RealtyNtsMetroRow = {
   id: RealtyMetroId;
@@ -54,14 +19,9 @@ export type RealtyNtsMetroRow = {
 };
 
 /** 주택분 종부세 과세인원. 기재부가 수치를 밝힌 수도권 3곳만. 나머지 시도는 원문 참고 2. */
-export const REALTY_NTS_CGT_METROS: readonly RealtyNtsMetroRow[] = [
-  { id: "seoul", label: "서울", prev: 269_000, now: 328_000, yoyPct: 21.0 },
-  { id: "gyeonggi", label: "경기", prev: 96_000, now: 113_000, yoyPct: 15.7 },
-  { id: "incheon", label: "인천", prev: 9_000, now: 11_000, yoyPct: 19.0 },
-];
+export const REALTY_NTS_CGT_METROS: readonly RealtyNtsMetroRow[] = (dataFile as any).exports.REALTY_NTS_CGT_METROS as any;
 
-export const REALTY_NTS_TRANSFER_NOTE =
-  "양도소득세·고가주택(12억 초과) 양도는 국세청 TASIS·data.go.kr 표(부동산소재지)에 있습니다. 사이트는 긁지 않아 칸만 둡니다. 물건지이지 납세자 이주가 아닙니다.";
+export const REALTY_NTS_TRANSFER_NOTE = (dataFile as any).exports.REALTY_NTS_TRANSFER_NOTE as any;
 
 export function ntsCgtDelta(row: RealtyNtsMetroRow): number {
   return row.now - row.prev;

@@ -50,9 +50,9 @@ describe("tax-brackets", () => {
   });
 
   it("초보 용어와 단기 양도·증여공제 조문이 있다", () => {
-    expect(TAX_TERMS.some((x) => x.id === "progressive")).toBe(true);
+    expect(TAX_TERMS.some((x: any) => x.id === "progressive")).toBe(true);
     expect(PROGRESSIVE_PLAIN[3]).toMatch(/324만/);
-    expect(CGT_FLAT_RATES.some((r) => r.id === "kr_other")).toBe(true);
+    expect(CGT_FLAT_RATES.some((r: any) => r.id === "kr_other")).toBe(true);
     expect(GIFT_DEDUCTIONS[0].amount).toMatch(/6억/);
     expect(TAX_TABLES).toHaveLength(5);
   });

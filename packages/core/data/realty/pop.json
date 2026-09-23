@@ -1,0 +1,964 @@
+{
+  "defaults": {
+    "asOf": "2025",
+    "effectiveFrom": null,
+    "effectiveTo": null,
+    "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+    "sourceUrl": "https://www.korea.kr/new",
+    "article": null,
+    "verifiedBy": "미검증",
+    "verifiedOn": null
+  },
+  "exports": {
+    "REALTY_JEONSE_SLOTS": [
+      {
+        "id": "share",
+        "label": "전세자금대출 비중",
+        "need": "가계대출 대비 전세자금. ECOS·금감원 통계코드 확인 후. 지금은 칸만."
+      },
+      {
+        "id": "hug",
+        "label": "전세보증사고",
+        "need": "주택도시보증공사(HUG) 공개통계. 사이트를 긁지 않습니다."
+      },
+      {
+        "id": "rule",
+        "label": "전세대출 규제",
+        "need": "금융위 10.15: 1주택자 수도권·규제지역 전세대출은 DSR. 전세대출 있으면 투기과열 3억 초과 아파트 취득 제한."
+      }
+    ],
+    "REALTY_MOVE_2025": {
+      "asOf": "2025",
+      "published": "2026-01-29",
+      "source": "국가데이터처 2025년 국내인구이동통계",
+      "url": "https://www.korea.kr/news/policyNewsView.do?newsId=156741997",
+      "movers": 6118000,
+      "ratePct": 12,
+      "housingSharePct": 33.7,
+      "seoulFromGgPct": 53.8,
+      "seoulToGgPct": 59.5,
+      "sejongNet": -47,
+      "regions": [
+        {
+          "id": "sudo",
+          "label": "수도권",
+          "net": 38000
+        },
+        {
+          "id": "jungbu",
+          "label": "중부권",
+          "net": 20000
+        },
+        {
+          "id": "honam",
+          "label": "호남권",
+          "net": -16000
+        },
+        {
+          "id": "yeongnam",
+          "label": "영남권",
+          "net": -39000
+        }
+      ],
+      "rates": [
+        {
+          "id": "incheon",
+          "label": "인천",
+          "rate": 1.1
+        },
+        {
+          "id": "chungbuk",
+          "label": "충북",
+          "rate": 0.7
+        },
+        {
+          "id": "chungnam",
+          "label": "충남",
+          "rate": 0.4
+        },
+        {
+          "id": "ulsan",
+          "label": "울산",
+          "rate": -0.5
+        },
+        {
+          "id": "jeju",
+          "label": "제주",
+          "rate": -0.6
+        },
+        {
+          "id": "gwangju",
+          "label": "광주",
+          "rate": -1
+        }
+      ]
+    },
+    "REALTY_MOVE_NOTE": "시도 순이동(전입−전출)은 통계청 국내인구이동통계입니다. 세계은행 순이동은 국가 단위라 시·도와 다릅니다.",
+    "REALTY_POP_DECLINE": [
+      {
+        "metro": "busan",
+        "label": "부산 동구"
+      },
+      {
+        "metro": "busan",
+        "label": "부산 서구"
+      },
+      {
+        "metro": "busan",
+        "label": "부산 영도구"
+      },
+      {
+        "metro": "daegu",
+        "label": "대구 남구"
+      },
+      {
+        "metro": "daegu",
+        "label": "대구 서구"
+      },
+      {
+        "metro": "daegu",
+        "label": "대구 군위군"
+      },
+      {
+        "metro": "incheon",
+        "label": "인천 강화군"
+      },
+      {
+        "metro": "incheon",
+        "label": "인천 옹진군"
+      },
+      {
+        "metro": "gyeonggi",
+        "label": "경기 가평군"
+      },
+      {
+        "metro": "gyeonggi",
+        "label": "경기 연천군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 고성군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 삼척시"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 양구군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 양양군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 영월군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 정선군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 철원군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 태백시"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 평창군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 홍천군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 화천군"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 횡성군"
+      },
+      {
+        "metro": "chungbuk",
+        "label": "충북 괴산군"
+      },
+      {
+        "metro": "chungbuk",
+        "label": "충북 단양군"
+      },
+      {
+        "metro": "chungbuk",
+        "label": "충북 보은군"
+      },
+      {
+        "metro": "chungbuk",
+        "label": "충북 영동군"
+      },
+      {
+        "metro": "chungbuk",
+        "label": "충북 옥천군"
+      },
+      {
+        "metro": "chungbuk",
+        "label": "충북 제천시"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 공주시"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 금산군"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 논산시"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 보령시"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 부여군"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 서천군"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 예산군"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 청양군"
+      },
+      {
+        "metro": "chungnam",
+        "label": "충남 태안군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 고창군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 김제시"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 남원시"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 무주군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 부안군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 순창군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 임실군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 장수군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 정읍시"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 진안군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 강진군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 고흥군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 곡성군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 구례군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 담양군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 보성군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 신안군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 영광군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 영암군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 완도군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 장성군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 장흥군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 진도군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 함평군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 해남군"
+      },
+      {
+        "metro": "jeonnam",
+        "label": "전남 화순군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 고령군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 문경시"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 봉화군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 상주시"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 성주군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 안동시"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 영덕군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 영양군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 영주시"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 영천시"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 울릉군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 울진군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 의성군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 청도군"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 청송군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 거창군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 고성군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 남해군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 밀양시"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 산청군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 의령군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 창녕군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 하동군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 함안군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 함양군"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 합천군"
+      }
+    ],
+    "REALTY_POP_WATCH": [
+      {
+        "metro": "daejeon",
+        "label": "대전 동구"
+      },
+      {
+        "metro": "incheon",
+        "label": "인천 동구"
+      },
+      {
+        "metro": "busan",
+        "label": "부산 중구"
+      },
+      {
+        "metro": "busan",
+        "label": "부산 금정구"
+      },
+      {
+        "metro": "gwangju",
+        "label": "광주 동구"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 통영시"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 강릉시"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 동해시"
+      },
+      {
+        "metro": "daejeon",
+        "label": "대전 중구"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 경주시"
+      },
+      {
+        "metro": "gyeongnam",
+        "label": "경남 사천시"
+      },
+      {
+        "metro": "gyeongbuk",
+        "label": "경북 김천시"
+      },
+      {
+        "metro": "daejeon",
+        "label": "대전 대덕구"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 인제군"
+      },
+      {
+        "metro": "jeonbuk",
+        "label": "전북 익산시"
+      },
+      {
+        "metro": "gyeonggi",
+        "label": "경기 동두천시"
+      },
+      {
+        "metro": "gangwon",
+        "label": "강원 속초시"
+      },
+      {
+        "metro": "gyeonggi",
+        "label": "경기 포천시"
+      }
+    ],
+    "REALTY_TFR_KOSTAT": {
+      "asOf": "2025",
+      "published": "2026-08-26",
+      "source": "국가데이터처 2025년 출생통계 확정",
+      "url": "https://www.korea.kr/news/policyNewsView.do?newsId=148970652",
+      "births": 254341,
+      "national": [
+        {
+          "year": 2023,
+          "tfr": 0.72
+        },
+        {
+          "year": 2024,
+          "tfr": 0.75
+        },
+        {
+          "year": 2025,
+          "tfr": 0.8
+        }
+      ],
+      "metros": [
+        {
+          "id": "jeonnam",
+          "label": "전남",
+          "tfr": 1.09
+        },
+        {
+          "id": "sejong",
+          "label": "세종",
+          "tfr": 1.06
+        },
+        {
+          "id": "chungbuk",
+          "label": "충북",
+          "tfr": 0.96
+        },
+        {
+          "id": "gwangju",
+          "label": "광주",
+          "tfr": 0.76
+        },
+        {
+          "id": "busan",
+          "label": "부산",
+          "tfr": 0.74
+        },
+        {
+          "id": "seoul",
+          "label": "서울",
+          "tfr": 0.63
+        }
+      ]
+    },
+    "WB_TFR_KR": "WB_TFR_KR",
+    "WB_TFR_STAT": "SP.DYN.TFRT.IN"
+  },
+  "entries": [
+    {
+      "id": "exports.REALTY_MOVE_2025.movers",
+      "value": 6118000,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.ratePct",
+      "value": 12,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.housingSharePct",
+      "value": 33.7,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.seoulFromGgPct",
+      "value": 53.8,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.seoulToGgPct",
+      "value": 59.5,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.sejongNet",
+      "value": -47,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.regions[0].net",
+      "value": 38000,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.regions[1].net",
+      "value": 20000,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.regions[2].net",
+      "value": -16000,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.regions[3].net",
+      "value": -39000,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.rates[0].rate",
+      "value": 1.1,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.rates[1].rate",
+      "value": 0.7,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.rates[2].rate",
+      "value": 0.4,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.rates[3].rate",
+      "value": -0.5,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.rates[4].rate",
+      "value": -0.6,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_MOVE_2025.rates[5].rate",
+      "value": -1,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.births",
+      "value": 254341,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.national[0].year",
+      "value": 2023,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.national[0].tfr",
+      "value": 0.72,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.national[1].year",
+      "value": 2024,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.national[1].tfr",
+      "value": 0.75,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.national[2].year",
+      "value": 2025,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.national[2].tfr",
+      "value": 0.8,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.metros[0].tfr",
+      "value": 1.09,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.metros[1].tfr",
+      "value": 1.06,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.metros[2].tfr",
+      "value": 0.96,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.metros[3].tfr",
+      "value": 0.76,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.metros[4].tfr",
+      "value": 0.74,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    },
+    {
+      "id": "exports.REALTY_TFR_KOSTAT.metros[5].tfr",
+      "value": 0.63,
+      "unit": "",
+      "asOf": "2025",
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "국가데이터처 2025년 국내인구이동통계",
+      "sourceUrl": "https://www.korea.kr/new",
+      "article": null,
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    }
+  ]
+}

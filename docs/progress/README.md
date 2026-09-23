@@ -2,6 +2,21 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-23 — 상수 JSON화·데이터 규칙 보강 (Cursor)
+**한 일**
+- AGENTS·CLAUDE·ChatGPT 11번에 `{status: empty|stale|unavailable}`·`DEMO_MODE` 「샘플」 문장 추가
+- `packages/core/data/**` 20 JSON(realty 15 + tax 5). entries **992**, 전원 `verifiedBy: "미검증"`. 코드는 JSON import, export 이름 유지
+- `load-data.ts`·`data-tables.test.ts`·`docs/tech/data-tables.md`. core tsc·vitest 230 통과
+- 리뷰 `2026-09-21-claude.md` 반영 열(1·2·B·7·3, 4·5·A 대기). `status.md`·`verification/2026-09-21-cursor.md`
+
+**다음 할 일**
+1. 사용자 결정: 부동산 편입/동결, ERP 계속(스키마)/보류
+2. 992 미검증 원문 대조. 화면 「기준·출처」 빠진 곳
+3. 루트 pnpm 복구 후 web·api typecheck. `feat/erp-tax-desk` → `dev`는 지시 후
+
+**막힌 것**
+- ERP 원장 없음. 원문 대조 전. pnpm CLI 링크 깨짐(core는 npx로 검증)
+
 ## 2026-09-21 — 투자 봇AI 대화형 화면
 **한 일**
 - `/chat` 이름을 투자 봇AI로. 빈 화면 인사·제안 카드·아래 입력칸. 사용자 말풍선 오른쪽, 봇 답 왼쪽. Enter 전송·Shift+Enter 줄바꿈. IME `isComposing` 유지. ADR 0048

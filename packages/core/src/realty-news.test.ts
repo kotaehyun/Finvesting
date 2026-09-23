@@ -13,7 +13,7 @@ describe("realty news and auction fail rate", () => {
 
   it("경매 유찰률은 칸이고 신청 건수만 숫자다", () => {
     expect(REALTY_AUCTION.filed).toBe(121_261);
-    expect(REALTY_DISTRESS_SLOTS.some((s) => s.id === "fail")).toBe(true);
+    expect(REALTY_DISTRESS_SLOTS.some((s: any) => s.id === "fail")).toBe(true);
     expect("failRateKr" in REALTY_AUCTION).toBe(false);
   });
 });

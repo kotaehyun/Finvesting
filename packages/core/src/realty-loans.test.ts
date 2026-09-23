@@ -64,7 +64,7 @@ describe("realty loans", () => {
       { date: "2026-06-01", value: 400 },
       { date: "2026-07-01", value: 400 },
     ];
-    expect(alignedShare(part, whole).map((p) => p.value)).toEqual([0.25, 0.3]);
+    expect(alignedShare(part, whole).map((p: any) => p.value)).toEqual([0.25, 0.3]);
     const rank = metroLoanRank(
       [
         { id: "seoul", label: "서울", latest: 400 },
@@ -73,7 +73,7 @@ describe("realty loans", () => {
       ],
       2000,
     );
-    expect(rank.map((r) => r.id)).toEqual(["gyeonggi", "seoul", "incheon"]);
+    expect(rank.map((r: any) => r.id)).toEqual(["gyeonggi", "seoul", "incheon"]);
     expect(rank[0]?.rank).toBe(1);
     expect(rank[0]?.shareOfKr).toBeCloseTo(0.25, 8);
     expect(rank[2]?.rank).toBeNull();

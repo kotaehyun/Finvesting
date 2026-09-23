@@ -38,7 +38,8 @@
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ 통과. 웹은 `@types/react` 19만 해석. 09-18 api+web 재확인 | 2026-09-18 | Grok |
-| core 테스트 (vitest) | ✅ 46개 파일 157개 테스트 전건 통과. 숫자 진위 아님 | 2026-09-16 | Grok |
+| core 테스트 (vitest) | ✅ 62파일 230 테스트 통과(data-tables 포함). 숫자 원문 대조 아님 | 2026-09-21 | Cursor |
+| `packages/core/data/**` JSON 스키마 | ✅ entries 992·`verifiedBy` 허용값. 원문 대조는 전원 미검증(⏸) | 2026-09-21 | Cursor |
 | interop 테스트 | ✅ 11개 통과 | 2026-09-16 | Grok |
 | `pnpm db:generate` / `db:migrate` | ✅ `0007_cloudy_star_brand` (`invest_style`) 적용 | 2026-09-14 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |

@@ -8,12 +8,12 @@ import {
 
 describe("realty bankruptcy causes and insolvency stats", () => {
   it("파탄원인은 서울회생법원 중복응답이고 주담대 칸이 없다", () => {
-    const ids = REALTY_BANKRUPTCY_CAUSES.map((c) => c.id);
+    const ids = REALTY_BANKRUPTCY_CAUSES.map((c: any) => c.id);
     expect(ids).toEqual(["living", "business", "income", "invest"]);
-    const sum = REALTY_BANKRUPTCY_CAUSES.reduce((a, c) => a + c.share, 0);
+    const sum = REALTY_BANKRUPTCY_CAUSES.reduce((a: any, c: any) => a + c.share, 0);
     expect(sum).toBeGreaterThan(100);
-    expect(REALTY_BANKRUPTCY_CAUSES.find((c) => c.id === "living")?.share).toBe(46.65);
-    expect(REALTY_BANKRUPTCY_CAUSES.find((c) => c.id === "invest")?.share).toBe(13.55);
+    expect(REALTY_BANKRUPTCY_CAUSES.find((c: any) => c.id === "living")?.share).toBe(46.65);
+    expect(REALTY_BANKRUPTCY_CAUSES.find((c: any) => c.id === "invest")?.share).toBe(13.55);
   });
 
   it("2025 법원통계월보 신청 건수를 쓴다", () => {
