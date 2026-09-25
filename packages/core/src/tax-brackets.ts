@@ -1,9 +1,10 @@
 // 양도·증여·보유 세율표. 조문 문언만. 특례·중과·비과세는 곱하지 않음. ADR 0041
 import dataFile from "../data/tax/brackets.json";
-import { assertDataFile } from "./load-data";
+import { assertDataFile, dataSourceLine, getValue, requireValue } from "./load-data";
 
-assertDataFile(dataFile as any, "tax/brackets.json");
+assertDataFile(dataFile, "tax/brackets.json");
 
+export const TAX_BRACKETS_SOURCE = dataSourceLine(dataFile.defaults);
 
 export type TaxBracket = {
   id: string;
@@ -35,20 +36,36 @@ function truncWon(n: number) {
   return Math.floor(n);
 }
 
+type BracketLabel = { id: string; rateLabel: string };
+
+function rebuildBrackets(prefix: string, labels: readonly BracketLabel[]): TaxBracket[] {
+  return labels.map((lab, i) => ({
+    id: lab.id,
+    floor: requireValue(dataFile, `${prefix}[${i}].floor`),
+    cap: getValue(dataFile, `${prefix}[${i}].cap`),
+    rateBp: requireValue(dataFile, `${prefix}[${i}].rateBp`),
+    addWon: requireValue(dataFile, `${prefix}[${i}].addWon`),
+    quickDeductionWon: requireValue(dataFile, `${prefix}[${i}].quickDeductionWon`),
+    rateLabel: lab.rateLabel,
+  }));
+}
+
+const labels = dataFile.bracketLabels;
+
 /** 소득세법 제55조 제1항. 종소세·양도 기본세율(제104조 제1항 제1호가 이 표를 씀). */
-export const ITA_ART55_BRACKETS: TaxBracket[] = (dataFile as any).itaArt55 as TaxBracket[];
+export const ITA_ART55_BRACKETS: TaxBracket[] = rebuildBrackets("itaArt55", labels.itaArt55);
 
 /** 상속세 및 증여세법 제26조. 증여는 제56조가 이 세율을 씀. */
-export const IHTA_ART26_BRACKETS: TaxBracket[] = (dataFile as any).ihtaArt26 as TaxBracket[];
+export const IHTA_ART26_BRACKETS: TaxBracket[] = rebuildBrackets("ihtaArt26", labels.ihtaArt26);
 
 /** 지방세법 제111조 제1항 제3호 나목. 주택 재산세 표준세율. */
-export const LTA_ART111_HOUSE_BRACKETS: TaxBracket[] = (dataFile as any).ltaArt111House as TaxBracket[];
+export const LTA_ART111_HOUSE_BRACKETS: TaxBracket[] = rebuildBrackets("ltaArt111House", labels.ltaArt111House);
 
 /** 종합부동산세법 제9조 제1항 제1호. 납세의무자가 2주택 이하. */
-export const CRET_ART9_2HOUSE_BRACKETS: TaxBracket[] = (dataFile as any).cretArt9_2house as TaxBracket[];
+export const CRET_ART9_2HOUSE_BRACKETS: TaxBracket[] = rebuildBrackets("cretArt9_2house", labels.cretArt9_2house);
 
 /** 종합부동산세법 제9조 제1항 제2호. 납세의무자가 3주택 이상. */
-export const CRET_ART9_3HOUSE_BRACKETS: TaxBracket[] = (dataFile as any).cretArt9_3house as TaxBracket[];
+export const CRET_ART9_3HOUSE_BRACKETS: TaxBracket[] = rebuildBrackets("cretArt9_3house", labels.cretArt9_3house);
 
 export const TAX_TABLES: TaxTable[] = [
   { id: "ita55", title: "종합소득·양도 기본세율", article: "소득세법 제55조 제1항. 양도는 제104조 제1항 제1호가 이 표를 씀(2년 이상 보유 부동산 등).", kind: "cgt", localOnTax: true, note: "단기 보유·주택 중과·1세대1주택 비과세는 이 표가 아닙니다. 지방소득세는 산출세액의 10%(지방세법 제103조의13).", brackets: ITA_ART55_BRACKETS },
@@ -58,15 +75,43 @@ export const TAX_TABLES: TaxTable[] = [
   { id: "cret9-3", title: "주택분 종부세 (3주택 이상)", article: "종합부동산세법 제9조 제1항 제2호.", kind: "holding", localOnTax: false, note: "법인은 제9조 제2항(2주택 이하 1천분의 27, 3주택 이상 1천분의 50). 이 표가 아닙니다.", brackets: CRET_ART9_3HOUSE_BRACKETS },
 ];
 
-export const CGT_FLAT_RATES = (dataFile as any).cgtFlatRates as any;
+export type CgtFlatRate = {
+  id: string;
+  label: string;
+  rate: string;
+  article: string;
+};
 
-export const GIFT_DEDUCTIONS = (dataFile as any).giftDeductions as any;
+export type GiftDeduction = {
+  id: string;
+  label: string;
+  amount: string;
+  article: string;
+  note: string;
+};
 
-export const TAX_TERMS = (dataFile as any).taxTerms as any;
+export type TaxTerm = {
+  id: string;
+  term: string;
+  plain: string;
+};
 
-export const PROGRESSIVE_PLAIN = (dataFile as any).progressivePlain as readonly string[];
+export type TaxHelpLink = {
+  id: string;
+  label: string;
+  href: string;
+  note: string;
+};
 
-export const TAX_HELP_LINKS = (dataFile as any).taxHelpLinks as any;
+export const CGT_FLAT_RATES: readonly CgtFlatRate[] = dataFile.cgtFlatRates;
+
+export const GIFT_DEDUCTIONS: readonly GiftDeduction[] = dataFile.giftDeductions;
+
+export const TAX_TERMS: readonly TaxTerm[] = dataFile.taxTerms;
+
+export const PROGRESSIVE_PLAIN: readonly string[] = dataFile.progressivePlain;
+
+export const TAX_HELP_LINKS: readonly TaxHelpLink[] = dataFile.taxHelpLinks;
 
 export function findTaxTable(id: string): TaxTable | undefined {
   return TAX_TABLES.find((t) => t.id === id);

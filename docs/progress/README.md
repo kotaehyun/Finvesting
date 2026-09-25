@@ -2,6 +2,23 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-25 — data 구조 정리·as any 0 (Cursor, feat/erp-tax-desk)
+**한 일**
+- tax 5 JSON: 값은 `entries`만. `getValue`/`requireValue`. rates·표 숫자 객체 삭제(라벨 동반만 유지)
+- realty 15 JSON: `entries` 삭제, `exports`→최상위. map/ref/loans `kind:"config"`
+- core `as any` 0. `dump-data-json.mjs` 삭제. verifiedBy 패턴. 미검증 개수 고정 expect 제거
+- `/erp`·`/profile` 「기준 asOf · sourceTitle」. `data-tables.md` 갱신. 리뷰 09-25 반영 열
+- typecheck 8/8 · core vitest 231 · web build 통과
+
+**다음 할 일**
+1. 사용자 결정: 부동산 편입/동결, ERP 계속(스키마)/보류
+2. tax entries·realty defaults 원문 대조(`verifiedBy` 올리기)
+3. `feat/erp-tax-desk` → `dev`는 지시 후
+
+**막힌 것**
+- ERP 원장 스키마 없음. 통계 원문 대조 전(전부 미검증)
+- corepack이 로컬 `.pnpm-store` 링크를 찾다 실패할 수 있음 → `COREPACK_ENABLE_STRICT=0` 또는 brew pnpm
+
 ## 2026-09-23 — 상수 JSON화·데이터 규칙 보강 (Cursor)
 **한 일**
 - AGENTS·CLAUDE·ChatGPT 11번에 `{status: empty|stale|unavailable}`·`DEMO_MODE` 「샘플」 문장 추가

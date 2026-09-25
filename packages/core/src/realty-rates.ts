@@ -1,9 +1,9 @@
 // 대출 금리는 한은 가중평균·기준금리, 은행연합회 COFIX만. 개별 은행 상품·등기는 안 긁는다.
 // ECOS 항목코드는 이름 매칭. 코드 추측 금지.
 import dataFile from "../data/realty/rates.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/rates.json");
+assertDefaults(dataFile, "realty/rates.json");
 
 
 export type RealtyRateBasis = "policy" | "new" | "out" | "cofix" | "market";
@@ -23,24 +23,24 @@ export type RealtyRateRow = {
   note?: string;
 };
 
-export const REALTY_RATE_LINKS = (dataFile as any).exports.REALTY_RATE_LINKS as any;
+export const REALTY_RATE_LINKS = dataFile.REALTY_RATE_LINKS;
 
-export const REALTY_RATE_NOTE = (dataFile as any).exports.REALTY_RATE_NOTE as any;
+export const REALTY_RATE_NOTE = dataFile.REALTY_RATE_NOTE;
 
 /** 한은 2026-08-27 금통위. */
-export const REALTY_BASE_RATE = (dataFile as any).exports.REALTY_BASE_RATE as any;
+export const REALTY_BASE_RATE = dataFile.REALTY_BASE_RATE;
 
 /**
  * 한은 2026년 7월 금융기관 가중평균금리. 본문 헤드라인 + 같은 보도 붙임 표(가계·주담대·전세·신용).
  * 8월 숫자는 9월 30일 공표 전이라 넣지 않는다.
  */
-export const REALTY_BOK_AVG = (dataFile as any).exports.REALTY_BOK_AVG as any;
+export const REALTY_BOK_AVG = dataFile.REALTY_BOK_AVG;
 
 /** 은행연합회 2026-09-15 공시. 대상기간 2026-08. */
-export const REALTY_COFIX = (dataFile as any).exports.REALTY_COFIX as any;
+export const REALTY_COFIX = dataFile.REALTY_COFIX;
 
-export const ECOS_LOAN_RATE_NEW_STAT = (dataFile as any).exports.ECOS_LOAN_RATE_NEW_STAT as any;
-export const ECOS_LOAN_RATE_OUT_STAT = (dataFile as any).exports.ECOS_LOAN_RATE_OUT_STAT as any;
+export const ECOS_LOAN_RATE_NEW_STAT = dataFile.ECOS_LOAN_RATE_NEW_STAT;
+export const ECOS_LOAN_RATE_OUT_STAT = dataFile.ECOS_LOAN_RATE_OUT_STAT;
 
 export type EcosLoanRateSpec = {
   id: string;
@@ -50,7 +50,7 @@ export type EcosLoanRateSpec = {
 };
 
 /** 항목코드 없음. StatisticItemList 이름만. */
-export const ECOS_LOAN_RATE_SPECS: readonly EcosLoanRateSpec[] = (dataFile as any).exports.ECOS_LOAN_RATE_SPECS as any;
+export const ECOS_LOAN_RATE_SPECS: readonly EcosLoanRateSpec[] = dataFile.ECOS_LOAN_RATE_SPECS;
 
 export function matchEcosLoanRateItem(stat: string, name: string): EcosLoanRateSpec | null {
   const n = name.replace(/\s+/g, "").trim();

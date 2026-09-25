@@ -1,8 +1,8 @@
 // 카드 연체·결제성 리볼빙(리빙볼). 개별 카드사 실명 상품은 안 긁는다.
 import dataFile from "../data/realty/card.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/card.json");
+assertDefaults(dataFile, "realty/card.json");
 
 
 export const REALTY_CARD_LINKS = dataFile.links as typeof dataFile.links;

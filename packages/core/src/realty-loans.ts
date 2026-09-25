@@ -1,14 +1,14 @@
 // 예금은행 지역별 가계대출은 시·구가 아니라 광역시도. ECOS 151Y003 말잔(십억원).
 // 통계청 2018 시군구 코드 앞 2자리. 항목코드는 이름 매칭, 추측 금지.
 import dataFile from "../data/realty/loans.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/loans.json");
+assertDefaults(dataFile, "realty/loans.json");
 
 
 export type RealtyMetroId = "seoul" | "busan" | "daegu" | "incheon" | "gwangju" | "daejeon" | "ulsan" | "sejong" | "gyeonggi" | "gangwon" | "chungbuk" | "chungnam" | "jeonbuk" | "jeonnam" | "gyeongbuk" | "gyeongnam" | "jeju";
 
-export const REALTY_METROS = (dataFile as any).exports.REALTY_METROS as readonly {
+export const REALTY_METROS = dataFile.REALTY_METROS as readonly {
   id: RealtyMetroId;
   label: string;
   kostat: string;
@@ -21,19 +21,19 @@ const METRO_BY_KOSTAT: Record<string, RealtyMetroId> = Object.fromEntries(
 
 const METRO_IDS = new Set<string>(REALTY_METROS.map((m) => m.id));
 
-export const ECOS_HHLOAN_STAT = (dataFile as any).exports.ECOS_HHLOAN_STAT as string;
-export const ECOS_HHLOAN_ITEM = (dataFile as any).exports.ECOS_HHLOAN_ITEM as string; // 예금은행 가계대출. sample 항목 목록에서 확인
-export const ECOS_HHLOAN_HS_ITEM = (dataFile as any).exports.ECOS_HHLOAN_HS_ITEM as string; // 주택관련대출-예금은행
-export const ECOS_HHNPL_STAT = (dataFile as any).exports.ECOS_HHNPL_STAT as string;
-export const ECOS_HHNPL_ITEM = (dataFile as any).exports.ECOS_HHNPL_ITEM as string; // 가계대출 연체율(전체1M). sample 항목 목록에서 확인
+export const ECOS_HHLOAN_STAT = dataFile.ECOS_HHLOAN_STAT as string;
+export const ECOS_HHLOAN_ITEM = dataFile.ECOS_HHLOAN_ITEM as string; // 예금은행 가계대출. sample 항목 목록에서 확인
+export const ECOS_HHLOAN_HS_ITEM = dataFile.ECOS_HHLOAN_HS_ITEM as string; // 주택관련대출-예금은행
+export const ECOS_HHNPL_STAT = dataFile.ECOS_HHNPL_STAT as string;
+export const ECOS_HHNPL_ITEM = dataFile.ECOS_HHNPL_ITEM as string; // 가계대출 연체율(전체1M). sample 항목 목록에서 확인
 
 function ecosMetroCodes(prefix: string): Record<RealtyMetroId, string> {
   return Object.fromEntries(REALTY_METROS.map((m) => [m.id, `${prefix}${m.code}`])) as Record<RealtyMetroId, string>;
 }
 
-export const ECOS_HHLOAN_CODES = (dataFile as any).exports.ECOS_HHLOAN_CODES as { kr: string } & Record<RealtyMetroId, string>;
-export const ECOS_HHLOAN_HS_CODES = (dataFile as any).exports.ECOS_HHLOAN_HS_CODES as Record<RealtyMetroId, string>;
-export const ECOS_HHNPL_CODES = (dataFile as any).exports.ECOS_HHNPL_CODES as Record<RealtyMetroId, string>;
+export const ECOS_HHLOAN_CODES = dataFile.ECOS_HHLOAN_CODES as { kr: string } & Record<RealtyMetroId, string>;
+export const ECOS_HHLOAN_HS_CODES = dataFile.ECOS_HHLOAN_HS_CODES as Record<RealtyMetroId, string>;
+export const ECOS_HHNPL_CODES = dataFile.ECOS_HHNPL_CODES as Record<RealtyMetroId, string>;
 
 const INCHEON_IDS = new Set(["incheon", "ganghwa", "ongjin"]);
 

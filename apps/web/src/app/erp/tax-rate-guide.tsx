@@ -8,6 +8,7 @@ import {
   TAX_HELP_LINKS,
   TAX_TABLES,
   TAX_TERMS,
+  TAX_BRACKETS_SOURCE,
   assessBracketTax,
   findTaxTable,
   type TaxTable,
@@ -269,6 +270,8 @@ export function TaxRateGuide({ paneDefault = "words", showCaution = true }: { pa
           <Worksheet tables={holding} />
         </>
       )}
+
+      <p className="erp-hint">{TAX_BRACKETS_SOURCE}</p>
     </>
   );
 }

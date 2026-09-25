@@ -1,8 +1,8 @@
 // 수도권 시·구 중심점. 좌표는 OSM Nominatim 검색(2026-09-15). 행정 중심이지 필지·동 경계가 아님.
 import dataFile from "../data/realty/map.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/map.json");
+assertDefaults(dataFile, "realty/map.json");
 
 import {
   realtyMetroFromKostatCode,
@@ -28,11 +28,11 @@ export type RealtyMapPoint = {
   note: string;
 };
 
-const REGULATED_NOTES = (dataFile as any).helpers.REGULATED_NOTES as Record<string, string>;
+const REGULATED_NOTES = dataFile.helpers.REGULATED_NOTES as Record<string, string>;
 
-const REGULATED_COORDS = (dataFile as any).helpers.REGULATED_COORDS as Record<string, readonly [number, number]>;
+const REGULATED_COORDS = dataFile.helpers.REGULATED_COORDS as unknown as Record<string, readonly [number, number]>;
 
-const CONTEXT = (dataFile as any).helpers.CONTEXT as readonly RealtyMapPoint[];
+const CONTEXT = dataFile.helpers.CONTEXT as readonly RealtyMapPoint[];
 
 function regulatedPoint(id: string, label: string, since: "2025-10-16" | "2026-07-01"): RealtyMapPoint {
   const xy = REGULATED_COORDS[id];
@@ -50,9 +50,9 @@ function regulatedPoint(id: string, label: string, since: "2025-10-16" | "2026-0
   };
 }
 
-export const REALTY_MAP_POINTS: readonly RealtyMapPoint[] = (dataFile as any).exports.REALTY_MAP_POINTS;
+export const REALTY_MAP_POINTS: readonly RealtyMapPoint[] = dataFile.REALTY_MAP_POINTS as readonly RealtyMapPoint[];
 
-export const REALTY_MAP_VIEW = (dataFile as any).exports.REALTY_MAP_VIEW;
+export const REALTY_MAP_VIEW = dataFile.REALTY_MAP_VIEW;
 
 export function realtyMapPoint(id: string): RealtyMapPoint | undefined {
   return REALTY_MAP_POINTS.find((p) => p.id === id);
@@ -76,7 +76,7 @@ export type RealtyPlanStyle = {
   note: string;
 };
 
-const GY_PLAN = (dataFile as any).helpers.GY_PLAN as any;
+const GY_PLAN = dataFile.helpers.GY_PLAN as Record<string, { id: string; label: string; kind: RealtyPlanKind; tone: RealtyTone | "muted"; note: string }>;
 
 function shortName(name: string): string {
   return name.replace(/^수원시|^성남시|^안양시|^안산시|^고양시|^용인시/, "");

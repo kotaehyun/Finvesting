@@ -1,14 +1,14 @@
 // 국세 집계로 본 고가주택 소재 경향. 개인 납세·자산 조회는 세법상 불가.
 // 고위공직자를 집계에서 뺄 수 없다. 종부세 고지는 기재부, 표는 국세통계포털(TASIS).
 import dataFile from "../data/realty/nts.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/nts.json");
+assertDefaults(dataFile, "realty/nts.json");
 
 
 import { shareOf, type RealtyMetroId } from "./realty-loans";
 
-export const REALTY_NTS_CGT = (dataFile as any).exports.REALTY_NTS_CGT as any;
+export const REALTY_NTS_CGT = dataFile.REALTY_NTS_CGT;
 
 export type RealtyNtsMetroRow = {
   id: RealtyMetroId;
@@ -19,9 +19,9 @@ export type RealtyNtsMetroRow = {
 };
 
 /** 주택분 종부세 과세인원. 기재부가 수치를 밝힌 수도권 3곳만. 나머지 시도는 원문 참고 2. */
-export const REALTY_NTS_CGT_METROS: readonly RealtyNtsMetroRow[] = (dataFile as any).exports.REALTY_NTS_CGT_METROS as any;
+export const REALTY_NTS_CGT_METROS: readonly RealtyNtsMetroRow[] = dataFile.REALTY_NTS_CGT_METROS as readonly RealtyNtsMetroRow[];
 
-export const REALTY_NTS_TRANSFER_NOTE = (dataFile as any).exports.REALTY_NTS_TRANSFER_NOTE as any;
+export const REALTY_NTS_TRANSFER_NOTE = dataFile.REALTY_NTS_TRANSFER_NOTE;
 
 export function ntsCgtDelta(row: RealtyNtsMetroRow): number {
   return row.now - row.prev;

@@ -1,22 +1,23 @@
 // 2026년 직장가입자·근로자 부담분. 원 단위 절사.
 // 국세(근로소득세)는 간이세액표·부양가족에 따라 달라 요율로 추정하지 않는다. 명세서 금액을 넣고 지방세는 그 10%.
 import dataFile from "../data/tax/payroll-rates-2026.json";
-import { assertDataFile } from "./load-data";
+import { assertDataFile, dataSourceLine, requireValue } from "./load-data";
 
-assertDataFile(dataFile as any, "tax/payroll-rates-2026.json");
+assertDataFile(dataFile, "tax/payroll-rates-2026.json");
 
+export const PAYROLL_RATES_SOURCE = dataSourceLine(dataFile.defaults);
 
-export const PAYROLL_RATES_2026 = dataFile.rates as {
-  readonly year: number;
-  readonly nationalPensionEmployee: number;
-  readonly nationalPensionFloor: number;
-  readonly nationalPensionCap: number;
-  readonly healthInsuranceTotal: number;
-  readonly healthInsuranceEmployeeShare: number;
-  readonly longTermCareIncomeRate: number;
-  readonly employmentInsuranceEmployee: number;
-  readonly localIncomeTaxOnNational: number;
-};
+export const PAYROLL_RATES_2026 = {
+  year: requireValue(dataFile, "rates.year"),
+  nationalPensionEmployee: requireValue(dataFile, "rates.nationalPensionEmployee"),
+  nationalPensionFloor: requireValue(dataFile, "rates.nationalPensionFloor"),
+  nationalPensionCap: requireValue(dataFile, "rates.nationalPensionCap"),
+  healthInsuranceTotal: requireValue(dataFile, "rates.healthInsuranceTotal"),
+  healthInsuranceEmployeeShare: requireValue(dataFile, "rates.healthInsuranceEmployeeShare"),
+  longTermCareIncomeRate: requireValue(dataFile, "rates.longTermCareIncomeRate"),
+  employmentInsuranceEmployee: requireValue(dataFile, "rates.employmentInsuranceEmployee"),
+  localIncomeTaxOnNational: requireValue(dataFile, "rates.localIncomeTaxOnNational"),
+} as const;
 
 function truncWon(n: number) {
   if (!Number.isFinite(n) || n <= 0) return 0;
@@ -37,7 +38,7 @@ export type StatutoryWithholding = {
 };
 
 // 소득세법 제47조 근로소득공제. 한도 2,000만. 원 단위 절사.
-export const BASIC_PERSONAL_EXEMPTION = dataFile.basicPersonalExemption as number; // 본인 기본공제. 부양가족은 아직 없음.
+export const BASIC_PERSONAL_EXEMPTION = requireValue(dataFile, "basicPersonalExemption");
 
 export function earnedIncomeDeduction(annualGross: number): number {
   const g = Math.max(0, Math.floor(Number(annualGross) || 0));

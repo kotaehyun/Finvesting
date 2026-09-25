@@ -16,6 +16,7 @@ import {
   payEarningGroupOf,
   PAY_DEDUCTION_PRESETS,
   PAY_EARNING_GROUP_LABEL,
+  PAYROLL_RATES_SOURCE,
   type PayEarningGroup,
 } from "@finvesting/core";
 
@@ -704,6 +705,7 @@ function ProfileWorkspace() {
                     <tr><td className="ro">실수령액</td><td className="ro">세전 − 공제 (세후 입력이 있으면 그 값)</td><td className="ro num">{pay ? won(pay.net) : "—"}</td></tr>
                   </tbody>
                 </table>
+                <p className="erp-hint">{PAYROLL_RATES_SOURCE}</p>
               </>
             )}
             {menu === "fixed" && (

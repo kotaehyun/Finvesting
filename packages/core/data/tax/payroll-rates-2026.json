@@ -9,18 +9,6 @@
     "verifiedBy": "미검증",
     "verifiedOn": null
   },
-  "rates": {
-    "year": 2026,
-    "nationalPensionEmployee": 0.0475,
-    "nationalPensionFloor": 410000,
-    "nationalPensionCap": 6590000,
-    "healthInsuranceTotal": 0.0719,
-    "healthInsuranceEmployeeShare": 0.5,
-    "longTermCareIncomeRate": 0.009448,
-    "employmentInsuranceEmployee": 0.009,
-    "localIncomeTaxOnNational": 0.1
-  },
-  "basicPersonalExemption": 1500000,
   "entries": [
     {
       "id": "rates.year",

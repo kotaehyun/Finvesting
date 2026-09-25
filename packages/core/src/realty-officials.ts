@@ -1,14 +1,14 @@
 // 공직자윤리법 재산공개. 사적 자산가·재벌 명단은 공식 공개가 아니라 넣지 않는다.
 // 공직윤리시스템·관보를 긁지 않는다. 집계는 인사혁신처 보도, 주택 방향은 관보를 인용한 확인분.
 import dataFile from "../data/realty/officials.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/officials.json");
+assertDefaults(dataFile, "realty/officials.json");
 
 
 import type { RealtyMetroId } from "./realty-loans";
 
-export const REALTY_OFFICIAL_ASSET = (dataFile as any).exports.REALTY_OFFICIAL_ASSET as any;
+export const REALTY_OFFICIAL_ASSET = dataFile.REALTY_OFFICIAL_ASSET;
 
 export type RealtyOfficialFlow = "capital-away" | "split" | "none";
 
@@ -24,11 +24,11 @@ export type RealtyOfficialHouse = {
 };
 
 /** 관할 광역이 아닌 서울·경기에 주택이 있는 광역단체장. 관보 2026-03-26, 동·면까지. */
-export const REALTY_OFFICIAL_HOUSES: readonly RealtyOfficialHouse[] = (dataFile as any).exports.REALTY_OFFICIAL_HOUSES as any;
+export const REALTY_OFFICIAL_HOUSES: readonly RealtyOfficialHouse[] = dataFile.REALTY_OFFICIAL_HOUSES as readonly RealtyOfficialHouse[];
 
-export const REALTY_OFFICIAL_METRO_HEADS = (dataFile as any).exports.REALTY_OFFICIAL_METRO_HEADS as any;
+export const REALTY_OFFICIAL_METRO_HEADS = dataFile.REALTY_OFFICIAL_METRO_HEADS;
 
-export const REALTY_OFFICIAL_FLOW_ROWS = (dataFile as any).exports.REALTY_OFFICIAL_FLOW_ROWS as any;
+export const REALTY_OFFICIAL_FLOW_ROWS = dataFile.REALTY_OFFICIAL_FLOW_ROWS;
 
 export function realtyOfficialCapitalAwayCount(): number {
   return REALTY_OFFICIAL_HOUSES.filter((h) => h.flow === "capital-away" || h.flow === "split").length;

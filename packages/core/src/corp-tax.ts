@@ -1,9 +1,10 @@
 // 법인사업자 양식. 법인세 세율은 과세표준 구간 고시라 곱하지 않는다. 종소세가 아님.
 import corpLocal from "../data/tax/corp-local-rate.json";
-import { assertDataFile } from "./load-data";
+import { assertDataFile, dataSourceLine, requireValue } from "./load-data";
 
-assertDataFile(corpLocal as any, "tax/corp-local-rate.json");
+assertDataFile(corpLocal, "tax/corp-local-rate.json");
 
+export const CORP_LOCAL_RATE_SOURCE = dataSourceLine(corpLocal.defaults);
 
 function truncWon(n: number) {
   if (!Number.isFinite(n) || n <= 0) return 0;
@@ -11,7 +12,7 @@ function truncWon(n: number) {
 }
 
 /** 지방세법 제103조의20. 법인지방소득세 표준세율 = 법인세액의 10%. */
-export const CIT_LOCAL_ON_CORP_TAX = (corpLocal as any).citLocalOnCorpTax as number;
+export const CIT_LOCAL_ON_CORP_TAX = requireValue(corpLocal, "citLocalOnCorpTax");
 
 /** 법인세법 제60조·제63조. 12월 결산 예시. 사업연도가 다르면 칸. */
 export const CIT_FILING_CALENDAR = [

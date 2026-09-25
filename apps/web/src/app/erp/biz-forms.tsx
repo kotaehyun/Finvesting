@@ -11,10 +11,13 @@ import {
   CORP_SOLE_DIFF,
   CIVIL_PAY,
   CIVIL_PAY_GRADES,
+  CIVIL_PAY_SOURCE,
   CIVIL_PAY_TABLE,
   civilPayAmount,
   civilPayCsv,
+  CORP_LOCAL_RATE_SOURCE,
   EI_STABILITY_BANDS,
+  EI_STABILITY_SOURCE,
   ENGAGEMENT_KINDS,
   FREELANCER_ALBA_CLAUSE,
   FREELANCER_ALBA_CLAUSE_BASIS,
@@ -534,6 +537,7 @@ export function LaborForm({ role }: { role?: OperatorRole }) {
             </tbody>
           </table>
           <p className="erp-hint">{INDUSTRIAL_ACCIDENT_NOTE}</p>
+          <p className="erp-hint">{EI_STABILITY_SOURCE}</p>
         </div>
       </section>
       <section className="wehago-widget wehago-widget-span">
@@ -611,6 +615,7 @@ export function LaborForm({ role }: { role?: OperatorRole }) {
             <button type="button" onClick={() => downloadCsv("공무원-별표3-봉급표-시산.csv", civilPayCsv())}>별표 3 시산 CSV</button>
             {" · "}빈 칸은 0이 아닙니다. 인사혁신처 제출 파일이 아닙니다.
           </p>
+          <p className="erp-hint">{CIVIL_PAY_SOURCE}</p>
         </div>
       </section>
     </>
@@ -964,6 +969,7 @@ export function CitForm() {
         <div className="wehago-kpi"><span className="k">차감납부</span><span className="v">{won(sheet.remaining)}</span><span className="s">중간예납 차감</span></div>
       </div>
       <p className="erp-hint">{sheet.note}</p>
+      <p className="erp-hint">{CORP_LOCAL_RATE_SOURCE}</p>
       <section className="wehago-widget wehago-widget-span">
         <h3>신고 달력</h3>
         <div className="body">

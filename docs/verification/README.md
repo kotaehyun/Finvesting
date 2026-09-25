@@ -37,13 +37,13 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ 통과. 웹은 `@types/react` 19만 해석. 09-18 api+web 재확인 | 2026-09-18 | Grok |
-| core 테스트 (vitest) | ✅ 62파일 230 테스트 통과(data-tables 포함). 숫자 원문 대조 아님 | 2026-09-21 | Cursor |
-| `packages/core/data/**` JSON 스키마 | ✅ entries 992·`verifiedBy` 허용값. 원문 대조는 전원 미검증(⏸) | 2026-09-21 | Cursor |
+| 타입체크 (web 포함 8패키지) | ✅ 8/8 통과 (`as any` 제거 후) | 2026-09-25 | Cursor |
+| core 테스트 (vitest) | ✅ 62파일 231 테스트. 미검증 개수 고정 expect 없음 | 2026-09-25 | Cursor |
+| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 원문 대조는 전원 미검증(⏸) | 2026-09-25 | Cursor |
 | interop 테스트 | ✅ 11개 통과 | 2026-09-16 | Grok |
 | `pnpm db:generate` / `db:migrate` | ✅ `0007_cloudy_star_brand` (`invest_style`) 적용 | 2026-09-14 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/statements` ƒ dynamic 포함 15 라우트 | 2026-09-16 | Grok |
+| `pnpm --filter @finvesting/web build` | ✅ Compiled. erp/profile 출처 한 줄 포함 | 2026-09-25 | Cursor |
 | 홈 `/` 개편 (월 선택·현금흐름·확인할 일) | ✅ 데스크톱. 평가손익 **+7,382원** 빨강. 2026-08은 현재 순자산 구분·거래 없음 문구. 모바일 390px 스택. 빈 계정 온보딩은 DB에 계좌 있어 미확인 | 2026-09-15 | Grok Chrome |
 | `/invest` 투자 대시보드 | ✅ 금투협 도넛 23.4% 신용(예탁금 106.8조·신용 32.6조, 2026-09-14). 미수금 칸. 관심 AAPL 331.34 USD. 평가손익 `+7,382원` | 2026-09-16 | Grok Chrome |
 | `/fundamentals` Yahoo 펀더멘털 표 | ✅ 09-16 수집분 카카오 `035720` 시총 14.87조(렌더≠진위). 09-18 Postgres 꺼짐 → tRPC `unavailable`, 화면 「DB 연결 불가」, 고정 폴백 없음 | 2026-09-18 | Grok Chrome |

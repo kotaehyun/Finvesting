@@ -1,9 +1,9 @@
 // 개인회생·파산은 법원통계월보 신청 건수, 파탄원인은 서울회생법원 중복응답.
 // 주담대 전용 비중·미수금 일별 잔액·면책률은 공표 칸.
 import dataFile from "../data/realty/bankruptcy.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/bankruptcy.json");
+assertDefaults(dataFile, "realty/bankruptcy.json");
 
 
 export type BankruptcyCause = {

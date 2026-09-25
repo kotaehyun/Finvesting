@@ -1,22 +1,22 @@
 // 공실·빈집·소득 대비 주택 부담. 급매·개인 압류는 공식 시계열이 없어 칸+원문.
 // 상업용 공실은 한국부동산원 임대동향, 빈집은 주택총조사, PIR은 주거실태조사, 지니는 가계금융복지조사.
 import dataFile from "../data/realty/stress.json";
-import { assertDataFile } from "./load-data";
+import { assertDefaults } from "./load-data";
 
-assertDataFile(dataFile as any, "realty/stress.json");
+assertDefaults(dataFile, "realty/stress.json");
 
 
 import { REALTY_METROS, type RealtyMetroId } from "./realty-loans";
 
-export const REALTY_STRESS_LINKS = (dataFile as any).exports.REALTY_STRESS_LINKS;
+export const REALTY_STRESS_LINKS = dataFile.REALTY_STRESS_LINKS;
 
-export const REALTY_VACANCY = (dataFile as any).exports.REALTY_VACANCY;
+export const REALTY_VACANCY = dataFile.REALTY_VACANCY;
 
-export const REALTY_EMPTY = (dataFile as any).exports.REALTY_EMPTY;
+export const REALTY_EMPTY = dataFile.REALTY_EMPTY;
 
-export const REALTY_PIR = (dataFile as any).exports.REALTY_PIR;
+export const REALTY_PIR = dataFile.REALTY_PIR;
 
-export const REALTY_GINI = (dataFile as any).exports.REALTY_GINI;
+export const REALTY_GINI = dataFile.REALTY_GINI;
 
 export type RealtyStressMetro = {
   id: RealtyMetroId;
@@ -32,11 +32,11 @@ export type RealtyStressMetro = {
 };
 
 
-export const REALTY_STRESS_METROS: readonly RealtyStressMetro[] = (dataFile as any).exports.REALTY_STRESS_METROS;
+export const REALTY_STRESS_METROS: readonly RealtyStressMetro[] = dataFile.REALTY_STRESS_METROS as readonly RealtyStressMetro[];
 
-export const REALTY_KR_VACANCY = (dataFile as any).exports.REALTY_KR_VACANCY;
+export const REALTY_KR_VACANCY = dataFile.REALTY_KR_VACANCY;
 
-export const REALTY_CAPITAL_IDS: readonly RealtyMetroId[] = (dataFile as any).exports.REALTY_CAPITAL_IDS;
+export const REALTY_CAPITAL_IDS: readonly RealtyMetroId[] = dataFile.REALTY_CAPITAL_IDS as readonly RealtyMetroId[];
 
 export function realtyStressOf(id: RealtyMetroId): RealtyStressMetro {
   return REALTY_STRESS_METROS.find((r) => r.id === id) ?? REALTY_STRESS_METROS[0]!;
@@ -68,7 +68,7 @@ export function incomeHousingTone(vs: number | null): IncomeHousingTone | null {
   return "high";
 }
 
-export const INCOME_HOUSING_TONE_LABEL: Record<IncomeHousingTone, string> = (dataFile as any).exports.INCOME_HOUSING_TONE_LABEL;
+export const INCOME_HOUSING_TONE_LABEL: Record<IncomeHousingTone, string> = dataFile.INCOME_HOUSING_TONE_LABEL;
 
 export function fmtRate(n: number | null | undefined, digits = 1): string {
   if (n == null || !Number.isFinite(n)) return "—";

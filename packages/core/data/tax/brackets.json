@@ -9,295 +9,142 @@
     "verifiedBy": "미검증",
     "verifiedOn": null
   },
-  "itaArt55": [
-    {
-      "id": "ita55-6",
-      "floor": 0,
-      "cap": 14000000,
-      "rateBp": 600,
-      "addWon": 0,
-      "quickDeductionWon": 0,
-      "rateLabel": "과세표준의 6퍼센트"
-    },
-    {
-      "id": "ita55-15",
-      "floor": 14000000,
-      "cap": 50000000,
-      "rateBp": 1500,
-      "addWon": 840000,
-      "quickDeductionWon": 1260000,
-      "rateLabel": "84만원 + (1,400만원을 초과하는 금액의 15퍼센트)"
-    },
-    {
-      "id": "ita55-24",
-      "floor": 50000000,
-      "cap": 88000000,
-      "rateBp": 2400,
-      "addWon": 6240000,
-      "quickDeductionWon": 5760000,
-      "rateLabel": "624만원 + (5,000만원을 초과하는 금액의 24퍼센트)"
-    },
-    {
-      "id": "ita55-35",
-      "floor": 88000000,
-      "cap": 150000000,
-      "rateBp": 3500,
-      "addWon": 15360000,
-      "quickDeductionWon": 15440000,
-      "rateLabel": "1,536만원 + (8,800만원을 초과하는 금액의 35퍼센트)"
-    },
-    {
-      "id": "ita55-38",
-      "floor": 150000000,
-      "cap": 300000000,
-      "rateBp": 3800,
-      "addWon": 37060000,
-      "quickDeductionWon": 19940000,
-      "rateLabel": "3,706만원 + (1억5천만원을 초과하는 금액의 38퍼센트)"
-    },
-    {
-      "id": "ita55-40",
-      "floor": 300000000,
-      "cap": 500000000,
-      "rateBp": 4000,
-      "addWon": 94060000,
-      "quickDeductionWon": 25940000,
-      "rateLabel": "9,406만원 + (3억원을 초과하는 금액의 40퍼센트)"
-    },
-    {
-      "id": "ita55-42",
-      "floor": 500000000,
-      "cap": 1000000000,
-      "rateBp": 4200,
-      "addWon": 174060000,
-      "quickDeductionWon": 35940000,
-      "rateLabel": "1억7,406만원 + (5억원을 초과하는 금액의 42퍼센트)"
-    },
-    {
-      "id": "ita55-45",
-      "floor": 1000000000,
-      "cap": null,
-      "rateBp": 4500,
-      "addWon": 384060000,
-      "quickDeductionWon": 65940000,
-      "rateLabel": "3억8,406만원 + (10억원을 초과하는 금액의 45퍼센트)"
-    }
-  ],
-  "ihtaArt26": [
-    {
-      "id": "ihta26-10",
-      "floor": 0,
-      "cap": 100000000,
-      "rateBp": 1000,
-      "addWon": 0,
-      "quickDeductionWon": 0,
-      "rateLabel": "과세표준의 100분의 10"
-    },
-    {
-      "id": "ihta26-20",
-      "floor": 100000000,
-      "cap": 500000000,
-      "rateBp": 2000,
-      "addWon": 10000000,
-      "quickDeductionWon": 10000000,
-      "rateLabel": "1천만원 + (1억원을 초과하는 금액의 100분의 20)"
-    },
-    {
-      "id": "ihta26-30",
-      "floor": 500000000,
-      "cap": 1000000000,
-      "rateBp": 3000,
-      "addWon": 90000000,
-      "quickDeductionWon": 60000000,
-      "rateLabel": "9천만원 + (5억원을 초과하는 금액의 100분의 30)"
-    },
-    {
-      "id": "ihta26-40",
-      "floor": 1000000000,
-      "cap": 3000000000,
-      "rateBp": 4000,
-      "addWon": 240000000,
-      "quickDeductionWon": 160000000,
-      "rateLabel": "2억4천만원 + (10억원을 초과하는 금액의 100분의 40)"
-    },
-    {
-      "id": "ihta26-50",
-      "floor": 3000000000,
-      "cap": null,
-      "rateBp": 5000,
-      "addWon": 1040000000,
-      "quickDeductionWon": 460000000,
-      "rateLabel": "10억4천만원 + (30억원을 초과하는 금액의 100분의 50)"
-    }
-  ],
-  "ltaArt111House": [
-    {
-      "id": "lta111-h1",
-      "floor": 0,
-      "cap": 60000000,
-      "rateBp": 10,
-      "addWon": 0,
-      "quickDeductionWon": 0,
-      "rateLabel": "1,000분의 1"
-    },
-    {
-      "id": "lta111-h2",
-      "floor": 60000000,
-      "cap": 150000000,
-      "rateBp": 15,
-      "addWon": 60000,
-      "quickDeductionWon": 30000,
-      "rateLabel": "60,000원 + 6천만원 초과금액의 1,000분의 1.5"
-    },
-    {
-      "id": "lta111-h3",
-      "floor": 150000000,
-      "cap": 300000000,
-      "rateBp": 25,
-      "addWon": 195000,
-      "quickDeductionWon": 180000,
-      "rateLabel": "195,000원 + 1억5천만원 초과금액의 1,000분의 2.5"
-    },
-    {
-      "id": "lta111-h4",
-      "floor": 300000000,
-      "cap": null,
-      "rateBp": 40,
-      "addWon": 570000,
-      "quickDeductionWon": 630000,
-      "rateLabel": "570,000원 + 3억원 초과금액의 1,000분의 4"
-    }
-  ],
-  "cretArt9_2house": [
-    {
-      "id": "cret9-2-1",
-      "floor": 0,
-      "cap": 300000000,
-      "rateBp": 50,
-      "addWon": 0,
-      "quickDeductionWon": 0,
-      "rateLabel": "1천분의 5"
-    },
-    {
-      "id": "cret9-2-2",
-      "floor": 300000000,
-      "cap": 600000000,
-      "rateBp": 70,
-      "addWon": 1500000,
-      "quickDeductionWon": 600000,
-      "rateLabel": "150만원 + (3억원 초과분의 1천분의 7)"
-    },
-    {
-      "id": "cret9-2-3",
-      "floor": 600000000,
-      "cap": 1200000000,
-      "rateBp": 100,
-      "addWon": 3600000,
-      "quickDeductionWon": 2400000,
-      "rateLabel": "360만원 + (6억원 초과분의 1천분의 10)"
-    },
-    {
-      "id": "cret9-2-4",
-      "floor": 1200000000,
-      "cap": 2500000000,
-      "rateBp": 130,
-      "addWon": 9600000,
-      "quickDeductionWon": 6000000,
-      "rateLabel": "960만원 + (12억원 초과분의 1천분의 13)"
-    },
-    {
-      "id": "cret9-2-5",
-      "floor": 2500000000,
-      "cap": 5000000000,
-      "rateBp": 150,
-      "addWon": 26500000,
-      "quickDeductionWon": 11000000,
-      "rateLabel": "2천650만원 + (25억원 초과분의 1천분의 15)"
-    },
-    {
-      "id": "cret9-2-6",
-      "floor": 5000000000,
-      "cap": 9400000000,
-      "rateBp": 200,
-      "addWon": 64000000,
-      "quickDeductionWon": 36000000,
-      "rateLabel": "6천400만원 + (50억원 초과분의 1천분의 20)"
-    },
-    {
-      "id": "cret9-2-7",
-      "floor": 9400000000,
-      "cap": null,
-      "rateBp": 270,
-      "addWon": 152000000,
-      "quickDeductionWon": 101800000,
-      "rateLabel": "1억5천200만원 + (94억원 초과분의 1천분의 27)"
-    }
-  ],
-  "cretArt9_3house": [
-    {
-      "id": "cret9-3-1",
-      "floor": 0,
-      "cap": 300000000,
-      "rateBp": 50,
-      "addWon": 0,
-      "quickDeductionWon": 0,
-      "rateLabel": "1천분의 5"
-    },
-    {
-      "id": "cret9-3-2",
-      "floor": 300000000,
-      "cap": 600000000,
-      "rateBp": 70,
-      "addWon": 1500000,
-      "quickDeductionWon": 600000,
-      "rateLabel": "150만원 + (3억원 초과분의 1천분의 7)"
-    },
-    {
-      "id": "cret9-3-3",
-      "floor": 600000000,
-      "cap": 1200000000,
-      "rateBp": 100,
-      "addWon": 3600000,
-      "quickDeductionWon": 2400000,
-      "rateLabel": "360만원 + (6억원 초과분의 1천분의 10)"
-    },
-    {
-      "id": "cret9-3-4",
-      "floor": 1200000000,
-      "cap": 2500000000,
-      "rateBp": 200,
-      "addWon": 9600000,
-      "quickDeductionWon": 14400000,
-      "rateLabel": "960만원 + (12억원 초과분의 1천분의 20)"
-    },
-    {
-      "id": "cret9-3-5",
-      "floor": 2500000000,
-      "cap": 5000000000,
-      "rateBp": 300,
-      "addWon": 35600000,
-      "quickDeductionWon": 39400000,
-      "rateLabel": "3천560만원 + (25억원 초과분의 1천분의 30)"
-    },
-    {
-      "id": "cret9-3-6",
-      "floor": 5000000000,
-      "cap": 9400000000,
-      "rateBp": 400,
-      "addWon": 110600000,
-      "quickDeductionWon": 89400000,
-      "rateLabel": "1억1천60만원 + (50억원 초과분의 1천분의 40)"
-    },
-    {
-      "id": "cret9-3-7",
-      "floor": 9400000000,
-      "cap": null,
-      "rateBp": 500,
-      "addWon": 286600000,
-      "quickDeductionWon": 183400000,
-      "rateLabel": "2억8천660만원 + (94억원 초과분의 1천분의 50)"
-    }
-  ],
+  "bracketLabels": {
+    "itaArt55": [
+      {
+        "id": "ita55-6",
+        "rateLabel": "과세표준의 6퍼센트"
+      },
+      {
+        "id": "ita55-15",
+        "rateLabel": "84만원 + (1,400만원을 초과하는 금액의 15퍼센트)"
+      },
+      {
+        "id": "ita55-24",
+        "rateLabel": "624만원 + (5,000만원을 초과하는 금액의 24퍼센트)"
+      },
+      {
+        "id": "ita55-35",
+        "rateLabel": "1,536만원 + (8,800만원을 초과하는 금액의 35퍼센트)"
+      },
+      {
+        "id": "ita55-38",
+        "rateLabel": "3,706만원 + (1억5천만원을 초과하는 금액의 38퍼센트)"
+      },
+      {
+        "id": "ita55-40",
+        "rateLabel": "9,406만원 + (3억원을 초과하는 금액의 40퍼센트)"
+      },
+      {
+        "id": "ita55-42",
+        "rateLabel": "1억7,406만원 + (5억원을 초과하는 금액의 42퍼센트)"
+      },
+      {
+        "id": "ita55-45",
+        "rateLabel": "3억8,406만원 + (10억원을 초과하는 금액의 45퍼센트)"
+      }
+    ],
+    "ihtaArt26": [
+      {
+        "id": "ihta26-10",
+        "rateLabel": "과세표준의 100분의 10"
+      },
+      {
+        "id": "ihta26-20",
+        "rateLabel": "1천만원 + (1억원을 초과하는 금액의 100분의 20)"
+      },
+      {
+        "id": "ihta26-30",
+        "rateLabel": "9천만원 + (5억원을 초과하는 금액의 100분의 30)"
+      },
+      {
+        "id": "ihta26-40",
+        "rateLabel": "2억4천만원 + (10억원을 초과하는 금액의 100분의 40)"
+      },
+      {
+        "id": "ihta26-50",
+        "rateLabel": "10억4천만원 + (30억원을 초과하는 금액의 100분의 50)"
+      }
+    ],
+    "ltaArt111House": [
+      {
+        "id": "lta111-h1",
+        "rateLabel": "1,000분의 1"
+      },
+      {
+        "id": "lta111-h2",
+        "rateLabel": "60,000원 + 6천만원 초과금액의 1,000분의 1.5"
+      },
+      {
+        "id": "lta111-h3",
+        "rateLabel": "195,000원 + 1억5천만원 초과금액의 1,000분의 2.5"
+      },
+      {
+        "id": "lta111-h4",
+        "rateLabel": "570,000원 + 3억원 초과금액의 1,000분의 4"
+      }
+    ],
+    "cretArt9_2house": [
+      {
+        "id": "cret9-2-1",
+        "rateLabel": "1천분의 5"
+      },
+      {
+        "id": "cret9-2-2",
+        "rateLabel": "150만원 + (3억원 초과분의 1천분의 7)"
+      },
+      {
+        "id": "cret9-2-3",
+        "rateLabel": "360만원 + (6억원 초과분의 1천분의 10)"
+      },
+      {
+        "id": "cret9-2-4",
+        "rateLabel": "960만원 + (12억원 초과분의 1천분의 13)"
+      },
+      {
+        "id": "cret9-2-5",
+        "rateLabel": "2천650만원 + (25억원 초과분의 1천분의 15)"
+      },
+      {
+        "id": "cret9-2-6",
+        "rateLabel": "6천400만원 + (50억원 초과분의 1천분의 20)"
+      },
+      {
+        "id": "cret9-2-7",
+        "rateLabel": "1억5천200만원 + (94억원 초과분의 1천분의 27)"
+      }
+    ],
+    "cretArt9_3house": [
+      {
+        "id": "cret9-3-1",
+        "rateLabel": "1천분의 5"
+      },
+      {
+        "id": "cret9-3-2",
+        "rateLabel": "150만원 + (3억원 초과분의 1천분의 7)"
+      },
+      {
+        "id": "cret9-3-3",
+        "rateLabel": "360만원 + (6억원 초과분의 1천분의 10)"
+      },
+      {
+        "id": "cret9-3-4",
+        "rateLabel": "960만원 + (12억원 초과분의 1천분의 20)"
+      },
+      {
+        "id": "cret9-3-5",
+        "rateLabel": "3천560만원 + (25억원 초과분의 1천분의 30)"
+      },
+      {
+        "id": "cret9-3-6",
+        "rateLabel": "1억1천60만원 + (50억원 초과분의 1천분의 40)"
+      },
+      {
+        "id": "cret9-3-7",
+        "rateLabel": "2억8천660만원 + (94억원 초과분의 1천분의 50)"
+      }
+    ]
+  },
   "taxTablesMeta": [
     {
       "id": "ita55",
