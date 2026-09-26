@@ -6,14 +6,18 @@ import {
   REALTY_CRE_NPL,
   REALTY_CRE_YIELD,
   REALTY_DISTRESS_LINKS,
+  REALTY_DISTRESS_SLOTS,
   REALTY_HH_NPL,
   REALTY_INSOLVENCY_LINKS,
+  REALTY_INSOLVENCY_SLOTS,
   REALTY_INSOLVENCY_STATS,
   REALTY_REVOLVING,
   REALTY_RTI,
   REALTY_YOUNG_LEVERAGE,
   auctionYoyPct,
   eokToJo1,
+  insolvencyFiledTotal,
+  rehabilitationYoyPct,
   revolvingShareOfCardCredit,
 } from "@finvesting/core";
 
@@ -122,7 +126,7 @@ export function RealtyDistressPanel() {
       <div className="realty-subblock-card">
         <div className="realty-subblock-head">
           <h4 className="realty-subblock-title">
-            <span>⚖️</span> 법원 경매 신청, 유찰률 및 전세보증 사고
+            <span>⚖️</span> 법원 경매 신청 및 전세보증 사고
           </h4>
           <span className="realty-subblock-source">{a.source}</span>
         </div>
@@ -137,18 +141,18 @@ export function RealtyDistressPanel() {
 
           <div className="sub-kpi-card">
             <div className="sub-kpi-title">
-              <span>🔨</span> 전국 부동산 경매 유찰률
+              <span>🔨</span> 경매 유찰·매각률
             </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>{a.failRateKr}%</div>
-            <p className="sub-kpi-sub">전국 매각률 31.6% · 10건 중 약 7건 1회 이상 유찰</p>
+            <div className="sub-kpi-val">—</div>
+            <p className="sub-kpi-sub">{REALTY_DISTRESS_SLOTS.find((s) => s.id === "fail")?.need}</p>
           </div>
 
           <div className="sub-kpi-card">
             <div className="sub-kpi-title">
-              <span>🏢</span> 수도권 아파트 유찰률
+              <span>🏢</span> 수도권·지방 유찰
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{a.failRateSudoApt}%</div>
-            <p className="sub-kpi-sub">수도권 매각률 40.8% (지방·비아파트 유찰률 {a.failRateNonCapital}%)</p>
+            <div className="sub-kpi-val">—</div>
+            <p className="sub-kpi-sub">민간 경매 사이트를 긁지 않습니다. 법원경매정보 원문.</p>
           </div>
 
           <div className="sub-kpi-card">
@@ -164,74 +168,53 @@ export function RealtyDistressPanel() {
         </div>
       </div>
 
-      {/* 4. 법원 개인회생·파산 및 채무 부실 원인 (생활대금·주담대·주식미수금) */}
+      {/* 4. 법원 개인회생·파산 (공표만) */}
       <div className="realty-subblock-card">
         <div className="realty-subblock-head">
           <h4 className="realty-subblock-title">
-            <span>🚨</span> 개인회생·파산 및 채무 불이행 원인 분석 (생활고·주담대·주식미수)
+            <span>🚨</span> 개인회생·파산 신청과 파탄원인
           </h4>
           <span className="realty-subblock-source">{ins.source}</span>
         </div>
+        <p className="muted" style={{ margin: "0 0 10px" }}>{ins.causeNote}</p>
 
-        {/* 4-1. 파산/회생 핵심 원인 비중 KPI 카드 */}
         <div className="sub-kpi-grid">
           <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>🛒</span> 생활대금·생계비 부족 (1위)
-            </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>42.6%</div>
-            <p className="sub-kpi-sub">고물가·소득 정체로 생활비 카드·신용대출 누적 돌려막기</p>
+            <div className="sub-kpi-title">개인회생 신청 2025</div>
+            <div className="sub-kpi-val highlight">{(ins.rehabilitationFiled / 10_000).toFixed(1)}만</div>
+            <p className="sub-kpi-sub">2024 {(ins.rehabilitationFiledPrev / 10_000).toFixed(1)}만 · 전년비 {rehabilitationYoyPct().toFixed(1)}%</p>
           </div>
-
           <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>🏠</span> 무리한 주담대·영끌 부담
-            </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>24.3%</div>
-            <p className="sub-kpi-sub">고금리 장기화에 따른 DSR 한계 초과 및 원리금 상환 불능</p>
+            <div className="sub-kpi-title">개인파산 신청 2025</div>
+            <div className="sub-kpi-val">{(ins.bankruptcyFiled / 10_000).toFixed(1)}만</div>
+            <p className="sub-kpi-sub">2024 {(ins.bankruptcyFiledPrev / 10_000).toFixed(1)}만 · 합 { (insolvencyFiledTotal() / 10_000).toFixed(1)}만</p>
           </div>
-
           <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>📉</span> 주식 미수금·투자 실패
-            </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>17.8%</div>
-            <p className="sub-kpi-sub">증권사 미수금 결제 불이행 및 반대매매 (2030 청년은 38.2%)</p>
+            <div className="sub-kpi-title">신복위 채무조정 확정</div>
+            <div className="sub-kpi-val">{(ins.debtAdjustmentSettled / 10_000).toFixed(1)}만</div>
+            <p className="sub-kpi-sub">{ins.debtAdjustmentAsOf} · {ins.debtAdjustmentSource} · 접수 아님</p>
           </div>
-
           <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>⚖️</span> 연간 개인도산 신청 건수
-            </div>
-            <div className="sub-kpi-val highlight">{(ins.totalInsolvencyFiled / 10_000).toFixed(1)}만 건</div>
-            <p className="sub-kpi-sub">개인회생 {(ins.rehabilitationFiled / 10_000).toFixed(1)}만 + 파산 {(ins.bankruptcyFiled / 10_000).toFixed(1)}만 (면책율 {ins.bankruptcyImmunityRate}%)</p>
+            <div className="sub-kpi-title">파탄원인</div>
+            <div className="sub-kpi-val">중복</div>
+            <p className="sub-kpi-sub">{ins.causeAsOf} 개인파산. 합 100% 아님 · 주담대 칸 없음</p>
           </div>
         </div>
 
-        {/* 4-2. 원인별 비교 표 */}
         <div className="table-wrap" style={{ marginTop: 14 }}>
           <table className="realty-table">
             <thead>
               <tr>
-                <th>채무 부실 주요 원인</th>
-                <th className="num">전체 비중</th>
-                <th className="num">2030 청년층 비중</th>
-                <th>주요 부실 발생 경로 및 양상</th>
+                <th>파탄원인 (중복응답)</th>
+                <th className="num">비중</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               {REALTY_BANKRUPTCY_CAUSES.map((cause) => (
                 <tr key={cause.id}>
-                  <td style={{ fontWeight: 600 }}>
-                    <span style={{ marginRight: 6 }}>{cause.icon}</span>
-                    {cause.label}
-                  </td>
-                  <td className="num" style={{ fontWeight: 700, color: cause.id === "living" ? "#dc2626" : undefined }}>
-                    {cause.share}%
-                  </td>
-                  <td className="num" style={{ fontWeight: 700, color: cause.id === "investment" ? "#dc2626" : "#2563eb" }}>
-                    {cause.youthShare}%
-                  </td>
+                  <td style={{ fontWeight: 600 }}>{cause.label}</td>
+                  <td className="num">{cause.share.toFixed(2)}%</td>
                   <td>{cause.description}</td>
                 </tr>
               ))}
@@ -239,46 +222,22 @@ export function RealtyDistressPanel() {
           </table>
         </div>
 
-        {/* 4-3. 주식 미수금·반대매매 & 신용회복 채무조정 세부 지표 */}
         <div className="sub-kpi-grid" style={{ marginTop: 14 }}>
-          <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>💸</span> 증권사 위탁매매 미수금
+          {REALTY_INSOLVENCY_SLOTS.map((s) => (
+            <div key={s.id} className="sub-kpi-card">
+              <div className="sub-kpi-title">{s.label}</div>
+              <div className="sub-kpi-val">—</div>
+              <p className="sub-kpi-sub">{s.need}</p>
             </div>
-            <div className="sub-kpi-val highlight">{ins.stockMarginReceivablesEok.toLocaleString("ko-KR")}억 원</div>
-            <p className="sub-kpi-sub">금융투자협회 공시 위탁매매 미수금 결제 대기 잔액</p>
-          </div>
-
-          <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>⚡</span> 일평균 강제 반대매매
-            </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{ins.stockDailyForcedSaleEok}억 원</div>
-            <p className="sub-kpi-sub">미수금 결제 실패로 익일 개장 시 시장가 자동 강제 청산</p>
-          </div>
-
-          <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>🤝</span> 신용회복 채무조정 접수
-            </div>
-            <div className="sub-kpi-val highlight">{(ins.debtAdjustmentCount / 10_000).toFixed(1)}만 건</div>
-            <p className="sub-kpi-sub">신용회복위원회 프리/개인워크아웃 채무조정 신청 규모</p>
-          </div>
-
-          <div className="sub-kpi-card">
-            <div className="sub-kpi-title">
-              <span>🛡️</span> 법원 파산 면책 인용률
-            </div>
-            <div className="sub-kpi-val highlight">{ins.bankruptcyImmunityRate}%</div>
-            <p className="sub-kpi-sub">파산 선고 채무자 중 잔여 채무 면책 최종 확정 비율</p>
-          </div>
+          ))}
         </div>
 
         <div className="starter-list" style={{ marginTop: 12 }}>
-          <a className="starter" href={REALTY_INSOLVENCY_LINKS.slbCourt} target="_blank" rel="noreferrer">서울회생법원 실무통계</a>
-          <a className="starter" href={REALTY_INSOLVENCY_LINKS.ccrs} target="_blank" rel="noreferrer">신용회복위원회 채무조정</a>
-          <a className="starter" href={REALTY_INSOLVENCY_LINKS.kofiaMisu} target="_blank" rel="noreferrer">금투협 미수금 통계</a>
-          <a className="starter" href={REALTY_INSOLVENCY_LINKS.scourtInsolvency} target="_blank" rel="noreferrer">대법원 사법연감 도산통계</a>
+          <a className="starter" href={REALTY_INSOLVENCY_LINKS.slbPdf} target="_blank" rel="noreferrer">서울회생법원 파산 통계 PDF</a>
+          <a className="starter" href={REALTY_INSOLVENCY_LINKS.slbCourt} target="_blank" rel="noreferrer">서울회생법원</a>
+          <a className="starter" href={REALTY_INSOLVENCY_LINKS.ccrs} target="_blank" rel="noreferrer">신용회복위원회</a>
+          <a className="starter" href={REALTY_INSOLVENCY_LINKS.kofiaMisu} target="_blank" rel="noreferrer">금투협 미수금</a>
+          <a className="starter" href={REALTY_INSOLVENCY_LINKS.scourtInsolvency} target="_blank" rel="noreferrer">2025 사법연감 보도</a>
         </div>
       </div>
 

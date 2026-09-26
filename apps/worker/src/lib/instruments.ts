@@ -7,7 +7,20 @@ type AssetClass = "stock" | "etf" | "bond" | "crypto" | "fund" | "other";
 // (symbol, market)로 종목을 찾거나 만든다. 어댑터 공용.
 export async function ensureInstrument(p: { symbol: string; market: string; name: string; assetClass: AssetClass; currency: string }) {
   const [found] = await db.select().from(instruments).where(and(eq(instruments.symbol, p.symbol), eq(instruments.market, p.market)));
-  if (found) return found;
+  if (found) {
+    if (p.name && found.name !== p.name && (/^\d{6}/.test(found.name) || found.name.includes(","))) {
+      await db.update(instruments).set({ name: p.name }).where(eq(instruments.id, found.id));
+      return { ...found, name: p.name };
+    }
+    return found;
+  }
+  if (/^\d{6}$/.test(p.symbol)) {
+    const [kr] = await db.select().from(instruments).where(eq(instruments.symbol, p.symbol));
+    if (kr) {
+      await db.update(instruments).set({ market: p.market, name: p.name, currency: p.currency, assetClass: p.assetClass }).where(eq(instruments.id, kr.id));
+      return { ...kr, market: p.market, name: p.name, currency: p.currency, assetClass: p.assetClass };
+    }
+  }
   const [created] = await db.insert(instruments).values(p).onConflictDoNothing().returning();
   if (created) return created;
   const [again] = await db.select().from(instruments).where(and(eq(instruments.symbol, p.symbol), eq(instruments.market, p.market)));

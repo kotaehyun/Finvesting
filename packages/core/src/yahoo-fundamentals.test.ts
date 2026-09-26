@@ -12,7 +12,12 @@ import {
   marketRegionFor,
   evaluateFundamentalSignals,
   fiftyTwoWeekPosition,
-  FALLBACK_FUNDAMENTAL_ROWS,
+  fiftyTwoWeekGauge,
+  matchInstrumentQuery,
+  instrumentQueryKey,
+  isMoneyFundamentalSortKey,
+  fundamentalLookups,
+  fundamentalVenueLookups,
 } from "./yahoo-fundamentals";
 import { naverStockUrl } from "./yahoo-search";
 
@@ -73,6 +78,27 @@ describe("parse / context / url", () => {
     expect(yahooQuoteUrl("AAPL")).toBe("https://finance.yahoo.com/quote/AAPL");
     expect(yahooQuoteUrl("")).toBe("https://finance.yahoo.com/");
   });
+
+  it("국내 조회는 네이버, 해외 조회는 Yahoo", () => {
+    const kr = fundamentalLookups("005930.KS");
+    expect(kr.map((l) => l.id)).toEqual(["naver", "kakaopaysec"]);
+    expect(kr[0]).toMatchObject({ id: "naver", primary: true });
+    expect(kr[0]?.url).toBe("https://stock.naver.com/domestic/stock/005930/price");
+    expect(kr.some((l) => l.id.startsWith("yahoo"))).toBe(false);
+
+    const bare = fundamentalLookups("005930", "KRX");
+    expect(bare[0]?.url).toContain("/005930/price");
+
+    const us = fundamentalLookups("AAPL");
+    expect(us.map((l) => l.id)).toEqual(["yahoo", "yahoo-stats"]);
+    expect(us[0]?.url).toBe("https://finance.yahoo.com/quote/AAPL");
+    expect(us[1]?.url).toContain("/key-statistics");
+    expect(us.some((l) => l.id === "naver" || l.id === "kakaopaysec")).toBe(false);
+
+    expect(fundamentalVenueLookups("kr").map((l) => l.id)).toEqual(["naver-home", "kakaopaysec"]);
+    expect(fundamentalVenueLookups("us").map((l) => l.id)).toEqual(["yahoo-home"]);
+    expect(fundamentalVenueLookups("all").map((l) => l.id)).toEqual(["naver-home", "kakaopaysec", "yahoo-home"]);
+  });
 });
 
 describe("한국 종목 및 시장 판별", () => {
@@ -83,6 +109,7 @@ describe("한국 종목 및 시장 판별", () => {
     expect(isKoreanSymbol("AAPL")).toBe(false);
 
     expect(naverStockUrl("005930.KS")).toBe("https://stock.naver.com/domestic/stock/005930/price");
+    expect(naverStockUrl("005930")).toBe("https://stock.naver.com/domestic/stock/005930/price");
     expect(naverStockUrl("AAPL")).toBeNull();
 
     expect(statementsUrl("005930.KS")).toBe("/statements?q=005930");
@@ -90,6 +117,7 @@ describe("한국 종목 및 시장 판별", () => {
 
     expect(marketRegionFor("005930.KS")).toBe("kr");
     expect(marketRegionFor("AAPL")).toBe("us");
+    expect(marketRegionFor("035720", "KRX")).toBe("kr");
     expect(marketRegionFor("NESN.SW", "SWX")).toBe("other");
   });
 });
@@ -111,12 +139,41 @@ describe("투자 신호 및 52주 게이지", () => {
     expect(fiftyTwoWeekPosition(100, 200, 90)).toBe(0);
     expect(fiftyTwoWeekPosition(100, 200, 210)).toBe(100);
     expect(fiftyTwoWeekPosition(undefined, 200, 150)).toBeNull();
+    expect(fiftyTwoWeekPosition(100, 200, 110)).toBe(10);
+    expect(fiftyTwoWeekPosition(100, 200, 190)).toBe(90);
   });
 
-  it("폴백 펀더멘털 행이 5개 이상 존재하고 유효하다", () => {
-    expect(FALLBACK_FUNDAMENTAL_ROWS.length).toBeGreaterThanOrEqual(5);
-    expect(FALLBACK_FUNDAMENTAL_ROWS.some((r) => r.symbol === "AAPL")).toBe(true);
-    expect(FALLBACK_FUNDAMENTAL_ROWS.some((r) => r.symbol === "005930.KS")).toBe(true);
+  it("행의 lastPrice로 게이지를 계산하고 중간값을 쓰지 않는다", () => {
+    const extra = { fiftyTwoWeekLow: 100, fiftyTwoWeekHigh: 200 };
+    const lowRow = {
+      extra,
+      lastPrice: 110,
+      lastPriceDate: "2026-09-16",
+      lastPriceSource: "yahoo",
+    };
+    const highRow = { ...lowRow, lastPrice: 190 };
+    expect(fiftyTwoWeekGauge(lowRow)).toBe(10);
+    expect(fiftyTwoWeekGauge(highRow)).toBe(90);
+    expect(fiftyTwoWeekGauge(lowRow)).not.toBe(fiftyTwoWeekGauge(highRow));
+    expect(fiftyTwoWeekGauge({ extra, lastPrice: (100 + 200) / 2 })).toBe(50);
+    expect(fiftyTwoWeekGauge({ extra, lastPrice: null })).toBeNull();
+    expect(lowRow.lastPriceDate).toBe("2026-09-16");
+    expect(lowRow.lastPriceSource).toBe("yahoo");
+  });
+
+  it("재무제표 q는 수집 목록에서 해당 종목만 고른다", () => {
+    const items = [
+      { id: "1", symbol: "AAPL", name: "Apple" },
+      { id: "2", symbol: "005930", name: "삼성전자", market: "KRX" },
+    ];
+    expect(instrumentQueryKey("005930.KS")).toBe("005930");
+    expect(matchInstrumentQuery(items, "AAPL")?.id).toBe("1");
+    expect(matchInstrumentQuery(items, "aapl")?.id).toBe("1");
+    expect(matchInstrumentQuery(items, "005930")?.id).toBe("2");
+    expect(matchInstrumentQuery(items, "005930.KS")?.id).toBe("2");
+    expect(matchInstrumentQuery(items, "MSFT")).toBeUndefined();
+    expect(isMoneyFundamentalSortKey("marketCap")).toBe(true);
+    expect(isMoneyFundamentalSortKey("per")).toBe(false);
   });
 });
 

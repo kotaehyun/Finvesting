@@ -1,11 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { db, quotes, fundamentals, macroIndicators } from "@finvesting/db";
-import { parseEnvTargets, unionUnique, WORLD_INDICES, worldIndexByYahoo, worldIndexMarket, worldIndexYahooTickers, yahooSavesFundamentals, yahooTickersFor, FX_PAIRS, fxYahooTickers } from "@finvesting/core";
+import { parseEnvTargets, unionUnique, WORLD_INDICES, worldIndexByYahoo, worldIndexMarket, worldIndexYahooTickers, yahooSavesFundamentals, yahooTickersFor, yahooBoardMarket, yahooBoardSymbol, DEFAULT_YAHOO_STOCKS, FX_PAIRS, fxYahooTickers } from "@finvesting/core";
 import { ensureInstrument, ensureIdentifier, loadQuoteTargets } from "../lib/instruments";
 
 // Yahoo Finance — 비공식 라이브러리 yahoo-finance2 v3 (v2는 2025년 지원 종료).
 // 개인 사용은 사실상 문제없으나 서비스화 시 정식 데이터 공급자로 교체 필요.
-// 대상 = 보유·관심 + YAHOO_TARGETS + 세계 지수(core/world-indices).
+// 대상 = 보유·관심 + YAHOO_TARGETS + DEFAULT_YAHOO_STOCKS(카카오 035720.KS) + 세계 지수(core/world-indices).
 // KRX는 005930.KS 실패 시 .KQ 재시도. KIS는 이번 범위 아님.
 // USDKRW 등 환율: Yahoo FX를 macro_indicators에 source=yahoo로 넣는다.
 // 같은 (code, date)에 ECOS가 있으면 USDKRW는 덮어쓰지 않는다.
@@ -229,11 +229,14 @@ export async function collectYahoo() {
   const jobs: Job[] = yahoo.map((inst) => ({ tickers: yahooTickersFor(inst.market, inst.symbol), inst }));
   const seen = new Set(jobs.flatMap((j) => j.tickers.map((t) => t.toUpperCase())));
   const fxSkip = new Set(fxYahooTickers().map((s) => s.toUpperCase()));
-  for (const sym of unionUnique(parseEnvTargets(process.env.YAHOO_TARGETS), worldIndexYahooTickers())) {
+  for (const sym of unionUnique(parseEnvTargets(process.env.YAHOO_TARGETS), [...DEFAULT_YAHOO_STOCKS, ...worldIndexYahooTickers()])) {
     if (seen.has(sym.toUpperCase())) continue;
     if (fxSkip.has(sym.toUpperCase())) continue;
     seen.add(sym.toUpperCase());
-    jobs.push({ tickers: [sym] });
+    const kr = yahooBoardSymbol(sym);
+    const tickers = /^\d{6}$/.test(kr) ? yahooTickersFor("KRX", kr) : [sym];
+    for (const t of tickers) seen.add(t.toUpperCase());
+    jobs.push({ tickers });
   }
 
   const mod = await import("yahoo-finance2");
@@ -260,8 +263,8 @@ export async function collectYahoo() {
       const inst = job.inst
         ? { id: job.inst.id }
         : await ensureInstrument({
-          symbol: ticker,
-          market: meta ? worldIndexMarket(meta) : (ticker.startsWith("^") || ticker.includes("=") ? "INDEX" : "US"),
+          symbol: yahooBoardSymbol(ticker),
+          market: meta ? worldIndexMarket(meta) : yahooBoardMarket(ticker),
           name: String(meta?.label ?? q.shortName ?? q.longName ?? ticker),
           assetClass: ticker.startsWith("^") || ticker.includes("=")
             ? "other"

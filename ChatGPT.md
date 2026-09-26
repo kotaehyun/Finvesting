@@ -19,6 +19,9 @@ ChatGPT(웹·앱)나 Codex로 이 저장소를 작업할 때 적용한다. 내�
 6. 패키지 의존 규칙(`docs/tech/architecture.md`)을 지킨다: core는 순수, web/mobile은 DB 직접 접근 금지.
 7. 금액은 `numeric` 문자열 ↔ `Number()` 변환. 뉴스 본문은 저장하지 않는다.
 8. 언어: 문서·주석은 한국어, 식별자는 영어. 패키지 매니저는 pnpm만.
+9. 세무 화면은 법령 문언만 보수적으로 읽는다. 애매하면 근로소득(소득세법 제20조·제129조 제1항 제1호). 절세 특강·유튜브 해석을 넣지 않는다. ADR 0040.
+10. 브랜치: `main`·`dev`에 직접 커밋하지 않는다. `feat|fix|docs|chore/<name>`에서만 작업하고, push·merge는 사용자가 말할 때만 한다(`docs/tech/git-workflow.md`).
+11. 데이터는 공식 출처에서 가져온 것만 쓴다. 통계·수치·금리·비율·건수를 AI가 만들어 넣지 않는다. 출처가 없거나 불확실하면 칸을 비우고, 문서·코드에 "데이터 없음"으로 표시한다. 실패·부재는 `{status: empty|stale|unavailable}`로 응답한다. 샘플 데이터는 `DEMO_MODE=true`에서만, 화면에 「샘플」 배지.
 
 ---
 
@@ -32,4 +35,6 @@ ChatGPT(웹·앱)나 Codex로 이 저장소를 작업할 때 적용한다. 내�
 6. Follow the package dependency rules in `docs/tech/architecture.md`: `core` is pure; `web`/`mobile` never access the DB directly.
 7. Money: `numeric` string ↔ `Number()`. Never store full news article bodies.
 8. Language: docs and comments in Korean (core docs mirrored as `*.en.md`), identifiers in English. Package manager: pnpm only.
-9. Branches: never commit directly to `main` or `dev`. Work only on `feat|fix|docs|chore/<name>` branches; push and merge only when the user says so (`docs/tech/git-workflow.md`).
+9. Tax screens read statute text conservatively. If the employment relationship is unclear, treat it as earned income (ITA Art. 20 / 129(1)(1)). Do not put YouTube tax-saving tips on screen. ADR 0040.
+10. Branches: never commit directly to `main` or `dev`. Work only on `feat|fix|docs|chore/<name>` branches; push and merge only when the user says so (`docs/tech/git-workflow.md`).
+11. Use only data from official sources. Never invent statistics, figures, rates, ratios, or counts. If a source is missing or uncertain, leave the field empty and mark "no data" in docs and code. Failures and missing data respond with `{status: empty|stale|unavailable}`. Sample data only when `DEMO_MODE=true`, with a 「샘플」 badge on screen.

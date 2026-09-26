@@ -23,9 +23,9 @@ describe("realty officials", () => {
     expect(REALTY_OFFICIAL_METRO_HEADS).toBe(16);
     expect(realtyOfficialCapitalAwayCount()).toBe(6);
     expect(realtyOfficialSplitCount()).toBe(2);
-    expect(REALTY_OFFICIAL_HOUSES.filter((h) => h.flow === "capital-away")).toHaveLength(4);
-    expect(REALTY_OFFICIAL_FLOW_ROWS.reduce((s, r) => s + r.count, 0)).toBe(16);
-    expect(REALTY_OFFICIAL_HOUSES.some((h) => h.house.includes("대치"))).toBe(true);
-    expect(REALTY_OFFICIAL_HOUSES.some((h) => h.flow === "none")).toBe(true);
+    expect(REALTY_OFFICIAL_HOUSES.filter((h: any) => h.flow === "capital-away")).toHaveLength(4);
+    expect(REALTY_OFFICIAL_FLOW_ROWS.reduce((s: any, r: any) => s + r.count, 0)).toBe(16);
+    expect(REALTY_OFFICIAL_HOUSES.some((h: any) => h.house.includes("대치"))).toBe(true);
+    expect(REALTY_OFFICIAL_HOUSES.some((h: any) => h.flow === "none")).toBe(true);
   });
 });

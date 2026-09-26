@@ -12,7 +12,7 @@ import {
 
 describe("realty cohort", () => {
   it("인구 최빈은 50대이고 혼인 피크는 30대 초반이다", () => {
-    const sum = REALTY_AGE_SHARES.reduce((s, r) => s + r.share, 0);
+    const sum = REALTY_AGE_SHARES.reduce((s: any, r: any) => s + r.share, 0);
     expect(sum).toBeCloseTo(99.9, 5);
     expect(modalAgeLabel()).toBe("50대");
     expect(modalAgeShare()).toBe(16.7);

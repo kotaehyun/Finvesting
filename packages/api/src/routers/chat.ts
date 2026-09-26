@@ -71,14 +71,19 @@ export const chatRouter = router({
       const coverage = await loadCoverageSnapshot(ctx.db, ctx.userId);
       const investAdvice = await loadInvestAdvice(ctx.db, ctx.userId, Promise.resolve(overview));
       const { assets, cashflow, txnCount, month, guide, holdings: h, profile } = overview;
-      const fundRows = await loadLatestFundamentals(ctx.db);
-      const fundById = new Map(fundRows.map((r) => [r.instrumentId, r]));
+      const fundBoard = await loadLatestFundamentals(ctx.db);
+      const fundById = new Map((fundBoard.status === "ok" ? fundBoard.items : []).map((r) => [r.instrumentId, r]));
       const fundBlocks = h.positions
         .map((p) => fundById.get(p.instrumentId))
         .filter((r): r is NonNullable<typeof r> => Boolean(r))
         .slice(0, 5)
         .map(formatFundamentalsContext);
-      const stmtInsts = await listStatementInstruments(ctx.db);
+      let stmtInsts: Awaited<ReturnType<typeof listStatementInstruments>> = [];
+      try {
+        stmtInsts = await listStatementInstruments(ctx.db);
+      } catch {
+        stmtInsts = [];
+      }
       const holdingIds = new Set(h.positions.map((p) => p.instrumentId));
       const stmtTargets = stmtInsts.filter((i) => holdingIds.has(i.id)).slice(0, 3);
       const fallback = stmtTargets.length ? stmtTargets : [];

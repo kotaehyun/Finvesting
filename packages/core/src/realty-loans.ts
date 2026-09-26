@@ -1,27 +1,19 @@
 // 예금은행 지역별 가계대출은 시·구가 아니라 광역시도. ECOS 151Y003 말잔(십억원).
 // 통계청 2018 시군구 코드 앞 2자리. 항목코드는 이름 매칭, 추측 금지.
+import dataFile from "../data/realty/loans.json";
+import { assertDefaults } from "./load-data";
 
-export const REALTY_METROS = [
-  { id: "seoul", label: "서울", kostat: "11", code: "SE" },
-  { id: "busan", label: "부산", kostat: "21", code: "BS" },
-  { id: "daegu", label: "대구", kostat: "22", code: "DG" },
-  { id: "incheon", label: "인천", kostat: "23", code: "IC" },
-  { id: "gwangju", label: "광주", kostat: "24", code: "GJ" },
-  { id: "daejeon", label: "대전", kostat: "25", code: "DJ" },
-  { id: "ulsan", label: "울산", kostat: "26", code: "US" },
-  { id: "sejong", label: "세종", kostat: "29", code: "SJ" },
-  { id: "gyeonggi", label: "경기", kostat: "31", code: "GG" },
-  { id: "gangwon", label: "강원", kostat: "32", code: "GW" },
-  { id: "chungbuk", label: "충북", kostat: "33", code: "CB" },
-  { id: "chungnam", label: "충남", kostat: "34", code: "CN" },
-  { id: "jeonbuk", label: "전북", kostat: "35", code: "JB" },
-  { id: "jeonnam", label: "전남", kostat: "36", code: "JN" },
-  { id: "gyeongbuk", label: "경북", kostat: "37", code: "GB" },
-  { id: "gyeongnam", label: "경남", kostat: "38", code: "GN" },
-  { id: "jeju", label: "제주", kostat: "39", code: "JJ" },
-] as const;
+assertDefaults(dataFile, "realty/loans.json");
 
-export type RealtyMetroId = (typeof REALTY_METROS)[number]["id"];
+
+export type RealtyMetroId = "seoul" | "busan" | "daegu" | "incheon" | "gwangju" | "daejeon" | "ulsan" | "sejong" | "gyeonggi" | "gangwon" | "chungbuk" | "chungnam" | "jeonbuk" | "jeonnam" | "gyeongbuk" | "gyeongnam" | "jeju";
+
+export const REALTY_METROS = dataFile.REALTY_METROS as readonly {
+  id: RealtyMetroId;
+  label: string;
+  kostat: string;
+  code: string;
+}[];
 
 const METRO_BY_KOSTAT: Record<string, RealtyMetroId> = Object.fromEntries(
   REALTY_METROS.map((m) => [m.kostat, m.id]),
@@ -29,19 +21,19 @@ const METRO_BY_KOSTAT: Record<string, RealtyMetroId> = Object.fromEntries(
 
 const METRO_IDS = new Set<string>(REALTY_METROS.map((m) => m.id));
 
-export const ECOS_HHLOAN_STAT = "151Y003";
-export const ECOS_HHLOAN_ITEM = "1111000"; // 예금은행 가계대출. sample 항목 목록에서 확인
-export const ECOS_HHLOAN_HS_ITEM = "11110A0"; // 주택관련대출-예금은행
-export const ECOS_HHNPL_STAT = "141Y005";
-export const ECOS_HHNPL_ITEM = "R5AB00"; // 가계대출 연체율(전체1M). sample 항목 목록에서 확인
+export const ECOS_HHLOAN_STAT = dataFile.ECOS_HHLOAN_STAT as string;
+export const ECOS_HHLOAN_ITEM = dataFile.ECOS_HHLOAN_ITEM as string; // 예금은행 가계대출. sample 항목 목록에서 확인
+export const ECOS_HHLOAN_HS_ITEM = dataFile.ECOS_HHLOAN_HS_ITEM as string; // 주택관련대출-예금은행
+export const ECOS_HHNPL_STAT = dataFile.ECOS_HHNPL_STAT as string;
+export const ECOS_HHNPL_ITEM = dataFile.ECOS_HHNPL_ITEM as string; // 가계대출 연체율(전체1M). sample 항목 목록에서 확인
 
 function ecosMetroCodes(prefix: string): Record<RealtyMetroId, string> {
   return Object.fromEntries(REALTY_METROS.map((m) => [m.id, `${prefix}${m.code}`])) as Record<RealtyMetroId, string>;
 }
 
-export const ECOS_HHLOAN_CODES = { kr: "ECOS_HHLOAN_KR", ...ecosMetroCodes("ECOS_HHLOAN_") };
-export const ECOS_HHLOAN_HS_CODES = ecosMetroCodes("ECOS_HHLOAN_HS_");
-export const ECOS_HHNPL_CODES = ecosMetroCodes("ECOS_HHNPL_");
+export const ECOS_HHLOAN_CODES = dataFile.ECOS_HHLOAN_CODES as { kr: string } & Record<RealtyMetroId, string>;
+export const ECOS_HHLOAN_HS_CODES = dataFile.ECOS_HHLOAN_HS_CODES as Record<RealtyMetroId, string>;
+export const ECOS_HHNPL_CODES = dataFile.ECOS_HHNPL_CODES as Record<RealtyMetroId, string>;
 
 const INCHEON_IDS = new Set(["incheon", "ganghwa", "ongjin"]);
 

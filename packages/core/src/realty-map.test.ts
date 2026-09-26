@@ -9,7 +9,7 @@ describe("realty map", () => {
     for (const p of REALTY_REGULATED_GYEONGGI) {
       expect(ids.has(p.id)).toBe(true);
     }
-    expect(REALTY_MAP_POINTS.some((p) => p.label.includes("권선"))).toBe(false);
+    expect(REALTY_MAP_POINTS.some((p: any) => p.label.includes("권선"))).toBe(false);
   });
 
   it("좌표는 수도권 상자 안에 있다", () => {
@@ -19,7 +19,7 @@ describe("realty map", () => {
       expect(p.lng).toBeGreaterThan(126.4);
       expect(p.lng).toBeLessThan(127.8);
     }
-    const dongtan = REALTY_MAP_POINTS.find((p) => p.id === "dongtan");
+    const dongtan = REALTY_MAP_POINTS.find((p: any) => p.id === "dongtan");
     expect(dongtan?.fresh).toBe(true);
     expect(dongtan?.tone).toBe("danger");
   });

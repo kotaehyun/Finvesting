@@ -116,3 +116,15 @@ export async function loadPayTrends(db: Db, userId: string, throughMonth: string
     current,
   );
 }
+
+/** 해당 연 `payroll_months`만. 07 추이처럼 프로필 현재월로 빈 달을 채우지 않는다. */
+export async function loadPayrollYear(db: Db, userId: string, year: number): Promise<PayTrendPoint[]> {
+  const from = `${year}-01`;
+  const to = `${year}-12`;
+  const snaps = await db.select().from(payrollMonths).where(and(
+    eq(payrollMonths.userId, userId),
+    gte(payrollMonths.month, from),
+    lte(payrollMonths.month, to),
+  ));
+  return snaps.map(fromRow).filter((p) => p.gross > 0 || p.tax > 0 || p.insurance > 0);
+}

@@ -1,6 +1,11 @@
 // 수도권 권역·규제지역·대출 위험. 숫자는 공공데이터 키가 없으면 안 넣는다.
 // 과밀억제권역 시 목록은 수도권정비계획법 시행령 별표1 요약. 동·산업단지 제외는 법령 원문.
 // 투기과열·조정대상·토허 시·구는 정책브리핑 고시 요약. 지정은 바뀌니 매수 전 원문.
+import dataFile from "../data/realty/ref.json";
+import { assertDefaults } from "./load-data";
+
+assertDefaults(dataFile, "realty/ref.json");
+
 
 export type RealtyZoneId = "overcrowded" | "growth" | "nature";
 
@@ -11,32 +16,7 @@ export type RealtyZone = {
   places: readonly string[];
 };
 
-export const REALTY_ZONES: readonly RealtyZone[] = [
-  {
-    id: "overcrowded",
-    label: "과밀억제권역",
-    summary: "인구·산업이 몰린 곳. 대형 건축·공장 신설 등 행위 제한이 있습니다. 세금·청약 가점도 이 구분과 겹치는 제도가 있어, 매수 전에 토지이용계획을 봅니다.",
-    places: [
-      "서울 전역",
-      "인천(강화·옹진·서구 일부 동·경제자유구역·남동산단 제외)",
-      "의정부", "구리", "하남", "고양", "수원", "성남", "안양", "부천", "광명", "과천", "의왕", "군포",
-      "남양주 일부 동",
-      "시흥(반월특수지역 제외)",
-    ],
-  },
-  {
-    id: "growth",
-    label: "성장관리권역",
-    summary: "과밀을 피하면서 계획적으로 개발하는 권역. 인천 일부·남양주 일부·시흥 반월·안산·화성·평택·용인 수지·기흥 등이 여기 들어갑니다. 경계는 동·리 단위라 별표를 엽니다.",
-    places: ["인천 일부", "남양주 일부", "시흥 반월", "안산·오산·평택·파주·화성·양주 등(별표)"],
-  },
-  {
-    id: "nature",
-    label: "자연보전권역",
-    summary: "한강 수계 보전. 개발 제한이 과밀·성장보다 셉니다. 가평·양평·여주 일부 등. 투자 아이디어가 아니라 행위 제한 안내입니다.",
-    places: ["가평·양평 등 수계 시군(별표)"],
-  },
-];
+export const REALTY_ZONES: readonly RealtyZone[] = dataFile.REALTY_ZONES as readonly RealtyZone[];
 
 export type RealtyTone = "info" | "warn" | "danger";
 
@@ -48,37 +28,20 @@ export type RealtyRegulatedPlace = {
 };
 
 /** 서울 25구 전역. 10.15 대책, 효력 2025-10-16. */
-export const REALTY_REGULATED_SEOUL = {
-  id: "seoul",
-  label: "서울 25구 전역",
-  since: "2025-10-16" as const,
-  summary: "기존 강남·서초·송파·용산 유지, 나머지 21구 추가. 투기과열·조정대상·토허(아파트 등)가 같이 붙었습니다.",
+export const REALTY_REGULATED_SEOUL = dataFile.REALTY_REGULATED_SEOUL as {
+  id: string;
+  label: string;
+  since: "2025-10-16" | "2026-07-01";
+  summary: string;
 };
 
 /**
  * 경기 규제 시·구. 10.15 대책 12곳 + 2026-06-30 보도 3곳.
  * 수원 권선·화성 전체·용인 처인은 이 목록에 없음.
  */
-export const REALTY_REGULATED_GYEONGGI: readonly RealtyRegulatedPlace[] = [
-  { id: "gwacheon", label: "과천시", since: "2025-10-16" },
-  { id: "gwangmyeong", label: "광명시", since: "2025-10-16" },
-  { id: "bundang", label: "성남 분당구", since: "2025-10-16" },
-  { id: "sujeong", label: "성남 수정구", since: "2025-10-16" },
-  { id: "jungwon", label: "성남 중원구", since: "2025-10-16" },
-  { id: "yeongtong", label: "수원 영통구", since: "2025-10-16" },
-  { id: "jangan", label: "수원 장안구", since: "2025-10-16" },
-  { id: "paldal", label: "수원 팔달구", since: "2025-10-16" },
-  { id: "dongan", label: "안양 동안구", since: "2025-10-16" },
-  { id: "suji", label: "용인 수지구", since: "2025-10-16" },
-  { id: "uiwang", label: "의왕시", since: "2025-10-16" },
-  { id: "hanam", label: "하남시", since: "2025-10-16" },
-  { id: "dongtan", label: "화성 동탄구", since: "2026-07-01" },
-  { id: "giheung", label: "용인 기흥구", since: "2026-07-01" },
-  { id: "guri", label: "구리시", since: "2026-07-01" },
-];
+export const REALTY_REGULATED_GYEONGGI: readonly RealtyRegulatedPlace[] = dataFile.REALTY_REGULATED_GYEONGGI as readonly RealtyRegulatedPlace[];
 
-export const REALTY_REGULATED_NOTE =
-  "이 목록은 투기과열지구·조정대상지역이 겹칩니다. 토허는 필지·용도마다 다릅니다. 동탄·기흥·구리 토허는 경기도가 2026-07-05~2027-12-31로 따로 지정했습니다. 지정은 고시로 바뀌니 매수 전 청약홈·국토부 원문을 엽니다.";
+export const REALTY_REGULATED_NOTE = dataFile.REALTY_REGULATED_NOTE as string;
 
 export type RealtyLoanRisk = {
   id: string;
@@ -88,75 +51,20 @@ export type RealtyLoanRisk = {
 };
 
 /** 금융위 2025-10-15 대출수요 관리 방안 요약. 개인 한도 계산기가 아님. */
-export const REALTY_LOAN_RISKS: readonly RealtyLoanRisk[] = [
-  {
-    id: "ltv",
-    label: "LTV 40%",
-    detail: "규제지역 주담대. 무주택·처분조건부 1주택. 비규제 70% → 규제 40%.",
-    tone: "danger",
-  },
-  {
-    id: "cap",
-    label: "구입 한도 6·4·2억",
-    detail: "수도권·규제지역 주택구입 목적. 시가 15억 이하 6억, 15~25억 4억, 25억 초과 2억.",
-    tone: "danger",
-  },
-  {
-    id: "stress-dsr",
-    label: "스트레스 DSR 3%",
-    detail: "수도권·규제지역 주담대 스트레스 금리 하한 1.5% → 3%. 한도가 더 줄어듭니다.",
-    tone: "danger",
-  },
-  {
-    id: "multi",
-    label: "다주택 위험",
-    detail: "수도권·규제지역 주담대 신규는 이미 막혀 있고, 아파트 담보 만기연장은 원칙 불허입니다.",
-    tone: "danger",
-  },
-  {
-    id: "jeonse",
-    label: "전세대출 묶임",
-    detail: "1주택자 수도권·규제지역 전세대출은 DSR. 전세대출 있으면 투기과열 3억 초과 아파트 취득 제한.",
-    tone: "warn",
-  },
-  {
-    id: "credit",
-    label: "신용 1억+",
-    detail: "1억 초과 신용대출을 들고 있으면 실행일부터 1년 규제지역 주택 구입이 막힙니다.",
-    tone: "warn",
-  },
-  {
-    id: "permit-ltv",
-    label: "토허 비주택 40%",
-    detail: "토지거래허가구역 상가·오피스텔 등 비주택담보 LTV 70% → 40%.",
-    tone: "warn",
-  },
-];
+export const REALTY_LOAN_RISKS: readonly RealtyLoanRisk[] = dataFile.REALTY_LOAN_RISKS as readonly RealtyLoanRisk[];
 
-export const REALTY_MIND = {
-  hub: { label: "수도권", sub: "지역 · 대출 위험" },
-  asOf: "2026-07-01",
-  branches: [
-    {
-      id: "zones",
-      label: "정비권역",
-      tone: "info" as const,
-      summary: "수도권정비계획법 시행령 별표1. 행위 제한 권역이지 시세가 아닙니다.",
-    },
-    {
-      id: "regulated",
-      label: "규제지역",
-      tone: "warn" as const,
-      summary: "투기과열 · 조정대상. 여기 들어가면 오른쪽 대출규제 규칙이 붙습니다.",
-    },
-    {
-      id: "loan",
-      label: "대출규제 위험군",
-      tone: "danger" as const,
-      summary: "규제지역·수도권에서 한도가 확 줄어드는 경우. 매수 권유가 아닙니다.",
-    },
-  ],
-} as const;
+export type RealtyMindBranch = {
+  id: string;
+  label: string;
+  tone: RealtyTone;
+  summary: string;
+};
+
+export const REALTY_MIND = dataFile.REALTY_MIND as unknown as {
+  hub: { label: string; sub: string };
+  asOf: string;
+  branches: readonly [RealtyMindBranch, RealtyMindBranch, RealtyMindBranch];
+};
 
 export function realtyRegulatedGyeonggiCount(): number {
   return REALTY_REGULATED_GYEONGGI.length;
@@ -166,82 +74,13 @@ export function realtyFreshRegulated(): readonly RealtyRegulatedPlace[] {
   return REALTY_REGULATED_GYEONGGI.filter((p) => p.since === "2026-07-01");
 }
 
-export const REALTY_REF_LINKS = [
-  { id: "law-zone", label: "시행령 별표1 (국가법령)", url: "https://www.law.go.kr/lsInfoP.do?lsiSeq=263671" },
-  { id: "policy-1015", label: "10.15 규제지역 (정책브리핑)", url: "https://www.korea.kr/news/policyNewsView.do?newsId=148950973" },
-  { id: "policy-0701", label: "동탄·기흥·구리 (정책브리핑)", url: "https://www.korea.kr/news/policyNewsView.do?newsId=148967354" },
-  { id: "fsc-loan", label: "대출수요 관리 (금융위)", url: "https://www.fsc.go.kr/po010101/85432" },
-  { id: "applyhome", label: "청약홈", url: "https://www.applyhome.co.kr/" },
-  { id: "eum", label: "토지이음 토지이용계획", url: "https://www.eum.go.kr/" },
-  { id: "rtms", label: "국토부 실거래가 공개", url: "https://rt.molit.go.kr/" },
-  { id: "reb", label: "한국부동산원", url: "https://www.reb.or.kr/" },
-  { id: "kosis-house", label: "통계청 주택", url: "https://kosis.kr/" },
-  { id: "molit", label: "국토교통부", url: "https://www.molit.go.kr/" },
-  { id: "datagokr", label: "공공데이터포털", url: "https://www.data.go.kr/" },
-  { id: "ecos", label: "한국은행 ECOS", url: "https://ecos.bok.or.kr/" },
-  { id: "peti", label: "공직윤리시스템 재산공개", url: "https://www.peti.go.kr/peOptpListVie.do" },
-  { id: "gwanbo", label: "전자관보 재산공개", url: "https://gwanbo.go.kr/user/search/searchThema.do?tabType=1" },
-  { id: "mpm-asset", label: "2026 재산변동 보도 (인사혁신처)", url: "https://www.mpm.go.kr/mpm/comm/newsPress/newsPressRelease/?cntId=4229&mode=view" },
-  { id: "mois-decline", label: "행안부 인구감소지역", url: "https://www.mois.go.kr/frt/sub/a06/b06/populationDecline/screen.do" },
-  { id: "mosf-cgt", label: "2025 종부세 고지 (KDI·기재부)", url: "https://eiec.kdi.re.kr/policy/materialView.do?num=273945" },
-  { id: "tasis", label: "국세통계포털 TASIS", url: "https://tasis.nts.go.kr/" },
-  { id: "nts-cgt", label: "국세청 종합부동산세", url: "https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7733&mi=40375" },
-  { id: "reb-buyer", label: "거래주체별 (부동산원)", url: "https://www.reb.or.kr/reb/cm/cntnts/cntntsView.do?cntntsId=1061&mi=10338&statId=S234220286" },
-  { id: "auction-court", label: "대법원 법원경매정보", url: "https://www.courtauction.go.kr/" },
-  { id: "housing-survey", label: "주거실태조사 (통계누리)", url: "https://stat.molit.go.kr/portal/cate/statView.do?hRsId=327" },
-  { id: "bok-avg", label: "한은 가중평균금리", url: "https://www.bok.or.kr/portal/bbs/B0000501/view.do?nttId=11064110&menuNo=201264" },
-  { id: "cofix", label: "은행연합회 COFIX", url: "https://portal.kfb.or.kr/fingoods/cofix.php" },
-  { id: "molit-stats", label: "국토부 7월 주택통계", url: "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156776040" },
-  { id: "crefia", label: "여신금융협회 카드공시", url: "https://gongsi.crefia.or.kr/" },
-] as const;
+export const REALTY_REF_LINKS = dataFile.REALTY_REF_LINKS as readonly {
+  id: string;
+  label: string;
+  url: string;
+}[];
 
 /** 포털 매물 호수는 안 긁는다. 칸은 국토부 실거래 건수·중위가(키 후). */
-export const REALTY_LISTING_TYPES = [
-  {
-    id: "apt",
-    label: "아파트",
-    molit: "아파트 매매 실거래",
-    need: "국토부 아파트 실거래 API (data.go.kr). 네이버·직방 호수는 안 긁습니다.",
-  },
-  {
-    id: "officetel",
-    label: "오피스텔",
-    molit: "오피스텔 실거래",
-    need: "국토부 오피스텔 실거래 API. 매물 호수가 아니라 신고 건수입니다.",
-  },
-  {
-    id: "villa",
-    label: "다가구·빌라",
-    molit: "단독/다가구 실거래",
-    need: "국토부 단독/다가구 실거래. 포털 ‘빌라’와 법정 유형이 다를 수 있습니다.",
-  },
-  {
-    id: "row",
-    label: "연립",
-    molit: "연립다세대 실거래",
-    need: "국토부 연립다세대 실거래. 다가구와 별도 집계입니다.",
-  },
-  {
-    id: "store",
-    label: "상가",
-    molit: "상업업무용 실거래",
-    need: "국토부 상업업무용 실거래 중 상가. 키 전에는 칸만.",
-  },
-  {
-    id: "building",
-    label: "빌딩·건물",
-    molit: "상업업무용 실거래",
-    need: "국토부 상업업무용 실거래 중 건물. 시세 추정이 아닙니다.",
-  },
-  {
-    id: "land",
-    label: "토지",
-    molit: "토지 실거래",
-    need: "국토부 토지 실거래 API. 필지 시세가 아니라 신고 건수입니다.",
-  },
-] as const;
+export const REALTY_LISTING_TYPES = dataFile.REALTY_LISTING_TYPES as readonly { id: string; label: string; molit: string; need: string }[];
 
-export const REALTY_METRIC_SLOTS = [
-  { id: "rent", label: "임대료 추이", need: "한국부동산원·통계청 공공데이터 키" },
-  { id: "supply", label: "공급량", need: "인허가·분양 통계" },
-] as const;
+export const REALTY_METRIC_SLOTS = dataFile.REALTY_METRIC_SLOTS as readonly { id: string; label: string; need: string }[];

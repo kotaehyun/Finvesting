@@ -1,6 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MARKET_REF_LINKS, tvSymbolOverviewSymbols, worldIndexById } from "@finvesting/core";
+import {
+  KOFIA_FUNDS_URL,
+  KOFIA_MAIN_URL,
+  MARKET_REF_LINKS,
+  creditShare,
+  kofiaFundsTotal,
+  marginShare,
+  millionWonToJo,
+  tvSymbolOverviewSymbols,
+  worldIndexById,
+  type KofiaMarketFunds,
+} from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
 import { TvEmbed } from "./tv-embed";
 import { SymbolSearch } from "./symbol-search";
@@ -58,6 +69,109 @@ function IndexSpark({ values, up }: { values: number[]; up: boolean | null }) {
   );
 }
 
+const FUNDS_COLOR: Record<string, string> = {
+  deposit: "#2563eb",
+  credit: "#b45309",
+  margin: "#b91c1c",
+};
+
+function jo(n: number) {
+  return `${millionWonToJo(n).toLocaleString("ko-KR", { maximumFractionDigits: 1 })}조원`;
+}
+
+function pct1(n: number) {
+  return `${(n * 100).toFixed(1)}%`;
+}
+
+function FundsDonut({ parts, center }: { parts: { id: string; value: number }[]; center: string }) {
+  const total = parts.reduce((a, p) => a + p.value, 0);
+  if (total <= 0) return null;
+  const r = 42;
+  const circ = 2 * Math.PI * r;
+  let acc = 0;
+  return (
+    <svg className="funds-donut" viewBox="0 0 120 120" width="148" height="148" aria-hidden="true">
+      {parts.map((p) => {
+        const frac = p.value / total;
+        const dash = frac * circ;
+        const rot = (acc / total) * 360 - 90;
+        acc += p.value;
+        return (
+          <circle
+            key={p.id}
+            cx="60"
+            cy="60"
+            r={r}
+            fill="none"
+            stroke={FUNDS_COLOR[p.id] ?? "#64748b"}
+            strokeWidth="16"
+            strokeDasharray={`${dash} ${circ - dash}`}
+            transform={`rotate(${rot} 60 60)`}
+          />
+        );
+      })}
+      <circle cx="60" cy="60" r="33" fill="var(--card)" />
+      <text x="60" y="58" textAnchor="middle" fontSize="16" fontWeight="700" fill="currentColor">{center}</text>
+      <text x="60" y="76" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">비중</text>
+    </svg>
+  );
+}
+
+function FundsChart({ funds }: { funds: KofiaMarketFunds }) {
+  const known = funds.slices.filter((s): s is { id: typeof s.id; label: string; millionWon: number } =>
+    s.millionWon != null && s.millionWon > 0);
+  const total = kofiaFundsTotal(funds);
+  const mShare = marginShare(funds);
+  const cShare = creditShare(funds);
+  const headline = mShare != null ? pct1(mShare) : (cShare != null ? pct1(cShare) : "—");
+  const headlineLabel = mShare != null ? "위탁매매 미수금" : "신용융자 (예탁금+신용)";
+
+  return (
+    <div className="funds-chart">
+      <div className="funds-visual">
+        <FundsDonut parts={known.map((s) => ({ id: s.id, value: s.millionWon }))} center={headline} />
+        <div>
+          <div className="big" style={{ fontSize: 28 }}>{headline}</div>
+          <p className="muted" style={{ margin: "0 0 8px" }}>{headlineLabel}</p>
+          {total != null && <p style={{ margin: "0 0 8px" }}>합 {jo(total)}</p>}
+          {funds.asOf && <p className="muted" style={{ margin: 0 }}>기준일 {funds.asOf} · 단위 백만원</p>}
+        </div>
+      </div>
+      {known.length > 0 && (
+        <div className="mix-bar" style={{ marginTop: 12 }} aria-hidden="true">
+          {known.map((s) => (
+            <span
+              key={s.id}
+              className={`mix-${s.id}`}
+              style={{ flex: s.millionWon }}
+              title={`${s.label} ${jo(s.millionWon)}`}
+            >
+              {s.label} {total ? pct1(s.millionWon / total) : ""}
+            </span>
+          ))}
+        </div>
+      )}
+      <ul className="funds-legend">
+        {funds.slices.map((s) => (
+          <li key={s.id}>
+            <span className={`funds-swatch mix-${s.id}`} />
+            {s.label}
+            {" · "}
+            {s.millionWon != null ? jo(s.millionWon) : "메인 공표에 없음"}
+          </li>
+        ))}
+      </ul>
+      {mShare == null && (
+        <p className="muted" style={{ margin: "8px 0 0" }}>
+          위탁매매 미수금은 금투협 메인 HTML에 없어 칸으로 둡니다. 숫자를 만들지 않습니다.
+          {" "}
+          <a href={KOFIA_FUNDS_URL} target="_blank" rel="noreferrer">증시자금 추이</a>
+        </p>
+      )}
+    </div>
+  );
+}
+
 function IndexCell({ i }: { i: IndexRow }) {
   const meta = worldIndexById(i.id);
   const href = i.href ?? meta?.href;
@@ -86,6 +200,7 @@ function IndexCell({ i }: { i: IndexRow }) {
 export default function InvestDashboard() {
   const theme = useTvTheme();
   const board = trpc.market.indexBoard.useQuery();
+  const funds = trpc.market.kofiaFunds.useQuery();
   const holdings = trpc.trades.holdings.useQuery();
   const watch = trpc.market.watchlist.useQuery();
   const removeWatch = trpc.market.watchRemove.useMutation();
@@ -172,6 +287,20 @@ export default function InvestDashboard() {
           칸의 선은 Yahoo 종가(최근 거래일)입니다. 아래 큰 차트는 TradingView이며 실시간 호가가 아닙니다. 코스피·코스닥은 위젯에 넣지 않고 Yahoo 선과 네이버 링크로 봅니다.
         </p>
         {theme && <TvEmbed widget="symbol-overview" config={symbols} height={380} />}
+      </section>
+
+      <section className="card" style={{ margin: "0 0 16px" }}>
+        <h3>증시자금 · 미수금 비중</h3>
+        <p className="muted" style={{ margin: "0 0 8px" }}>
+          금융투자협회 FreeSIS 메인. 예탁금·신용융자는 메인 칸, 위탁매매 미수금은 메인이 비면 그리지 않습니다.
+          {" "}
+          <a href={KOFIA_MAIN_URL} target="_blank" rel="noreferrer">금투협 메인</a>
+        </p>
+        {funds.isLoading && <p className="muted">불러오는 중…</p>}
+        {funds.error && <p>오류: {funds.error.message}</p>}
+        {funds.data && (funds.data.deposit != null || funds.data.credit != null)
+          ? <FundsChart funds={funds.data} />
+          : (!funds.isLoading && !funds.error && <p className="muted">아직 숫자가 없습니다. 워커 금투협 수집 또는 메인 페이지를 확인하세요.</p>)}
       </section>
 
       <section className="card" style={{ margin: "0 0 16px" }}>

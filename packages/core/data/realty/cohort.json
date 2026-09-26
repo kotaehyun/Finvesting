@@ -1,0 +1,154 @@
+{
+  "defaults": {
+    "asOf": "2025",
+    "effectiveFrom": null,
+    "effectiveTo": null,
+    "sourceTitle": "국가데이터처 2025년 출생통계",
+    "sourceUrl": "https://www.korea.kr/briefing/policyBriefingView.do?new",
+    "article": null,
+    "verifiedBy": "미검증",
+    "verifiedOn": null
+  },
+  "REALTY_AGE_SHARES": [
+    {
+      "id": "0-9",
+      "label": "0–9",
+      "share": 5.7,
+      "family": false
+    },
+    {
+      "id": "10s",
+      "label": "10대",
+      "share": 8.8,
+      "family": false
+    },
+    {
+      "id": "20s",
+      "label": "20대",
+      "share": 11.7,
+      "family": false
+    },
+    {
+      "id": "30s",
+      "label": "30대",
+      "share": 13.5,
+      "family": true
+    },
+    {
+      "id": "40s",
+      "label": "40대",
+      "share": 14.8,
+      "family": true
+    },
+    {
+      "id": "50s",
+      "label": "50대",
+      "share": 16.7,
+      "family": false
+    },
+    {
+      "id": "60s",
+      "label": "60대",
+      "share": 15.3,
+      "family": false
+    },
+    {
+      "id": "70s",
+      "label": "70대",
+      "share": 8.6,
+      "family": false
+    },
+    {
+      "id": "80s",
+      "label": "80대",
+      "share": 4.1,
+      "family": false
+    },
+    {
+      "id": "90s",
+      "label": "90+",
+      "share": 0.7,
+      "family": false
+    }
+  ],
+  "REALTY_BIRTH_AGE": {
+    "asOf": "2025",
+    "source": "국가데이터처 2025년 출생통계",
+    "mother": 33.8,
+    "first": 33.2,
+    "mother35Share": 37.3,
+    "peakBand": "30–34",
+    "peakRate": 73.1,
+    "late30Rate": 52.1
+  },
+  "REALTY_CENSUS_2025": {
+    "asOf": "2025-11-01",
+    "published": "2026-07-28",
+    "source": "국가데이터처 2025년 인구주택총조사",
+    "people": 51820000,
+    "medianAge": 46.8,
+    "workShare": 69.2,
+    "workPeople": 35870000,
+    "oldShare": 20.7,
+    "childShare": 10.1,
+    "sudoShare": 50.9,
+    "single18": 29.6,
+    "married18": 56.3,
+    "single30": 54.7,
+    "single40": 21.9,
+    "seoulSingle": 37.1
+  },
+  "REALTY_COHORT_LINKS": {
+    "census": "https://www.korea.kr/briefing/policyBriefingView.do?newsId=156772432",
+    "censusKdi": "https://eiec.kdi.re.kr/policy/materialView.do?num=284799",
+    "marry": "https://mods.go.kr/board.es?act=view&bid=204&list_no=444103&mid=a10301010000",
+    "birth": "https://mods.go.kr/board.es?act=view&bid=204&list_no=446625&mid=a10301010000",
+    "housing": "https://stat.molit.go.kr/portal/cate/statView.do?hRsId=327",
+    "rebAge": "https://www.reb.or.kr/reb/cm/cntnts/cntntsView.do?cntntsId=1061&mi=10338&statId=S234220286"
+  },
+  "REALTY_COHORT_SLOTS": [
+    {
+      "id": "buyer-age",
+      "label": "아파트 매입 연령대",
+      "need": "부동산원 월별 매입자연령대별. 등기정보광장은 긁지 않습니다."
+    },
+    {
+      "id": "spend-age",
+      "label": "가구주 연령별 소비",
+      "need": "가계동향조사 KOSIS. 키·표 확인 전 칸."
+    }
+  ],
+  "REALTY_HOUSING_COHORT": {
+    "asOf": "2024",
+    "source": "국토교통부 2024년도 주거실태조사",
+    "youth": "가구주 19–34세",
+    "newlywed": "혼인 7년 이하",
+    "youthOwn": 12.2,
+    "newlywedOwn": 43.9,
+    "generalOwn": 58.4,
+    "youthPir": 6,
+    "newlywedPir": 6,
+    "elderPir": 9.1,
+    "youthRir": 16,
+    "newlywedRir": 17.7,
+    "firstYears": 7.9,
+    "newlywedApt": 73.4,
+    "youthApt": 31,
+    "generalApt": 53.1,
+    "firstAge": 46.4,
+    "firstAgeLow": 57
+  },
+  "REALTY_MARRY_2025": {
+    "asOf": "2025",
+    "published": "2026-03",
+    "source": "국가데이터처 2025년 혼인·이혼 통계",
+    "count": 240000,
+    "yoyPct": 8.1,
+    "crude": 4.7,
+    "firstAgeM": 33.9,
+    "firstAgeF": 31.6,
+    "peakBand": "30–34",
+    "peakM": 53.9,
+    "peakF": 57.6
+  }
+}

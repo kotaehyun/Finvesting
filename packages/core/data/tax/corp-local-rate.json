@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "asOf": null,
+    "effectiveFrom": null,
+    "effectiveTo": null,
+    "sourceTitle": "지방세법 제103조의20",
+    "sourceUrl": "https://www.law.go.kr/",
+    "article": "지방세법 제103조의20",
+    "verifiedBy": "미검증",
+    "verifiedOn": null
+  },
+  "entries": [
+    {
+      "id": "citLocalOnCorpTax",
+      "value": 0.1,
+      "unit": "",
+      "asOf": null,
+      "effectiveFrom": null,
+      "effectiveTo": null,
+      "sourceTitle": "지방세법 제103조의20",
+      "sourceUrl": "https://www.law.go.kr/",
+      "article": "지방세법 제103조의20",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
+    }
+  ]
+}

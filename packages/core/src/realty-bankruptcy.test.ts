@@ -1,28 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { REALTY_BANKRUPTCY_CAUSES, REALTY_INSOLVENCY_STATS } from "./realty-bankruptcy";
+import {
+  REALTY_BANKRUPTCY_CAUSES,
+  REALTY_INSOLVENCY_STATS,
+  insolvencyFiledTotal,
+  rehabilitationYoyPct,
+} from "./realty-bankruptcy";
 
 describe("realty bankruptcy causes and insolvency stats", () => {
-  it("파산 및 채무불이행 주요 원인에 생활대금, 주담대, 주식미수금이 포함된다", () => {
-    const ids = REALTY_BANKRUPTCY_CAUSES.map((c) => c.id);
-    expect(ids).toContain("living");
-    expect(ids).toContain("mortgage");
-    expect(ids).toContain("investment");
-    expect(ids).toContain("business");
-
-    const living = REALTY_BANKRUPTCY_CAUSES.find((c) => c.id === "living");
-    expect(living?.share).toBeGreaterThan(40); // 생활대금 파산이 1위
-
-    const mortgage = REALTY_BANKRUPTCY_CAUSES.find((c) => c.id === "mortgage");
-    expect(mortgage?.share).toBeGreaterThan(20); // 주담대 부담
-
-    const investment = REALTY_BANKRUPTCY_CAUSES.find((c) => c.id === "investment");
-    expect(investment?.youthShare).toBeGreaterThan(30); // 2030 청년층 주식/미수금 비중 높음
+  it("파탄원인은 서울회생법원 중복응답이고 주담대 칸이 없다", () => {
+    const ids = REALTY_BANKRUPTCY_CAUSES.map((c: any) => c.id);
+    expect(ids).toEqual(["living", "business", "income", "invest"]);
+    const sum = REALTY_BANKRUPTCY_CAUSES.reduce((a: any, c: any) => a + c.share, 0);
+    expect(sum).toBeGreaterThan(100);
+    expect(REALTY_BANKRUPTCY_CAUSES.find((c: any) => c.id === "living")?.share).toBe(46.65);
+    expect(REALTY_BANKRUPTCY_CAUSES.find((c: any) => c.id === "invest")?.share).toBe(13.55);
   });
 
-  it("사법연감 도산 신청 및 주식 미수금 지표가 유효하다", () => {
-    expect(REALTY_INSOLVENCY_STATS.rehabilitationFiled).toBeGreaterThan(100_000);
-    expect(REALTY_INSOLVENCY_STATS.bankruptcyFiled).toBeGreaterThan(30_000);
-    expect(REALTY_INSOLVENCY_STATS.stockMarginReceivablesEok).toBeGreaterThan(0);
-    expect(REALTY_INSOLVENCY_STATS.stockDailyForcedSaleEok).toBeGreaterThan(0);
+  it("2025 법원통계월보 신청 건수를 쓴다", () => {
+    expect(REALTY_INSOLVENCY_STATS.rehabilitationFiled).toBe(149_146);
+    expect(REALTY_INSOLVENCY_STATS.bankruptcyFiled).toBe(40_908);
+    expect(insolvencyFiledTotal()).toBe(190_054);
+    expect(rehabilitationYoyPct()).toBeCloseTo(15.17, 1);
+    expect(REALTY_INSOLVENCY_STATS.debtAdjustmentSettled).toBe(174_841);
   });
 });

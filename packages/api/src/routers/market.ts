@@ -33,6 +33,8 @@ import {
   policyRateTone,
   parseYahooSearchQuotes,
   instrumentFromYahooHit,
+  KOFIA_MAIN_URL,
+  parseKofiaMainHtml,
   ECOS_HHLOAN_CODES,
   ECOS_HHLOAN_HS_CODES,
   ECOS_HHNPL_CODES,
@@ -47,7 +49,6 @@ import {
   applyLiveRates,
   realtyRateSnapshot,
   shareOf,
-  REALTY_CURATED_NEWS,
   type LoanPoint,
   type RealtyMetroId,
 } from "@finvesting/core";
@@ -162,6 +163,7 @@ export const marketRouter = router({
         }
         return {
           items,
+          status: items.length ? "ok" as const : "empty" as const,
           stats: {
             total,
             ko: byLang.ko ?? 0,
@@ -172,27 +174,17 @@ export const marketRouter = router({
             .filter((p): p is { publisher: string; n: number } => Boolean(p.publisher))
             .map((p) => ({ publisher: p.publisher, n: ni(p.n) })),
         };
-      } catch (err) {
-        const fallback = REALTY_CURATED_NEWS.map((n) => ({
-          id: n.id,
-          title: n.title,
-          url: n.url,
-          publisher: n.publisher,
-          publishedAt: new Date(n.publishedAt),
-          summary: n.summary,
-          category: "realty" as const,
-          lang: "ko",
-          source: "rss:hankyung-realestate",
-        }));
+      } catch {
         return {
-          items: fallback,
+          items: [],
+          status: "unavailable" as const,
           stats: {
-            total: fallback.length,
-            ko: fallback.length,
+            total: 0,
+            ko: 0,
             en: 0,
-            categories: NEWS_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: c.id === "realty" ? fallback.length : 0 })),
+            categories: NEWS_CATEGORIES.map((c) => ({ id: c.id, label: c.label, n: 0 })),
           },
-          publishers: [{ publisher: "한국경제 부동산", n: 1 }],
+          publishers: [],
         };
       }
     }),
@@ -585,9 +577,57 @@ export const marketRouter = router({
   // Yahoo 일 단위 스냅샷. 종목별 최신 1행. DART 재무제표와 별개.
   fundamentals: publicProcedure.query(({ ctx }) => loadLatestFundamentals(ctx.db)),
 
+  kofiaFunds: publicProcedure.query(async ({ ctx }) => {
+    const year = Number(new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 4));
+    try {
+      const res = await fetch(KOFIA_MAIN_URL, {
+        headers: { "User-Agent": "Finvesting/0.1 (personal)" },
+      });
+      if (res.ok) {
+        const live = parseKofiaMainHtml(await res.text(), year);
+        if (live.deposit != null || live.credit != null) return live;
+      }
+    } catch { /* DB */ }
+    try {
+      const rows = await ctx.db.select({
+        code: macroIndicators.code,
+        date: macroIndicators.date,
+        value: macroIndicators.value,
+      }).from(macroIndicators)
+        .where(inArray(macroIndicators.code, ["KOFIA_INVESTOR_DEPOSIT", "KOFIA_CREDIT", "KOFIA_MARGIN"]))
+        .orderBy(desc(macroIndicators.date));
+      const latest: Record<string, { date: string; value: number }> = {};
+      for (const r of rows) {
+        if (latest[r.code]) continue;
+        const n = Number(r.value);
+        if (!Number.isFinite(n)) continue;
+        latest[r.code] = { date: r.date, value: n };
+      }
+      const deposit = latest.KOFIA_INVESTOR_DEPOSIT?.value ?? null;
+      const credit = latest.KOFIA_CREDIT?.value ?? null;
+      const margin = latest.KOFIA_MARGIN?.value ?? null;
+      return {
+        asOf: latest.KOFIA_INVESTOR_DEPOSIT?.date ?? latest.KOFIA_CREDIT?.date ?? null,
+        unit: "백만원" as const,
+        source: "kofia-main" as const,
+        deposit,
+        credit,
+        margin,
+        slices: [
+          { id: "deposit" as const, label: "투자자예탁금", millionWon: deposit },
+          { id: "credit" as const, label: "신용융자", millionWon: credit },
+          { id: "margin" as const, label: "위탁매매 미수금", millionWon: margin },
+        ],
+      };
+    } catch {
+      return parseKofiaMainHtml("", year);
+    }
+  }),
+
   // 예금은행 광역시도 가계대출 말잔. 시·구 숫자는 ECOS에 없음.
   realtyLoans: publicProcedure.query(async ({ ctx }) => {
     let rows: { code: string; date: string; value: string }[] = [];
+    let dbOk = true;
     try {
       rows = await ctx.db.select({
         code: macroIndicators.code,
@@ -597,6 +637,7 @@ export const marketRouter = router({
         .where(inArray(macroIndicators.code, [...realtyLoanMacroCodes(), ...ecosLoanRateMacroCodes()]))
         .orderBy(desc(macroIndicators.date));
     } catch {
+      dbOk = false;
       rows = [];
     }
     const byCode = new Map<string, LoanPoint[]>();
@@ -612,51 +653,6 @@ export const marketRouter = router({
       byCode.set(k, [...arr].reverse());
     }
 
-    // DB 연결 불가 또는 데이터 부재 시 한국은행 ECOS 151Y003 최신 공표 기준 스냅샷 폴백 적용
-    if (byCode.size === 0) {
-      const curDate = "2026-07-01";
-      const prevDate = "2025-07-01";
-      const fallbackSnapshot: Record<RealtyMetroId, { total: number; housing: number; npl: number }> = {
-        seoul: { total: 385200, housing: 242000, npl: 0.28 },
-        gyeonggi: { total: 326800, housing: 215400, npl: 0.32 },
-        incheon: { total: 54100, housing: 36200, npl: 0.38 },
-        busan: { total: 68400, housing: 42100, npl: 0.42 },
-        daegu: { total: 46200, housing: 28900, npl: 0.45 },
-        gyeongnam: { total: 42100, housing: 25600, npl: 0.39 },
-        chungnam: { total: 29400, housing: 17200, npl: 0.35 },
-        daejeon: { total: 27800, housing: 17600, npl: 0.31 },
-        gyeongbuk: { total: 25200, housing: 14800, npl: 0.36 },
-        gwangju: { total: 24300, housing: 15100, npl: 0.34 },
-        chungbuk: { total: 20400, housing: 12300, npl: 0.33 },
-        jeonbuk: { total: 19500, housing: 11400, npl: 0.37 },
-        ulsan: { total: 18600, housing: 11900, npl: 0.30 },
-        gangwon: { total: 17200, housing: 9800, npl: 0.36 },
-        jeonnam: { total: 16400, housing: 9200, npl: 0.38 },
-        jeju: { total: 14200, housing: 7900, npl: 0.52 },
-        sejong: { total: 12300, housing: 9400, npl: 0.18 },
-      };
-      const krTotal = 1128000;
-      byCode.set(ECOS_HHLOAN_CODES.kr, [
-        { date: prevDate, value: 1084000 },
-        { date: curDate, value: krTotal },
-      ]);
-      for (const m of REALTY_METROS) {
-        const snap = fallbackSnapshot[m.id];
-        const prevVal = Math.round(snap.total * 0.96);
-        const prevHs = Math.round(snap.housing * 0.95);
-        byCode.set(ECOS_HHLOAN_CODES[m.id], [
-          { date: prevDate, value: prevVal },
-          { date: curDate, value: snap.total },
-        ]);
-        byCode.set(ECOS_HHLOAN_HS_CODES[m.id], [
-          { date: prevDate, value: prevHs },
-          { date: curDate, value: snap.housing },
-        ]);
-        byCode.set(ECOS_HHNPL_CODES[m.id], [
-          { date: curDate, value: snap.npl },
-        ]);
-      }
-    }
     function pack(metro: RealtyMetroId) {
       const total = byCode.get(ECOS_HHLOAN_CODES[metro]) ?? [];
       const housing = byCode.get(ECOS_HHLOAN_HS_CODES[metro]) ?? [];
@@ -712,6 +708,7 @@ export const marketRouter = router({
       if (last) live[code] = last;
     }
     return {
+      status: !dbOk ? "unavailable" as const : (dates.length ? "ok" as const : "empty" as const),
       grain: "metro" as const,
       unit: "십억원",
       note: "시·구 가계대출은 한국은행 ECOS에 없습니다. 예금은행 광역시도 말잔입니다. 전국 대비 비중이지 가계신용/GDP가 아닙니다.",

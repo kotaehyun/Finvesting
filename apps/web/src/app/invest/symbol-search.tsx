@@ -57,6 +57,7 @@ export function SymbolSearch() {
                 <a href={h.yahooUrl} target="_blank" rel="noreferrer">Yahoo</a>
                 {h.naverUrl && <a href={h.naverUrl} target="_blank" rel="noreferrer">네이버</a>}
                 {h.dartUrl && <a href={h.dartUrl} target="_blank" rel="noreferrer">DART</a>}
+                {h.edgarUrl && <a href={h.edgarUrl} target="_blank" rel="noreferrer">EDGAR</a>}
                 {draft
                   ? (
                     <button

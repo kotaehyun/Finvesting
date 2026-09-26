@@ -18,7 +18,7 @@ function won(n: number) {
 }
 
 export function PayYearSection({
-  points, year, monthlyPension = 0,
+  points, year,
 }: {
   points: PayYearPoint[];
   year?: PayYearPoint;
@@ -26,8 +26,6 @@ export function PayYearSection({
 }) {
   if (!points.length) return null;
   const y = year;
-  const payMonths = points.filter((p) => p.gross > 0).length;
-  const annualPension = monthlyPension * payMonths;
   return (
     <>
       <h3 style={{ marginTop: 20 }}>연봉 추이 — 최근 12개월</h3>
@@ -87,12 +85,12 @@ export function PayYearSection({
           </tfoot>
         )}
       </table>
-      {y && y.gross > 0 && <YearEndBlock year={y} annualPension={annualPension} />}
+      {y && y.gross > 0 && <p className="erp-hint">연말정산 업무(연간 명세·과세표준)는 <a href="/profile?menu=yearEnd">12 연말정산</a>에 있습니다.</p>}
     </>
   );
 }
 
-function YearEndBlock({ year, annualPension }: { year: PayYearPoint; annualPension: number }) {
+export function YearEndBlock({ year, annualPension }: { year: PayYearPoint; annualPension: number }) {
   const slip = yearEndWageSlip(year);
   const settle = yearEndSettlement(year, annualPension);
   const earnGroups = (["monthly", "irregular", "custom"] as const).map((g) => ({

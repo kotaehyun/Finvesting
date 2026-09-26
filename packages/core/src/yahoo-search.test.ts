@@ -5,6 +5,7 @@ import { yahooQuoteUrl } from "./yahoo-fundamentals";
 describe("yahoo search", () => {
   it("삼성전자 KS는 네이버·DART 링크", () => {
     expect(krStockCode("005930.KS")).toBe("005930");
+    expect(krStockCode("005930")).toBe("005930");
     const hits = parseYahooSearchQuotes({
       quotes: [
         { symbol: "005930.KS", shortname: "SamsungElec", exchange: "KSC", quoteType: "EQUITY" },
@@ -15,7 +16,10 @@ describe("yahoo search", () => {
     expect(hits).toHaveLength(2);
     expect(hits[0]?.naverUrl).toContain("005930");
     expect(hits[0]?.dartUrl).toContain("005930");
+    expect(hits[0]?.edgarUrl).toBeNull();
     expect(hits[1]?.naverUrl).toBeNull();
+    expect(hits[1]?.dartUrl).toBeNull();
+    expect(hits[1]?.edgarUrl).toContain("CIK=AAPL");
     expect(hits[1]?.yahooUrl).toBe(yahooQuoteUrl("AAPL"));
   });
 

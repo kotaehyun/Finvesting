@@ -1,21 +1,22 @@
 // 2026년 직장가입자·근로자 부담분. 원 단위 절사.
 // 국세(근로소득세)는 간이세액표·부양가족에 따라 달라 요율로 추정하지 않는다. 명세서 금액을 넣고 지방세는 그 10%.
+import dataFile from "../data/tax/payroll-rates-2026.json";
+import { assertDataFile, dataSourceLine, requireValue } from "./load-data";
+
+assertDataFile(dataFile, "tax/payroll-rates-2026.json");
+
+export const PAYROLL_RATES_SOURCE = dataSourceLine(dataFile.defaults);
 
 export const PAYROLL_RATES_2026 = {
-  year: 2026,
-  // 국민연금: 전체 9.5% 중 근로자 4.75%. 기준소득월액 하한 41만·상한 659만 (2026-07~2027-06)
-  nationalPensionEmployee: 0.0475,
-  nationalPensionFloor: 410_000,
-  nationalPensionCap: 6_590_000,
-  // 건강보험: 전체 7.19% 중 근로자 50%. 복지부 2025-08-28 건정심
-  healthInsuranceTotal: 0.0719,
-  healthInsuranceEmployeeShare: 0.5,
-  // 장기요양: 소득 대비 0.9448%. 4대보험 연계센터: 건보료 × (0.9448% / 7.19%)
-  longTermCareIncomeRate: 0.009448,
-  // 고용보험 실업급여 근로자 0.9% (고용안정·직능개발은 사업주)
-  employmentInsuranceEmployee: 0.009,
-  // 지방소득세 = 소득세(국세)의 10%
-  localIncomeTaxOnNational: 0.1,
+  year: requireValue(dataFile, "rates.year"),
+  nationalPensionEmployee: requireValue(dataFile, "rates.nationalPensionEmployee"),
+  nationalPensionFloor: requireValue(dataFile, "rates.nationalPensionFloor"),
+  nationalPensionCap: requireValue(dataFile, "rates.nationalPensionCap"),
+  healthInsuranceTotal: requireValue(dataFile, "rates.healthInsuranceTotal"),
+  healthInsuranceEmployeeShare: requireValue(dataFile, "rates.healthInsuranceEmployeeShare"),
+  longTermCareIncomeRate: requireValue(dataFile, "rates.longTermCareIncomeRate"),
+  employmentInsuranceEmployee: requireValue(dataFile, "rates.employmentInsuranceEmployee"),
+  localIncomeTaxOnNational: requireValue(dataFile, "rates.localIncomeTaxOnNational"),
 } as const;
 
 function truncWon(n: number) {
@@ -37,7 +38,7 @@ export type StatutoryWithholding = {
 };
 
 // 소득세법 제47조 근로소득공제. 한도 2,000만. 원 단위 절사.
-export const BASIC_PERSONAL_EXEMPTION = 1_500_000; // 본인 기본공제. 부양가족은 아직 없음.
+export const BASIC_PERSONAL_EXEMPTION = requireValue(dataFile, "basicPersonalExemption");
 
 export function earnedIncomeDeduction(annualGross: number): number {
   const g = Math.max(0, Math.floor(Number(annualGross) || 0));

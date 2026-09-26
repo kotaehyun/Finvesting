@@ -14,6 +14,8 @@ import { genericBankImporter } from "./importers/generic-bank";
 import { genericCsvExporter } from "./exporters/generic-csv";
 import type { TransactionImporter, TradeImporter, LedgerExporter } from "./types";
 
+export { genericCsvExporter };
+
 // 등록 순서 = 감지 우선순위 (구체적인 것 먼저, 범용은 마지막)
 export const transactionImporters: TransactionImporter[] = [genericBankImporter];
 export const tradeImporters: TradeImporter[] = [];
