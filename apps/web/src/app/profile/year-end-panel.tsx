@@ -44,14 +44,12 @@ export function YearEndPanel({
       <p className="erp-hint">
         근로자 본인 연말정산입니다. 고용노동부 연 합 명세와 과세표준 기초만 수집분입니다.
         기부금·자녀 등은 창을 나눠 넣을 수 있습니다. 세액공제율을 곱하지 않습니다. 홈택스 제출이 아닙니다.
-        종소세 5월은 프리랜서·개인사업자 업무에서 엽니다. <a href="/erp?role=business&view=git">종소세</a>
+        종소세(사업·프리랜서) 화면(`/erp`)은 보류(ADR 0050)입니다.
       </p>
       <p className="erp-hint">
         <a href="/profile?menu=books">07 월 임금명세서</a>
         {" · "}
         <a href="/profile?menu=taxBooks">13 양도·배당</a>
-        {" · "}
-        <a href="/erp">종소세 (인격 고르기)</a>
         {" · "}
         <a href="/profile?menu=taxBooks">세율표(13)</a>
       </p>

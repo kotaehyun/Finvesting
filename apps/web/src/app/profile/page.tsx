@@ -566,7 +566,6 @@ function ProfileWorkspace() {
       <div className="erp-titlebar">
         <h1>프로필대장 <span className="path">재무관리 › {menuLabel}</span></h1>
         <div className="wehago-title-meta">
-          <a href="/erp">사업·프리랜서 업무</a>
           <label>
             기준월
             <input type="month" value={month} onChange={(e) => { setMonth(e.target.value); setDirty(false); }} />
@@ -638,7 +637,7 @@ function ProfileWorkspace() {
             {menu === "master" && (
               <>
                 <h3>기본정보</h3>
-                <p className="erp-hint">이 대장은 근로자 기준입니다. 세전·국세를 넣고 저장하면 4대보험·지방세·실수령을 계산합니다. 사업·프리랜서 매출·부가세는 <a href="/erp">업무</a> 화면입니다.</p>
+                <p className="erp-hint">이 대장은 근로자 기준입니다. 세전·국세를 넣고 저장하면 4대보험·지방세·실수령을 계산합니다. 사업·프리랜서 매출·부가세 화면(`/erp`)은 보류(ADR 0050)입니다.</p>
                 <table className="erp-props">
                   <tbody>
                     <Prop label="세전 월 소득"><Num value={gross} onChange={(v) => { setGross(v); markDirty(); }} placeholder="기본급+수당+상여 합" /></Prop>

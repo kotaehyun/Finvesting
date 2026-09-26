@@ -70,7 +70,6 @@ export default function Dashboard() {
             </select>
           </label>
           <a className="starter" href="/accounts">내역 가져오기</a>
-          <a className="starter" href="/erp">사업 업무</a>
         </div>
       </div>
 

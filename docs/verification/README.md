@@ -39,7 +39,8 @@
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ 8/8 통과 (`as any` 제거 후) | 2026-09-25 | Cursor |
 | core 테스트 (vitest) | ✅ 62파일 231 테스트. 미검증 개수 고정 expect 없음 | 2026-09-25 | Cursor |
-| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 원문 대조는 전원 미검증(⏸) | 2026-09-25 | Cursor |
+| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 원문 대조는 전원 미검증(⏸). 3파일 준비표 09-26 | 2026-09-26 | Cursor |
+| 부동산·ERP 범위 | ✅ 동결·보류(ADR 0050). 내비 숨김 | 2026-09-26 | Cursor |
 | interop 테스트 | ✅ 11개 통과 | 2026-09-16 | Grok |
 | `pnpm db:generate` / `db:migrate` | ✅ `0007_cloudy_star_brand` (`invest_style`) 적용 | 2026-09-14 | Grok |
 | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
