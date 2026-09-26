@@ -51,7 +51,7 @@ export function TaxBooksPanel() {
       </aside>
       <p className="erp-hint">
         근로자 본인의 해외주식 양도·배당·이자입니다. 연말정산 업무는 <a href="/profile?menu=yearEnd">12 연말정산</a>에 있습니다.
-        사업 매출·부가세는 <a href="/erp">업무</a> 화면입니다. 양도·증여·보유 세율표는 아래입니다. 결정세액·특례는 세무사·회계사·국세청 126이 먼저입니다.
+        사업 매출·부가세 화면(`/erp`)은 보류(ADR 0050)입니다. 양도·증여·보유 세율표는 아래입니다. 결정세액·특례는 세무사·회계사·국세청 126이 먼저입니다.
       </p>
       <p className="erp-hint">
         연도{" "}
@@ -71,8 +71,6 @@ export function TaxBooksPanel() {
         <a href="/profile?menu=yearEnd">12 연말정산</a>
         {" · "}
         <a href="/holdings">보유·체결</a>
-        {" · "}
-        <a href="/erp">사업 업무</a>
       </p>
       {board.isLoading && <p className="erp-hint">불러오는 중…</p>}
       {data?.status === "unavailable" && <p className="erp-hint">{data.note}</p>}

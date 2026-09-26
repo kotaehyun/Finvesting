@@ -2,6 +2,20 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-09-26 — 부동산 동결·ERP 보류 + tax 대조 준비
+**한 일**
+- `feat/erp-tax-desk` → `dev` merge·push (`82538be`)
+- ADR 0050. 내비·스타터에서 `/realty`·`/erp` 숨김. 로드맵·overview 동결/보류 절. 라우트 삭제는 없음
+- 원문 대조 준비표: `docs/verification/2026-09-26-tax-verify-prep.md` (payroll·brackets·ei-stability). 값 대조는 사용자
+
+**다음 할 일**
+1. 사용자가 tax 3파일 원문 대조 후 `verifiedBy` 갱신
+2. Financial Timeline / 홈택스 간소화(로드맵)
+3. `/realty`·`/erp` 재개는 지시할 때만
+
+**막힌 것**
+- 없음(결정 반영됨). corepack strict 시 `COREPACK_ENABLE_STRICT=0`
+
 ## 2026-09-25 — data 구조 정리·as any 0 (Cursor, feat/erp-tax-desk)
 **한 일**
 - tax 5 JSON: 값은 `entries`만. `getValue`/`requireValue`. rates·표 숫자 객체 삭제(라벨 동반만 유지)

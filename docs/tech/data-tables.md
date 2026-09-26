@@ -41,5 +41,9 @@
 1. 공식 원문(URL)을 연다. 값을 대조한다.
 2. **tax**: 해당 `entries[].value`와 메타를 고친다. **realty**: 최상위 상수와 `defaults`를 고친다. `verifiedBy`를 `사용자` 또는 `AI:<모델>`로, `verifiedOn`을 오늘 날짜로.
 3. `pnpm --filter @finvesting/core test` — `data-tables.test.ts` 통과(미검증 개수 고정 기대값 없음).
-4. `/erp`·`/profile` 화면에 「기준 … · …」(`dataSourceLine`)이 보이는지 확인.
+4. `/erp`·`/profile` 화면에 「기준 … · …」(`dataSourceLine`)이 보이는지 확인. (`/erp`는 ADR 0050 보류·내비 숨김이어도 URL·프로필 세율표는 유지.)
 5. `docs/verification/`에 원문 대조만 ✅로 올린다(렌더만이면 ⏸).
+
+## 원문 대조 우선 (2026-09-26)
+사용자 대조용 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`  
+대상: `payroll-rates-2026.json` · `brackets.json` · `ei-stability.json`만. 나머지는 미착수.

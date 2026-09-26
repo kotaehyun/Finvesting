@@ -268,7 +268,6 @@ export default function InvestDashboard() {
           <a className="starter" href="/profile?menu=invest">투자내역</a>
           <a className="starter" href="/profile?menu=style">투자성향</a>
           <a className="starter" href="/markets">시장·수급·기술</a>
-          <a className="starter" href="/realty">부동산</a>
         </div>
       </div>
 
