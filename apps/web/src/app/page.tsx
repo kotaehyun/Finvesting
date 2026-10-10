@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { pnlTone, signedWon } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
 import { Pnl } from "./pnl";
+import { NetWorthChart } from "./net-worth-chart";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
@@ -84,6 +85,11 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* 순자산 시계열 추이 & 자산 배분 인터랙티브 위젯 */}
+      <div style={{ marginBottom: 16 }}>
+        <NetWorthChart selectedMonth={month} onSelectMonth={setMonth} />
+      </div>
 
       <div className="grid">
         <div className="card">

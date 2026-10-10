@@ -9,6 +9,8 @@
 | [data-tables.md](./data-tables.md) | 코드 상수에서 뺀 JSON 표·갱신 주기·절차 |
 | [ai.md](./ai.md) | 챗봇, LLM 프로바이더, RAG 계획 |
 | [interop.md](./interop.md) | 외부 파일 가져오기/내보내기 — 통장·카드·증권 CSV, 더존·위하고·세무사랑 양식 |
-| [setup.md](./setup.md) | 맥/윈도우 개발 환경, 실행 명령 |
+| [setup.md](./setup.md) | 맥/윈도우 개발 환경, 기본 세팅 |
+| [commands.md](./commands.md) | 자주 쓰는 개발·DB·워커·검사 CLI 명령어 모음 및 환경별(macOS/PowerShell) 실행법 |
 | [git-workflow.md](./git-workflow.md) | 브랜치 전략(main/dev/기능), 두 기기 동기화, AI 도구 커밋 규칙 |
+| [tax.md](./tax.md) | 세금 & 연말정산(해외주식 250만 공제, 2천만 금융소득, 연말정산 환급 시뮬레이터) |
 | [decisions/](./decisions/README.md) | 아키텍처 결정 기록(ADR) |

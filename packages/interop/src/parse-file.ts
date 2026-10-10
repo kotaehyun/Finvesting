@@ -70,3 +70,13 @@ export function toIsoDate(s: string): string {
   const m = s.match(/(\d{4})[.\-\/]?(\d{2})[.\-\/]?(\d{2})/);
   return m ? `${m[1]}-${m[2]}-${m[3]}` : s;
 }
+
+export function extractTime(s: string): string | undefined {
+  if (!s) return undefined;
+  const m = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return undefined;
+  const hh = m[1]!.padStart(2, "0");
+  const mm = m[2]!;
+  const ss = m[3] ? m[3].padStart(2, "0") : "00";
+  return `${hh}:${mm}:${ss}`;
+}

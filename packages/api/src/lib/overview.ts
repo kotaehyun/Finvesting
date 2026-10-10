@@ -3,8 +3,8 @@ import {
   accounts, transactions, financialProfiles, recurringCosts,
   savingsPlans, savingsContributions, type Db,
 } from "@finvesting/db";
-import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets, addMonths } from "@finvesting/core";
-import { loadHoldings } from "./holdings";
+import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets, addMonths, convertAccountBalances } from "@finvesting/core";
+import { latestUsdKrw, loadHoldings } from "./holdings";
 
 export function currentKstMonth() {
   return new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 7);
@@ -60,8 +60,9 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
     contribByPlan.set(c.planId, (contribByPlan.get(c.planId) ?? 0) + Number(c.amount));
   }
 
-  const byType: Record<string, number> = {};
-  for (const a of accts) byType[a.type] = (byType[a.type] ?? 0) + Number(a.balance);
+  const usdkrw = await latestUsdKrw(db);
+  const conversion = convertAccountBalances(accts, { USD: usdkrw });
+  const byType = conversion.byTypeKrw;
   const liquid = (byType.cash ?? 0) + (byType.checking ?? 0) + (byType.savings ?? 0) + (byType.installment ?? 0);
   const brokerCash = brokerCashKrw(byType);
   const debt = (byType.card ?? 0) + (byType.loan ?? 0);
@@ -139,7 +140,20 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
     month,
     isCurrentMonth,
     asOf,
-    assets: { byType, liquid, invested, accountInvested: brokerCash, brokerCash, debt, net: liquid + invested - debt, accountCount: accts.length },
+    assets: {
+      byType,
+      byCurrency: conversion.byCurrency,
+      liquid,
+      invested,
+      accountInvested: brokerCash,
+      brokerCash,
+      debt,
+      net: liquid + invested - debt,
+      accountCount: accts.length,
+      unconvertedCount: conversion.unconvertedCount,
+      unconvertedCurrencies: conversion.unconvertedCurrencies,
+      isFxComplete: conversion.isFxComplete,
+    },
     holdings,
     cashflow,
     txnCount: txns.length,

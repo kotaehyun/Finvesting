@@ -18,6 +18,7 @@
 ## 목록
 | 날짜 | 제목 | 상태 |
 |---|---|---|
+| 2026-10-09 | body 태그 Hydration Mismatch (antigravity-scroll-lock) | 해결 |
 | 2026-09-16 | 부동산 가상 통계·헤드라인 | 해결 (공표·칸만) |
 | 2026-09-15 | MapLibre GeoJSON 워커 URL (Next) | 해결 |
 | 2026-09-14 | TradingView technical-analysis S&P 「데이터 없음」 | 해결 (`SP:SPX`) |

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { accounts, instruments, trades } from "@finvesting/db";
-import { buildPositions } from "@finvesting/core";
+import { buildPositions, compareTradesForReplay, type TradeReplayItem } from "@finvesting/core";
 import { router, publicProcedure } from "../trpc";
 import { latestUsdKrw, loadHoldings, toTradeLike } from "../lib/holdings";
 
@@ -94,34 +94,24 @@ export const tradesRouter = router({
 
       const existing = await ctx.db.select().from(trades)
         .where(and(eq(trades.userId, ctx.userId), eq(trades.accountId, input.accountId)))
-        .orderBy(asc(trades.tradedAt), asc(trades.id));
-      const next = [
-        ...existing.map((t) => ({ ...toTradeLike(t), tradedAt: t.tradedAt, id: t.id })),
-        {
-          instrumentId: input.instrumentId,
-          side: input.side,
-          quantity: input.quantity,
-          price: input.price,
-          fee: input.fee,
-          tax: input.tax,
-          fxRate,
-          tradedAt,
-          id: "new",
-        },
-      ].sort((a, b) => {
-        const dt = a.tradedAt.getTime() - b.tradedAt.getTime();
-        return dt !== 0 ? dt : a.id.localeCompare(b.id);
-      });
+        .orderBy(asc(trades.tradedAt), asc(trades.createdAt), asc(trades.id));
+      const candidate: TradeReplayItem = {
+        instrumentId: input.instrumentId,
+        side: input.side,
+        quantity: input.quantity,
+        price: input.price,
+        fee: input.fee,
+        tax: input.tax,
+        fxRate,
+        tradedAt,
+        createdAt: new Date(),
+      };
+      const next: TradeReplayItem[] = [
+        ...existing.map((t) => ({ ...toTradeLike(t), tradedAt: t.tradedAt, createdAt: t.createdAt, id: t.id })),
+        candidate,
+      ].sort(compareTradesForReplay);
       try {
-        buildPositions(next.map((t) => ({
-          instrumentId: t.instrumentId,
-          side: t.side,
-          quantity: t.quantity,
-          price: t.price,
-          fee: t.fee,
-          tax: t.tax,
-          fxRate: t.fxRate ?? undefined,
-        })));
+        buildPositions(next);
       } catch (e) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -153,9 +143,13 @@ export const tradesRouter = router({
       if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "체결을 찾을 수 없습니다" });
       const remaining = await ctx.db.select().from(trades)
         .where(and(eq(trades.userId, ctx.userId), eq(trades.accountId, row.accountId)))
-        .orderBy(asc(trades.tradedAt), asc(trades.id));
+        .orderBy(asc(trades.tradedAt), asc(trades.createdAt), asc(trades.id));
       try {
-        buildPositions(remaining.filter((t) => t.id !== input.id).map(toTradeLike));
+        const sortedRemaining = remaining
+          .filter((t) => t.id !== input.id)
+          .map((t) => ({ ...toTradeLike(t), tradedAt: t.tradedAt, createdAt: t.createdAt, id: t.id }))
+          .sort(compareTradesForReplay);
+        buildPositions(sortedRemaining);
       } catch (e) {
         throw new TRPCError({
           code: "BAD_REQUEST",

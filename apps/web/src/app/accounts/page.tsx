@@ -103,8 +103,19 @@ export default function AccountsPage() {
 
   return (
     <>
-      <h1>계좌 · 거래</h1>
-      <p className="muted">통장·카드 계좌를 등록하고, 은행 내보내기 CSV/엑셀/워드를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 분류를 바꿀 수 있습니다. 프로필대장 통장내역에서도 같은 파일을 볼 수 있습니다.</p>
+      <div className="page-head" style={{ marginBottom: 12 }}>
+        <div>
+          <h1 style={{ marginBottom: 4 }}>계좌 · 거래</h1>
+          <p className="muted" style={{ margin: 0 }}>
+            통장·카드 계좌를 등록하고, 은행 내보내기 CSV/엑셀/워드를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 분류를 바꿀 수 있습니다.
+          </p>
+        </div>
+        <div className="row">
+          <a className="starter" href="/accounting" style={{ background: "#1f6feb" }}>
+            🏢 회계 전표 내보내기 (더존/위하고)
+          </a>
+        </div>
+      </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
         <h3>계좌 추가</h3>
