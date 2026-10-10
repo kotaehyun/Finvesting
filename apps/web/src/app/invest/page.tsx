@@ -4,6 +4,7 @@ import { MARKET_REF_LINKS, tvSymbolOverviewSymbols, worldIndexById } from "@finv
 import { trpc } from "@/lib/trpc";
 import { TvEmbed } from "./tv-embed";
 import { SymbolSearch } from "./symbol-search";
+import { WatchlistTerminal } from "./watchlist-terminal";
 import { Pnl } from "../pnl";
 
 function useTvTheme() {
@@ -87,9 +88,6 @@ export default function InvestDashboard() {
   const theme = useTvTheme();
   const board = trpc.market.indexBoard.useQuery();
   const holdings = trpc.trades.holdings.useQuery();
-  const watch = trpc.market.watchlist.useQuery();
-  const removeWatch = trpc.market.watchRemove.useMutation();
-  const utils = trpc.useUtils();
   const [openPanel, setOpenPanel] = useState<"screener" | "calendar" | "links" | null>(null);
 
   const heatmap = {
@@ -130,7 +128,6 @@ export default function InvestDashboard() {
   const classRows = (holdings.data?.byClass ?? []).filter((c) => c.count > 0);
   const currencyRows = (holdings.data?.byCurrency ?? []).filter((c) => c.count > 0);
   const contrib = (holdings.data?.pnlContribution ?? []).slice(0, 6);
-  const watchRows = watch.data ?? [];
   const asOf = board.data?.asOf;
 
   return (
@@ -200,9 +197,8 @@ export default function InvestDashboard() {
         </div>
       </section>
 
-      <div className="invest-board" style={{ marginBottom: 16 }}>
-        <section className="card">
-          <h3>내 보유</h3>
+        <section className="card" style={{ marginBottom: 16 }}>
+          <h3>내 보유 포트폴리오 요약</h3>
           {holdings.isLoading && <p className="muted">불러오는 중…</p>}
           {holdings.error && <p>오류: {holdings.error.message}</p>}
           {holdings.data && open.length === 0 && (
@@ -251,35 +247,8 @@ export default function InvestDashboard() {
             </>
           )}
         </section>
-        <section className="card">
-          <h3>관심 종목</h3>
-          {watch.isLoading && <p className="muted">불러오는 중…</p>}
-          {watch.error && <p>오류: {watch.error.message}</p>}
-          {watch.data && watchRows.length === 0 && (
-            <p className="muted" style={{ margin: 0 }}>관심 종목이 없습니다. 위 검색에서 추가하세요. 시세는 다음 수집 때 붙습니다.</p>
-          )}
-          {watchRows.length > 0 && (
-            <ul className="plain">
-              {watchRows.map((w) => (
-                <li key={w.id}>
-                  {w.symbol}
-                  {w.lastPrice != null ? ` ${num(w.lastPrice, w.currency)}` : " · 시세 없음"}
-                  <span className="muted"> · {w.name}{w.lastDate ? ` · ${w.lastDate}` : ""}</span>
-                  {" "}
-                  <button
-                    type="button"
-                    className="link"
-                    onClick={() => removeWatch.mutateAsync({ id: w.id }).then(() => utils.market.watchlist.invalidate())}
-                    disabled={removeWatch.isPending}
-                  >
-                    삭제
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+
+      <WatchlistTerminal />
 
       <section className="card" style={{ marginBottom: 16 }}>
         <h3>미국 섹터 히트맵</h3>

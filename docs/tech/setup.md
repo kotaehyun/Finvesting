@@ -49,8 +49,20 @@ cd D:\workspace\Finvesting
 corepack enable; corepack prepare pnpm@9.15.0 --activate
 pnpm install
 copy .env.example .env
+pnpm db:up
+Get-Content packages\db\seed\000_extensions.sql | docker exec -i finvesting-db psql -U finvesting -d finvesting
+pnpm db:generate
+pnpm db:migrate
+Get-Content packages\db\seed\001_default_user.sql | docker exec -i finvesting-db psql -U finvesting -d finvesting
+# (선택) 프로필 및 패널 샘플 데이터 시딩
+docker cp packages/db/seed/002_sample_profile.sql finvesting-db:/tmp/002_sample_profile.sql
+docker exec finvesting-db psql -U finvesting -d finvesting -f /tmp/002_sample_profile.sql
+pnpm dev:web
 ```
-이후 "첫 실행" 절차와 동일. DB 데이터는 맥북과 공유되지 않으므로 윈도우는 빈 DB로 시작한다.
+DB 데이터는 맥북과 공유되지 않으므로 윈도우는 빈 DB로 시작한다.
+
+## 전체 명령어 레퍼런스
+개발 서버, 워커, DB, 테스트 등 전체 명령어와 세부 옵션은 **[commands.md](./commands.md)** 참조.
 
 ## 브랜치·기기 이동
 브랜치 전략과 맥/윈도우별 git 명령, 기기 옮길 때 체크리스트는 [git-workflow.md](./git-workflow.md).
@@ -58,5 +70,7 @@ copy .env.example .env
 ## 윈도우 주의
 
 - 한글 경로는 피하는 것이 안전 (`D:\workspace\Finvesting` 등)
-- PowerShell에서 `psql`이 없으면 Docker 컨테이너로: `docker exec -i finvesting-db psql -U finvesting -d finvesting < packages/db/seed/000_extensions.sql`
+- PowerShell에서 `psql`이 없으면 `<` 리다이렉션 대신 파이프라인 사용:  
+  `Get-Content packages\db\seed\000_extensions.sql | docker exec -i finvesting-db psql -U finvesting -d finvesting`
+- `pipe/dockerDesktopLinuxEngine` 에러 발생 시 Docker Desktop 앱이 켜져 있는지 및 트레이 아이콘이 초록색(실행 중)인지 확인 후 재시도
 

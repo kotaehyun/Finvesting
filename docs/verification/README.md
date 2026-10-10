@@ -36,14 +36,17 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ 통과 (0 errors). 8개 전체 패키지 일괄 통과 | 2026-09-21 | Gemini |
-| core 테스트 (vitest) | ✅ 48개 파일 159개 단위/회귀 테스트 전건 통과 (금융 원장 5대 오류 검증 포함) | 2026-09-21 | Gemini |
-| interop 테스트 | ✅ 1개 파일 11개 테스트 전건 통과 | 2026-09-21 | Gemini |
-| `pnpm db:generate` / `db:migrate` | ✅ `0007_cloudy_star_brand` (`invest_style`) 적용 | 2026-09-14 | Grok |
-| seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/fundamentals` 포함 15 라우트 빌드 통과 | 2026-09-21 | Gemini |
-| 홈 `/` 개편 (월 선택·현금흐름·확인할 일) | ✅ 데스크톱. 평가손익 **+7,382원** 빨강. 2026-08은 현재 순자산 구분·거래 없음 문구. 모바일 390px 스택. 빈 계정 온보딩은 DB에 계좌 있어 미확인 | 2026-09-15 | Grok Chrome |
-| `/invest` 투자 대시보드 | ✅ 검색 관심 추가 AAPL 332.27 USD. 평가손익 `+7,382원` 빨강 | 2026-09-15 | Grok Chrome |
+| 타입체크 (web 포함 8패키지) | ✅ 통과 (0 errors). 8개 전체 패키지 일괄 통과 | 2026-10-10 | Gemini |
+| core 테스트 (vitest) | ✅ 52개 파일 188개 단위/회귀 테스트 전건 통과 (`accounting-journal.test.ts` 6건 포함) | 2026-10-10 | Gemini |
+| interop 테스트 | ✅ 5개 파일 18개 테스트 전건 통과 (`accounting-journal-csv.test.ts` 4건 포함) | 2026-10-10 | Gemini |
+| `pnpm db:generate` / `db:migrate` | ✅ 마이그레이션 23개 테이블 전건 적용 | 2026-10-09 | Gemini |
+| seed SQL 적용 (extensions, default user, sample profile, sample tax) | ✅ 000_extensions, 001_default_user, 002_sample_profile, 003_sample_tax 시딩 완료 | 2026-10-10 | Gemini |
+| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/timeline`, `/invest`, `/tax`, `/accounting` 포함 라우트 통과 | 2026-09-22 | Gemini |
+| `/accounting` 회계 전표 & 세무 프로그램 연동 | ✅ 4대 바롬메터 KPI(총 24건/60행, 차변 6,230만, 대변 6,230만, 대차평형 차액 0원), 계정코드표 토글, 분개장 카드, 더존 Smart A / 위하고 / 세무사랑 / XLSX 워크북 내보내기 브라우저 실물 확인 | 2026-10-10 | Gemini Browser |
+| `/tax` 세금 & 연말정산 터미널 | ✅ 3대 바롬메터 KPI(해외주식 250만 공제/양도세, 금융소득 2,000만 종합과세 게이지, 연말정산 환급액 예측), 3개 탭 전환, 실시간 10대 공제 시뮬레이터 브라우저 실물 확인 | 2026-10-10 | Gemini Browser |
+| `/timeline` Financial Timeline | ✅ 4대 KPI 요약 바롬터, 월/유형/키워드 필터, 일별 헤더/소계, 이벤트 카드 및 바로가기 링크, 콘솔 에러 0건 확인 | 2026-09-22 | Gemini Playwright |
+| 홈 `/` 순자산 시계열 차트 & 자산 배분 | ✅ 4대 KPI 요약(순자산 5,765만, MoM +327만, Peak/평균, 자산배분 게이지), 6/12개월 모드, 유동/저축/투자 스택바 차트, 월별 호버 툴팁 및 클릭 연동 브라우저 확인 완료 | 2026-10-10 | Gemini Browser |
+| `/invest` 관심 종목 터미널 (Watchlist Terminal) | ✅ 4대 메트릭 요약 바롬터, 마켓 필터(전체/KRX/US/UPBIT), 프리셋 퀵 추가, 등락률 뱃지, 실시간 고가/저가/거래량, 펀더멘털 스냅샷, 인라인 메모 에디터, 관련 최신 뉴스 아코디언 매핑 브라우저 실물 확인 | 2026-10-09 | Gemini Browser |
 | `/fundamentals` Yahoo 펀더멘털 표 | ✅ 4대 KPI 요약 바롬터, 자산군/시장 다중 필터, 전 컬럼 정렬, 저PBR/우량ROE 뱃지, 52주 게이지, 네이버/DART/AI 링크 연동 및 DB 오프라인 방어 폴백 확인 | 2026-09-16 | Gemini |
 | `/markets` 시장 (물가·금리·거래량·수급링크·크립토/외환·TA) | ✅ 인플레 16칸. BIS 금리 17칸(한 2.75·미 3.63·튀르키예 37). 히트맵·뉴스 | 2026-09-14 | Grok Chrome |
 | `/realty` 부동산 | ✅ tRPC 500 에러 완전 해소(200 OK). ECOS 151Y003 스냅샷 폴백. 개인회생·파산 원인별 통계, 경매 유찰률 4대 카드, 뉴스 그리드, 대출규제 3D 맵 정상 렌더링 확인 | 2026-09-16 | Gemini Playwright |
@@ -82,6 +85,9 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-10-09 | Gemini (CLI 문서화, 프로필 실데이터 시딩, 관심 종목 터미널 구축 및 2단계 착수) | [2026-10-09-gemini.md](./2026-10-09-gemini.md) |
+| 2026-09-22 | Gemini (Financial Timeline 구현 및 MVP 1단계 검증) | [2026-09-22-gemini.md](./2026-09-22-gemini.md) |
+| 2026-09-21 | Gemini (금융 원장 5대 결함 완전 해결) | [2026-09-21-gemini.md](./2026-09-21-gemini.md) |
 | 2026-09-15 | Gemini (맥 최신 작업 윈도우 교차 검증) | [2026-09-15-gemini.md](./2026-09-15-gemini.md) |
 | 2026-09-15 | Codex (백엔드·AI 방향 문서화) | [2026-09-15-codex.md](./2026-09-15-codex.md) |
 | 2026-09-15 | Cursor Grok (관심·Fundamentals·연말정산) | [2026-09-15-grok-2.md](./2026-09-15-grok-2.md) |

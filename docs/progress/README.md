@@ -2,6 +2,237 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-10-10 (31) — 웹 스타일링 표준 호환성(line-clamp) 경고 해소 (Gemini)
+**한 일**
+- `apps/web/src/app/globals.css`:
+  - `.realty-news-title` 및 `.realty-news-sum` 클래스에 `-webkit-line-clamp: 2;`와 병행하여 CSS 표준 속성 `line-clamp: 2;` 추가 (호환성 경고 해소).
+  - `pnpm typecheck`: 8개 모노레포 패키지 0 errors 확인.
+
+**다음 할 일**
+- Phase 2 (Market Terminal) 잔여:
+  - 한국투자증권(KIS Open API) 실시간 국내/해외 시세 어댑터 스캐폴딩 (`apps/worker`).
+  - 네이버 검색 API 뉴스 수집기 연동.
+- 또는 Phase 4 (서비스화 준비):
+  - 다중 사용자 인증 (NextAuth / JWT / Session) 및 사용자별 데이터 격리 스캐폴딩.
+
+---
+
+## 2026-10-10 (30) — 더존 Smart A · 위하고 · 세무사랑 표준 회계 전표(복식부기) CSV/XLSX 내보내기 구축 완료 (Gemini)
+**한 일**
+- **더존 Smart A · 위하고(WEHAGO) · 세무사랑 Pro(K-Lep) 표준 복식부기 분개 전표 내보내기 터미널 (`/accounting`) 구축 완료**:
+  1. **Core 복식부기 엔진 및 정밀 테스트 (`packages/core/src/accounting-journal.ts`, `accounting-journal.test.ts`)**:
+     - 한국 표준 계정과목표(`STANDARD_CHART_OF_ACCOUNTS`): 100번대 자산(101 현금, 103 보통예금, 104 정기예적금, 107 유가증권, 136 선납세금), 200번대 부채(251 외상매입금, 253 미지급금/카드, 254 예수금, 260 단기차입금), 400·500·900 수익(401 매출, 501 급여수익, 903 이자수익, 904 배당금수익, 906 유가증권처분이익, 930 잡이익), 800·900 비용(811 복리후생비, 812 여비교통비, 813 통신비, 814 수도광열비, 816 지급임차료, 819 보험료, 824 지급수수료, 830 소모품비, 931 이자비용, 960 유가증권처분손실).
+     - **금융기관·세무기관 명칭 자동 부착 (`resolveCounterAccountCode`)**: `보통예금(KB국민은행)`, `보통예금(키움증권)`, `미지급금(현대카드)`, `예수금(원천세/4대보험)` 등 계정과목명에 금융기관/관리항목을 구체화하고, 거래처 컬럼에도 `KB국민은행`, `키움증권`, `토스뱅크`, `국세청/국민건강보험공단`을 정확히 매핑.
+     - `resolveExpenseAccountCode` / `resolveCounterAccountCode`: 지출 카테고리 및 계좌 수단에 따른 계정과목 자동 매핑.
+     - `buildJournalEntries`: 일반 지출/수입/이체 거래, 배당 및 이자 소득, 주식 매수/매도(원가 상각 및 실현손익), 급여대장(세전 급여, 실수령액, 4대보험 및 원천세 예수금)을 완전한 복식부기 전표로 분개하고 대차평형(`debitSum === creditSum`, `difference === 0`) 검증.
+     - 단위 테스트 6건 신설 및 core 52개 파일 188개 테스트 **100% PASS**.
+  2. **Interop 3대 회계 소프트웨어 표준 포맷 변환기 (`packages/interop/src/exporters/accounting-journal-csv.ts`, `accounting-journal-csv.test.ts`)**:
+     - `exportDouzoneSmartACsv`: 더존 Smart A 일반전표 엑셀/CSV 규격 (일자 YYYYMMDD, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처명, 차변금액, 대변금액, 적요, UTF-8 BOM).
+     - `exportWehagoCsv`: 위하고 WEHAGO 전자전표 CSV 규격 (회계일자, 전표번호, 전표구분 차변/대변, 계정코드, 거래처명, 공급가액, 합계금액, 적요, UTF-8 BOM).
+     - `exportSemuSarangCsv`: 세무사랑 Pro / 뉴젠 K-Lep 일반전표 업로드 CSV 규격 (월, 일, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처, 금액, 적요, UTF-8 BOM).
+     - `buildAccountingJournalXlsx`: 세무대리인 제출용 4개 시트 통합 워크북 XLSX 생성 (시트 1: 더존_SmartA, 시트 2: 위하고_WEHAGO, 시트 3: 세무사랑Pro, 시트 4: 복식부기_분개장).
+     - 단위 테스트 4건 신설 및 interop 5개 파일 18개 테스트 **100% PASS**.
+  3. **tRPC 회계 라우터 신설 (`packages/api/src/routers/accounting.ts`, `appRouter` 등록)**:
+     - `accounting.preview`: 기간(연도/월) 및 원장 소스(전체/거래/배당/주식/급여) 필터링 분개 데이터 및 4대 KPI 요약 반환.
+     - `accounting.exportFile`: 3대 소프트웨어 CSV 또는 XLSX 워크북 원클릭 파일 생성 및 다운로드 API.
+  4. **웹 터미널 화면 구축 (`apps/web/src/app/accounting/page.tsx`, `layout.tsx`, `accounts/page.tsx`, `tax/page.tsx`)**:
+     - 4대 KPI 요약 바롬터: 총 전표/분개행수(24건/60행), 차변 총액, 대변 총액, 대차평형 상태 (✅ 차액 0원 균형).
+     - 상단 원클릭 내보내기 버튼 그룹: 🏢 더존 Smart A (CSV), 🌐 위하고 WEHAGO (CSV), 📊 세무사랑 Pro (CSV), 📑 4개 시트 통합 엑셀 (.xlsx).
+     - 한국 표준 계정과목 코드표 토글 가이드 드로어 (100번대 자산 ~ 800번대 비용).
+     - 복식부기 분개장 카드 & 테이블: 전표번호별 묶음, 차변3/대변4 컬러 뱃지, 계정코드, 거래처, 차·대변 금액, 대차합 일치 체크마크.
+     - 네비게이션 바 링크(`layout.tsx`), 계좌 관리(`/accounts`), 세금/연말정산(`/tax`) 상단에 빠른 연동 바로가기 버튼 배치.
+  5. **검증**:
+     - `pnpm typecheck`: 8개 모노레포 패키지 전체 통과 (0 errors).
+     - `pnpm --filter @finvesting/core test`: 52개 파일 188개 테스트 전건 통과.
+     - `pnpm --filter @finvesting/interop test`: 5개 파일 18개 테스트 전건 통과.
+     - 브라우저 E2E 검증 (`browser_subagent`): `/accounting` 접속, 4대 KPI 카드(24건/60행, 차변 6,230만, 대변 6,230만, 대차 차액 0원) 확인, 계정코드표 토글, 분개장 테이블 렌더링, 더존 Smart A CSV 다운로드 성공 확인, 콘솔 오류 0건.
+  6. **문서 갱신**:
+     - `docs/progress/roadmap.md`: 4단계 "회계·세무 프로그램 연동" 완료 체크.
+     - `docs/tech/interop.md`: 더존/위하고/세무사랑/통합 XLSX 내보내기 사양 반영.
+     - `docs/verification/2026-10-10-gemini.md` 및 `docs/verification/README.md`: 검증 결과 갱신.
+
+**다음 할 일**
+- Phase 2 (Market Terminal) 잔여:
+  - 한국투자증권(KIS Open API) 실시간 국내/해외 시세 어댑터 스캐폴딩 (`apps/worker`).
+  - 네이버 검색 API 뉴스 수집기 연동.
+- 또는 Phase 4 (서비스화 준비):
+  - 다중 사용자 인증 (NextAuth / JWT / Session) 및 사용자별 데이터 격리 스캐폴딩.
+
+---
+
+## 2026-10-10 (29) — 월별 순자산(Net Worth) 시계열 추이 & 자산 배분 위젯 홈 대시보드 구축 완료 (Gemini)
+**한 일**
+- **월별 순자산(Net Worth) 자산 vs 부채 추이 시계열 차트 & 자산배분 인터랙티브 위젯 구축 완료**:
+  1. **Core 순수 함수 및 정밀 테스트 (`packages/core/src/net-worth.ts`, `net-worth.test.ts`)**:
+     - `calculateNetWorthTimeSeries`: 유동/저축/투자 자산 및 부채 합산, 순자산 계산, 전월 대비 증감액 및 MoM 증감률(%), 자산군별 비중(liquidRatio, savingsRatio, investedRatio, debtRatio), 스택바 높이(px/%) 정규화 계산.
+     - 단위 테스트 3건 신설 (`net-worth.test.ts`) 및 core 51개 파일 182개 테스트 **100% PASS**.
+     - `packages/core/src/index.ts`에 순수 함수 및 인터페이스 export 등록.
+  2. **tRPC 대시보드 백엔드 프로시저 신설 (`packages/api/src/routers/dashboard.ts`, `packages/api/src/lib/net-worth-history.ts`)**:
+     - `dashboard.netWorthHistory`: 최근 N개월(6개월/12개월) 계좌 잔액, 보유 포지션 평가액, 적금 납입 누적액, 부채 잔액을 월별 집계하여 반환.
+  3. **웹 대시보드 인터랙티브 위젯 구축 (`apps/web/src/app/net-worth-chart.tsx`, `page.tsx`, `globals.css`)**:
+     - 4대 요약 바롬터: 최근 순자산, 전월 대비 증감(▲/▼ 금액 및 %), Peak/평균 순자산, 자산 배분 비중 바.
+     - 6개월 / 12개월 기간 토글 스위치.
+     - 월별 3색 스택 바 차트 (유동자산: 파랑, 저축성자산: 보라, 투자자산: 초록) 및 부채/순자산 뱃지.
+     - 바 호버/클릭 시 인터랙티브 툴팁 및 상세 자산군 분해, 클릭 시 대시보드 조회 월(`selectedMonth`) 실시간 양방향 동기화.
+     - `.nw-*` 다크/네온 테마 CSS 스타일 시스템 구축.
+  4. **검증**:
+     - `pnpm typecheck`: 8개 전체 패키지 일괄 통과 (0 errors).
+     - `pnpm --filter @finvesting/core test`: 51개 파일 182개 테스트 전건 100% 통과.
+     - 브라우저 E2E 검증 (`browser_subagent`): 홈 화면(`/`) 접속, 4대 KPI 카드 및 자산배분 게이지 렌더링, 6개월/12개월 토글, 3색 스택바 호버 툴팁, 바 클릭 시 상단 조회 월 연동 브라우저 실물 확인 완료, 콘솔 오류 0건.
+  5. **문서 갱신**:
+     - `docs/verification/2026-10-10-gemini.md` 및 `docs/verification/README.md`에 검증 결과 반영.
+
+**다음 할 일**
+- Phase 4 (서비스화 준비) 착수:
+  - 다중 사용자 인증 (NextAuth / Supabase Auth / Lucia 등) 기반 구조 마련.
+  - 전표 내보내기: 더존 Smart A / 위하고(WEHAGO) / 세무사랑 표준 회계 전표 CSV 파일 생성기.
+- 또는 Phase 2 (Market Terminal) 잔여: KIS (한국투자증권) 실시간 국내/해외 시세 API 어댑터 연동.
+
+---
+
+## 2026-10-10 (28) — 로드맵 3단계 (Tax + Year-End) 전면 구축 완료 (Gemini)
+**한 일**
+- **로드맵 3단계 (Tax + Year-End 본인 기준) 세무 터미널 구축 완료**:
+  1. **Core 순수 함수 및 정밀 테스트 (`packages/core/src/tax.ts`, `tax.test.ts`)**:
+     - `calculateOverseasCapitalGainsTax`: 해외주식 연간 매도 실현손익 통산, 250만원 기본공제(`OVERSEAS_CAPITAL_GAINS_BASIC_DEDUCTION`), 과세표준, 국세 20% + 지방세 2% (합계 22%) 산출세액 계산.
+     - `simulateTaxLossHarvesting`: 250만원 초과 수익 발생 시, 보유 중인 마이너스 수익률 해외 종목 중 얼마를 연말 전 매도(손실 확정)하면 세금이 0원이 되는지 계산 및 절세액 추정.
+     - `aggregateFinancialIncome`: 연간 배당 및 이자 소득(세전) 집계, 2,000만원 종합과세 기준선(`FINANCIAL_INCOME_TAX_THRESHOLD`) 대비 한도 소진율, 원천징수 15.4% 기납부세액, 상태(`safe`/`caution`/`exceeded`) 판별.
+     - `calculateYearEndTaxSettlement`: 근로소득 연말정산 시뮬레이터 (총급여, 근로소득공제, 기본인적공제, 4대보험공제, 청약저축 소득공제, 신용/체크카드 소득공제, 종합소득 누진세율, 근로소득세액공제, 연금저축/IRP 세액공제, 보장성보험료 세액공제, 결정세액 및 13월의 월급 환급액/추가납부액 계산).
+     - 단위 테스트 10건 신설 (`tax.test.ts`) 및 core 50개 파일 179개 테스트 **100% PASS**.
+  2. **tRPC 세무 백엔드 라우터 신설 (`packages/api/src/routers/tax.ts`, `appRouter` 등록)**:
+     - `tax.summary`: 연도별 3대 세목 종합 요약 및 상단 KPI 카드 지표 반환.
+     - `tax.capitalGains`: 해외주식 실현 매도 체결, 미실현 손익 보유분, Tax-loss harvesting 절세 가이드 반환.
+     - `tax.financialIncome`: 배당/이자 수취 목록, 월별 추이, 2천만원 종합과세 모니터링 데이터 반환.
+     - `tax.simulateYearEnd`: 10대 공제 변수 조절 시 즉시 재계산 시뮬레이션 지원.
+     - `tax.addIncome`: 신규 배당/이자 수취 내역 등록 mutation (원천징수 15.4% 자동 계산).
+  3. **DB 시드 데이터 확충 (`packages/db/seed/003_sample_tax.sql`)**:
+     - NVDA, TSLA 해외 종목 및 시세 추가.
+     - NVDA 실현 익절 매도 건 및 TSLA 평가손실 보유분 추가 (Tax-loss harvesting 시뮬레이션 검증용).
+     - 삼성전자, Apple, TIGER S&P500 분기 배당금 및 토스뱅크 예금 이자소득 5건 추가.
+  4. **홈택스 간소화 파일 파서 & 4개 시트 XLSX 엑셀 내보내기 (`packages/interop`)**:
+     - `parseHometaxJson` & `parseHometaxRows`: 국세청 홈택스 표준 연말정산 간소화 전자문서(JSON) 및 요약 CSV 파서 구축. 서식코드(P101 IRP, P102 연금저축, J301 주택청약, A102 보장성보험, G107/G207/G307 카드·현금영수증) 자동 분류 및 금액 집계. 단위 테스트 2건 통과.
+     - `buildTaxSettlementXlsx`: 회사/세무대리인 제출 및 소장용 4개 시트 통합 워크북 XLSX 생성 (시트 1: 연말정산_정산요약, 시트 2: 공제_세부명세, 시트 3: 해외주식_양도소득세, 시트 4: 금융소득_배당이자). 단위 테스트 1건 통과.
+     - `interop` 테스트 4개 파일 14건 **100% 통과**.
+  5. **웹 대시보드 인터랙티브 터미널 구축 (`apps/web/src/app/tax/page.tsx`, `layout.tsx`, `globals.css`)**:
+     - 상단 헤더, 연도 선택기(2026/2025), 3대 바롬메터 KPI 카드 (해외주식 양도세, 금융소득 한도 소진율 게이지, 연말정산 환급액).
+     - 헤더 액션 컨트롤:
+       - `📥 연말정산 XLSX 내보내기`: 원클릭으로 4개 시트 XLSX 엑셀 파일 생성 및 다운로드.
+       - `📂 홈택스 간소화 불러오기`: 모달 드롭존에서 간소화 파일 선택 즉시 공제 필드 일괄 자동 입력 및 환급액 자동 재계산.
+     - 3개 탭 뷰:
+       - 🇺🇸 해외주식 양도소득세 & Tax-Loss Harvesting 절세 가이드
+       - 💰 배당·이자 금융소득 종합과세 2,000만원 모니터 및 수취 등록
+       - 📋 근로소득 연말정산 인터랙티브 시뮬레이터 (슬라이더/필드 변경 시 13월의 월급 환급액 실시간 재계산)
+     - 네비게이션 바에 `/tax` ("세금/연말정산") 링크 추가.
+  6. **검증**:
+     - `pnpm typecheck`: 8개 모노레포 패키지 전체 통과 (0 errors).
+     - `pnpm --filter @finvesting/core test`: 50개 파일 179개 테스트 전건 100% 통과.
+     - `pnpm --filter @finvesting/interop test`: 4개 파일 14개 테스트 전건 100% 통과.
+     - 브라우저 E2E 검증 (`browser_subagent`): `/tax` 접속, KPI 카드 렌더링, 3개 탭 전환, 연말정산 공제 인풋 변경 및 환급액 실시간 재계산, 홈택스 모달 열기/닫기, XLSX 다운로드 실행 브라우저 실물 확인 완료, 콘솔 오류 0건.
+  7. **문서 갱신**:
+     - `docs/progress/roadmap.md`: 3단계 (Tax + Year-End) 전 항목 100% 완료 체크 반영.
+     - `docs/tech/tax.md` 신설 및 `docs/tech/README.md` 색인 반영.
+     - `docs/verification/2026-10-10-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
+
+**다음 할 일**
+- 월별 순자산(Net Worth) 자산 vs 부채 추이 시계열 차트 및 홈 대시보드 요약.
+- Phase 4 (서비스화 준비): 다중 사용자 인증 또는 Phase 2 KIS 국내/해외 실시간 시세 어댑터 연동.
+- 회계·세무 프로그램 연동: 더존 Smart A / 위하고 / 세무사랑 전표 양식 내보내기.
+
+---
+
+## 2026-10-09 (27) — CLI 및 PowerShell 실행 명령어 문서화 (Gemini)
+**한 일**
+- **모노레포 CLI 실행 명령어 레퍼런스 신설 및 환경별 가이드 문서화**:
+  - `docs/tech/commands.md` 신설:
+    - 빠른 참조 표 (개발 서버, 워커, DB, 테스트, 빌드 등 핵심 스크립트).
+    - 개발 서버, 데이터 수집 워커 데몬/1회 즉시 실행, 단위 테스트(`vitest`), 타입 검사(`turbo run typecheck`) 정리.
+    - Windows(PowerShell) vs macOS/Linux 환경별 DB 컨테이너 실행 및 시딩 명령어(`Get-Content ... | docker exec`) 완비.
+    - Docker Desktop 파이프 미연결(`pipe/dockerDesktopLinuxEngine`) 원인 및 조치 가이드 수록.
+  - `docs/tech/setup.md` 갱신: 윈도우 PowerShell 환경용 DB 시딩 파이프라인 명령어 및 `commands.md` 링크 반영.
+  - `docs/tech/README.md` 갱신: `commands.md` 색인 항목 추가.
+- **재무 프로필 및 11대 전체 패널 실데이터 시딩 완료**:
+  - `packages/db/seed/002_sample_profile.sql` 작성 및 DB 적용 완료.
+  - 기본정보 & 급여공제: 세전 500만 / 세후 429만, 기본급/식대/차량유지비/직책수당 분개, 투자성향(성장추구·중립).
+  - 고정비(7건): 월세 65만, 관리비 18만, 통신비 7.5만, 넷플릭스 1.7만, 유튜브 1.49만, 보장보험 12.2만, 전세대출이자 15만.
+  - 세액 및 급여추이(6개월): 2026-05 ~ 2026-10 월별 세액(24.5만~38만), 성과급 포함 급여명세 스냅샷.
+  - 적금/예금(3개 상품, 13건 납입): KB청년도약계좌(연 6.0%, 월 70만), 카카오26주적금(연 3.8%), 토스예금(연 3.5%, 1,000만).
+  - 보험(3건): KB 3대질병 종합건강보험, 삼성화재 실손의료비보험, DB손해보험 운전자보험.
+  - 계좌·거래원장·투자: KB국민/토스/키움 계좌 3종, 2026-10 주요 입출금 트랜잭션, 삼성전자/S&P500/AAPL 매수 체결 및 시세.
+  - `/profile` 전체 11개 탭 및 대시보드 정상 렌더링 확인 (HTTP 200 OK).
+- **로드맵 2단계 (Market Terminal) 공식 착수 — 관심 종목 터미널 (`/invest`) 전면 구축**:
+  1. **Core 순수 함수 및 정밀 테스트 (`packages/core/src/watchlist.ts`, `watchlist.test.ts`)**:
+     - `calculatePriceChange`: 현재가와 직전 종가(또는 시가)를 비교하여 등락폭(change) 및 등락률(changePct %)을 소수점 정밀 계산.
+     - `formatChangePct`: 부호(+/-)를 포함한 일관된 퍼센트 문자열 포맷팅.
+     - `filterWatchlist`: 마켓(전체/KRX/미국US/가상자산UPBIT), 자산군, 실시간 검색어(심볼/종목명/메모) 필터링.
+     - `sortWatchlist`: 최신등록순, 등락률 높은순(상승), 등락률 낮은순(하락), 가나다순 정렬.
+     - `summarizeWatchlist`: 전체 등록 수, 상승(▲), 하락(▼), 보합 종목 수 자동 집계.
+     - 단위 테스트 5건 신설 및 Core 169개 전체 테스트 **100% PASS**.
+  2. **tRPC 관심 종목 백엔드 프로시저 고도화 (`packages/api/src/routers/market.ts`)**:
+     - `market.watchlist`: 최근 2일 시세 기반 등락률, 고가/저가/거래량 계산, 펀더멘털 스냅샷(PER, PBR, ROE, 배당률, 시가총액) 조인, 최근 120건 뉴스 중 종목별 연관 기사(최대 3건) 인메모리 고속 매핑.
+     - `market.watchUpdateNote`: 관심 종목에 사용자 분석 메모(목표가, 투자 이유, 체크포인트 등) 인라인 저장.
+     - `market.watchNews`: 특정 종목 전용 관련 뉴스 피드 조회 프로시저 신설.
+     - `market.watchAddPreset`: 인기 우량주(삼성전자, SK하이닉스, Apple, NVIDIA, S&P500 ETF, 비트코인) 원클릭 퀵 추가 지원.
+  3. **웹 대시보드 인터랙티브 터미널 UI (`apps/web/src/app/invest/watchlist-terminal.tsx`, `page.tsx`)**:
+     - 기존의 단순 리스트를 교체하여 전문 증권 터미널 수준의 인터랙티브 컴포넌트 구축.
+     - 상단 4대 메트릭 요약 바롬터(전체/상승/하락/보합) 및 즉시 새로고침 버튼.
+     - 인기 우량주 퀵 프리셋 칩(클릭 한 번으로 관심 목록 추가).
+     - 마켓 세그먼트 탭(전체, KRX, 미국, UPBIT), 검색창, 다중 정렬 옵션.
+     - 종목별 등락률 뱃지(한국 표준 빨강 상승/파랑 하락), 당일 고/저/거래량, 펀더멘털 스냅샷 칩.
+     - 인라인 투자 메모 에디터(원클릭 인풋 전환 및 저장).
+     - 종목별 관련 언론사 최신 뉴스 아코디언 드로어(제목, 언론사, 발행일, 원문 링크).
+     - 네이버 증권, Yahoo Finance, DART 공시 바로가기 링크.
+  4. **검증**:
+     - `pnpm typecheck`: 8개 모노레포 패키지 **100% ALL PASS (0 errors)**.
+     - `pnpm --filter @finvesting/core test`: 49개 파일 169개 테스트 **전건 100% 통과**.
+     - 브라우저 실물 검증: `/invest`에서 터미널 렌더링, 필터 전환, 프리셋 추가, 뉴스 아코디언 확장, 콘솔 에러 0건 확인 및 비디오/스크린샷 아티팩트 저장.
+
+**다음 할 일**
+1. KIS 국내/해외 시세 API 연동 및 실시간 호가/시세 어댑터 확장
+2. 월별 순자산(Net Worth) 스냅샷 스키마 설계 및 시계열 트렌드 차트
+3. 모바일 Expo 기동 및 환경 점검 (`docs/verification/README.md` ❌ 잔여 과제)
+
+**막힌 것**
+- 없음
+
+## 2026-09-22 (26) — Financial Timeline (금융 타임라인) 첫 버전 구현 및 MVP 1단계 완수 (Gemini)
+**한 일**
+- **MVP 1단계 핵심 대표 기능 Financial Timeline (`/timeline`) 전면 구축**:
+  1. **Core 순수 함수 및 표준 이벤트 모델 (`packages/core/src/timeline.ts`)**:
+     - `UnifiedFinancialEvent` 표준 모델 정의 (`sourceType`: transaction, trade, income, savings, payroll / `type`: income, expense, transfer, trade_buy, trade_sell, dividend, interest, savings_deposit, payroll_statement).
+     - 분산 소스 통합 매핑 및 결정적 타임스탬프 내림차순(최신순) 정렬 `buildFinancialTimeline` 구현.
+     - **급여명세와 통장 입금 이중 집계 방지**: `payroll_months`는 `direction: "neutral"`(정보성)으로 분류하여 총 유입액 합산 시 통장 입금(`transactions`의 `category: salary`)과 중복 계산되지 않도록 방어.
+     - 유형 그룹, 기간(월), 키워드 검색을 지원하는 `filterTimelineEvents` 구현.
+     - 일자별(YYYY-MM-DD) 그룹핑 및 당일 입출금 소계, 요일 자동 판별 `groupTimelineByDate` 구현.
+     - 총 유입, 총 유출, 순 현금흐름, 투자 체결액, 배당/이자 요약 통계 `calculateTimelineSummary` 구현.
+     - `packages/core/src/timeline.test.ts`: 5대 핵심 시나리오 단위 테스트 100% PASS.
+  2. **tRPC 타임라인 API 라우터 신설 (`packages/api/src/routers/timeline.ts`)**:
+     - `timeline.list` 프로시저 구현: `transactions`, `trades`, `incomes`, `savingsContributions`, `payrollMonths`를 병렬 조회하여 통합 변환.
+     - 로컬 DB 미구동 또는 초기 데이터 부재 시에도 안정적으로 화면을 탐색할 수 있도록 우아한 실측 데모 폴백(`FALLBACK_TIMELINE_INPUTS`) 지원.
+     - `packages/api/src/index.ts`의 `appRouter`에 `timeline` 등록.
+  3. **웹 타임라인 인터랙티브 대시보드 UI (`apps/web/src/app/timeline/page.tsx`, `globals.css`)**:
+     - 상단 내비게이션 바에 `타임라인` 링크 배치 (`layout.tsx`).
+     - 상단 4대 핵심 KPI 요약 카드 바롬터: 총 유입(초록), 총 유출(빨강), 투자 체결액(파랑), 순 현금흐름.
+     - 인터랙티브 컨트롤: 월(Month) 선택 네비게이터(`YYYY-MM` 및 전체 기간), 키워드 실시간 검색창.
+     - 6대 유형 필터 세그먼트 탭: `[전체]`, `[통장 입출금·소비]`, `[주식·ETF 체결]`, `[배당·이자 수취]`, `[적금 납입]`, `[급여 명세서]`.
+     - 날짜별 헤더 카드(날짜, 요일, 당일 입출금 소계) 및 버티컬 타임라인 피드 카드.
+     - 이벤트 배지, 제목/부제, 통화별 금액 및 원화 환산액, 태그, 원본 화면 바로가기 링크(`통장내역 ↗`, `보유종목 ↗`, `급여상세 ↗`, `적금대장 ↗`).
+- **검증**:
+  - `pnpm --filter @finvesting/core test`: 48개 파일 164개 단위/회귀 테스트 **전건 100% PASS** (신규 테스트 5건 추가).
+  - `pnpm typecheck`: 8개 모노레포 패키지 **100% ALL PASS** (0 errors).
+  - `pnpm --filter @finvesting/web build`: `/timeline` 라우트 포함 16개 전체 라우트 Next.js 15 프로덕션 빌드 성공.
+  - 브라우저 실물 검증: KPI 카드, 필터 전환, 검색어 필터링, 날짜별 타임라인 렌더링, 콘솔 에러 0건 확인.
+- **문서 동기화**:
+  - `docs/progress/roadmap.md`: `- [x] Financial Timeline` 완료 체크.
+  - `docs/verification/2026-09-22-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
+
+**다음 할 일**
+1. 모바일 Expo 기동 및 환경 점검 (`docs/verification/README.md` ❌ 잔여 과제)
+2. 관심 종목 관리 UI 고도화 및 실시간 시세 연동
+3. 월별 순자산 스냅샷 스키마 설계 및 시계열 트렌드 차트
+
+**막힌 것**
+- 없음
+
 ## 2026-09-21 (25) — 금융 원장(Ledger) 핵심 오류 5건 완전 해결 및 단위/회귀 테스트 구축 (Gemini)
 **한 일**
 - **금융 원장 핵심 결함 5건(Codex 리뷰 및 21-ledger-correctness-fixes.md) 전면 해결**:

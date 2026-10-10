@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { and, desc, eq, inArray, isNotNull, notInArray, or, sql, type SQL } from "drizzle-orm";
-import { news, macroIndicators, quotes, instruments, watchlist } from "@finvesting/db";
+import { news, macroIndicators, quotes, instruments, watchlist, fundamentals } from "@finvesting/db";
 import {
+  calculatePriceChange,
   ANALYST_TITLE_RE,
   NEWS_CATEGORIES,
   NEWS_CATEGORY_IDS,
@@ -419,24 +420,206 @@ export const marketRouter = router({
       id: watchlist.id,
       instrumentId: watchlist.instrumentId,
       note: watchlist.note,
+      addedAt: watchlist.addedAt,
       symbol: instruments.symbol,
       name: instruments.name,
       market: instruments.market,
       currency: instruments.currency,
+      assetClass: instruments.assetClass,
     }).from(watchlist)
       .innerJoin(instruments, eq(watchlist.instrumentId, instruments.id))
-      .where(eq(watchlist.userId, ctx.userId));
-    const qMap = await latestCloses(ctx.db, rows.map((r) => r.instrumentId));
+      .where(eq(watchlist.userId, ctx.userId))
+      .orderBy(desc(watchlist.addedAt));
+
+    if (!rows.length) return [];
+
+    const instIds = rows.map((r) => r.instrumentId);
+
+    // 1. 최근 시세 2개씩 가져와서 전일 종가 및 변동률 계산
+    const quotesList = await ctx.db
+      .select({
+        instrumentId: quotes.instrumentId,
+        date: quotes.date,
+        open: quotes.open,
+        high: quotes.high,
+        low: quotes.low,
+        close: quotes.close,
+        volume: quotes.volume,
+        source: quotes.source,
+      })
+      .from(quotes)
+      .where(inArray(quotes.instrumentId, instIds))
+      .orderBy(desc(quotes.date));
+
+    const quoteMap = new Map<string, { latest: typeof quotesList[0]; prev?: typeof quotesList[0] }>();
+    for (const q of quotesList) {
+      const existing = quoteMap.get(q.instrumentId);
+      if (!existing) {
+        quoteMap.set(q.instrumentId, { latest: q });
+      } else if (!existing.prev) {
+        existing.prev = q;
+      }
+    }
+
+    // 2. 펀더멘털 스냅샷 (PER, PBR, ROE, 배당률, 시총)
+    const fundRows = await ctx.db
+      .select({
+        instrumentId: fundamentals.instrumentId,
+        date: fundamentals.date,
+        per: fundamentals.per,
+        pbr: fundamentals.pbr,
+        roe: fundamentals.roe,
+        dividendYield: fundamentals.dividendYield,
+        marketCap: fundamentals.marketCap,
+      })
+      .from(fundamentals)
+      .where(inArray(fundamentals.instrumentId, instIds))
+      .orderBy(desc(fundamentals.date));
+
+    const fundMap = new Map<string, typeof fundRows[0]>();
+    for (const f of fundRows) {
+      if (!fundMap.has(f.instrumentId)) {
+        fundMap.set(f.instrumentId, f);
+      }
+    }
+
+    // 3. 최근 뉴스 중 종목 관련 뉴스 매핑 (최대 3건)
+    const recentNews = await ctx.db
+      .select({
+        id: news.id,
+        title: news.title,
+        url: news.url,
+        publisher: news.publisher,
+        publishedAt: news.publishedAt,
+        symbols: news.symbols,
+      })
+      .from(news)
+      .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
+      .limit(120);
+
     return rows.map((r) => {
-      const q = qMap.get(r.instrumentId);
+      const qInfo = quoteMap.get(r.instrumentId);
+      const lq = qInfo?.latest;
+      const pq = qInfo?.prev;
+      const lastPrice = lq ? Number(lq.close) : null;
+      const prevPrice = pq ? Number(pq.close) : (lq?.open ? Number(lq.open) : null);
+      const priceDiff = calculatePriceChange(lastPrice, prevPrice);
+
+      const fInfo = fundMap.get(r.instrumentId);
+
+      const symLower = r.symbol.toLowerCase();
+      const nameLower = r.name.toLowerCase();
+      const itemNews = recentNews
+        .filter((n) => {
+          if (n.symbols && Array.isArray(n.symbols) && n.symbols.some((s) => s.toLowerCase() === symLower)) return true;
+          if (n.title.toLowerCase().includes(symLower) || n.title.toLowerCase().includes(nameLower)) return true;
+          return false;
+        })
+        .slice(0, 3)
+        .map((n) => ({
+          id: n.id,
+          title: n.title,
+          url: n.url,
+          publisher: n.publisher,
+          publishedAt: n.publishedAt ? new Date(n.publishedAt).toISOString() : null,
+        }));
+
       return {
-        ...r,
-        lastPrice: q?.close ?? null,
-        lastDate: q?.date ?? null,
-        quoteSource: q?.source ?? null,
+        id: r.id,
+        instrumentId: r.instrumentId,
+        note: r.note,
+        symbol: r.symbol,
+        name: r.name,
+        market: r.market,
+        currency: r.currency,
+        assetClass: r.assetClass,
+        addedAt: r.addedAt ? new Date(r.addedAt).toISOString() : null,
+        lastPrice,
+        prevPrice,
+        change: priceDiff?.change ?? null,
+        changePct: priceDiff?.changePct ?? null,
+        high: lq?.high != null ? Number(lq.high) : null,
+        low: lq?.low != null ? Number(lq.low) : null,
+        volume: lq?.volume != null ? Number(lq.volume) : null,
+        lastDate: lq ? String(lq.date) : null,
+        quoteSource: lq?.source ?? null,
+        per: fInfo?.per != null ? Number(fInfo.per) : null,
+        pbr: fInfo?.pbr != null ? Number(fInfo.pbr) : null,
+        roe: fInfo?.roe != null ? Number(fInfo.roe) : null,
+        dividendYield: fInfo?.dividendYield != null ? Number(fInfo.dividendYield) : null,
+        marketCap: fInfo?.marketCap != null ? Number(fInfo.marketCap) : null,
+        recentNews: itemNews,
       };
     });
   }),
+
+  watchUpdateNote: publicProcedure
+    .input(z.object({
+      id: z.string().uuid(),
+      note: z.string().max(300).nullable(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(watchlist)
+        .set({ note: input.note ? input.note.trim() : null })
+        .where(and(eq(watchlist.id, input.id), eq(watchlist.userId, ctx.userId)));
+      return { ok: true as const, id: input.id, note: input.note };
+    }),
+
+  watchNews: publicProcedure
+    .input(z.object({
+      symbol: z.string(),
+      name: z.string().optional(),
+      limit: z.number().min(1).max(30).default(10),
+    }))
+    .query(async ({ ctx, input }) => {
+      const sym = input.symbol.trim();
+      const name = input.name?.trim();
+      const conds = [
+        sql`${news.symbols} @> ARRAY[${sym}]::text[]`,
+        sql`${news.title} ILIKE ${`%${sym}%`}`,
+      ];
+      if (name && name.length >= 2) {
+        conds.push(sql`${news.title} ILIKE ${`%${name}%`}`);
+      }
+      return ctx.db
+        .select(newsListCols)
+        .from(news)
+        .where(or(...conds))
+        .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
+        .limit(input.limit);
+    }),
+
+  watchAddPreset: publicProcedure
+    .input(z.object({
+      symbol: z.string(),
+      market: z.string(),
+      name: z.string(),
+      assetClass: z.enum(["stock", "etf", "bond", "crypto", "fund", "other"]).default("stock"),
+      currency: z.string().default("KRW"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const [found] = await ctx.db.select().from(instruments)
+        .where(and(eq(instruments.symbol, input.symbol), eq(instruments.market, input.market)));
+      const inst = found ?? (await ctx.db.insert(instruments).values({
+        symbol: input.symbol,
+        market: input.market,
+        name: input.name,
+        assetClass: input.assetClass,
+        currency: input.currency,
+      }).returning())[0];
+      if (!inst) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "종목을 생성하지 못했습니다." });
+
+      const [existing] = await ctx.db.select().from(watchlist)
+        .where(and(eq(watchlist.userId, ctx.userId), eq(watchlist.instrumentId, inst.id)));
+      if (existing) return { id: existing.id, already: true as const, symbol: inst.symbol, name: inst.name };
+
+      const [row] = await ctx.db.insert(watchlist).values({
+        userId: ctx.userId,
+        instrumentId: inst.id,
+      }).returning();
+      return { id: row!.id, already: false as const, symbol: inst.symbol, name: inst.name };
+    }),
 
   watchAdd: publicProcedure
     .input(z.object({

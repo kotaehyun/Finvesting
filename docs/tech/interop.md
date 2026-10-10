@@ -12,7 +12,7 @@
 | 카드 이용내역 | CSV/XLSX | 승인일·가맹점·금액·할부 | 미구현 |
 | 증권사 체결내역 (한투, 키움 …) | CSV/XLSX | `TradeImporter` | 미구현 |
 | 코인 거래소 (업비트) | CSV | `TradeImporter` | 미구현 |
-| 홈택스 자료 (연말정산 간소화 PDF/XLSX, 카드·현금영수증) | PDF/XLSX | 3단계 | 미구현 |
+| 홈택스 자료 (연말정산 간소화 JSON/CSV) | JSON/CSV | `importers/hometax.ts` — P101(IRP), P102(연금), J301(청약), A102(보험), G107/G207/G307(카드·영수증) 자동 파싱 | 연결됨 (`/tax`) |
 | 급여대장 / 4대보험 고지 | XLSX | 4단계 | 미구현 |
 
 흐름: 파일 업로드 → `fileToRows`(csv/`xlsxToRows`/`docxToRows`) → `detectTransactionImporter` 또는 고정비 헤더 → 변환 내용 표 → 사용자 확인 → 저장.
@@ -22,11 +22,12 @@
 ## 내보내기 (Export)
 | 대상 | 형식 | 상태 |
 |---|---|---|
-| 세무사 전달용 범용 장부 CSV | 일자·계정과목·차변·대변·적요·거래처·증빙 | 초안 (`exporters/generic-csv.ts`) |
-| **더존** (Smart A / iCUBE) | 전표 엑셀 업로드 양식 — 실제 양식 파일 확보 후 작성 | 미구현 |
-| **위하고** (WEHAGO) | 거래내역·전표 엑셀 업로드 양식 | 미구현 |
-| **세무사랑** | 전표 엑셀 업로드 양식 | 미구현 |
-| 연말정산 제출 자료 패키지 | 공제 항목 정리 XLSX | 3단계 |
+| 세무사 전달용 범용 장부 CSV | 일자·계정과목·차변·대변·적요·거래처·증빙 | 구현됨 (`exporters/generic-csv.ts`) |
+| **더존** (Smart A / iCUBE) | 일반전표 엑셀/CSV 업로드 규격 (일자, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **위하고** (WEHAGO) | 전자전표 CSV 업로드 규격 (회계일자, 전표구분 차변/대변, 계정코드, 공급가액, 합계, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **세무사랑 Pro** (K-Lep) | 일반전표 엑셀 업로드 규격 (월, 일, 전표번호, 구분 3:차변/4:대변, 계정코드, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **회계 통합 워크북** | 4개 시트 통합 XLSX (더존, 위하고, 세무사랑, 복식부기 분개장) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| 연말정산 제출 자료 패키지 | 4개 시트 통합 XLSX (정산요약, 공제명세, 해외주식 양도세, 금융소득) | 구현됨 (`exporters/tax-settlement-xlsx.ts`, `/tax`) |
 | 급여명세·원천세 신고 자료 | XLSX | 4단계 |
 
 각 프로그램의 업로드 양식은 버전마다 다르고 공개 스펙이 없으므로, **실제 양식 파일(빈 템플릿)을 받아서** `exporters/<program>.ts`에 컬럼 순서·헤더·날짜 형식을 그대로 맞춘다. 추측으로 만들지 않는다.
