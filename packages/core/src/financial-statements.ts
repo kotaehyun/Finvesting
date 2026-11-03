@@ -1,4 +1,15 @@
-// 종목 재무제표·감사의견 표시·챗 컨텍스트. 숫자는 호출 측이 넣은 값만 쓴다.
+// 종목 재무제표·감사·기업정보 표시·챗 컨텍스트. 숫자는 호출 측이 넣은 값만 쓴다.
+
+import {
+  formatDividendsContext,
+  formatHoldersContext,
+  formatOverviewContext,
+  formatSegmentsContext,
+  type CompanyDividendRow,
+  type CompanyHolder,
+  type CompanyOverview,
+  type CompanySegmentRow,
+} from "./company-profile";
 
 export const FS_ITEM_LABELS: Record<string, string> = {
   revenue: "매출액",
@@ -90,12 +101,18 @@ export function formatStatementContext(input: {
   balance?: Record<string, number>;
   cashflow?: Record<string, number>;
   audit?: AuditBrief | null;
+  overview?: CompanyOverview | null;
+  holders?: CompanyHolder[] | null;
+  dividends?: CompanyDividendRow[] | null;
+  segments?: CompanySegmentRow[] | null;
 }): string {
   const merged = { ...input.income, ...input.balance, ...input.cashflow };
   const ratios = statementRatios(merged);
   const blocks: string[] = [
     `${input.name}(${input.symbol}) ${input.fiscalYear} 연결`,
   ];
+  const overview = formatOverviewContext(input.overview);
+  if (overview) blocks.push(`## 기업개황\n${overview}`);
   const pushStmt = (title: string, items?: Record<string, number>) => {
     if (!items || !Object.keys(items).length) return;
     blocks.push(`## ${title}\n${Object.entries(items).map(([k, n]) => moneyLine(k, n, input.currency)).join("\n")}`);
@@ -114,6 +131,12 @@ export function formatStatementContext(input: {
     }
     blocks.push(`## 비율(컨텍스트 숫자로만 계산)\n- ${bits.join(" · ")}`);
   }
+  const segments = formatSegmentsContext(input.segments, input.currency);
+  if (segments) blocks.push(`## 사업부문\n${segments}`);
+  const holders = formatHoldersContext(input.holders);
+  if (holders) blocks.push(`## 최대주주\n${holders}`);
+  const dividends = formatDividendsContext(input.dividends);
+  if (dividends) blocks.push(`## 배당\n${dividends}`);
   if (input.audit) blocks.push(`## 감사의견\n${formatAuditContext(input.audit)}`);
   else blocks.push("## 감사의견\n없음");
   return blocks.join("\n\n");

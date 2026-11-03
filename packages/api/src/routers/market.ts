@@ -50,6 +50,9 @@ import {
   applyLiveRates,
   realtyRateSnapshot,
   shareOf,
+  buildMcapBoards,
+  formatMcapLabel,
+  matchNewsForSymbol,
   type LoanPoint,
   type RealtyMetroId,
 } from "@finvesting/core";
@@ -759,6 +762,50 @@ export const marketRouter = router({
 
   // Yahoo 일 단위 스냅샷. 종목별 최신 1행. DART 재무제표와 별개.
   fundamentals: publicProcedure.query(({ ctx }) => loadLatestFundamentals(ctx.db)),
+
+  /** `/invest` 국내·해외 시총 순위(Yahoo 수집분) + 관련 뉴스 제목·링크. */
+  mcapBoard: publicProcedure
+    .input(z.object({ limit: z.number().int().min(5).max(50).default(15) }).optional())
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 15;
+      const board = await loadLatestFundamentals(ctx.db);
+      if (board.status !== "ok") {
+        return { status: board.status, asOf: null as string | null, kr: [], world: [] };
+      }
+      const { kr, world } = buildMcapBoards(board.items, limit);
+      const recentNews = await ctx.db
+        .select({
+          id: news.id,
+          title: news.title,
+          url: news.url,
+          publisher: news.publisher,
+          publishedAt: news.publishedAt,
+          symbols: news.symbols,
+        })
+        .from(news)
+        .where(newsOnly)
+        .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
+        .limit(200);
+
+      const attach = (rows: typeof kr) => rows.map((r) => ({
+        ...r,
+        marketCapLabel: formatMcapLabel(r.marketCap, r.currency),
+        recentNews: matchNewsForSymbol(recentNews, r.symbol, r.name, 3),
+      }));
+
+      const asOf = board.items.reduce<string | null>((best, r) => {
+        if (!r.date) return best;
+        if (!best || r.date > best) return r.date;
+        return best;
+      }, null);
+
+      return {
+        status: "ok" as const,
+        asOf,
+        kr: attach(kr),
+        world: attach(world),
+      };
+    }),
 
   kofiaFunds: publicProcedure.query(async ({ ctx }) => {
     const year = Number(new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 4));

@@ -81,6 +81,7 @@ export default function MarketsPage() {
         </div>
         <div className="row">
           <a className="starter" href="/invest">투자 대시보드</a>
+          <a className="starter" href="/realty">부동산</a>
           <a className="starter" href="/news">뉴스</a>
         </div>
       </div>

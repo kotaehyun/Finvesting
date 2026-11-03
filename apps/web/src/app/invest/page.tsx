@@ -15,6 +15,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { TvEmbed } from "./tv-embed";
 import { SymbolSearch } from "./symbol-search";
+import { McapBoard } from "./mcap-board";
 import { WatchlistTerminal } from "./watchlist-terminal";
 import { Pnl } from "../pnl";
 
@@ -265,6 +266,7 @@ export default function InvestDashboard() {
           <a className="starter" href="/profile?menu=invest">투자내역</a>
           <a className="starter" href="/profile?menu=style">투자성향</a>
           <a className="starter" href="/markets">시장·수급·기술</a>
+          <a className="starter" href="/realty">부동산</a>
         </div>
       </div>
 
@@ -375,6 +377,8 @@ export default function InvestDashboard() {
             </>
           )}
         </section>
+
+      <McapBoard />
 
       <WatchlistTerminal />
 

@@ -21,7 +21,7 @@ A personal finance work terminal that connects scattered account, card, brokerag
 - Home `/`: current net worth, selected-month spending and saving/investing outflows, monthly cash flow, follow-ups, three news items. Past months do not present today’s balances as that month’s net worth. There is no month-end snapshot table. **Unrealized P&L uses a signed `+`/`−` and Korean red-up / blue-down** (same as index cells)
 - News dashboard at `/news` (KR/global plus economy/finance/realty/markets/crypto/FX/central-bank; title, link, summary only)
 - Opinion/column dashboard at `/opinions` (KR columns, analyst takes, global opinion; title/link/summary only; no sell-side report RSS)
-- Investment dashboard at `/invest` (indices, bitcoin, commodities, FX, KOFIA investor-deposit/credit doughnut — unpaid margin is a slot unless it appears on the main HTML, company search that adds a watchlist, holdings; links out to markets)
+- Investment dashboard at `/invest` (indices, bitcoin, commodities, FX, KOFIA investor-deposit/credit doughnut — unpaid margin is a slot unless it appears on the main HTML, Yahoo market-cap ranks for collected KR/overseas names with related news headlines, company search that adds a watchlist, holdings; links out to markets)
 - Markets `/markets` (World Bank inflation and BIS policy-rate cells, volume heatmap, KRX flow links, crypto/FX heatmaps and news, technical analysis, company search)
 - ~~Realty `/realty`~~ **frozen** (ADR 0050). Route kept; nav and roadmap exclude it; no new features
 - Statements & audit opinion at `/statements` (`?q=` selects that ticker only when collected; otherwise official lookup links; Korea DART / US EDGAR numbers + opinion; “재무제표를 읽는 사람들” only on Korean lookups; no report body; local LLM reading)

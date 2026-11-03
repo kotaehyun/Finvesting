@@ -2,6 +2,167 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-03 — 세션 종료: statements pipeline + invest 시총 (Cursor)
+**한 일**
+- 재무제표 0~4단계 + `/invest` 시총 보드 작업 마무리. `turbo typecheck` 8패키지 통과(mcap-board stale 분기 타입 수정)
+- progress·status·overview(.en)·data-sources·verification 갱신. 브랜치 `feat/statements-pipeline`에 커밋
+
+**다음 할 일**
+1. 브라우저 `/invest` 시총·뉴스·`/statements` 딥링크 클릭 확인
+2. Ollama 「읽어주기」실호출
+3. DART 현금흐름 계정 매핑
+4. 부문매출 다른 공시 경로(지시 시)
+5. tax 3파일 원문 대조(사용자)
+6. push·`dev` merge는 지시 시
+
+**막힌 것**
+- 전 세계 공식 시총 API 없음 · 미국 주주·배당·부문 단일 API 없음 · `/erp` 보류
+
+---
+
+## 2026-11-03 — `/invest` 시총 순위·뉴스 연계 (Cursor)
+**한 일**
+- `market.mcapBoard`: Yahoo 시총 국내(KRX·KOSDAQ)·해외(주로 미국) 순위 + 종목별 관련 뉴스 제목·링크
+- `/invest` `McapBoard` 패널(탭·뉴스 펼침·재무제표 딥링크 `area`/`browse`/`q`)
+- core: `buildMcapBoards`·`matchNewsForSymbol` 테스트 통과
+
+**다음 할 일**
+- 5단계 세션 종료(지시 시)
+- 브라우저에서 `/invest` UI 클릭 확인(지시 시)
+
+**막힌 것**
+- 전 세계 공식 시총 순위 API 없음 → 「해외 · 수집분」라벨
+
+---
+
+## 2026-11-03 — `/statements` 시가총액 순위 (Cursor)
+**한 일**
+- 보기 「시가총액」: 국내·해외(현재 시장) Yahoo 시총 수집분 큰 순. 순위·시총 표시. 없으면 empty
+- yahoo 수집 대상에 섹터 종목(`statementLookupYahooTickers`) 합침
+
+**다음 할 일**
+- yahoo `run:once`로 시총 채우기(지시 시)
+- 5단계 세션 종료
+
+**막힌 것**
+- 전 시장 공식 시총 순위 API 없음 → Yahoo 수집분 한정
+
+---
+
+## 2026-11-03 — `/statements` 섹터 종목 채움 (Cursor)
+**한 일**
+- 국내·미국 `STATEMENT_LOOKUP_GROUPS` 전 섹터에 상장 티커·이름 채움(반도체·플랫폼·2차전지·모빌리티·금융·바이오·소비재 등). 일본·중국·유럽은 그대로 빈 칸.
+
+**다음 할 일**
+- 5단계 세션 종료 또는 수집 대상 확대(지시 시)
+
+**막힌 것**
+- 없음(메뉴 바로가기용. 숫자는 수집분 있을 때만)
+
+---
+
+## 2026-11-03 — 재무제표 4단계: 챗 컨텍스트 (Cursor)
+**한 일**
+- `formatStatementContext`에 기업개황·주주·배당·부문 블록. 「읽어주기」·투자 봇이 같은 문자열 사용
+- 챗 대상 = 보유∪관심 중 재무 수집분(최대 3). 프롬프트에 개황·주주·배당 규칙 반영
+- 삼성전자 2025 컨텍스트에 개황·주주·배당·감사 포함 확인(len 1180)
+
+**다음 할 일**
+1. 「진행」→ 5단계 세션 종료(verification·status 마무리)
+2. Ollama로 「읽어주기」실호출(지시 시)
+
+**막힌 것**
+- 없음(LLM 실응답은 이번 미실행)
+
+---
+
+## 2026-11-03 — 재무제표 3단계: 기업정보 패널 (Cursor)
+**한 일**
+- `company_overviews`·`company_year_facts` (0008). DART 개황·최대주주·배당, EDGAR submissions 개황
+- `/statements` 오른쪽에 수집분 표시. 부문매출은 XBRL member 있을 때만(삼성·하이닉스는 이번 수집 0)
+- worker `dart-profile` / `edgar-profile` 스케줄
+
+**다음 할 일**
+1. 「진행」→ 4단계(챗 컨텍스트에 개황·주주·배당)
+2. 부문매출 다른 공시 경로(지시 시)
+
+**막힌 것**
+- 미국 주주·배당·부문: 단일 공식 API 없음 → 칸 비움
+
+---
+
+## 2026-11-03 — 재무제표 2단계: 기간 확장 (Cursor)
+**한 일**
+- `core/statement-collect`: 5년·DART 보고서 코드(FY/Q1/H1/Q3)·`preferStatementRow`(FY 우선)
+- worker DART·EDGAR가 같은 연도 폭으로 수집. 감사는 사업보고서만
+- 실수집: DART upsert 80, EDGAR 120. 삼성·하이닉스 2022–2025 감사 적정
+
+**다음 할 일**
+1. 「진행」→ 3단계(기업개황·사업부문·주주·배당 패널)
+2. DART 현금흐름 계정 매핑(지시 시)
+
+**막힌 것**
+- 없음(현금흐름 빈 칸은 계정명 미매핑)
+
+---
+
+## 2026-11-01 — `/statements` 국내·해외 보기·보유/관심/섹터 (Cursor)
+**한 일**
+- 왼쪽을 국내/해외 큰 칸으로. 해외는 미국 + 일본·중국·유럽 「추가」.
+- 보기: 보유(평가액 순)·관심목록·기업. 국내를 누르면 보유가 있으면 그 목록이 가운데에 먼저 나옴. 검색 횟수는 기록이 없어 만들지 않음.
+- 섹터는 폴더. 클릭하면 빅테크 등 하위가 펼쳐지고, 「편집」에서 추가·이름·숨김·종목 넣기(로컬). 숫자는 수집분·보유·관심만.
+
+**다음 할 일**
+- 2단계 기간 확장
+
+**막힌 것**
+- 없음
+
+---
+
+## 2026-11-01 — `/statements` 오른쪽 기업정보 칸 (Cursor)
+**한 일**
+- 비율·감사를 가운데에서 빼고 오른쪽 속성 바로 옮김. 종목 요약도 그 칸.
+- `STATEMENT_SIDE_SLOTS`: 기업개황·사업부문·주주·배당은 「추가」칸. 수집 전에는 비움.
+
+**다음 할 일**
+1. 「진행」→ 2단계(기간 확장) 또는 오른쪽 칸 채우기(공시 수집 후)
+2. 업종별 기업 채우기(지시 시)
+
+**막힌 것**
+- 없음(오른쪽 예약 칸은 의도적으로 비움)
+
+---
+
+## 2026-11-01 — 재무제표 1단계: 보유·관심 + corpCode/CIK (Cursor)
+**한 일**
+- 사용자 지시 「너가 정해서 일단 하자」. 윈도우 최신분 없이 맥에서 파이프라인 1단계.
+- `core/statement-targets.ts`: 보유·관심 ∪ `DART_TARGETS`/`EDGAR_TARGETS`. OpenDART `corpCode.xml`·SEC `company_tickers.json`으로 식별자. 없으면 unmatched skip, 추측 없음.
+- worker `dart.ts`/`edgar.ts`가 env 수동 `종목:id`만이 아니라 위 합집합을 수집. 매핑은 `instrument_identifiers`.
+- ADR 0007 메모, `data-sources.md` 계획 행을 구현으로. `status.md` 부동산 복원·ERP 보류 반영.
+
+**다음 할 일**
+1. 「진행」→ 2단계(기간 확장)
+2. DART 실수집은 키 따옴표 후 `run:once`
+3. 업종별 기업 채우기(지시 시)
+
+**막힌 것**
+- 윈도우 10/10 이후 GitHub에 없음
+- 국내 수집은 `.env` `#` 따옴표에 의존
+
+---
+
+## 2026-10-11 — 부동산 내비 복원 (Cursor)
+**한 일**
+- 사용자 지시 「일단 부동산 살려」. ADR 0050에서 뺀 `/realty` 링크를 `layout.tsx` 상단 내비, `invest/page.tsx`·`markets/page.tsx` 스타터에 되돌렸다. ERP(`/erp`) 링크는 보류 유지.
+- ADR 0050에 부동산 동결 해제 메모 추가.
+
+**다음 할 일**
+- 부동산 새 패널·통계 작업은 별도 지시 시.
+- 윈도우 PC는 `feat/yahoo-fundamentals`(`7a750d5`)에 있어 dev와 화면이 다르다. `git checkout dev && git pull --ff-only` 필요.
+
+---
+
 ## 2026-10-10 (31) — 웹 스타일링 표준 호환성(line-clamp) 경고 해소 (Gemini)
 **한 일**
 - `apps/web/src/app/globals.css`:
@@ -263,6 +424,69 @@
   - `docs/verification/2026-09-21-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
 
 ---
+
+## 2026-09-26 — `/statements` 업종 하위 카테고리 예약 (feat/statements-pipeline)
+**한 일**
+- `STATEMENT_LOOKUP_GROUPS`: 지역마다 빅테크·반도체·플랫폼·2차전지·모빌리티·금융·바이오·소비재 8칸
+- 빅테크만 기업 채움. 빈 칸은 메뉴에 「추가」표시. 공시 구역은 그대로 분리
+
+**다음 할 일**
+1. 업종별 기업 채우기(지시 시)
+2. 「진행」→ 1단계
+
+**막힌 것**
+- 없음
+
+## 2026-09-26 — `/statements` ERP 셸·빅테크/공시 분리 (feat/statements-pipeline)
+**한 일**
+- `/statements`를 `erp wehago`로 재구성. 왼쪽: 지역 → 빅테크 → 공시(구역 분리). 작업창: 수집 표·3표만
+- 빅테크와 공시 링크를 한 카드에 섞지 않음
+
+**다음 할 일**
+1. 「진행」→ 1단계
+2. DART 수집
+
+**막힌 것**
+- 없음
+
+## 2026-09-26 — `/statements` 기업정보 빅테크 목록 (feat/statements-pipeline)
+**한 일**
+- 국내(삼성·하이닉스·네이버·카카오)·미국(Mag7) 기업명 바로가기. 이름 클릭 → `?q=` 선택(수집분이 있으면 숫자)
+- 시총·실적 수치 없음
+
+**다음 할 일**
+1. 「진행」→ 1단계
+2. DART 수집
+
+**막힌 것**
+- 없음
+
+## 2026-09-26 — `/statements` 수집분 검색 (feat/statements-pipeline)
+**한 일**
+- 수집 종목만 검색(`filterInstrumentsByQuery`). 심볼·이름 부분 일치, 선택 시 `?q=` 동기
+- miss면 숫자 위조 없이 공식 조회만. Yahoo 전 종목은 `/invest` 안내
+
+**다음 할 일**
+1. 「진행」→ 1단계(보유·관심 대상 + corpCode/CIK)
+2. DART `.env` 따옴표 후 국내 수집
+
+**막힌 것**
+- 없음(검색은 수집분 한정)
+
+## 2026-09-26 — `/statements` 지역 칸(확장 가능) (feat/statements-pipeline)
+**한 일**
+- `core/statement-regions.ts`: 국내·미국 active, 일본·중국·유럽 예약(`active:false`). `statementRegionFor`·`lookupServicesForRegion`
+- `/statements`는 고정 2칸이 아니라 `activeStatementRegions()` 기반. 「해외」→「미국」
+- `data-sources.md` 지역 칸 절. vitest `statement-regions.test.ts`
+- 0단계 확인: `docs/verification/2026-09-26-cursor-statements-0.md`
+
+**다음 할 일**
+1. 「진행」→ 1단계(보유·관심 대상 + corpCode/CIK)
+2. DART `.env` 값 따옴표( `#` 잘림) 후 국내 수집
+3. 2~5단계. 일본·중국·유럽은 공식 출처 확정 후 `active`·`venue`만 켜면 됨
+
+**막힌 것**
+- 국내 수집분 없음. 미국만 EDGAR 수집분. JP/CN/EU 수집기 없음(의도)
 
 ## 2026-09-26 — 부동산 동결·ERP 보류 + tax 대조 준비
 **한 일**

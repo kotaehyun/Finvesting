@@ -16,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/holdings">보유</a>
             <a href="/invest">투자</a>
             <a href="/markets">시장</a>
+            <a href="/realty">부동산</a>
             <a href="/statements">재무제표</a>
             <a href="/fundamentals">Fundamentals</a>
             <a href="/profile">프로필대장</a>

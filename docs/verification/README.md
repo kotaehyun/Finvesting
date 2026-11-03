@@ -37,7 +37,7 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ 통과 (0 errors). 8개 전체 패키지 일괄 통과 | 2026-10-10 | Gemini |
+| 타입체크 (web 포함 8패키지) | ✅ `turbo typecheck` 8패키지 통과 (statements pipeline·mcap-board 포함) | 2026-11-03 | Cursor |
 | core 테스트 (vitest) | ✅ 52개 파일 188개 단위/회귀 테스트 전건 통과 (`accounting-journal.test.ts` 6건 포함) | 2026-10-10 | Gemini |
 | `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 원문 대조는 전원 미검증(⏸). 3파일 준비표 09-26 | 2026-09-26 | Cursor |
 | 부동산·ERP 범위 | ✅ 동결·보류(ADR 0050). 내비 숨김 | 2026-09-26 | Cursor |
@@ -50,6 +50,7 @@
 | `/timeline` Financial Timeline | ✅ 4대 KPI 요약 바롬터, 월/유형/키워드 필터, 일별 헤더/소계, 이벤트 카드 및 바로가기 링크, 콘솔 에러 0건 확인 | 2026-09-22 | Gemini Playwright |
 | 홈 `/` 순자산 시계열 차트 & 자산 배분 | ✅ 4대 KPI 요약(순자산 5,765만, MoM +327만, Peak/평균, 자산배분 게이지), 6/12개월 모드, 유동/저축/투자 스택바 차트, 월별 호버 툴팁 및 클릭 연동 브라우저 확인 완료 | 2026-10-10 | Gemini Browser |
 | `/invest` 관심 종목 터미널 (Watchlist Terminal) | ✅ 4대 메트릭 요약 바롬터, 마켓 필터(전체/KRX/US/UPBIT), 프리셋 퀵 추가, 등락률 뱃지, 실시간 고가/저가/거래량, 펀더멘털 스냅샷, 인라인 메모 에디터, 관련 최신 뉴스 아코디언 매핑 브라우저 실물 확인 | 2026-10-09 | Gemini Browser |
+| `/invest` 시가총액 보드 (`market.mcapBoard`) | ✅ tRPC ok·국내/해외 5행·삼성 뉴스 연계. 브라우저 UI 클릭은 ❌ | 2026-11-03 | Cursor |
 | `/fundamentals` Yahoo 펀더멘털 표 | ✅ 4대 KPI 요약 바롬터, 자산군/시장 다중 필터, 전 컬럼 정렬, 저PBR/우량ROE 뱃지, 52주 게이지, 네이버/DART/AI 링크 연동 및 DB 오프라인 방어 폴백 확인 | 2026-09-16 | Gemini |
 | `/markets` 시장 (물가·금리·거래량·수급링크·크립토/외환·TA) | ✅ 인플레 16칸. BIS 금리 17칸(한 2.75·미 3.63·튀르키예 37). 히트맵·뉴스 | 2026-09-14 | Grok Chrome |
 | `/realty` 부동산 | ✅ 버튼 「저장된 데이터 다시 불러오기」. 09-18 DB 꺼짐 클릭 → 성공 문구 없이 「DB 연결 불가」. 정적 칸은 버튼과 무관. 가상 뉴스·대출 폴백 없음 | 2026-09-18 | Grok Chrome |
@@ -88,8 +89,8 @@
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — Yahoo (보유·관심 + KRW=X USDKRW) | ✅ 13/13 (지수10+AAPL/MSFT/SPY). 이후 지수 chart 90일 624봉. 펀더멘털 주식·ETF만. USDKRW yahoo | 2026-09-14 | Grok collectYahoo |
 | 대시보드 투자자산 = 평가액+예수금 | ✅ overview invested 104,802 = 평가 104,802 + 예수금 0. 브라우저 문구는 미클릭 | 2026-09-13 | Grok tRPC |
-| worker — DART (계정명 매핑) | ⏸ 키·대상 없음, skip 동작 확인 | 2026-09-02 | |
-| worker — EDGAR (태그·UA) | ⏸ `SEC_USER_AGENT` 없어 skip (`SEC_USER_AGENT not set`) | 2026-09-05 | Grok |
+| worker — DART (계정명 매핑) | ✅ 5년×분기. upsert 80. 삼성·하이닉스 FY 2022–2025·Q/H1. 감사 8건 적정. 현금흐름 계정 매핑은 비는 구간 있음 | 2026-11-03 | Cursor |
+| worker — EDGAR (태그·UA) | ✅ 5년. upsert 120. AAPL·MSFT FY/Q 2022– | 2026-11-03 | Cursor |
 | worker — 세계은행 CPI | ✅ 16/16 upsert. 한 2.12%(2025) 미 2.95%(2024) | 2026-09-14 | Grok collectWorldBankInflation |
 | worker — BIS 정책금리 | ✅ 14 upsert / 3 stale(DE·FR·IT). KR 2.75 US 3.625 XM 2.25 | 2026-09-14 | Grok collectBisPolicyRates |
 | Yahoo 기업 검색 | ✅ `005930`→005930.KS. Chrome `AAPL`→Apple Inc. 나스닥. 한글 회사명 Yahoo 400 | 2026-09-14 | Grok Chrome 재기동 |
@@ -100,6 +101,12 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-03 | Cursor (세션 종료 typecheck) | [2026-11-03-cursor-session-end.md](./2026-11-03-cursor-session-end.md) |
+| 2026-11-03 | Cursor (`/invest` 시총 보드) | [2026-11-03-cursor-invest-mcap.md](./2026-11-03-cursor-invest-mcap.md) |
+| 2026-11-03 | Cursor (재무제표 4단계 챗 컨텍스트) | [2026-11-03-cursor-statements-4.md](./2026-11-03-cursor-statements-4.md) |
+| 2026-11-03 | Cursor (재무제표 3단계 기업정보 패널) | [2026-11-03-cursor-statements-3.md](./2026-11-03-cursor-statements-3.md) |
+| 2026-11-03 | Cursor (재무제표 2단계 기간 확장 5년·분기) | [2026-11-03-cursor-statements-2.md](./2026-11-03-cursor-statements-2.md) |
+| 2026-11-01 | Cursor (재무제표 1단계 보유·관심 + corpCode/CIK) | [2026-11-01-cursor-statements-1.md](./2026-11-01-cursor-statements-1.md) |
 | 2026-10-10 | Gemini (더존/위하고/세무사랑 회계 전표 내보내기, 세금/연말정산, 순자산 시계열 위젯) | [2026-10-10-gemini.md](./2026-10-10-gemini.md) |
 | 2026-10-09 | Gemini (CLI 문서화, 프로필 실데이터 시딩, 관심 종목 터미널 구축 및 2단계 착수) | [2026-10-09-gemini.md](./2026-10-09-gemini.md) |
 | 2026-09-22 | Gemini (Financial Timeline 구현 및 MVP 1단계 검증) | [2026-09-22-gemini.md](./2026-09-22-gemini.md) |
