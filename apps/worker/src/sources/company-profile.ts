@@ -13,6 +13,7 @@ import {
   resolveDartTargets,
   resolveEdgarTargets,
   statementCollectYears,
+  statementLookupHeldRefs,
 } from "@finvesting/core";
 import { loadDartCorpCatalog, loadSecTickerCatalog } from "../lib/catalogs";
 import { ensureIdentifier, ensureInstrument, loadHeldInstruments } from "../lib/instruments";
@@ -100,7 +101,7 @@ async function upsertYearFact(
 export async function collectDartCompanyProfile() {
   const key = process.env.DART_API_KEY?.trim();
   if (!key) return { skipped: "DART_API_KEY not set" };
-  const held = await loadHeldInstruments();
+  const held = [...(await loadHeldInstruments()), ...statementLookupHeldRefs(["kr"])];
   const env = parseEnvTargets(process.env.DART_TARGETS);
   let catalog = new Map<string, { corp: string; name: string }>();
   let catalogStatus: "ok" | "empty" | "unavailable" | "skipped" = "skipped";
@@ -179,7 +180,7 @@ export async function collectDartCompanyProfile() {
 export async function collectEdgarCompanyProfile() {
   const ua = process.env.SEC_USER_AGENT?.trim();
   if (!ua) return { skipped: "SEC_USER_AGENT not set" };
-  const held = await loadHeldInstruments();
+  const held = [...(await loadHeldInstruments()), ...statementLookupHeldRefs(["us"])];
   const env = parseEnvTargets(process.env.EDGAR_TARGETS);
   let catalog = new Map<string, { cik: string; title: string }>();
   let catalogStatus: "ok" | "empty" | "unavailable" | "skipped" = "skipped";

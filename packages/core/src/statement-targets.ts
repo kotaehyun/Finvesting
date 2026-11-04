@@ -3,6 +3,7 @@
 
 import { extractKoreanCode } from "./yahoo-fundamentals";
 import { filingVenueFor } from "./disclosure-links";
+import { STATEMENT_LOOKUP_GROUPS, type StatementRegionId } from "./statement-regions";
 
 export type HeldInstrumentRef = {
   symbol: string;
@@ -115,6 +116,27 @@ export function parseSecCompanyTickers(json: unknown): Map<string, SecTickerEntr
     const title = String(rec.title ?? "").trim();
     if (!ticker || !cik || filingVenueFor(ticker) !== "edgar") continue;
     if (!out.has(ticker)) out.set(ticker, { cik, title: title || ticker });
+  }
+  return out;
+}
+
+/** `/statements` 섹터 종목을 보유와 같은 형태로. corp/CIK는 공식 목록에서만. */
+export function statementLookupHeldRefs(
+  regionIds: readonly StatementRegionId[] = ["kr", "us"],
+): HeldInstrumentRef[] {
+  const seen = new Set<string>();
+  const out: HeldInstrumentRef[] = [];
+  for (const rid of regionIds) {
+    const market = rid === "kr" ? "KRX" : rid === "us" ? "US" : null;
+    if (!market) continue;
+    for (const g of STATEMENT_LOOKUP_GROUPS[rid] ?? []) {
+      for (const c of g.companies) {
+        const key = `${market}|${c.symbol}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({ symbol: c.symbol, market, name: c.name });
+      }
+    }
   }
   return out;
 }

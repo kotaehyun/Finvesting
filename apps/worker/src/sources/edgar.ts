@@ -5,12 +5,13 @@ import {
   parseEdgarTarget,
   parseEnvTargets,
   resolveEdgarTargets,
+  statementLookupHeldRefs,
 } from "@finvesting/core";
 import { loadSecTickerCatalog } from "../lib/catalogs";
 import { ensureInstrument, ensureIdentifier, loadHeldInstruments } from "../lib/instruments";
 
 // 미국 SEC EDGAR — 공식, 키 불필요, 단 User-Agent에 연락처 필수(SEC 정책). 초당 10요청 제한.
-// 대상 = trades∪watchlist(US/NYSE/NASDAQ/AMEX) ∪ EDGAR_TARGETS.
+// 대상 = trades∪watchlist(US/NYSE/NASDAQ/AMEX) ∪ EDGAR_TARGETS ∪ `/statements` 미국 섹터.
 // EDGAR_TARGETS는 `AAPL` 또는 `AAPL:0000320193`. CIK가 없으면 company_tickers.json에서 찾는다.
 // 목록에 없는 티커는 skip. CIK를 추측하지 않는다.
 
@@ -33,7 +34,7 @@ type Fact = { end: string; val: number; fy: number; fp: string; form: string };
 
 export async function collectEdgar() {
   if (!UA) return { skipped: "SEC_USER_AGENT not set" };
-  const held = await loadHeldInstruments();
+  const held = [...(await loadHeldInstruments()), ...statementLookupHeldRefs(["us"])];
   const env = parseEnvTargets(process.env.EDGAR_TARGETS);
   let catalogStatus: "ok" | "empty" | "unavailable" | "skipped" = "skipped";
   let catalog = new Map<string, { cik: string; title: string }>();

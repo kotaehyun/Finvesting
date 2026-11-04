@@ -24,6 +24,7 @@ export * from "./statement-targets";
 export * from "./statement-collect";
 export * from "./company-profile";
 export * from "./statement-mcap";
+export * from "./dart-accounts";
 export * from "./world-indices";
 export * from "./fx-pairs";
 export * from "./inflation-countries";

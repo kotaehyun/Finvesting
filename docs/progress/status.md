@@ -13,13 +13,13 @@
 - **활성 화면:** 근로자 대장·투자·시장·뉴스·챗·타임라인·세금·회계전표·재무제표·부동산.
 - **보류:** `/erp`는 URL로만.
 - **데이터:** `packages/core/data` tax=entries / realty=defaults. 원문 대조는 미검증. 우선 3파일 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`.
-- **재무제표:** 0~4단계 코드·문서 완료(5년·분기, 개황·주주·배당 패널, 챗 컨텍스트, 시총 보기). `/invest` Yahoo 시총 국내·해외 수집분+뉴스. typecheck 통과.
-- **미검증:** 브라우저 `/invest` 시총 UI · Ollama 「읽어주기」 · `/statements` 연도 전환 클릭.
+- **재무제표:** 0~4단계 + DART `cfo`(SinglAcntAll). `/invest` 시총·뉴스. typecheck 통과(이전 세션).
+- **사용자 확인(2026-11-04):** `/invest`·딥링크 브라우저, Ollama 「읽어주기」완료.
+- **미검증:** `/statements` 현금흐름 칸 브라우저 클릭 · 이번 변경 커밋.
 
 ## 미해결 우선 과제
 1. 🟠 tax 3파일 원문 대조(사용자) — payroll / brackets / ei-stability
-2. 🟡 브라우저 `/invest` 시총·딥링크 · LLM 「읽어주기」실호출
-3. 🟡 DART 현금흐름 계정 매핑 · 부문매출 공시 경로
-4. 🟡 홈택스 간소화·연말정산 XLSX (로드맵 3단계)
-5. ⏸ `/erp` 재개 — 사용자 지시 전 금지
-6. push / `dev` merge · 윈도우 10/10 이후 원격 반영은 지시 시
+2. 🟡 부문매출 다른 공시 경로(지시 시)
+3. 🟡 홈택스 간소화·연말정산 XLSX (로드맵 3단계)
+4. ⏸ `/erp` 재개 — 사용자 지시 전 금지
+5. 커밋·push / `dev` merge · 윈도우 10/10 이후 원격 반영은 지시 시

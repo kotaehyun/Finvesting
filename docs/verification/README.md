@@ -89,7 +89,7 @@
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — Yahoo (보유·관심 + KRW=X USDKRW) | ✅ 13/13 (지수10+AAPL/MSFT/SPY). 이후 지수 chart 90일 624봉. 펀더멘털 주식·ETF만. USDKRW yahoo | 2026-09-14 | Grok collectYahoo |
 | 대시보드 투자자산 = 평가액+예수금 | ✅ overview invested 104,802 = 평가 104,802 + 예수금 0. 브라우저 문구는 미클릭 | 2026-09-13 | Grok tRPC |
-| worker — DART (계정명 매핑) | ✅ 5년×분기. upsert 80. 삼성·하이닉스 FY 2022–2025·Q/H1. 감사 8건 적정. 현금흐름 계정 매핑은 비는 구간 있음 | 2026-11-03 | Cursor |
+| worker — DART (계정명 매핑) | ✅ SinglAcntAll CF→cfo. upsert 116. cashflow 36행 전부 cfo. 삼성·하이닉스 2022–2026 | 2026-11-04 | Cursor |
 | worker — EDGAR (태그·UA) | ✅ 5년. upsert 120. AAPL·MSFT FY/Q 2022– | 2026-11-03 | Cursor |
 | worker — 세계은행 CPI | ✅ 16/16 upsert. 한 2.12%(2025) 미 2.95%(2024) | 2026-09-14 | Grok collectWorldBankInflation |
 | worker — BIS 정책금리 | ✅ 14 upsert / 3 stale(DE·FR·IT). KR 2.75 US 3.625 XM 2.25 | 2026-09-14 | Grok collectBisPolicyRates |
@@ -101,6 +101,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-04 | Cursor (DART 현금흐름 cfo) | [2026-11-04-cursor-dart-cfo.md](./2026-11-04-cursor-dart-cfo.md) |
 | 2026-11-03 | Cursor (세션 종료 typecheck) | [2026-11-03-cursor-session-end.md](./2026-11-03-cursor-session-end.md) |
 | 2026-11-03 | Cursor (`/invest` 시총 보드) | [2026-11-03-cursor-invest-mcap.md](./2026-11-03-cursor-invest-mcap.md) |
 | 2026-11-03 | Cursor (재무제표 4단계 챗 컨텍스트) | [2026-11-03-cursor-statements-4.md](./2026-11-03-cursor-statements-4.md) |

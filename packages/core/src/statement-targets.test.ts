@@ -12,6 +12,7 @@ import {
   parseSecCompanyTickers,
   resolveDartTargets,
   resolveEdgarTargets,
+  statementLookupHeldRefs,
 } from "./statement-targets";
 
 describe("pad identifiers", () => {
@@ -162,6 +163,18 @@ describe("resolveEdgarTargets", () => {
     });
     expect(r.targets).toEqual([]);
     expect(r.unmatched).toEqual(["ZZZZ"]);
+  });
+});
+
+describe("statementLookupHeldRefs", () => {
+  it("국내·미국 섹터 종목을 중복 없이", () => {
+    const kr = statementLookupHeldRefs(["kr"]);
+    const us = statementLookupHeldRefs(["us"]);
+    expect(kr.length).toBeGreaterThan(20);
+    expect(us.length).toBeGreaterThan(20);
+    expect(kr.some((h) => h.symbol === "035420" && h.market === "KRX")).toBe(true);
+    expect(us.some((h) => h.symbol === "NVDA" && h.market === "US")).toBe(true);
+    expect(new Set(kr.map((h) => h.symbol)).size).toBe(kr.length);
   });
 });
 

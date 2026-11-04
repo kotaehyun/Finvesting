@@ -2,6 +2,36 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-04 — 재무제표 수집 대상에 섹터 기업 합침 (Cursor)
+**한 일**
+- `statementLookupHeldRefs`: `/statements` 국내·미국 섹터 → DART/EDGAR/프로필 대상
+- EDGAR: upsert 2506 · 미국 44종목. DART 재시도 성공: upsert 2158 · 국내 39종목 · cfo 666행(재시도·부분 실패 skip)
+
+**다음 할 일**
+1. 부문매출 경로 · tax 대조 · 커밋(지시 시)
+
+**막힌 것**
+- 없음
+
+---
+
+## 2026-11-04 — DART 현금흐름(cfo) 매핑 (Cursor)
+**한 일**
+- 원인: `fnlttSinglAcnt`에 CF 없음. `fnlttSinglAcntAll` CF + `core/dart-accounts`(`mapDartFsRow`)
+- `cfo` = 영업활동현금흐름(account_id 우선). CF 표의 당기순이익·창출액은 제외
+- 재수집 upsert 116. cashflow 36행 전부 cfo(삼성·하이닉스). 테스트 7건
+- 사용자: 할 일 1·2(브라우저·읽어주기) 완료로 전달받음
+
+**다음 할 일**
+1. 부문매출 다른 공시 경로(지시 시)
+2. tax 원문 대조(사용자)
+3. 커밋·push·`dev` merge(지시 시)
+
+**막힌 것**
+- 없음(SinglAcntAll 013이면 해당 기간 cashflow 비움)
+
+---
+
 ## 2026-11-03 — 세션 종료: statements pipeline + invest 시총 (Cursor)
 **한 일**
 - 재무제표 0~4단계 + `/invest` 시총 보드 작업 마무리. `turbo typecheck` 8패키지 통과(mcap-board stale 분기 타입 수정)
