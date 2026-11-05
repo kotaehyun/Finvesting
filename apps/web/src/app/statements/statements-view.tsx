@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import {
@@ -258,7 +258,7 @@ export function StatementsView({
         && (areaId === "kr" || statementRegionFor(f)?.id === regionId)),
   );
 
-  const workItems: ListItem[] = (() => {
+  const workItems: ListItem[] = useMemo(() => {
     if (browse === "holdings") {
       return holdingRows.map((p) => mergeCollected({
         id: p.instrumentId, symbol: p.symbol, name: p.name, market: p.market,
@@ -288,7 +288,7 @@ export function StatementsView({
       );
     }
     return filterInstrumentsByQuery(collectedInRegion, searchTrim);
-  })();
+  }, [browse, holdingRows, watchRows, mcapRows, items, collectedInRegion, searchTrim, activeSector]);
 
   const filingQuery = exact?.symbol
     ?? (missRegion?.id === region.id ? searchTrim : undefined)
@@ -638,6 +638,7 @@ export function StatementsView({
               filterActive={Boolean(searchTrim) && browse === "companies"}
               preferId={exact && workItems.some((i) => i.id === exact.id) ? exact.id : undefined}
               showMcap={browse === "mcap"}
+              onPickSymbol={selectSymbol}
               emptyHint={
                 browse === "holdings"
                   ? "이 지역 보유 종목이 없습니다. 관심목록이나 기업 보기에서 고르면 됩니다."
@@ -668,6 +669,7 @@ function MarketWork({
   preferId,
   emptyHint,
   showMcap,
+  onPickSymbol,
 }: {
   region: StatementRegion;
   groupTitle?: string;
@@ -677,20 +679,33 @@ function MarketWork({
   preferId?: string;
   emptyHint?: string;
   showMcap?: boolean;
+  onPickSymbol?: (symbol: string) => void;
 }) {
   const [instrumentId, setInstrumentId] = useState("");
   const [year, setYear] = useState<number | undefined>(undefined);
   const explain = trpc.statements.explain.useMutation();
+  const preferSeen = useRef<string | undefined>(undefined);
+  const itemsKey = items.map((i) => i.id).join("|");
 
+  // preferId(URL q)는 값이 바뀔 때만 강제. items 참조가 매 렌더 바뀌어도 클릭 선택을 덮어쓰지 않음.
   useEffect(() => {
-    setYear(undefined);
-    explain.reset();
-    if (preferId && items.some((i) => i.id === preferId)) {
+    const preferChanged = preferId !== preferSeen.current;
+    if (preferChanged) preferSeen.current = preferId;
+
+    if (preferChanged && preferId && items.some((i) => i.id === preferId)) {
       setInstrumentId(preferId);
+      setYear(undefined);
+      explain.reset();
       return;
     }
-    setInstrumentId((cur) => (items.some((i) => i.id === cur) ? cur : (items[0]?.id ?? "")));
-  }, [preferId, items]);
+    setInstrumentId((cur) => {
+      if (cur && items.some((i) => i.id === cur)) return cur;
+      if (preferId && items.some((i) => i.id === preferId)) return preferId;
+      return items[0]?.id ?? "";
+    });
+    // items는 itemsKey로 동일성 판단
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferId, itemsKey]);
 
   const picked = items.find((i) => i.id === instrumentId);
   const bundle = trpc.statements.get.useQuery(
@@ -736,7 +751,12 @@ function MarketWork({
               <tr
                 key={i.id}
                 className={instrumentId === i.id ? "sel on" : ""}
-                onClick={() => { setInstrumentId(i.id); setYear(undefined); explain.reset(); }}
+                onClick={() => {
+                  setInstrumentId(i.id);
+                  setYear(undefined);
+                  explain.reset();
+                  onPickSymbol?.(i.symbol);
+                }}
                 style={{ cursor: "pointer" }}
               >
                 {showMcap && <td className="ro num">{i.mcapRank ?? "—"}</td>}

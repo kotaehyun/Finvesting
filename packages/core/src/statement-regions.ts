@@ -421,7 +421,7 @@ export const STATEMENT_SIDE_SLOTS: readonly StatementSideSlot[] = [
   { id: "ratios", title: "비율", kind: "collected", emptyHint: "수집된 손익·재무 숫자로만 계산합니다." },
   { id: "audit", title: "감사", kind: "collected", emptyHint: "이 연도 감사의견이 없습니다." },
   { id: "overview", title: "기업개황", kind: "collected", emptyHint: "기업개황 수집분이 없습니다. worker `dart-profile` / `edgar-profile` 후 다시 보세요." },
-  { id: "segment", title: "사업부문", kind: "collected", emptyHint: "부문별 매출 XBRL이 없거나 미국 종목입니다. 공시 원문을 보세요." },
+  { id: "segment", title: "사업부문", kind: "collected", emptyHint: "연결 영업부문 매출 XBRL이 없거나 미국 종목입니다. 공시 원문을 보세요." },
   { id: "holders", title: "주주", kind: "collected", emptyHint: "최대주주 수집분이 없습니다. 국내는 DART 사업보고서, 미국은 별도 API 없음." },
   { id: "dividend", title: "배당", kind: "collected", emptyHint: "배당 공시 수집분이 없습니다. 국내는 DART alotMatter." },
 ];

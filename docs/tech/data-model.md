@@ -39,7 +39,7 @@
 | `financial_statements` | 기간별 재무제표. `statement`(income/balance/cashflow), `fiscal_period`(FY/Q1~Q4), `items` jsonb에 표준 키(revenue, operating_income, net_income, eps_diluted, total_assets, total_liabilities, total_equity, cfo). 원본은 `raw`. 웹 `/statements` 목록은 `{status, items}`. 0건 empty, DB 오류 unavailable. 고정 샘플 없음 | (instrument, fy, period, statement, consolidated, source) |
 | `audit_reports` | DART 정기보고서 감사인·감사의견·강조사항·핵심감사사항. 본문(PDF/XML)은 저장하지 않음. 화면은 의견 + 회계법인·DART 링크. KAM/강조는 저장만 하고 전문을 나열하지 않음 | (instrument, fy, report_code, source) |
 | `company_overviews` | 기업개황(연도 없음). DART `company.json` / SEC submissions. 대표·주소·홈·업종·결산월 등. 추측 필드 없음 | (instrument, source) |
-| `company_year_facts` | 연도별 오른쪽 칸. `kind`=holders\|dividend\|segment. DART 최대주주·배당·(있을 때만) 부문매출. 미국 holders/dividend/segment는 수집 없음 | (instrument, fy, report_code, kind, source) |
+| `company_year_facts` | 연도별 오른쪽 칸. `kind`=holders\|dividend\|segment. DART 최대주주·배당·부문매출(`fnlttXbrl` 연결 Revenue·영업/제품 부문). 미국 holders/dividend/segment는 수집 없음 | (instrument, fy, report_code, kind, source) |
 | `instrument_fundamentals` | 일 단위 지표 스냅샷: 시총, PER, forward PER, PBR, EPS, ROE, 배당수익률, TTM 매출·순이익, 부채비율, 베타. 소스별 추가 지표는 `extra`. 웹 `/fundamentals`는 `{status, items}`. 0건은 empty, DB 오류는 unavailable. 고정 샘플 없음. 52주 게이지 종가는 `market_quotes` 최신 close. Yahoo 단위: 배당수익률=퍼센트 숫자, ROE=비율, D/E=×100 (2026-09-14 AAPL 확인) | (instrument, date, source) |
 | `instrument_identifiers` | 외부 식별자 매핑 — dart corp_code, sec CIK, yahoo 티커, kis 코드 | (provider, external_id) |
 

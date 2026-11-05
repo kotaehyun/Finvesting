@@ -5,11 +5,12 @@ import {
   parseDartCompanyOverview,
   parseDartDividends,
   parseDartHolders,
-  parseDartSegments,
+  parseDartXbrlOperatingSegments,
   parseEdgarCompanyOverview,
   parseDartTarget,
   parseEdgarTarget,
   parseEnvTargets,
+  pickDartAnnualReceipt,
   resolveDartTargets,
   resolveEdgarTargets,
   statementCollectYears,
@@ -17,8 +18,62 @@ import {
 } from "@finvesting/core";
 import { loadDartCorpCatalog, loadSecTickerCatalog } from "../lib/catalogs";
 import { ensureIdentifier, ensureInstrument, loadHeldInstruments } from "../lib/instruments";
+import { readZipFileBySuffix } from "../lib/zip";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function dartFetch(url: string, tries = 4): Promise<Response> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await fetch(url);
+    } catch (e) {
+      last = e;
+      await sleep(400 * (i + 1));
+    }
+  }
+  throw last instanceof Error ? last : new Error(String(last));
+}
+
+/** 사업보고서 접수번호 → fnlttXbrl ZIP → 영업부문 매출. */
+async function collectDartSegmentsFromXbrl(
+  key: string,
+  corp: string,
+  stock: string,
+  year: number,
+): Promise<{ rows: ReturnType<typeof parseDartXbrlOperatingSegments>; raw: unknown }> {
+  const bgn = `${year}0101`;
+  const end = `${year + 1}0630`;
+  const listUrl = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${key}&corp_code=${corp}&bgn_de=${bgn}&end_de=${end}&pblntf_ty=A&page_count=100`;
+  const listRes = await dartFetch(listUrl);
+  if (!listRes.ok) return { rows: [], raw: { listHttp: listRes.status } };
+  const listJson = await listRes.json() as { status: string; message?: string; list?: Array<{ report_nm?: string; rcept_no?: string }> };
+  if (listJson.status !== "000") {
+    return { rows: [], raw: { listStatus: listJson.status, message: listJson.message } };
+  }
+  const rcept = pickDartAnnualReceipt(listJson.list ?? [], year);
+  if (!rcept) return { rows: [], raw: { list: "no annual receipt" } };
+  await sleep(150);
+  const xUrl = `https://opendart.fss.or.kr/api/fnlttXbrl.xml?crtfc_key=${key}&rcept_no=${rcept}&reprt_code=11011`;
+  const xRes = await dartFetch(xUrl);
+  if (!xRes.ok) return { rows: [], raw: { rcept, xbrlHttp: xRes.status } };
+  const buf = Buffer.from(await xRes.arrayBuffer());
+  if (buf.length < 4 || buf[0] !== 0x50 || buf[1] !== 0x4b) {
+    // JSON 오류 메시지일 수 있음
+    let msg: unknown = { rcept, notZip: true };
+    try { msg = { rcept, ...(JSON.parse(buf.toString("utf8")) as object) }; } catch { /* ignore */ }
+    return { rows: [], raw: msg };
+  }
+  const instance = readZipFileBySuffix(buf, ".xbrl");
+  const labKo = readZipFileBySuffix(buf, "lab-ko.xml");
+  if (!instance) return { rows: [], raw: { rcept, missing: "xbrl" } };
+  const rows = parseDartXbrlOperatingSegments({
+    instanceXml: instance.toString("utf8"),
+    labKoXml: labKo?.toString("utf8") ?? null,
+    fiscalYear: year,
+  });
+  return { rows, raw: { rcept, source: "fnlttXbrl", n: rows.length, stock } };
+}
 
 async function upsertOverview(
   instrumentId: string,
@@ -162,14 +217,16 @@ export async function collectDartCompanyProfile() {
       }
       await sleep(120);
 
-      const sRes = await fetch(`https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json?${base}&fs_div=CFS`);
-      if (sRes.ok) {
-        const json = await sRes.json() as { status: string; message?: string; list?: unknown[] };
-        if (json.status === "000") {
-          upserted += await upsertYearFact(inst.id, year, "segment", parseDartSegments(json.list), "dart", { status: json.status });
-        } else if (json.status !== "013") console.warn(`dart segment ${t.stock} ${year}: ${json.message}`);
+      try {
+        const seg = await collectDartSegmentsFromXbrl(key, t.corp, t.stock, year);
+        upserted += await upsertYearFact(inst.id, year, "segment", seg.rows, "dart", seg.raw);
+        if (!seg.rows.length) {
+          console.warn(`dart segment ${t.stock} ${year}: empty`, seg.raw);
+        }
+      } catch (e) {
+        console.warn(`dart segment ${t.stock} ${year}:`, e instanceof Error ? e.message : e);
       }
-      await sleep(120);
+      await sleep(150);
     }
   }
 

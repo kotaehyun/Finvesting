@@ -101,6 +101,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-04 | Cursor (부문매출 XBRL) | [2026-11-04-cursor-segments.md](./2026-11-04-cursor-segments.md) |
 | 2026-11-04 | Cursor (DART 현금흐름 cfo) | [2026-11-04-cursor-dart-cfo.md](./2026-11-04-cursor-dart-cfo.md) |
 | 2026-11-03 | Cursor (세션 종료 typecheck) | [2026-11-03-cursor-session-end.md](./2026-11-03-cursor-session-end.md) |
 | 2026-11-03 | Cursor (`/invest` 시총 보드) | [2026-11-03-cursor-invest-mcap.md](./2026-11-03-cursor-invest-mcap.md) |

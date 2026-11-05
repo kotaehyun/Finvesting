@@ -2,6 +2,21 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-04 — 부문매출 XBRL 경로 (Cursor)
+**한 일**
+- 원인: `fnlttSinglAcntAll`에 부문매출 없음 → `list` 접수번호 + `fnlttXbrl` ZIP 파싱 (`core/dart-xbrl-segments`)
+- 연결·Revenue + OperatingSegments/SegmentsAxis. 삼성 2024 DX/DS/SDC/Harman, 하이닉스 2024 DRAM/NAND, 네이버 서치·커머스 등 저장
+- 일부 연도·종목은 XBRL 구조 달라 empty(가짜 숫자 없음)
+
+**다음 할 일**
+1. 국내 섹터 부문매출 재수집(지시 시)
+2. 미국 부문: 10-K XBRL 경로(지시 시) · tax 대조
+
+**막힌 것**
+- 미국 부문: companyfacts에 차원 없음 → 10-K `*_htm.xml` 필요. 연도마다 태그 축이 다르면 칸 비움
+
+---
+
 ## 2026-11-04 — 재무제표 수집 대상에 섹터 기업 합침 (Cursor)
 **한 일**
 - `statementLookupHeldRefs`: `/statements` 국내·미국 섹터 → DART/EDGAR/프로필 대상

@@ -36,3 +36,46 @@ export function decodeDartCorpCodePayload(buf: Buffer): string {
   }
   return buf.toString("utf8");
 }
+
+type ZipEntry = { name: string; method: number; compSize: number; dataStart: number };
+
+/** ZIP 로컬 헤더를 순회해 파일 목록·오프셋. */
+export function listZipLocalEntries(buf: Buffer): ZipEntry[] {
+  const out: ZipEntry[] = [];
+  let i = 0;
+  while (i + 30 <= buf.length && buf.readUInt32LE(i) === LOCAL) {
+    const method = buf.readUInt16LE(i + 8);
+    const compSize = buf.readUInt32LE(i + 18);
+    const nameLen = buf.readUInt16LE(i + 26);
+    const extraLen = buf.readUInt16LE(i + 28);
+    const name = buf.subarray(i + 30, i + 30 + nameLen).toString("utf8");
+    const dataStart = i + 30 + nameLen + extraLen;
+    let size = compSize;
+    if (size === 0) {
+      const next = findCentral(buf, dataStart);
+      // 다음 local 또는 central 전까지
+      let nextLocal = -1;
+      for (let j = dataStart; j + 4 <= buf.length; j++) {
+        if (buf.readUInt32LE(j) === LOCAL) { nextLocal = j; break; }
+        if (buf.readUInt32LE(j) === CENTRAL) break;
+      }
+      size = (nextLocal > 0 ? nextLocal : next > 0 ? next : buf.length) - dataStart;
+    }
+    out.push({ name, method, compSize: size, dataStart });
+    i = dataStart + size;
+  }
+  return out;
+}
+
+export function readZipEntry(buf: Buffer, entry: ZipEntry): Buffer {
+  const payload = buf.subarray(entry.dataStart, Math.min(buf.length, entry.dataStart + entry.compSize));
+  if (entry.method === 0) return Buffer.from(payload);
+  if (entry.method === 8) return inflateRawSync(payload);
+  throw new Error(`unsupported zip method ${entry.method}`);
+}
+
+export function readZipFileBySuffix(buf: Buffer, suffix: string): Buffer | null {
+  const entries = listZipLocalEntries(buf);
+  const hit = entries.find((e) => e.name.toLowerCase().endsWith(suffix.toLowerCase()));
+  return hit ? readZipEntry(buf, hit) : null;
+}
