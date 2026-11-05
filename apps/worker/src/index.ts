@@ -7,6 +7,7 @@ import { collectFred } from "./sources/fred";
 import { collectYahoo } from "./sources/yahoo";
 import { collectDart } from "./sources/dart";
 import { collectEdgar } from "./sources/edgar";
+import { collectDartCompanyProfile, collectEdgarCompanyProfile } from "./sources/company-profile";
 import { collectWorldBankInflation } from "./sources/worldbank";
 import { collectBisPolicyRates } from "./sources/bis";
 import { collectKofiaFunds } from "./sources/kofia";
@@ -20,6 +21,8 @@ const jobs: Array<[string, string, () => Promise<unknown>]> = [
   ["Yahoo 시세",  "*/30 * * * *", collectYahoo],     // 30분마다. 카카오 035720.KS 포함
   ["DART 재무제표",   "0 3 * * 1",    collectDart],      // 매주 월 03시
   ["EDGAR 재무제표",  "0 4 * * 1",    collectEdgar],     // 매주 월 04시
+  ["DART 기업정보",   "30 3 * * 1",   collectDartCompanyProfile],  // 재무 뒤
+  ["EDGAR 기업개황",  "30 4 * * 1",   collectEdgarCompanyProfile],
   ["세계은행 물가",   "0 8 * * 1",    collectWorldBankInflation], // 매주 월 08시
   ["BIS 정책금리",    "0 8 * * 1,4",  collectBisPolicyRates],     // 월·목 08시
   ["금투협 증시자금", "0 8,18 * * 1-5", collectKofiaFunds],        // 평일 08·18시. 메인 HTML

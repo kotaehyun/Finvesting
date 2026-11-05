@@ -85,6 +85,22 @@ export function matchInstrumentQuery<T extends { symbol: string }>(items: T[], q
   return items.find((i) => instrumentQueryKey(i.symbol) === key);
 }
 
+/** `/statements` 검색: 수집분만. 심볼 키 일치·심볼·이름 부분 일치. */
+export function filterInstrumentsByQuery<T extends { symbol: string; name?: string | null }>(
+  items: T[],
+  q: string,
+): T[] {
+  const t = q.trim().toLowerCase();
+  if (!t) return items;
+  const key = instrumentQueryKey(q);
+  return items.filter((i) => {
+    if (key && instrumentQueryKey(i.symbol) === key) return true;
+    if (i.symbol.toLowerCase().includes(t)) return true;
+    if ((i.name ?? "").toLowerCase().includes(t)) return true;
+    return false;
+  });
+}
+
 export function fiftyTwoWeekGauge(row: {
   extra: Pick<FundamentalExtra, "fiftyTwoWeekLow" | "fiftyTwoWeekHigh">;
   lastPrice: number | null;

@@ -50,6 +50,51 @@ export const instrumentIdentifiers = pgTable("instrument_identifiers", {
   externalId: text("external_id").notNull(), // corp_code / CIK / ticker
 }, (t) => [uniqueIndex("ident_uq").on(t.provider, t.externalId), index("ident_instrument_idx").on(t.instrumentId)]);
 
+/** 기업개황(연도 없음). DART company.json / SEC submissions. */
+export const companyOverviews = pgTable("company_overviews", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  instrumentId: uuid("instrument_id").notNull().references(() => instruments.id),
+  source: text("source").notNull(), // dart | edgar
+  corpName: text("corp_name"),
+  corpNameEn: text("corp_name_en"),
+  stockName: text("stock_name"),
+  ceo: text("ceo"),
+  corpClass: text("corp_class"),
+  address: text("address"),
+  homepage: text("homepage"),
+  irUrl: text("ir_url"),
+  phone: text("phone"),
+  industryCode: text("industry_code"),
+  industryName: text("industry_name"),
+  establishedOn: date("established_on"),
+  fiscalMonth: text("fiscal_month"),
+  items: jsonb("items"),
+  raw: jsonb("raw"),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("company_overview_uq").on(t.instrumentId, t.source),
+  index("company_overview_instrument_idx").on(t.instrumentId),
+]);
+
+/**
+ * 연도별 기업정보 칸. kind: holders | dividend | segment.
+ * items는 표준 배열(jsonb). 본문·추측 숫자 없음.
+ */
+export const companyYearFacts = pgTable("company_year_facts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  instrumentId: uuid("instrument_id").notNull().references(() => instruments.id),
+  fiscalYear: integer("fiscal_year").notNull(),
+  reportCode: text("report_code").notNull().default("11011"),
+  kind: text("kind").notNull(), // holders | dividend | segment
+  items: jsonb("items").notNull(),
+  source: text("source").notNull(),
+  raw: jsonb("raw"),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("company_year_fact_uq").on(t.instrumentId, t.fiscalYear, t.reportCode, t.kind, t.source),
+  index("company_year_fact_instrument_idx").on(t.instrumentId),
+]);
+
 // DART 정기보고서 감사인·감사의견. 감사보고서 본문(PDF/XML)은 저장하지 않는다.
 export const auditReports = pgTable("audit_reports", {
   id: uuid("id").primaryKey().defaultRandom(),

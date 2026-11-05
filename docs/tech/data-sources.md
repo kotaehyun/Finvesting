@@ -13,13 +13,15 @@
 | 업비트 일봉 | `upbit.ts` | 공개 API. 대상 = 보유·관심 `market=UPBIT` ∪ `UPBIT_TARGETS`(있으면). 최근 90일 일봉 | 5분 | 불필요 | `market_quotes`. 웹 `/invest` 비트코인 칸(원화) |
 | 한국은행 ECOS — 원/달러, 기준금리, CPI, 국고채3년, **예금은행 지역별 가계대출 말잔**, **예금은행 가중평균 대출금리** | `ecos.ts` | API. 대출 잔액은 `151Y003` 월. 금리는 `121Y006`·`121Y015` 항목 이름 매칭. 시·구 없음 | 09·18시 | `ECOS_API_KEY` | `macro_indicators` (USDKRW, BOK_BASE_RATE, CPI, KTB_3Y, `ECOS_HHLOAN_*`, `ECOS_LOAN_*`) |
 | 미국 FRED — 연방기금금리, CPI, 국채 2y/10y, 달러지수, 실업률, VIX | `fred.ts` | API | 07·19시 | `FRED_API_KEY` (무료) | `macro_indicators` (US_*, DXY_BROAD, VIX) |
-| Yahoo Finance — 보유·관심 종목 시세 + 세계 지수·비트코인·원자재 + 원환율 + `KRW=X`→USDKRW + 주식·ETF 펀더멘털 | `yahoo.ts` | 비공식 `yahoo-finance2` v3. 대상 = trades∪watchlist ∪ `YAHOO_TARGETS` ∪ `DEFAULT_YAHOO_STOCKS`(카카오 `035720.KS`) ∪ `core/world-indices`(KOSPI·S&P·BTC-USD·GC=F·SI=F·HG=F·CL=F·BZ=F 등). 세계 지수는 `quote` 당일 + 일봉이 40일 미만이면 `chart` 90일. 환율은 `core/fx-pairs`(달러·유로·엔·위안·파운드)를 `macro_indicators`에. USDKRW는 같은 날짜 ECOS가 있으면 덮지 않음. KRX는 `.KS` 실패 시 `.KQ`. 주식·ETF는 `quote` + `quoteSummary`. 지수·상품·코인은 시세만. 429 → `YAHOO_GAP_MS` | 30분 | 불필요 | `market_quotes`, `instrument_fundamentals`, `macro_indicators`. 웹 `/invest`·`/fundamentals` |
+| Yahoo Finance — 보유·관심 종목 시세 + 세계 지수·비트코인·원자재 + 원환율 + `KRW=X`→USDKRW + 주식·ETF 펀더멘털 | `yahoo.ts` | 비공식 `yahoo-finance2` v3. 대상 = trades∪watchlist ∪ `YAHOO_TARGETS` ∪ `DEFAULT_YAHOO_STOCKS`(카카오 `035720.KS`) ∪ `/statements` 섹터 종목(`statementLookupYahooTickers`) ∪ `core/world-indices`. 세계 지수는 `quote` 당일 + 일봉이 40일 미만이면 `chart` 90일. 환율은 `core/fx-pairs`. USDKRW는 같은 날짜 ECOS가 있으면 덮지 않음. KRX는 `.KS` 실패 시 `.KQ`. 주식·ETF는 `quote` + `quoteSummary`. 지수·상품·코인은 시세만. 429 → `YAHOO_GAP_MS` | 30분 | 불필요 | `market_quotes`, `instrument_fundamentals`, `macro_indicators`. 웹 `/invest`(시총 보드·관심)·`/fundamentals`·`/statements` 시가총액 |
 | 금투협 FreeSIS — 투자자예탁금·신용융자 | `kofia.ts` | 메인 HTML (`stat/main.do`) 파싱. 단위 백만원. 위탁매매 미수금은 메인에 없어 저장하지 않음 | 평일 08·18시 | 불필요 | `macro_indicators` (`KOFIA_INVESTOR_DEPOSIT`, `KOFIA_CREDIT`, HTML에 있으면 `KOFIA_MARGIN`). 웹 `/invest` 도넛 |
-| 금감원 DART — 한국 상장사 연결 재무제표 + 감사의견 | `dart.ts` | 공식 API. 타깃은 `종목코드:corp_code:이름`. 재무는 `fnlttSinglAcnt`, 감사는 `accnutAdtorNmNdAdtOpinion`(감사인·의견·강조·핵심감사사항만, 본문 X). 형식 불량이거나 금액 파싱 실패는 skip | 매주 월 | `DART_API_KEY`, `DART_TARGETS` | `financial_statements`, `audit_reports`. 웹 `/statements` |
+| 금감원 DART — 한국 상장사 연결 재무제표 + 감사의견 | `dart.ts` | 공식 API. 대상 = trades∪watchlist(KRX/KOSDAQ) ∪ `DART_TARGETS` ∪ `/statements` 국내 섹터(`statementLookupHeldRefs`). 타깃은 `종목코드` 또는 `종목코드:corp_code:이름`. corp가 없으면 `corpCode.xml`에서 찾는다. 목록에 없으면 skip. 손익·재무상태=`fnlttSinglAcnt`(CFS), 현금흐름=`fnlttSinglAcntAll` CF만(`cfo`=`ifrs-full_CashFlowsFromUsedInOperatingActivities`·영업활동현금흐름. 창출액·당기순이익 행은 제외). 계정 매핑 `core/dart-accounts`. 기간=`statementCollectYears`×사업/1분기/반기/3분기. 감사=`accnutAdtorNmNdAdtOpinion` 사업보고서만(본문 X). 013·형식 불량·금액 실패는 skip | 매주 월 | `DART_API_KEY` 필수, `DART_TARGETS` 보조 | `financial_statements`, `audit_reports`. 웹 `/statements` |
+| 금감원 DART — 기업개황·최대주주·배당·부문 | `company-profile.ts` (`collectDartCompanyProfile`) | 대상은 DART 재무와 동일(보유·env·국내 섹터). `company.json`, `hyslrSttus`, `alotMatter`. 부문매출=`list.json` 사업보고서 접수번호 → `fnlttXbrl` ZIP → 연결·OperatingSegments·Revenue (`core/dart-xbrl-segments`). SinglAcntAll에는 부문 없음. 확정 사업연도 최근 3년. XBRL·부문 없으면 skip | 매주 월 | `DART_API_KEY` | `company_overviews`, `company_year_facts`. `/statements` 오른쪽 |
 | Yahoo 종목 검색 | (api `market.searchSymbols`) | `query1.finance.yahoo.com/v1/finance/search`, `newsCount=0`. 저장 없음 | 요청 시 | 불필요 | 웹 `/invest`·`/markets` |
 | 세계은행 연간 CPI 상승률 | `worldbank.ts` | 공개 API `FP.CPI.TOTL.ZG`. 키 없음. 최신 연도 결측이면 이전 연도 | 매주 월 08시 | 불필요 | `macro_indicators` `WB_INFL_<ISO2>`. 웹 `/markets` |
 | BIS 중앙은행 정책금리 | `bis.ts` | 공개 SDMX `WS_CBPOL` 월. 키 없음. 18개월보다 오래된 시계열은 저장 안 함 | 월·목 08시 | 불필요 | `macro_indicators` `BIS_POL_<ISO2>`. 웹 `/markets` |
-| SEC EDGAR — 미국 상장사 10-K/10-Q (XBRL companyfacts) | `edgar.ts` | 공식 API. `SEC_USER_AGENT` 없으면 skip. 같은 기간·항목은 `end`가 최신인 fact | 매주 월 | `SEC_USER_AGENT` 필수, `EDGAR_TARGETS` | `financial_statements` |
+| SEC EDGAR — 미국 상장사 10-K/10-Q (XBRL companyfacts) | `edgar.ts` | 공식 API. 대상 = trades∪watchlist(US/NYSE/NASDAQ/AMEX) ∪ `EDGAR_TARGETS` ∪ `/statements` 미국 섹터(`statementLookupHeldRefs`). 타깃은 `티커` 또는 `티커:CIK`. CIK가 없으면 `company_tickers.json`에서 매핑. 목록에 없으면 skip. `SEC_USER_AGENT` 없으면 skip. fy는 `edgarMinFiscalYear`(5년). 같은 기간·항목은 `end`가 최신인 fact | 매주 월 | `SEC_USER_AGENT` 필수, `EDGAR_TARGETS` 보조 | `financial_statements` |
+| SEC EDGAR — 기업개황·부문 | `company-profile.ts` (`collectEdgarCompanyProfile`) | 대상은 EDGAR 재무와 동일(보유·env·미국 섹터). `submissions/CIK….json` 개황. 부문매출=같은 submissions의 10-K → Archives `*_htm.xml` → 제품축(ProductOrService) 우선·없으면 영업/지역 축 (`core/edgar-xbrl-segments`). companyfacts에는 차원 없음. 주주·배당은 단일 API 없어 비움 | 매주 월 | `SEC_USER_AGENT` | `company_overviews`, `company_year_facts`(segment) |
 
 ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검증 필요(코드가 바뀌기도 함).
 
@@ -42,9 +44,30 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 | **DART 기업개황·회사별 공시·감사보고서 검색, OpenDART 재무정보조회** | 조회 UI | 한국 종목만 (`core/disclosure-links` `filingVenueFor`). 감사의견은 의견 한 줄 + 회계법인 홈·DART 원문 |
 | **SEC EDGAR 회사검색·browse-edgar** | 조회 UI | 미국 티커만. `/statements`·`/invest` 검색. `/fundamentals`에는 없음 |
 
+## `/statements` 지역 칸 (`packages/core/src/statement-regions.ts`)
+- 한 화면에 지역별 칸. `STATEMENT_REGIONS`: **국내·미국 `active`**, 일본·중국·유럽은 id·시장만 예약(`active: false`, `venue: null`). 공식 출처·워커 준비 후 켠다
+- 종목 배정: `statementRegionFor` — `instruments.market` 우선, 없으면 `filingVenueFor`(dart→kr, edgar→us)
+- 그리드: `auto-fit`이라 칸이 늘어도 같은 레이아웃
+- UI: ERP(`erp wehago`) 셸. 왼쪽: **국내/해외** 탭, 그 아래 **보기·섹터·공시** 폴더(클릭하면 하위가 펼침). 섹터는 로컬에서 추가·이름·숨김·종목 넣기. 가운데: 수집 표·3표. 오른쪽: 기업정보 속성 칸
+- 첫 화면(국내 클릭): 보유 종목을 평가액 순으로. 보유 없으면 관심목록, 둘 다 없으면 수집 기업. 검색 횟수 기록은 없어서 인기검색을 만들지 않음
+- 보기 「시가총액」: 국내/해외(현재 시장) Yahoo `marketCap` 수집분만 큰 순. 미수집은 순위에 없음. 통화 혼합 없음
+- 딥링크: `?q=`·`?area=kr|os`·`?browse=mcap|holdings|…` (`/invest` 시총 보드에서 연결)
+- 업종: `STATEMENT_LOOKUP_GROUPS` — 국내·미국 섹터마다 상장 티커·이름. 로컬 `finvesting.statement-sector-prefs`로 숨김·이름·종목·커스텀. 일본·중국·유럽은 칸만
+- 해외: 미국 활성, 일본·중국·유럽은 「추가」칸
+- 오른쪽: `STATEMENT_SIDE_SLOTS` — 종목·비율·감사·기업개황·사업부문·주주·배당. 수집분 없으면 힌트만(가짜 숫자 없음)
+- 수집 기간: `core/statement-collect` — 올해 포함 5년. DART는 FY·Q1·H1·Q3, EDGAR는 10-K/10-Q. `/statements` 조회는 같은 연도에서 FY 우선(`preferStatementRow`)
+- 숫자는 공시 표준 항목만. Yahoo 전 종목은 `/invest`
+
+## `/invest` 시가총액 보드
+- API `market.mcapBoard`: `buildMcapBoards`로 국내·해외 분리. 종목마다 `matchNewsForSymbol`(제목·`news.symbols`, 본문 없음)
+- UI: 관심 터미널 위. 「해외 · 수집분」= Yahoo 수집분(주로 미국). 전 세계 공식 순위 아님
+- 연계: 뉴스 펼침·원문 링크, `/statements?area=&browse=mcap&q=` 재무·개황
+
 ## `/statements` 외부 링크 (`packages/core/src/disclosure-links.ts`)
-- 창구는 `filingVenueFor`. 한국: 기업개황 `dsae001`, 기업정보 팝업 `SearchCompanyIR_M.html?textCrpNM=`, 회사별 공시 `dsab001`, OpenDART 재무조회 `fnltt/singlindx`, 감사보고서 검색 `dsab007`, 뷰어 `dsaf001?rcpNo=`, 「재무제표를 읽는 사람들」
+- 창구는 `filingVenueFor`. 칸별 필터는 `lookupServicesForRegion`
+- 한국: 기업개황 `dsae001`, 기업정보 팝업 `SearchCompanyIR_M.html?textCrpNM=`, 회사별 공시 `dsab001`, OpenDART 재무조회 `fnltt/singlindx`, 감사보고서 검색 `dsab007`, 뷰어 `dsaf001?rcpNo=`, 「재무제표를 읽는 사람들」
 - 미국: EDGAR `browse-edgar?CIK=`·회사검색, Yahoo `/financials`. drcr 없음
+- 일본·중국·유럽: 수집기·공식 링크 없음(추측 출처 금지)
 - 회계법인: 삼일(PwC)·삼정(KPMG)·안진(Deloitte)·한영(EY) 홈. 미매칭은 한국공인회계사회 (`kicpa.or.kr`)
 
 ## 표준 재무 항목 키 (`financial_statements.items`)
@@ -56,8 +79,8 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 | 한국투자증권 KIS Open API | API (키 필요) | 국내·해외 주식 시세 | 미구현 |
 | 네이버 뉴스 검색 API | API | 종목별 뉴스 | 미구현 |
 | 경제 캘린더 (예: investing.com / 금통위·FOMC 일정) | 크롤링 | `economic_events` | 미구현 |
-| DART corpCode.xml / SEC company_tickers.json | 파일 | 종목코드↔corp_code, 티커↔CIK 자동 매핑 (지금은 환경변수 수동) | 미구현 |
-| watchlist·trades 테이블 → 수집 대상 자동화 | 내부 | 보유+관심 종목이 본 대상, env는 보조 | **구현** (`core/quote-targets.ts`, ADR 0007). KIS 국내 시세는 미구현 |
+| DART corpCode.xml / SEC company_tickers.json | 파일 | 종목코드↔corp_code, 티커↔CIK 자동 매핑. `instrument_identifiers`에 저장 | **구현** (`core/statement-targets.ts`, worker `catalogs.ts`) |
+| watchlist·trades 테이블 → 수집 대상 자동화 | 내부 | 보유+관심 종목이 본 대상, env는 보조. 시세는 `quote-targets`, 재무제표는 `statement-targets` | **구현** (ADR 0007). KIS 국내 시세는 미구현 |
 | Finviz 스크리너 (개인용) | 라이브러리/크롤링 | 스크리너 조건 결과 → 관심 종목 후보 | 미구현 |
 | TradingView 위젯 | 임베드 | `/invest` 지수 차트·히트맵. `/markets` 거래량·크립토·외환 히트맵·기술분석 | **구현** (ADR 0009·0011·0012) |
 | 한국 부동산 실거래·임대료 | 공공데이터 API (키) | `/realty` 유형별 건수·임대료 | 미구현 (아파트·오피스텔·다가구·연립·상가·빌딩·토지 칸만). 포털 매물 호수 크롤링 없음 (ADR 0017·0018) |

@@ -7,3 +7,4 @@
   - 원/달러는 야후 `KRW=X`를 `macro_indicators.code=USDKRW` `source=yahoo`로 넣는다. 같은 날짜에 ECOS가 있으면 ECOS가 덮어쓴다.
   - 매핑은 `packages/core/src/quote-targets.ts` 순수 함수.
 - 결과: 체결만 넣어도 다음 `run:once`에서 시세·환율이 붙는다. 웹 검색에서 관심 종목을 넣을 수 있다. 국내 정식 시세는 여전히 KIS.
+- 2026-11-01: DART·EDGAR도 같은 합집합. 식별자는 OpenDART `corpCode.xml`, SEC `company_tickers.json`. 매핑 실패는 skip (`core/statement-targets.ts`).

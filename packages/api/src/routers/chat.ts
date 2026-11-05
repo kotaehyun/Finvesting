@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { and, eq, inArray, notInArray, or, sql } from "drizzle-orm";
-import { news, macroIndicators, quotes, instruments } from "@finvesting/db";
+import { news, macroIndicators, quotes, instruments, watchlist } from "@finvesting/db";
 import { ANALYST_TITLE_RE, allOpinionSources, formatFundamentalsContext, formatInvestStyleContext, signedWon, worldIndexByYahoo, worldIndexYahooTickers } from "@finvesting/core";
 import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
@@ -85,10 +85,14 @@ export const chatRouter = router({
         stmtInsts = [];
       }
       const holdingIds = new Set(h.positions.map((p) => p.instrumentId));
-      const stmtTargets = stmtInsts.filter((i) => holdingIds.has(i.id)).slice(0, 3);
-      const fallback = stmtTargets.length ? stmtTargets : [];
+      const watchRows = await ctx.db.select({ instrumentId: watchlist.instrumentId })
+        .from(watchlist)
+        .where(eq(watchlist.userId, ctx.userId));
+      const interestedIds = new Set([...holdingIds, ...watchRows.map((r) => r.instrumentId)]);
+      // 보유·관심에 재무 수집분이 있으면 최대 3종. 개황·주주·배당은 bundle.context에 포함.
+      const stmtTargets = stmtInsts.filter((i) => interestedIds.has(i.id)).slice(0, 3);
       const stmtBlocks: string[] = [];
-      for (const it of fallback) {
+      for (const it of stmtTargets) {
         const b = await loadStatementBundle(ctx.db, it.id);
         if (b?.context) stmtBlocks.push(b.context);
       }
@@ -118,7 +122,7 @@ export const chatRouter = router({
           ? coverage.contextHept
           : undefined,
         "투자성향·조언": formatInvestStyleContext(investAdvice),
-        "재무제표·감사": stmtBlocks.length ? stmtBlocks.join("\n\n") : undefined,
+        "재무제표·기업정보": stmtBlocks.length ? stmtBlocks.join("\n\n") : undefined,
         "펀더멘털": fundBlocks.length ? fundBlocks.join("\n\n") : undefined,
         "최근 뉴스": recentNews.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
         "오피니언·칼럼": recentOpinions.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),

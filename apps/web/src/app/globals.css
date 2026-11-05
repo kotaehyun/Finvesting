@@ -136,6 +136,218 @@ body:has(.chat-shell) .nav a[href="/chat"] { color: var(--chat-accent); }
 .news-board { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .opinion-board { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 .invest-board { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* `/statements` ERP — 지역 / 업종(하위) / 종목 / 공시 분리 */
+.statements-erp-body { grid-template-columns: 196px minmax(0, 1fr); }
+.statements-cat-empty { margin-left: auto; opacity: 0.45; font-size: 10px; font-weight: 400; }
+.statements-cat-sym { margin-left: auto; opacity: 0.5; font-size: 11px; }
+.statements-menu { overflow: auto; }
+.statements-menu h2 {
+  margin: 10px 12px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7a8490;
+}
+.statements-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--erp-line, #d5dee8);
+}
+.statements-area button {
+  width: auto;
+  text-align: center;
+  border: 0;
+  border-radius: 0;
+  padding: 9px 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.statements-tree button,
+.statements-tree a {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 5px 10px;
+}
+.statements-tree .lv2 { padding-left: 22px; }
+.statements-tree .lv3 {
+  padding-left: 20px;
+  margin-left: 22px;
+  width: calc(100% - 22px);
+  box-sizing: border-box;
+  font-size: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+.statements-tree .lv3.on { font-weight: 600; }
+.erp.wehago .statements-tree .lv3 { color: #b9d3e3; }
+.statements-folder-block { border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.erp-menu .statements-folder,
+.erp-menu .statements-edit,
+.erp-menu .statements-mini { width: auto; }
+.statements-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  white-space: nowrap;
+}
+.statements-folder .chev { width: 10px; opacity: 0.7; }
+.erp.wehago .statements-folder { color: #7eb8d4; }
+.erp.wehago .statements-folder.open { color: #c5e6f4; }
+.statements-folder-row { display: flex; align-items: center; }
+.statements-folder-row .statements-folder { flex: 1; width: auto; }
+.statements-edit-row { opacity: 0.7; font-size: 11px; }
+.statements-item { display: flex; align-items: center; }
+.statements-item .lv2, .statements-item .lv3 { flex: 1; min-width: 0; }
+.statements-edit {
+  margin-right: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+  opacity: 0.7;
+  padding: 1px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  width: auto;
+  background: transparent;
+  color: inherit;
+}
+.statements-edit.on { opacity: 1; background: #00b8d4; color: #08324f; border-color: #00b8d4; }
+.statements-row-acts { margin-left: auto; display: flex; gap: 4px; }
+.statements-mini {
+  margin-left: auto;
+  width: auto;
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.7;
+  letter-spacing: 0;
+  padding: 0 6px;
+  background: transparent;
+}
+.erp.wehago .statements-edit,
+.erp.wehago .statements-mini { color: #c5e6f4; }
+.statements-put { opacity: 0.75; }
+.statements-add.lv2 {
+  display: flex;
+  gap: 4px;
+  padding: 4px 10px 8px 18px;
+  align-items: center;
+}
+.erp-menu .statements-add input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  border: 1px solid #c5cdd8;
+  border-radius: 2px;
+  font-size: 11px;
+  padding: 3px 6px;
+  background: #fff;
+  color: #1a1d21;
+  -webkit-text-fill-color: #1a1d21;
+}
+.erp-menu .statements-add button {
+  width: 22px;
+  min-width: 22px;
+  padding: 0;
+  height: 22px;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  border: 1px solid #c5cdd8;
+  border-radius: 2px;
+  background: #f7f9fb;
+  color: #1a1d21;
+}
+.statements-erp-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 248px;
+  flex: 1;
+  min-height: 0;
+}
+.statements-erp-side {
+  border-left: 1px solid var(--erp-line, #d5dee8);
+  background: #f4f7fa;
+  overflow: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.statements-side-card {
+  background: #fff;
+  border: 1px solid var(--erp-line, #d5dee8);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.statements-side-card.reserved { background: #fbfcfd; }
+.statements-side-card h3 {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--erp-navy, #0a3d62);
+  background: var(--erp-head, #f4f8fb);
+  border-bottom: 1px solid var(--erp-line, #d5dee8);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.statements-side-year {
+  margin-left: auto;
+  font-weight: 400;
+  opacity: 0.65;
+}
+.statements-side-card .body { padding: 0; }
+.statements-side-card .erp-props { margin: 0; }
+.statements-side-card .erp-props th {
+  width: 76px;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+.statements-side-card .erp-props td.ro { font-size: 12px; padding: 4px 8px; }
+.statements-side-card .erp-hint { padding: 8px 10px; margin: 0; font-size: 11px; line-height: 1.45; }
+.statements-side-card .erp-slip {
+  margin: 0;
+  padding: 6px 8px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.statements-erp-grids {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+@media (max-width: 1100px) {
+  .statements-erp-main { grid-template-columns: 1fr; }
+  .statements-erp-side { border-left: 0; border-top: 1px solid var(--erp-line, #d5dee8); }
+}
+.statements-erp-grids .wehago-widget { margin: 0; }
+.statements-erp-grids .wehago-widget h3 {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--erp-navy, #0a3d62);
+  background: var(--erp-head, #f4f8fb);
+  border-bottom: 1px solid var(--erp-line, #d5dee8);
+}
+.erp .erp-slip a {
+  font-size: 12px;
+  color: var(--erp-navy, #0a3d62);
+  padding: 4px 8px;
+}
 .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
 .index-kr { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .index-cell { padding: 8px 0; }

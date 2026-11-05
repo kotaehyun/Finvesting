@@ -65,4 +65,38 @@ describe("formatStatementContext", () => {
     expect(t).toContain("없음");
     expect(t).not.toContain("재무상태표");
   });
+
+  it("개황·주주·배당이 있으면 블록에 넣는다", () => {
+    const t = formatStatementContext({
+      symbol: "005930",
+      name: "삼성전자",
+      fiscalYear: 2025,
+      currency: "KRW",
+      income: { revenue: 100 },
+      overview: {
+        corpName: "삼성전자(주)",
+        corpNameEn: null,
+        stockName: "삼성전자",
+        ceo: "전영현",
+        corpClass: "유가",
+        address: null,
+        homepage: null,
+        irUrl: null,
+        phone: null,
+        industryCode: null,
+        industryName: null,
+        establishedOn: "1969-01-13",
+        fiscalMonth: "12",
+        source: "dart",
+      },
+      holders: [{ name: "삼성생명", relation: "계열사", stockKind: "보통주", shares: 1, ratio: 8.5 }],
+      dividends: [{ label: "주당 현금배당금(원)", stockKind: "보통주", current: "1,446", prior: null, prior2: null }],
+    });
+    expect(t).toContain("## 기업개황");
+    expect(t).toContain("전영현");
+    expect(t).toContain("## 최대주주");
+    expect(t).toContain("8.5%");
+    expect(t).toContain("## 배당");
+    expect(t).toContain("1,446");
+  });
 });

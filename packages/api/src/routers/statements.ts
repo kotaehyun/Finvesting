@@ -36,8 +36,8 @@ export const statementsRouter = router({
       const llm = createProvider();
       const reading = await llm.chat([
         { role: "system", content: STATEMENT_READER_SYSTEM },
-        { role: "system", content: buildContextBlock({ "재무제표·감사": bundle.context }) },
-        { role: "user", content: "이 종목의 재무제표와 감사의견을 읽어 주세요. 없는 숫자는 없다고 하고, 매수·매도는 단정하지 마세요." },
+        { role: "system", content: buildContextBlock({ "재무제표·기업정보": bundle.context }) },
+        { role: "user", content: "이 종목의 재무제표·기업개황·주주·배당·감사의견을 읽어 주세요. 컨텍스트에 없는 항목은 없다고 하고, 매수·매도는 단정하지 마세요." },
       ]);
       return { reading, provider: llm.name, fiscalYear: bundle.fiscalYear };
     }),

@@ -1,5 +1,12 @@
-import { desc, eq } from "drizzle-orm";
-import { auditReports, financialStatements, instruments, type Db } from "@finvesting/db";
+import { and, desc, eq } from "drizzle-orm";
+import {
+  auditReports,
+  companyOverviews,
+  companyYearFacts,
+  financialStatements,
+  instruments,
+  type Db,
+} from "@finvesting/db";
 import {
   asStatementItems,
   auditorSite,
@@ -7,8 +14,13 @@ import {
   formatStatementContext,
   goingConcernMentioned,
   lookupServices,
+  preferStatementRow,
   statementRatios,
   type AuditBrief,
+  type CompanyDividendRow,
+  type CompanyHolder,
+  type CompanyOverview,
+  type CompanySegmentRow,
 } from "@finvesting/core";
 
 function toAudit(row: typeof auditReports.$inferSelect): AuditBrief {
@@ -85,21 +97,97 @@ export async function loadStatementBundle(db: Db, instrumentId: string, year?: n
   const years = [...new Set([...fsAll.map((r) => r.fiscalYear), ...auAll.map((r) => r.fiscalYear)])].sort((a, b) => b - a);
   const fiscalYear = year && years.includes(year) ? year : years[0];
   if (fiscalYear == null) {
+    const [overviewRow] = await db.select().from(companyOverviews)
+      .where(eq(companyOverviews.instrumentId, instrumentId))
+      .orderBy(desc(companyOverviews.fetchedAt))
+      .limit(1);
     return {
       instrument: inst, fiscalYear: null, years, income: {}, balance: {}, cashflow: {}, ratios: {},
-      audit: null, context: "", lookups: lookupServices(inst.symbol || inst.name),
+      audit: null,
+      overview: overviewRow
+        ? {
+          corpName: overviewRow.corpName,
+          corpNameEn: overviewRow.corpNameEn,
+          stockName: overviewRow.stockName,
+          ceo: overviewRow.ceo,
+          corpClass: overviewRow.corpClass,
+          address: overviewRow.address,
+          homepage: overviewRow.homepage,
+          irUrl: overviewRow.irUrl,
+          phone: overviewRow.phone,
+          industryCode: overviewRow.industryCode,
+          industryName: overviewRow.industryName,
+          establishedOn: overviewRow.establishedOn,
+          fiscalMonth: overviewRow.fiscalMonth,
+          source: overviewRow.source,
+        } satisfies CompanyOverview
+        : null,
+      holders: null,
+      dividends: null,
+      segments: null,
+      context: "",
+      lookups: lookupServices(inst.symbol || inst.name),
     };
   }
   const fs = fsAll.filter((r) => r.fiscalYear === fiscalYear);
-  const income = asStatementItems(fs.find((r) => r.statement === "income")?.items);
-  const balance = asStatementItems(fs.find((r) => r.statement === "balance")?.items);
-  const cashflow = asStatementItems(fs.find((r) => r.statement === "cashflow")?.items);
-  const currency = fs[0]?.currency ?? "KRW";
+  const incomeRow = preferStatementRow(fs, "income");
+  const balanceRow = preferStatementRow(fs, "balance");
+  const cashflowRow = preferStatementRow(fs, "cashflow");
+  const income = asStatementItems(incomeRow?.items);
+  const balance = asStatementItems(balanceRow?.items);
+  const cashflow = asStatementItems(cashflowRow?.items);
+  const currency = incomeRow?.currency ?? balanceRow?.currency ?? cashflowRow?.currency ?? "KRW";
   const au = auAll.find((r) => r.fiscalYear === fiscalYear) ?? null;
   const audit = au ? toAudit(au) : null;
+  const [overviewRow] = await db.select().from(companyOverviews)
+    .where(eq(companyOverviews.instrumentId, instrumentId))
+    .orderBy(desc(companyOverviews.fetchedAt))
+    .limit(1);
+  const overview = overviewRow
+    ? ({
+      corpName: overviewRow.corpName,
+      corpNameEn: overviewRow.corpNameEn,
+      stockName: overviewRow.stockName,
+      ceo: overviewRow.ceo,
+      corpClass: overviewRow.corpClass,
+      address: overviewRow.address,
+      homepage: overviewRow.homepage,
+      irUrl: overviewRow.irUrl,
+      phone: overviewRow.phone,
+      industryCode: overviewRow.industryCode,
+      industryName: overviewRow.industryName,
+      establishedOn: overviewRow.establishedOn,
+      fiscalMonth: overviewRow.fiscalMonth,
+      source: overviewRow.source,
+    } satisfies CompanyOverview)
+    : null;
+
+  const yearFacts = await db.select().from(companyYearFacts).where(and(
+    eq(companyYearFacts.instrumentId, instrumentId),
+    eq(companyYearFacts.fiscalYear, fiscalYear),
+  ));
+  const holdersRaw = (yearFacts.find((f) => f.kind === "holders")?.items ?? null) as CompanyHolder[] | null;
+  const dividendsRaw = (yearFacts.find((f) => f.kind === "dividend")?.items ?? null) as CompanyDividendRow[] | null;
+  const segmentsRaw = (yearFacts.find((f) => f.kind === "segment")?.items ?? null) as CompanySegmentRow[] | null;
+  const holders = Array.isArray(holdersRaw) && holdersRaw.length ? holdersRaw : null;
+  const dividends = Array.isArray(dividendsRaw) && dividendsRaw.length ? dividendsRaw : null;
+  const segments = Array.isArray(segmentsRaw) && segmentsRaw.length ? segmentsRaw : null;
+
   const context = formatStatementContext({
-    symbol: inst.symbol, name: inst.name, fiscalYear, currency, income, balance, cashflow, audit,
+    symbol: inst.symbol,
+    name: inst.name,
+    fiscalYear,
+    currency,
+    income,
+    balance,
+    cashflow,
+    audit,
+    overview,
+    holders,
+    dividends,
+    segments,
   });
+
   return {
     instrument: inst,
     fiscalYear,
@@ -117,6 +205,10 @@ export async function loadStatementBundle(db: Db, instrumentId: string, year?: n
         auditorSite: auditorSite(audit.auditor),
       }
       : null,
+    overview,
+    holders,
+    dividends,
+    segments,
     lookups: lookupServices(inst.symbol || inst.name),
     context,
   };

@@ -14,6 +14,7 @@ import {
   fiftyTwoWeekPosition,
   fiftyTwoWeekGauge,
   matchInstrumentQuery,
+  filterInstrumentsByQuery,
   instrumentQueryKey,
   isMoneyFundamentalSortKey,
   fundamentalLookups,
@@ -172,6 +173,9 @@ describe("투자 신호 및 52주 게이지", () => {
     expect(matchInstrumentQuery(items, "005930")?.id).toBe("2");
     expect(matchInstrumentQuery(items, "005930.KS")?.id).toBe("2");
     expect(matchInstrumentQuery(items, "MSFT")).toBeUndefined();
+    expect(filterInstrumentsByQuery(items, "aap").map((i) => i.id)).toEqual(["1"]);
+    expect(filterInstrumentsByQuery(items, "삼성").map((i) => i.id)).toEqual(["2"]);
+    expect(filterInstrumentsByQuery(items, "MSFT")).toEqual([]);
     expect(isMoneyFundamentalSortKey("marketCap")).toBe(true);
     expect(isMoneyFundamentalSortKey("per")).toBe(false);
   });
