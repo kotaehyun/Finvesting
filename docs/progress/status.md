@@ -9,7 +9,7 @@
 - **2026-10-11:** 부동산 내비 복원. `/realty` 링크만. 새 패널은 별도 지시.
 
 ## 현재 상태
-- **Git:** `origin/dev` = `c37e38e` (statements-pipeline merge). `main`은 별도 지시.
+- **Git:** `origin/main` = `dcf1f0f` (dev merge). `origin/dev`는 문서 후속 merge 대기 가능.
 - **활성 화면:** 근로자 대장·투자·시장·뉴스·챗·타임라인·세금·회계전표·재무제표·부동산.
 - **보류:** `/erp`는 URL로만.
 - **데이터:** `packages/core/data` tax=entries / realty=defaults. 원문 대조는 미검증. 우선 3파일 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`.
@@ -21,4 +21,3 @@
 1. 🟠 tax 3파일 원문 대조(사용자) — payroll / brackets / ei-stability
 2. 🟡 홈택스 간소화·연말정산 XLSX (로드맵 3단계)
 3. ⏸ `/erp` 재개 — 사용자 지시 전 금지
-4. `main` merge — verification 후 지시 시

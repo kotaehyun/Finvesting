@@ -2,6 +2,19 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-05 — main ← dev merge (Cursor)
+**한 일**
+- 사전: `turbo typecheck` 8패키지 · core vitest 78파일 337건 통과
+- `main`에 `dev` `--no-ff` merge·push (`dcf1f0f`). 이후 `dev`로 복귀
+
+**다음 할 일**
+1. tax 3파일 원문 대조(사용자) · 홈택스 XLSX
+
+**막힌 것**
+- 없음
+
+---
+
 ## 2026-11-05 — feat/statements-pipeline → dev merge (Cursor)
 **한 일**
 - `turbo typecheck` 8패키지 통과 후 `dev`에 `--no-ff` merge·push (`c37e38e`)
