@@ -21,7 +21,7 @@
 | 세계은행 연간 CPI 상승률 | `worldbank.ts` | 공개 API `FP.CPI.TOTL.ZG`. 키 없음. 최신 연도 결측이면 이전 연도 | 매주 월 08시 | 불필요 | `macro_indicators` `WB_INFL_<ISO2>`. 웹 `/markets` |
 | BIS 중앙은행 정책금리 | `bis.ts` | 공개 SDMX `WS_CBPOL` 월. 키 없음. 18개월보다 오래된 시계열은 저장 안 함 | 월·목 08시 | 불필요 | `macro_indicators` `BIS_POL_<ISO2>`. 웹 `/markets` |
 | SEC EDGAR — 미국 상장사 10-K/10-Q (XBRL companyfacts) | `edgar.ts` | 공식 API. 대상 = trades∪watchlist(US/NYSE/NASDAQ/AMEX) ∪ `EDGAR_TARGETS` ∪ `/statements` 미국 섹터(`statementLookupHeldRefs`). 타깃은 `티커` 또는 `티커:CIK`. CIK가 없으면 `company_tickers.json`에서 매핑. 목록에 없으면 skip. `SEC_USER_AGENT` 없으면 skip. fy는 `edgarMinFiscalYear`(5년). 같은 기간·항목은 `end`가 최신인 fact | 매주 월 | `SEC_USER_AGENT` 필수, `EDGAR_TARGETS` 보조 | `financial_statements` |
-| SEC EDGAR — 기업개황 | `company-profile.ts` (`collectEdgarCompanyProfile`) | 대상은 EDGAR 재무와 동일(보유·env·미국 섹터). `submissions/CIK….json` 이름·거래소·SIC·주소·결산월. 주주·배당·부문은 공식 단일 API 없어 비움 | 매주 월 | `SEC_USER_AGENT` | `company_overviews` |
+| SEC EDGAR — 기업개황·부문 | `company-profile.ts` (`collectEdgarCompanyProfile`) | 대상은 EDGAR 재무와 동일(보유·env·미국 섹터). `submissions/CIK….json` 개황. 부문매출=같은 submissions의 10-K → Archives `*_htm.xml` → 제품축(ProductOrService) 우선·없으면 영업/지역 축 (`core/edgar-xbrl-segments`). companyfacts에는 차원 없음. 주주·배당은 단일 API 없어 비움 | 매주 월 | `SEC_USER_AGENT` | `company_overviews`, `company_year_facts`(segment) |
 
 ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검증 필요(코드가 바뀌기도 함).
 

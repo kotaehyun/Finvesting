@@ -7,10 +7,16 @@ import {
   parseDartHolders,
   parseDartXbrlOperatingSegments,
   parseEdgarCompanyOverview,
+  parseEdgarXbrlSegments,
   parseDartTarget,
   parseEdgarTarget,
   parseEnvTargets,
   pickDartAnnualReceipt,
+  pickEdgarAnnual10K,
+  edgarAccessionPath,
+  edgarCikPath,
+  edgarInstanceXmlName,
+  zipEdgarRecentFilings,
   resolveDartTargets,
   resolveEdgarTargets,
   statementCollectYears,
@@ -233,7 +239,57 @@ export async function collectDartCompanyProfile() {
   return { upserted, catalog: catalogStatus, unmatched, years: factYears };
 }
 
-/** EDGAR: submissions 개황만. 주주·배당·부문 API는 여기 없음. */
+async function edgarFetch(url: string, ua: string, tries = 4): Promise<Response> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await fetch(url, { headers: { "User-Agent": ua, Accept: "*/*" } });
+    } catch (e) {
+      last = e;
+      await sleep(400 * (i + 1));
+    }
+  }
+  throw last instanceof Error ? last : new Error(String(last));
+}
+
+/** submissions 10-K → 아카이브 `*_htm.xml` → 제품/영업부문 매출. */
+async function collectEdgarSegmentsFrom10K(
+  ua: string,
+  cik: string,
+  ticker: string,
+  year: number,
+  filings: ReturnType<typeof zipEdgarRecentFilings>,
+): Promise<{ rows: ReturnType<typeof parseEdgarXbrlSegments>; raw: unknown }> {
+  const filing = pickEdgarAnnual10K(filings, year);
+  if (!filing?.accessionNumber || !filing.primaryDocument) {
+    return { rows: [], raw: { year, no10k: true } };
+  }
+  const acc = edgarAccessionPath(filing.accessionNumber);
+  const cikPath = edgarCikPath(cik);
+  const xmlName = edgarInstanceXmlName(filing.primaryDocument);
+  const url = `https://www.sec.gov/Archives/edgar/data/${cikPath}/${acc}/${xmlName}`;
+  await sleep(200);
+  const res = await edgarFetch(url, ua);
+  if (!res.ok) return { rows: [], raw: { year, accession: filing.accessionNumber, xmlHttp: res.status, xmlName } };
+  const xml = await res.text();
+  if (!xml.includes("context") && !xml.includes("Context")) {
+    return { rows: [], raw: { year, accession: filing.accessionNumber, notXml: true } };
+  }
+  const rows = parseEdgarXbrlSegments({ instanceXml: xml, fiscalYear: year });
+  return {
+    rows,
+    raw: {
+      year,
+      accession: filing.accessionNumber,
+      reportDate: filing.reportDate,
+      source: "10-K htm.xml",
+      n: rows.length,
+      ticker,
+    },
+  };
+}
+
+/** EDGAR: submissions 개황 + 10-K XBRL 부문매출. 주주·배당 단일 API는 없음. */
 export async function collectEdgarCompanyProfile() {
   const ua = process.env.SEC_USER_AGENT?.trim();
   if (!ua) return { skipped: "SEC_USER_AGENT not set" };
@@ -253,6 +309,8 @@ export async function collectEdgarCompanyProfile() {
   for (const s of unmatched) console.warn(`edgar-profile unmatched: ${s}`);
   if (!targets.length) return { skipped: "no edgar targets", catalog: catalogStatus, unmatched };
 
+  // 미국은 결산월이 달라 올해 10-K가 이미 있을 수 있음 → 최근 3개 연도 시도
+  const factYears = statementCollectYears().slice(0, 3);
   let upserted = 0;
   const heldByTicker = new Map(held.map((h) => [h.symbol.trim().toUpperCase(), h]));
   for (const t of targets) {
@@ -260,11 +318,11 @@ export async function collectEdgarCompanyProfile() {
     const market = heldRow && /^(US|NYSE|NASDAQ|AMEX)$/i.test(heldRow.market) ? heldRow.market : "US";
     const inst = await ensureInstrument({ symbol: t.ticker, market, name: t.name, assetClass: "stock", currency: "USD" });
     await ensureIdentifier(inst.id, "sec", t.cik);
-    const res = await fetch(`https://data.sec.gov/submissions/CIK${t.cik}.json`, {
-      headers: { "User-Agent": ua, Accept: "application/json" },
-    });
+    const res = await edgarFetch(`https://data.sec.gov/submissions/CIK${t.cik}.json`, ua);
     if (!res.ok) { console.warn(`edgar submissions ${t.ticker}: ${res.status}`); continue; }
-    const json = await res.json() as Record<string, unknown>;
+    const json = await res.json() as Record<string, unknown> & {
+      filings?: { recent?: Parameters<typeof zipEdgarRecentFilings>[0] };
+    };
     const overview = parseEdgarCompanyOverview(json);
     if (overview) {
       await upsertOverview(inst.id, "edgar", overview, {
@@ -275,7 +333,20 @@ export async function collectEdgarCompanyProfile() {
       });
       upserted++;
     }
+    const filings = zipEdgarRecentFilings(json.filings?.recent ?? {});
+    for (const year of factYears) {
+      try {
+        const seg = await collectEdgarSegmentsFrom10K(ua, t.cik, t.ticker, year, filings);
+        upserted += await upsertYearFact(inst.id, year, "segment", seg.rows, "edgar", seg.raw);
+        if (!seg.rows.length) {
+          console.warn(`edgar segment ${t.ticker} ${year}: empty`, seg.raw);
+        }
+      } catch (e) {
+        console.warn(`edgar segment ${t.ticker} ${year}:`, e instanceof Error ? e.message : e);
+      }
+      await sleep(200);
+    }
     await sleep(150);
   }
-  return { upserted, catalog: catalogStatus, unmatched };
+  return { upserted, catalog: catalogStatus, unmatched, years: factYears };
 }

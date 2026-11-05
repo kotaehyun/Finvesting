@@ -26,6 +26,7 @@ export * from "./company-profile";
 export * from "./statement-mcap";
 export * from "./dart-accounts";
 export * from "./dart-xbrl-segments";
+export * from "./edgar-xbrl-segments";
 export * from "./world-indices";
 export * from "./fx-pairs";
 export * from "./inflation-countries";

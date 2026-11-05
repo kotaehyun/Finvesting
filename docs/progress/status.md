@@ -13,13 +13,12 @@
 - **활성 화면:** 근로자 대장·투자·시장·뉴스·챗·타임라인·세금·회계전표·재무제표·부동산.
 - **보류:** `/erp`는 URL로만.
 - **데이터:** `packages/core/data` tax=entries / realty=defaults. 원문 대조는 미검증. 우선 3파일 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`.
-- **재무제표:** 0~4단계 + DART `cfo`(SinglAcntAll). `/invest` 시총·뉴스. typecheck 통과(이전 세션).
+- **재무제표:** 0~4단계 + DART `cfo`·국내/미국 부문 XBRL. `/invest` 시총·뉴스.
 - **사용자 확인(2026-11-04):** `/invest`·딥링크 브라우저, Ollama 「읽어주기」완료.
-- **미검증:** `/statements` 현금흐름 칸 브라우저 클릭 · 이번 변경 커밋.
+- **최근 수집(2026-11-05):** 국내 segment 46행·23종목. 미국 edgar segment 81행·38종목.
 
 ## 미해결 우선 과제
 1. 🟠 tax 3파일 원문 대조(사용자) — payroll / brackets / ei-stability
 2. 🟡 홈택스 간소화·연말정산 XLSX (로드맵 3단계)
-3. 🟡 미국 10-K XBRL 부문(지시 시)
-4. ⏸ `/erp` 재개 — 사용자 지시 전 금지
-5. `dev` merge — 지시 시
+3. ⏸ `/erp` 재개 — 사용자 지시 전 금지
+4. `dev` merge — 지시 시

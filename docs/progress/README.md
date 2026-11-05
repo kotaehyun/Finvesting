@@ -2,6 +2,20 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-05 — 미국 10-K XBRL 부문매출 (Cursor)
+**한 일**
+- `core/edgar-xbrl-segments`: submissions 10-K → Archives `*_htm.xml` 파싱(제품축 우선). 테스트 4건
+- `collectEdgarCompanyProfile`에 부문 수집 연결. upsert 126 · segment(edgar) **81행 · 38종목**(AAPL iPhone/Service, MSFT·NVDA·AMZN 등)
+- companyfacts에는 차원 없음 → 인스턴스 XML만. 주주·배당은 여전히 비움
+
+**다음 할 일**
+1. tax 대조 · `dev` merge(지시 시)
+
+**막힌 것**
+- 태그·축이 다른 일부 연도 empty(가짜 숫자 없음)
+
+---
+
 ## 2026-11-05 — 국내 섹터 부문매출 재수집 (Cursor)
 **한 일**
 - `collectDartCompanyProfile` 1회: upsert 326 · catalog ok · 연도 2025–2023 · ~10분

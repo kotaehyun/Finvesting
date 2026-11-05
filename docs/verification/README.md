@@ -101,6 +101,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-05 | Cursor (미국 10-K 부문) | [2026-11-05-cursor-edgar-segments.md](./2026-11-05-cursor-edgar-segments.md) |
 | 2026-11-05 | Cursor (국내 부문 재수집) | [2026-11-05-cursor-dart-segments-recollect.md](./2026-11-05-cursor-dart-segments-recollect.md) |
 | 2026-11-04 | Cursor (부문매출 XBRL) | [2026-11-04-cursor-segments.md](./2026-11-04-cursor-segments.md) |
 | 2026-11-04 | Cursor (DART 현금흐름 cfo) | [2026-11-04-cursor-dart-cfo.md](./2026-11-04-cursor-dart-cfo.md) |
