@@ -2,6 +2,19 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-05 — feat/statements-pipeline → dev merge (Cursor)
+**한 일**
+- `turbo typecheck` 8패키지 통과 후 `dev`에 `--no-ff` merge·push (`c37e38e`)
+- 원격·로컬 `feat/statements-pipeline` 삭제
+
+**다음 할 일**
+1. tax 3파일 원문 대조(사용자) · 홈택스 XLSX · main merge는 검증 후 지시 시
+
+**막힌 것**
+- 없음
+
+---
+
 ## 2026-11-05 — 미국 10-K XBRL 부문매출 (Cursor)
 **한 일**
 - `core/edgar-xbrl-segments`: submissions 10-K → Archives `*_htm.xml` 파싱(제품축 우선). 테스트 4건
