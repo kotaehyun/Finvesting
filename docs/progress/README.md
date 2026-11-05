@@ -2,6 +2,20 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-05 — 국내 섹터 부문매출 재수집 (Cursor)
+**한 일**
+- `collectDartCompanyProfile` 1회: upsert 326 · catalog ok · 연도 2025–2023 · ~10분
+- `company_year_facts` segment(dart) 비어 있지 않은 행 46 · 종목 23(삼성·하이닉스·네이버·LG화학·CJ ENM 등)
+- XBRL 구조·미제공 연도는 empty skip(가짜 숫자 없음). 예: 삼성 2025 empty, 2024 DX/DS/SDC/Harman
+
+**다음 할 일**
+1. 미국 10-K XBRL 부문(지시 시) · tax 대조 · `dev` merge(지시 시)
+
+**막힌 것**
+- 부문 없는 공시·축 다른 종목/연도는 칸 비움
+
+---
+
 ## 2026-11-04 — 부문매출 XBRL 경로 (Cursor)
 **한 일**
 - 원인: `fnlttSinglAcntAll`에 부문매출 없음 → `list` 접수번호 + `fnlttXbrl` ZIP 파싱 (`core/dart-xbrl-segments`)
