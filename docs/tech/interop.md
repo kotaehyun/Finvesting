@@ -6,26 +6,34 @@
 ## 가져오기 (Import)
 | 대상 | 파일 | 파서 | 상태 |
 |---|---|---|---|
-| 은행 통장 거래내역 (공통) | CSV/XLSX | `importers/generic-bank.ts` — 헤더 이름으로 날짜/입금/출금/내용/잔액 컬럼 탐지 | 초안 |
+| 은행 통장 거래내역 (공통) | CSV/XLSX/DOCX | `importers/generic-bank.ts` + `fileToRows`. 웹 `/accounts`·`/profile` 통장내역 → `profile.previewFile` 변환 미리보기 후 `transactions.commitImport`. 빈 잔액 칸은 0원이 아니라 없음. 저장은 DB 트랜잭션. 잔액은 가장 늦은 거래일의 값만, 기존 최신 거래보다 오래된 파일이면 잔액 미갱신 | 연결됨 |
+| 고정비 세부내역 | CSV/XLSX/DOCX | `importers/recurring-costs.ts` — 헤더 이름·분류·금액·출금일·메모. 프로필대장 가져오기 → 변환 내용 표시 후 `recurringImport`. 같은 이름은 갱신. 내보내기 CSV·엑셀·워드 | 연결됨 |
 | 은행별 전용 (카카오뱅크, 토스, 국민, 신한 …) | 각 은행 내보내기 | 은행별 파서 — 실제 파일 샘플 받아서 작성 | 미구현 |
 | 카드 이용내역 | CSV/XLSX | 승인일·가맹점·금액·할부 | 미구현 |
 | 증권사 체결내역 (한투, 키움 …) | CSV/XLSX | `TradeImporter` | 미구현 |
 | 코인 거래소 (업비트) | CSV | `TradeImporter` | 미구현 |
-| 홈택스 자료 (연말정산 간소화 PDF/XLSX, 카드·현금영수증) | PDF/XLSX | 3단계 | 미구현 |
+| 홈택스 자료 (연말정산 간소화 JSON/CSV) | JSON/CSV | `importers/hometax.ts` — P101(IRP), P102(연금), J301(청약), A102(보험), G107/G207/G307(카드·영수증) 자동 파싱 | 연결됨 (`/tax`) |
 | 급여대장 / 4대보험 고지 | XLSX | 4단계 | 미구현 |
 
-흐름: 파일 업로드 → `csvToRows`/`xlsxToRows` → `detectTransactionImporter` → 미리보기(중복·잔액 검증) → 사용자 확인 → `transactions` 저장(`source`에 파서 id, `raw`에 원본 행).
+흐름: 파일 업로드 → `fileToRows`(csv/`xlsxToRows`/`docxToRows`) → `detectTransactionImporter` 또는 고정비 헤더 → 변환 내용 표 → 사용자 확인 → 저장.
 인코딩: 국내 은행 CSV는 EUC-KR인 경우가 많음 — 업로드 시 `TextDecoder("euc-kr")` 시도 후 깨지면 UTF-8.
+워드: `.docx` 표만. 구형 `.doc`는 거절하고 docx로 저장하라고 안내.
 
 ## 내보내기 (Export)
 | 대상 | 형식 | 상태 |
 |---|---|---|
-| 세무사 전달용 범용 장부 CSV | 일자·계정과목·차변·대변·적요·거래처·증빙 | 초안 (`exporters/generic-csv.ts`) |
-| **더존** (Smart A / iCUBE) | 전표 엑셀 업로드 양식 — 실제 양식 파일 확보 후 작성 | 미구현 |
-| **위하고** (WEHAGO) | 거래내역·전표 엑셀 업로드 양식 | 미구현 |
-| **세무사랑** | 전표 엑셀 업로드 양식 | 미구현 |
-| 연말정산 제출 자료 패키지 | 공제 항목 정리 XLSX | 3단계 |
+| 세무사 전달용 범용 장부 CSV | 일자·계정과목·차변·대변·적요·거래처·증빙 | 구현됨 (`exporters/generic-csv.ts`) |
+| **더존** (Smart A / iCUBE) | 일반전표 엑셀/CSV 업로드 규격 (일자, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **위하고** (WEHAGO) | 전자전표 CSV 업로드 규격 (회계일자, 전표구분 차변/대변, 계정코드, 공급가액, 합계, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **세무사랑 Pro** (K-Lep) | 일반전표 엑셀 업로드 규격 (월, 일, 전표번호, 구분 3:차변/4:대변, 계정코드, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **회계 통합 워크북** | 4개 시트 통합 XLSX (더존, 위하고, 세무사랑, 복식부기 분개장) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| 연말정산 제출 자료 패키지 | 4개 시트 통합 XLSX (정산요약, 공제명세, 해외주식 양도세, 금융소득) | 구현됨 (`exporters/tax-settlement-xlsx.ts`, `/tax`) |
 | 급여명세·원천세 신고 자료 | XLSX | 4단계 |
+| 부가세·인건비·3.3%·법인세·종소세·비상장·면세·수출입 시산 양식 | 화면 | 연결됨. `/erp` 인격별. 홈택스 XML·더존 업로드 아님 |
+| 분개·별지 제50호·제54호·사업장현황·수출실적·수입부가세·근로자명부·건보 자격취득 시산 CSV | CSV | 연결됨. 서식 문언 헤더·직역·주의. 넣은 칸만. 빈 칸은 0 아님. 홈택스·공단 제출 파일 아님 |
+| 공무원보수규정 별표 3 봉급표 시산 CSV | CSV | 연결됨. 1급~9급 호봉 봉급월액. 빈 칸은 그 계급에 없음. 0 아님. 인사혁신처 제출 아님 |
+| 건강보험 자격취득 공식 창구 | 링크 | 연결됨. 공단 홈·EDI·4대보험 연계센터. Open API·칸 자동 입력 없음. 화면 예시(홍길동)는 시산만 |
+| 건강보험 EDI 일괄신고 엑셀 | XLSX | 나중에. 빈 템플릿이 오면 그 컬럼 그대로. 지금은 컬럼을 만들지 않음 |
 
 각 프로그램의 업로드 양식은 버전마다 다르고 공개 스펙이 없으므로, **실제 양식 파일(빈 템플릿)을 받아서** `exporters/<program>.ts`에 컬럼 순서·헤더·날짜 형식을 그대로 맞춘다. 추측으로 만들지 않는다.
 

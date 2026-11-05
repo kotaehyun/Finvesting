@@ -1,0 +1,180 @@
+{
+  "defaults": {
+    "asOf": null,
+    "effectiveFrom": null,
+    "effectiveTo": null,
+    "sourceTitle": "가계대출 공표",
+    "sourceUrl": "https://www.bok.or.kr/",
+    "article": null,
+    "verifiedBy": "미검증",
+    "verifiedOn": null
+  },
+  "kind": "config",
+  "ECOS_HHLOAN_CODES": {
+    "kr": "ECOS_HHLOAN_KR",
+    "seoul": "ECOS_HHLOAN_SE",
+    "busan": "ECOS_HHLOAN_BS",
+    "daegu": "ECOS_HHLOAN_DG",
+    "incheon": "ECOS_HHLOAN_IC",
+    "gwangju": "ECOS_HHLOAN_GJ",
+    "daejeon": "ECOS_HHLOAN_DJ",
+    "ulsan": "ECOS_HHLOAN_US",
+    "sejong": "ECOS_HHLOAN_SJ",
+    "gyeonggi": "ECOS_HHLOAN_GG",
+    "gangwon": "ECOS_HHLOAN_GW",
+    "chungbuk": "ECOS_HHLOAN_CB",
+    "chungnam": "ECOS_HHLOAN_CN",
+    "jeonbuk": "ECOS_HHLOAN_JB",
+    "jeonnam": "ECOS_HHLOAN_JN",
+    "gyeongbuk": "ECOS_HHLOAN_GB",
+    "gyeongnam": "ECOS_HHLOAN_GN",
+    "jeju": "ECOS_HHLOAN_JJ"
+  },
+  "ECOS_HHLOAN_HS_CODES": {
+    "seoul": "ECOS_HHLOAN_HS_SE",
+    "busan": "ECOS_HHLOAN_HS_BS",
+    "daegu": "ECOS_HHLOAN_HS_DG",
+    "incheon": "ECOS_HHLOAN_HS_IC",
+    "gwangju": "ECOS_HHLOAN_HS_GJ",
+    "daejeon": "ECOS_HHLOAN_HS_DJ",
+    "ulsan": "ECOS_HHLOAN_HS_US",
+    "sejong": "ECOS_HHLOAN_HS_SJ",
+    "gyeonggi": "ECOS_HHLOAN_HS_GG",
+    "gangwon": "ECOS_HHLOAN_HS_GW",
+    "chungbuk": "ECOS_HHLOAN_HS_CB",
+    "chungnam": "ECOS_HHLOAN_HS_CN",
+    "jeonbuk": "ECOS_HHLOAN_HS_JB",
+    "jeonnam": "ECOS_HHLOAN_HS_JN",
+    "gyeongbuk": "ECOS_HHLOAN_HS_GB",
+    "gyeongnam": "ECOS_HHLOAN_HS_GN",
+    "jeju": "ECOS_HHLOAN_HS_JJ"
+  },
+  "ECOS_HHLOAN_HS_ITEM": "11110A0",
+  "ECOS_HHLOAN_ITEM": "1111000",
+  "ECOS_HHLOAN_STAT": "151Y003",
+  "ECOS_HHNPL_CODES": {
+    "seoul": "ECOS_HHNPL_SE",
+    "busan": "ECOS_HHNPL_BS",
+    "daegu": "ECOS_HHNPL_DG",
+    "incheon": "ECOS_HHNPL_IC",
+    "gwangju": "ECOS_HHNPL_GJ",
+    "daejeon": "ECOS_HHNPL_DJ",
+    "ulsan": "ECOS_HHNPL_US",
+    "sejong": "ECOS_HHNPL_SJ",
+    "gyeonggi": "ECOS_HHNPL_GG",
+    "gangwon": "ECOS_HHNPL_GW",
+    "chungbuk": "ECOS_HHNPL_CB",
+    "chungnam": "ECOS_HHNPL_CN",
+    "jeonbuk": "ECOS_HHNPL_JB",
+    "jeonnam": "ECOS_HHNPL_JN",
+    "gyeongbuk": "ECOS_HHNPL_GB",
+    "gyeongnam": "ECOS_HHNPL_GN",
+    "jeju": "ECOS_HHNPL_JJ"
+  },
+  "ECOS_HHNPL_ITEM": "R5AB00",
+  "ECOS_HHNPL_STAT": "141Y005",
+  "REALTY_METROS": [
+    {
+      "id": "seoul",
+      "label": "서울",
+      "kostat": "11",
+      "code": "SE"
+    },
+    {
+      "id": "busan",
+      "label": "부산",
+      "kostat": "21",
+      "code": "BS"
+    },
+    {
+      "id": "daegu",
+      "label": "대구",
+      "kostat": "22",
+      "code": "DG"
+    },
+    {
+      "id": "incheon",
+      "label": "인천",
+      "kostat": "23",
+      "code": "IC"
+    },
+    {
+      "id": "gwangju",
+      "label": "광주",
+      "kostat": "24",
+      "code": "GJ"
+    },
+    {
+      "id": "daejeon",
+      "label": "대전",
+      "kostat": "25",
+      "code": "DJ"
+    },
+    {
+      "id": "ulsan",
+      "label": "울산",
+      "kostat": "26",
+      "code": "US"
+    },
+    {
+      "id": "sejong",
+      "label": "세종",
+      "kostat": "29",
+      "code": "SJ"
+    },
+    {
+      "id": "gyeonggi",
+      "label": "경기",
+      "kostat": "31",
+      "code": "GG"
+    },
+    {
+      "id": "gangwon",
+      "label": "강원",
+      "kostat": "32",
+      "code": "GW"
+    },
+    {
+      "id": "chungbuk",
+      "label": "충북",
+      "kostat": "33",
+      "code": "CB"
+    },
+    {
+      "id": "chungnam",
+      "label": "충남",
+      "kostat": "34",
+      "code": "CN"
+    },
+    {
+      "id": "jeonbuk",
+      "label": "전북",
+      "kostat": "35",
+      "code": "JB"
+    },
+    {
+      "id": "jeonnam",
+      "label": "전남",
+      "kostat": "36",
+      "code": "JN"
+    },
+    {
+      "id": "gyeongbuk",
+      "label": "경북",
+      "kostat": "37",
+      "code": "GB"
+    },
+    {
+      "id": "gyeongnam",
+      "label": "경남",
+      "kostat": "38",
+      "code": "GN"
+    },
+    {
+      "id": "jeju",
+      "label": "제주",
+      "kostat": "39",
+      "code": "JJ"
+    }
+  ]
+}

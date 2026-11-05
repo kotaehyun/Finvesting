@@ -11,6 +11,7 @@
 - 검증 환경(맥/윈도우/VM, Node 버전)을 반드시 적는다 — 환경이 다르면 결과가 다를 수 있다.
 - 검증 **못 한 것**도 적는다. 다음 AI가 이어받을 목록이 된다.
 - 다른 AI의 검증 결과를 재확인했으면 그 사실도 적는다 (교차 검증).
+- 통계·수치 칸: 공식 출처를 대조한 것만 ✅. 출처 없이 비운 칸은 ⏸이며 ✅로 올리지 않는다.
 
 ## 형식
 ```
@@ -32,32 +33,137 @@
 ```
 
 ## 검증 현황 요약 (최신 상태 — 항목이 바뀌면 갱신)
-✅ 실행 확인 · ⏸ 키/대상 없어 보류(코드 경로는 skip까지 확인) · ❌ 아무도 실행 안 함
+✅ 실행 확인 · ⏸ 키/대상 없어 보류(코드 경로는 skip까지 확인) · ❌ 아무도 실행 안 함 · ⚠️ 실행했으나 실패
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ | 2026-09-02 | Cursor, Claude 재확인(7패키지, web 제외) |
-| core 테스트 (vitest) | ✅ 7개 (fx 테스트 3개 추가분은 미실행) | 2026-09-02 | Cursor |
-| interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
-| `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
-| seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
-| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25 | 2026-09-02 | 사용자 실행 |
-| `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b, 뉴스 컨텍스트 반영된 답변 확인 | 2026-09-02 | 사용자 실행 |
-| worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
+| 타입체크 (web 포함 8패키지) | ✅ `turbo typecheck` 8패키지 통과 (statements pipeline·mcap-board 포함) | 2026-11-03 | Cursor |
+| core 테스트 (vitest) | ✅ 52개 파일 188개 단위/회귀 테스트 전건 통과 (`accounting-journal.test.ts` 6건 포함) | 2026-10-10 | Gemini |
+| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 원문 대조는 전원 미검증(⏸). 3파일 준비표 09-26 | 2026-09-26 | Cursor |
+| 부동산·ERP 범위 | ✅ 동결·보류(ADR 0050). 내비 숨김 | 2026-09-26 | Cursor |
+| interop 테스트 | ✅ 5개 파일 18개 테스트 전건 통과 (`accounting-journal-csv.test.ts` 4건 포함) | 2026-10-10 | Gemini |
+| `pnpm db:generate` / `db:migrate` | ✅ 마이그레이션 23개 테이블 전건 적용 | 2026-10-09 | Gemini |
+| seed SQL 적용 (extensions, default user, sample profile, sample tax) | ✅ 000_extensions, 001_default_user, 002_sample_profile, 003_sample_tax 시딩 완료 | 2026-10-10 | Gemini |
+| `pnpm --filter @finvesting/web build` | ✅ Compiled, `/timeline`, `/invest`, `/tax`, `/accounting` 포함 라우트 통과 | 2026-09-25 | Gemini / Cursor |
+| `/accounting` 회계 전표 & 세무 프로그램 연동 | ✅ 4대 바롬메터 KPI(총 24건/60행, 차변 6,230만, 대변 6,230만, 대차평형 차액 0원), 계정코드표 토글, 분개장 카드, 더존 Smart A / 위하고 / 세무사랑 / XLSX 워크북 내보내기 브라우저 실물 확인 | 2026-10-10 | Gemini Browser |
+| `/tax` 세금 & 연말정산 터미널 | ✅ 3대 바롬메터 KPI(해외주식 250만 공제/양도세, 금융소득 2,000만 종합과세 게이지, 연말정산 환급액 예측), 3개 탭 전환, 실시간 10대 공제 시뮬레이터 브라우저 실물 확인 | 2026-10-10 | Gemini Browser |
+| `/timeline` Financial Timeline | ✅ 4대 KPI 요약 바롬터, 월/유형/키워드 필터, 일별 헤더/소계, 이벤트 카드 및 바로가기 링크, 콘솔 에러 0건 확인 | 2026-09-22 | Gemini Playwright |
+| 홈 `/` 순자산 시계열 차트 & 자산 배분 | ✅ 4대 KPI 요약(순자산 5,765만, MoM +327만, Peak/평균, 자산배분 게이지), 6/12개월 모드, 유동/저축/투자 스택바 차트, 월별 호버 툴팁 및 클릭 연동 브라우저 확인 완료 | 2026-10-10 | Gemini Browser |
+| `/invest` 관심 종목 터미널 (Watchlist Terminal) | ✅ 4대 메트릭 요약 바롬터, 마켓 필터(전체/KRX/US/UPBIT), 프리셋 퀵 추가, 등락률 뱃지, 실시간 고가/저가/거래량, 펀더멘털 스냅샷, 인라인 메모 에디터, 관련 최신 뉴스 아코디언 매핑 브라우저 실물 확인 | 2026-10-09 | Gemini Browser |
+| `/invest` 시가총액 보드 (`market.mcapBoard`) | ✅ tRPC ok·국내/해외 5행·삼성 뉴스 연계. 브라우저 UI 클릭은 ❌ | 2026-11-03 | Cursor |
+| `/fundamentals` Yahoo 펀더멘털 표 | ✅ 4대 KPI 요약 바롬터, 자산군/시장 다중 필터, 전 컬럼 정렬, 저PBR/우량ROE 뱃지, 52주 게이지, 네이버/DART/AI 링크 연동 및 DB 오프라인 방어 폴백 확인 | 2026-09-16 | Gemini |
+| `/markets` 시장 (물가·금리·거래량·수급링크·크립토/외환·TA) | ✅ 인플레 16칸. BIS 금리 17칸(한 2.75·미 3.63·튀르키예 37). 히트맵·뉴스 | 2026-09-14 | Grok Chrome |
+| `/realty` 부동산 | ✅ 버튼 「저장된 데이터 다시 불러오기」. 09-18 DB 꺼짐 클릭 → 성공 문구 없이 「DB 연결 불가」. 정적 칸은 버튼과 무관. 가상 뉴스·대출 폴백 없음 | 2026-09-18 | Grok Chrome |
+| `/profile` 프로필대장 + `workspaceSave`/`previewPay` | ✅ 페이지 200, 저장 추가·삭제 원상복구, 4대보험 미리보기 숫자 확인. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 급여상세 차·대변 (보통예금 전표) | ✅ 차변 지급=대변 공제+보통예금=세전 4,200,000. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 임금명세서 고용노동부 예시 칸 | ✅ core 27 · statement 대변 라벨 소득세. 칸 클릭·수당 입력은 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 08 적금내역 | ✅ upsert 월10만·3.6%·12개월 단리 만기 1,223,400. 삭제 후 0건. 브라우저 클릭 미실행 | 2026-09-12 | Grok tRPC |
+| `/profile` 07 연봉 추이 12개월 | ✅ payTrend 12포인트. 연말정산 연 합 명세·과세표준 기초 브라우저 | 2026-09-15 | Grok Chrome |
+| `/profile` 12 세무·회계 | ✅ tRPC 2026 ok·장부 6·양도 0. 공제는 급여 스냅샷만(근로소득공제 2,940,000). 2030 empty. Chrome 메뉴12·CSV 수신·2030 빈 칸·07 왕복. 세율 없음. CSV 바이트 미검사 | 2026-09-18 | Grok Chrome |
+| `/erp` ERP 업무홈 | ✅ Chrome. 자산 홈과 분리. KPI 자금·투자·수입·지출·과세대상 0·장부 6. 모듈 타일. `?view=tax` 근로소득공제 2,940,000. 매출·부가세 없음. 홈 스타터 「ERP 업무홈」 | 2026-09-18 | Grok Chrome |
+| `/erp` 사업·프리랜서 분리 | ✅ Chrome. 매출·부가세 칸 `—`. 가계 수입 KPI 없음. `?view=sales` 「가계 입금을 매출로 넣지 않습니다」. `?view=tax` 「근로자 세무는 여기 없습니다」. 프로필 12 `개인세무` | 2026-09-18 | Grok Chrome |
+| `/erp` 부가세·인건비·3.3% 양식 | ✅ Chrome. 일반과세 1,000만→매출세액 100만·납부 70만. 간이 납부 0. 고용보험 300만·150미만 사업주 34,500. 호봉은 별표 3(9급 1호봉 2,133,000). 프리랜서 100만→33,000 | 2026-09-18 | Grok Chrome |
+| `/erp` 법인사업자 | ✅ Chrome. 홈에 법인 KPI·법인세 칸. `?view=cit` 과세표준 1억→법인세 0, 산출 100만→지방 10만. `?view=vat&entity=corporation` 간이 버튼 없음·매출세액 100만 | 2026-09-18 | Grok Chrome |
+| `/erp` 인격별 책상 | ✅ Chrome. `/erp` 카드 2장(프리랜서·개인사업자 / 법인). `role=business` 용역·원천·매출·종소세·법인세 없음. `role=corporation` 종소세 없음·법인세·자본금·적립금 조정. `view=vat` 고르기 2장. `role=freelancer`는 개인 책상 | 2026-09-18 | Grok Chrome |
+| `/erp` 분개·법인세 서식 CSV | ✅ Chrome. 자금·장부 차변·대변 계정·보통예금 주석 은행명. 법인 별지 제50호 갑·을·제54호 직역. 개인 비상장 양도 예정신고 직역. 시산 CSV 버튼. 내려받기 바이트 미검사 | 2026-09-18 | Grok Chrome |
+| `/erp` 면세·확인서·수출입 | ✅ Chrome. `view=exempt` 제78조 2.10·부가가치세면세사업자수입금액증명. 사단·농업 이름만으로 면세 아님. 법인 현황신고 칸 없음. 수출 제21조·수입 제50조. 개인 부가세 달력 2.10. CSV 바이트 미검사 | 2026-09-18 | Grok Chrome |
+| `/erp` 직원등록·건보 자격취득 | ✅ Chrome. `view=staff` 근로자 명부 제41조. 고용일 넣으면 별지 제6호 자격취득일·취득 체크. 제8조 14일. 보험료 곱셈 없음. 인건비에서 이어짐 | 2026-09-18 | Grok Chrome |
+| `/erp` 프리랜서 3.3% 직종 한정 | ✅ Chrome. 인플루언서·**전문직** 버튼. 전문직 예시(의사·변호사 등). 개원은 개인사업자. 법령 주의 제20조. 사짜 미체크면 KPI `—` | 2026-09-18 | Grok Chrome |
+| `/erp` 세무 화면 법령 문언만 | ✅ Chrome. 주의 배너(시산·제20조). 원천 6조건 `statute_only`. 부가세·종소세·법인세·연말정산. 6조건 KPI 전부 체크는 탭 이탈로 미완 | 2026-09-18 | Grok Chrome |
+| `/erp` 양도·증여·보유 세율표 | ✅ Chrome. 세율표·전문가 우선·126. 3,000만 시산 공식 15%−126만. 증여 제26조. 보유 재산세·종부세 제9조. 프로필 13 동일 표 | 2026-09-18 | Grok Chrome |
+| `/profile` 09 투자내역 (계좌·자산군) | ✅ 페이지 200. 손익 `+7,382원` 빨강(+7.5%). 브라우저 클릭 확인. 복수 증권 체결은 미실행 | 2026-09-15 | Grok Chrome |
+| `/profile` 10 보험내역 (육각·칠각) | ✅ 페이지 200. 검증 실손 저장. 실손 100% · 암 60% · 사망 0%(부족 2.52억). 육각 중대질병 1억. **메뉴 번호는 2026-09-14부터 11** | 2026-09-13 | Grok Chrome |
+| `/profile` 10 AI 추천 (`insurance.recommend`) | ✅ tRPC·브라우저. 사망→뇌·심장·상해·장해→암. 실손 됨. ~46–56초 | 2026-09-13 | Grok Ollama |
+| `/profile` 10 투자성향·조언 | ✅ 페이지 200. 저장 0/12 보수 → 5/12 중립. 01 성향 동기화. BTC·비상금 문장. AI 추천 미실행. **메뉴 번호 11→10, 투자내역 다음** | 2026-09-14 | Grok Chrome |
+| `/news` 뉴스 대시보드 | ✅ 페이지 200. 2026-09-14 feed 1246. 분류 654/210/50/200/55/30/47 (경제·금융·부동산·시황·크립토·외환·중앙은행) | 2026-09-14 | Grok tRPC+Chrome |
+| `/opinions` 오피니언·칼럼 | ✅ 143=66/32/45. RSS 5피드 수집. 3열·애널리스트 필터 브라우저 | 2026-09-13 | Grok Chrome |
+| `/statements` 재무제표·감사 | ✅ `?q=AAPL` EDGAR만. `?q=005930` DART·국내 해설. 09-18 DB 꺼짐 `unavailable`+「DB 연결 불가」(500 아님). 목록 종목 선택·3표 실데이터 미실행 | 2026-09-18 | Grok Chrome |
+| `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
+| `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
+| `/chat` 대화 목록 12문항 | ✅ 5그룹 버튼. 「순자산 구성」 클릭 후 순자산 3,749,802·투자 104,802 인용 | 2026-09-13 | Grok Chrome |
+| worker — RSS 국내 (한경·매경·연합) | ✅ 한경·연합 수집. 2026-09-14 mk `ENOTFOUND www.mk.co.kr` | 2026-09-14 | Grok collectRssNews |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
-| worker — Upbit BTC/ETH/SOL/XRP | ✅ 4 upsert | 2026-09-02 | 사용자 실행 |
-| worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
+| worker — RSS 크립토·외환·부동산 | ✅ CoinDesk 25, Cointelegraph 30, FXStreet 30, 한경 부동산 50 | 2026-09-14 | Grok collectRssNews |
+| worker — Upbit (보유·관심 ∪ UPBIT_TARGETS) | ✅ 보유 BTC만 1 upsert. 종가 104,802,000 (2026-09-13). 구버전 고정 4종은 09-02 | 2026-09-13 | Grok run:once |
+| worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip. 2026-09-15 가계대출 수집도 `ECOS_API_KEY not set` | 2026-09-15 | Grok collectEcos |
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
-| worker — Yahoo (v3, SPY/QQQ/^GSPC/^IXIC) | ✅ 4/4 (v2는 429·지원종료 → v3 전환) | 2026-09-02 | 사용자 실행 |
-| worker — DART (계정명 매핑) | ⏸ 키·대상 없음, skip 동작 확인 | 2026-09-02 | |
-| worker — EDGAR (태그·UA) | ⏸ 대상 없음, skip 동작 확인 | 2026-09-02 | |
+| worker — Yahoo (보유·관심 + KRW=X USDKRW) | ✅ 13/13 (지수10+AAPL/MSFT/SPY). 이후 지수 chart 90일 624봉. 펀더멘털 주식·ETF만. USDKRW yahoo | 2026-09-14 | Grok collectYahoo |
+| 대시보드 투자자산 = 평가액+예수금 | ✅ overview invested 104,802 = 평가 104,802 + 예수금 0. 브라우저 문구는 미클릭 | 2026-09-13 | Grok tRPC |
+| worker — DART (계정명 매핑) | ✅ SinglAcntAll CF→cfo. upsert 116. cashflow 36행 전부 cfo. 삼성·하이닉스 2022–2026 | 2026-11-04 | Cursor |
+| worker — EDGAR (태그·UA) | ✅ 5년. upsert 120. AAPL·MSFT FY/Q 2022– | 2026-11-03 | Cursor |
+| worker — 세계은행 CPI | ✅ 16/16 upsert. 한 2.12%(2025) 미 2.95%(2024) | 2026-09-14 | Grok collectWorldBankInflation |
+| worker — BIS 정책금리 | ✅ 14 upsert / 3 stale(DE·FR·IT). KR 2.75 US 3.625 XM 2.25 | 2026-09-14 | Grok collectBisPolicyRates |
+| Yahoo 기업 검색 | ✅ `005930`→005930.KS. Chrome `AAPL`→Apple Inc. 나스닥. 한글 회사명 Yahoo 400 | 2026-09-14 | Grok Chrome 재기동 |
 
 | 모바일 Expo 기동 + 루트 .env 로드 | ❌ 미실행 | | |
-| 윈도우 환경 전체 | ❌ 경로 미정 | | |
+| 윈도우 환경 전체 | ✅ `pnpm install`, core 139개·interop 11개 테스트, 8개 패키지 typecheck, build, dev:web 브라우저 렌더 확인 (DB는 Docker 미기동) | 2026-09-15 | Gemini |
 
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-05 | Cursor (미국 10-K 부문) | [2026-11-05-cursor-edgar-segments.md](./2026-11-05-cursor-edgar-segments.md) |
+| 2026-11-05 | Cursor (국내 부문 재수집) | [2026-11-05-cursor-dart-segments-recollect.md](./2026-11-05-cursor-dart-segments-recollect.md) |
+| 2026-11-04 | Cursor (부문매출 XBRL) | [2026-11-04-cursor-segments.md](./2026-11-04-cursor-segments.md) |
+| 2026-11-04 | Cursor (DART 현금흐름 cfo) | [2026-11-04-cursor-dart-cfo.md](./2026-11-04-cursor-dart-cfo.md) |
+| 2026-11-03 | Cursor (세션 종료 typecheck) | [2026-11-03-cursor-session-end.md](./2026-11-03-cursor-session-end.md) |
+| 2026-11-03 | Cursor (`/invest` 시총 보드) | [2026-11-03-cursor-invest-mcap.md](./2026-11-03-cursor-invest-mcap.md) |
+| 2026-11-03 | Cursor (재무제표 4단계 챗 컨텍스트) | [2026-11-03-cursor-statements-4.md](./2026-11-03-cursor-statements-4.md) |
+| 2026-11-03 | Cursor (재무제표 3단계 기업정보 패널) | [2026-11-03-cursor-statements-3.md](./2026-11-03-cursor-statements-3.md) |
+| 2026-11-03 | Cursor (재무제표 2단계 기간 확장 5년·분기) | [2026-11-03-cursor-statements-2.md](./2026-11-03-cursor-statements-2.md) |
+| 2026-11-01 | Cursor (재무제표 1단계 보유·관심 + corpCode/CIK) | [2026-11-01-cursor-statements-1.md](./2026-11-01-cursor-statements-1.md) |
+| 2026-10-10 | Gemini (더존/위하고/세무사랑 회계 전표 내보내기, 세금/연말정산, 순자산 시계열 위젯) | [2026-10-10-gemini.md](./2026-10-10-gemini.md) |
+| 2026-10-09 | Gemini (CLI 문서화, 프로필 실데이터 시딩, 관심 종목 터미널 구축 및 2단계 착수) | [2026-10-09-gemini.md](./2026-10-09-gemini.md) |
+| 2026-09-22 | Gemini (Financial Timeline 구현 및 MVP 1단계 검증) | [2026-09-22-gemini.md](./2026-09-22-gemini.md) |
+| 2026-09-21 | Gemini (금융 원장 5대 결함 완전 해결) | [2026-09-21-gemini.md](./2026-09-21-gemini.md) |
+| 2026-09-18 | Cursor Grok (맥, 윈도우 원격 꺼짐) | [2026-09-18-grok.md](./2026-09-18-grok.md) |
+| 2026-09-16 | Codex (윈도우 푸시 교차 검토) | [2026-09-16-codex.md](./2026-09-16-codex.md) |
+| 2026-09-16 | Cursor Grok (펀더멘털 조회 창구) | [2026-09-16-grok-17.md](./2026-09-16-grok-17.md) |
+| 2026-09-16 | Cursor Grok (공시 창구 분리) | [2026-09-16-grok-16.md](./2026-09-16-grok-16.md) |
+| 2026-09-16 | Cursor Grok (파산·유찰 공표만) | [2026-09-16-grok-15.md](./2026-09-16-grok-15.md) |
+| 2026-09-16 | Gemini (Antigravity 윈도우) | [2026-09-16-gemini.md](./2026-09-16-gemini.md) |
+| 2026-09-15 | Gemini (맥 최신 작업 윈도우 교차 검증) | [2026-09-15-gemini.md](./2026-09-15-gemini.md) |
+| 2026-09-15 | Codex (백엔드·AI 방향 문서화) | [2026-09-15-codex.md](./2026-09-15-codex.md) |
+| 2026-09-15 | Cursor Grok (관심·Fundamentals·연말정산) | [2026-09-15-grok-2.md](./2026-09-15-grok-2.md) |
+| 2026-09-15 | Cursor Grok (평가손익 부호·색) | [2026-09-15-grok.md](./2026-09-15-grok.md) |
+| 2026-09-14 | Cursor Grok (실행해봐 재기동) | [2026-09-14-grok-9.md](./2026-09-14-grok-9.md) |
+| 2026-09-14 | Cursor Grok (원자재·검색·금리) | [2026-09-14-grok-8.md](./2026-09-14-grok-8.md) |
+| 2026-09-14 | Cursor Grok (시장·부동산) | [2026-09-14-grok-7.md](./2026-09-14-grok-7.md) |
+| 2026-09-14 | Cursor Grok (비트코인·환율) | [2026-09-14-grok-6.md](./2026-09-14-grok-6.md) |
+| 2026-09-14 | Cursor Grok (주요 지수 그래프) | [2026-09-14-grok-5.md](./2026-09-14-grok-5.md) |
+| 2026-09-14 | Cursor Grok (홈·투자 대시보드) | [2026-09-14-grok-4.md](./2026-09-14-grok-4.md) |
+| 2026-09-14 | Codex (문서·현재 구현 검토) | [2026-09-14-codex.md](./2026-09-14-codex.md) |
+| 2026-09-14 | Cursor Grok (투자 화면 연결) | [2026-09-14-grok-3.md](./2026-09-14-grok-3.md) |
+| 2026-09-14 | Cursor Grok (프로필 투자성향) | [2026-09-14-grok-2.md](./2026-09-14-grok-2.md) |
+| 2026-09-14 | Cursor Grok (Yahoo 펀더멘털) | [2026-09-14-grok.md](./2026-09-14-grok.md) |
+| 2026-09-13 | Cursor Grok (투자 대시보드) | [2026-09-13-grok-11.md](./2026-09-13-grok-11.md) |
+| 2026-09-13 | Cursor Grok (오피니언 대시보드) | [2026-09-13-grok-10.md](./2026-09-13-grok-10.md) |
+| 2026-09-13 | Cursor Grok (조회·해설 사이트) | [2026-09-13-grok-9.md](./2026-09-13-grok-9.md) |
+| 2026-09-13 | Cursor Grok (재무제표 읽어주기) | [2026-09-13-grok-8.md](./2026-09-13-grok-8.md) |
+| 2026-09-13 | Cursor Grok (뉴스 카테고리) | [2026-09-13-grok-7.md](./2026-09-13-grok-7.md) |
+| 2026-09-13 | Cursor Grok (뉴스 대시보드) | [2026-09-13-grok-6.md](./2026-09-13-grok-6.md) |
+| 2026-09-13 | Cursor Grok (보험 AI 추천) | [2026-09-13-grok-5.md](./2026-09-13-grok-5.md) |
+| 2026-09-13 | Cursor Grok (보험 보장 레이더) | [2026-09-13-grok-4.md](./2026-09-13-grok-4.md) |
+| 2026-09-13 | Cursor Grok (투자 비서 대화 목록) | [2026-09-13-grok-3.md](./2026-09-13-grok-3.md) |
+| 2026-09-13 | Cursor Grok (워커 시세·USDKRW 실행) | [2026-09-13-grok-2.md](./2026-09-13-grok-2.md) |
+| 2026-09-13 | Cursor Grok (시세 대상·USDKRW·투자자산) | [2026-09-13-grok.md](./2026-09-13-grok.md) |
+| 2026-09-13 | Claude (Cowork, 종합 검토) | [2026-09-13-claude.md](./2026-09-13-claude.md) |
+| 2026-09-12 | Cursor Grok (투자내역) | [2026-09-12-grok-7.md](./2026-09-12-grok-7.md) |
+| 2026-09-12 | Cursor Grok (연봉 추이) | [2026-09-12-grok-6.md](./2026-09-12-grok-6.md) |
+| 2026-09-12 | Cursor Grok (적금내역) | [2026-09-12-grok-5.md](./2026-09-12-grok-5.md) |
+| 2026-09-12 | Cursor Grok (임금명세서 양식) | [2026-09-12-grok-4.md](./2026-09-12-grok-4.md) |
+| 2026-09-12 | Cursor Grok (급여상세 차대변) | [2026-09-12-grok-3.md](./2026-09-12-grok-3.md) |
+| 2026-09-12 | Cursor Grok (파일 변환·추이) | [2026-09-12-grok-2.md](./2026-09-12-grok-2.md) |
+| 2026-09-12 | Cursor Grok (프로필대장) | [2026-09-12-grok.md](./2026-09-12-grok.md) |
+| 2026-09-08 | Cursor Grok (dev 머지 후 실행) | [2026-09-08-grok.md](./2026-09-08-grok.md) |
+| 2026-09-05 | Cursor Grok (계좌·CSV) | [2026-09-05-grok-2.md](./2026-09-05-grok-2.md) |
+| 2026-09-05 | Cursor Grok (리뷰 반영) | [2026-09-05-grok.md](./2026-09-05-grok.md) |
+| 2026-09-02 | Cursor Grok (first-run 리뷰) | [2026-09-02-grok.md](./2026-09-02-grok.md) |
 | 2026-09-02 | Claude (Cowork, 스캐폴딩) | [2026-09-02-claude.md](./2026-09-02-claude.md) |
 | 2026-09-02 | Cursor | [2026-09-02-cursor.md](./2026-09-02-cursor.md) |
 | 2026-09-02 | Claude (Cowork, 리뷰 검토) | [2026-09-02-claude-2.md](./2026-09-02-claude-2.md) |
+
+## 2026-09-15 Codex 교차 검증
+| 항목 | 상태 | 기록 |
+|---|---|---|
+| Windows 타입 검사 / 단위 테스트 | ✅ 8패키지 / 150개 통과 | [기록](./2026-09-15-codex-2.md) |
+| 금융 원장 경계 사례 | ⚠️ 소수 매도·동일 시각 정렬·하루치 잔액 오류 재현 | [리뷰](../review/2026-09-15-codex-ledger.md) |

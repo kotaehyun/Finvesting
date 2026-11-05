@@ -17,11 +17,11 @@
 
 ## 데이터 흐름
 ```
-[외부 소스] RSS · Upbit · ECOS · (KIS, Naver, 크롤러)
+[외부 소스] RSS · Upbit · ECOS · FRED · Yahoo · DART · EDGAR · World Bank · BIS · (KIS, Naver, 크롤러)
       │  apps/worker (cron)
       ▼
 [PostgreSQL] market_news · market_quotes · macro_indicators · economic_events
-             accounts · transactions · trades · financial_profiles
+             accounts · transactions · trades · financial_profiles · savings_plans · insurance_policies
       │  packages/db (Drizzle)
       ▼
 [packages/api] tRPC 라우터 ── packages/core(계산) ── packages/ai(LLM)
@@ -36,14 +36,17 @@
 ## 패키지 의존 규칙
 - `core`와 `interop`은 DB·네트워크에 의존하지 않는다 (순수 함수). 계산 로직은 `core`, 파일 변환은 `interop`.
 - `db`는 `core`를 모른다. 스키마와 연결만.
-- `api`가 `db` + `core` + `ai`를 조합한다.
+- `api`가 `db` + `core` + `ai` + `interop`를 조합한다. (파일 파싱·가져오기는 api가 interop 결과를 저장)
 - `web`/`mobile`은 `api`의 타입만 import, DB 직접 접근 금지.
-- `worker`는 `db`(+`ai` 임베딩)만 사용, `api`를 거치지 않는다.
+- `worker`는 `db` + `core`(수집 대상 매핑) + `ai` 임베딩. `api`를 거치지 않는다.
 
 ## 인증
 단일 사용자 모드. `DEFAULT_USER_ID`로 고정. 모든 사용자 데이터 테이블에 `user_id`가 있어 서비스화 시 인증만 붙이면 된다.
 
+## 웹 타입 해석
+`apps/web/tsconfig.json`은 `typeRoots`와 `paths`로 `@types/react` 19만 보게 한다. 모노레포의 모바일 Expo(`@types/react` 18)가 Next `styled-jsx`를 통해 섞이면 JSX 컴포넌트 오류가 난다. 타입 단언으로 가리지 않는다.
+
 ## 실행 형태
 - 로컬: `pnpm dev` (web + worker 동시), Docker Postgres
-- 모바일: Expo Go, 같은 Wi‑Fi에서 맥북 IP의 3000 포트 호출
+- 모바일: Expo Go, 같은 Wi‑Fi에서 맥북 IP의 3000 포트 호출. 웹 기본 `pnpm dev:web`은 `127.0.0.1`만 연다. 폰에서 보려면 `pnpm --filter @finvesting/web dev:lan` (`0.0.0.0`). API는 인증 없음.
 - 서비스화 시: web은 Vercel/컨테이너, worker는 컨테이너 1개, DB는 Supabase/RDS — 코드 변경 없이 `DATABASE_URL`만 교체

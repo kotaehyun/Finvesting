@@ -3,11 +3,23 @@
 
 export type RiskTolerance = "conservative" | "moderate" | "aggressive";
 
+export const RISK_TOLERANCE_LABEL: Record<RiskTolerance, string> = {
+  conservative: "보수",
+  moderate: "중립",
+  aggressive: "공격",
+};
+
+export const RISK_INVEST_SHARE: Record<RiskTolerance, number> = {
+  conservative: 0.3,
+  moderate: 0.5,
+  aggressive: 0.7,
+};
+
 export type AllocationInput = {
   monthlyNetIncome: number;
   monthlyFixedCost: number;
   liquidAssets: number;        // 현금 + 입출금 + 예적금
-  investedAssets: number;      // 주식·ETF·코인 등 평가액
+  investedAssets: number;      // 보유 평가액 + 증권·코인·연금 예수금
   emergencyFundMonths: number; // 목표 비상금 개월 수
   riskTolerance: RiskTolerance;
 };
@@ -23,7 +35,7 @@ export type MonthlyBudgetGuide = {
   notes: string[];
 };
 
-const INVEST_SHARE: Record<RiskTolerance, number> = { conservative: 0.3, moderate: 0.5, aggressive: 0.7 };
+const INVEST_SHARE = RISK_INVEST_SHARE;
 
 export function monthlyBudgetGuide(i: AllocationInput): MonthlyBudgetGuide {
   const notes: string[] = [];

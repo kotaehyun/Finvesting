@@ -2,6 +2,2054 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-05 — feat/statements-pipeline → dev merge (Cursor)
+**한 일**
+- `turbo typecheck` 8패키지 통과 후 `dev`에 `--no-ff` merge·push (`c37e38e`)
+- 원격·로컬 `feat/statements-pipeline` 삭제
+
+**다음 할 일**
+1. tax 3파일 원문 대조(사용자) · 홈택스 XLSX · main merge는 검증 후 지시 시
+
+**막힌 것**
+- 없음
+
+---
+
+## 2026-11-05 — 미국 10-K XBRL 부문매출 (Cursor)
+**한 일**
+- `core/edgar-xbrl-segments`: submissions 10-K → Archives `*_htm.xml` 파싱(제품축 우선). 테스트 4건
+- `collectEdgarCompanyProfile`에 부문 수집 연결. upsert 126 · segment(edgar) **81행 · 38종목**(AAPL iPhone/Service, MSFT·NVDA·AMZN 등)
+- companyfacts에는 차원 없음 → 인스턴스 XML만. 주주·배당은 여전히 비움
+
+**다음 할 일**
+1. tax 대조 · `dev` merge(지시 시)
+
+**막힌 것**
+- 태그·축이 다른 일부 연도 empty(가짜 숫자 없음)
+
+---
+
+## 2026-11-05 — 국내 섹터 부문매출 재수집 (Cursor)
+**한 일**
+- `collectDartCompanyProfile` 1회: upsert 326 · catalog ok · 연도 2025–2023 · ~10분
+- `company_year_facts` segment(dart) 비어 있지 않은 행 46 · 종목 23(삼성·하이닉스·네이버·LG화학·CJ ENM 등)
+- XBRL 구조·미제공 연도는 empty skip(가짜 숫자 없음). 예: 삼성 2025 empty, 2024 DX/DS/SDC/Harman
+
+**다음 할 일**
+1. 미국 10-K XBRL 부문(지시 시) · tax 대조 · `dev` merge(지시 시)
+
+**막힌 것**
+- 부문 없는 공시·축 다른 종목/연도는 칸 비움
+
+---
+
+## 2026-11-04 — 부문매출 XBRL 경로 (Cursor)
+**한 일**
+- 원인: `fnlttSinglAcntAll`에 부문매출 없음 → `list` 접수번호 + `fnlttXbrl` ZIP 파싱 (`core/dart-xbrl-segments`)
+- 연결·Revenue + OperatingSegments/SegmentsAxis. 삼성 2024 DX/DS/SDC/Harman, 하이닉스 2024 DRAM/NAND, 네이버 서치·커머스 등 저장
+- 일부 연도·종목은 XBRL 구조 달라 empty(가짜 숫자 없음)
+
+**다음 할 일**
+1. 국내 섹터 부문매출 재수집(지시 시)
+2. 미국 부문: 10-K XBRL 경로(지시 시) · tax 대조
+
+**막힌 것**
+- 미국 부문: companyfacts에 차원 없음 → 10-K `*_htm.xml` 필요. 연도마다 태그 축이 다르면 칸 비움
+
+---
+
+## 2026-11-04 — 재무제표 수집 대상에 섹터 기업 합침 (Cursor)
+**한 일**
+- `statementLookupHeldRefs`: `/statements` 국내·미국 섹터 → DART/EDGAR/프로필 대상
+- EDGAR: upsert 2506 · 미국 44종목. DART 재시도 성공: upsert 2158 · 국내 39종목 · cfo 666행(재시도·부분 실패 skip)
+
+**다음 할 일**
+1. 부문매출 경로 · tax 대조 · 커밋(지시 시)
+
+**막힌 것**
+- 없음
+
+---
+
+## 2026-11-04 — DART 현금흐름(cfo) 매핑 (Cursor)
+**한 일**
+- 원인: `fnlttSinglAcnt`에 CF 없음. `fnlttSinglAcntAll` CF + `core/dart-accounts`(`mapDartFsRow`)
+- `cfo` = 영업활동현금흐름(account_id 우선). CF 표의 당기순이익·창출액은 제외
+- 재수집 upsert 116. cashflow 36행 전부 cfo(삼성·하이닉스). 테스트 7건
+- 사용자: 할 일 1·2(브라우저·읽어주기) 완료로 전달받음
+
+**다음 할 일**
+1. 부문매출 다른 공시 경로(지시 시)
+2. tax 원문 대조(사용자)
+3. 커밋·push·`dev` merge(지시 시)
+
+**막힌 것**
+- 없음(SinglAcntAll 013이면 해당 기간 cashflow 비움)
+
+---
+
+## 2026-11-03 — 세션 종료: statements pipeline + invest 시총 (Cursor)
+**한 일**
+- 재무제표 0~4단계 + `/invest` 시총 보드 작업 마무리. `turbo typecheck` 8패키지 통과(mcap-board stale 분기 타입 수정)
+- progress·status·overview(.en)·data-sources·verification 갱신. 브랜치 `feat/statements-pipeline`에 커밋
+
+**다음 할 일**
+1. 브라우저 `/invest` 시총·뉴스·`/statements` 딥링크 클릭 확인
+2. Ollama 「읽어주기」실호출
+3. DART 현금흐름 계정 매핑
+4. 부문매출 다른 공시 경로(지시 시)
+5. tax 3파일 원문 대조(사용자)
+6. push·`dev` merge는 지시 시
+
+**막힌 것**
+- 전 세계 공식 시총 API 없음 · 미국 주주·배당·부문 단일 API 없음 · `/erp` 보류
+
+---
+
+## 2026-11-03 — `/invest` 시총 순위·뉴스 연계 (Cursor)
+**한 일**
+- `market.mcapBoard`: Yahoo 시총 국내(KRX·KOSDAQ)·해외(주로 미국) 순위 + 종목별 관련 뉴스 제목·링크
+- `/invest` `McapBoard` 패널(탭·뉴스 펼침·재무제표 딥링크 `area`/`browse`/`q`)
+- core: `buildMcapBoards`·`matchNewsForSymbol` 테스트 통과
+
+**다음 할 일**
+- 5단계 세션 종료(지시 시)
+- 브라우저에서 `/invest` UI 클릭 확인(지시 시)
+
+**막힌 것**
+- 전 세계 공식 시총 순위 API 없음 → 「해외 · 수집분」라벨
+
+---
+
+## 2026-11-03 — `/statements` 시가총액 순위 (Cursor)
+**한 일**
+- 보기 「시가총액」: 국내·해외(현재 시장) Yahoo 시총 수집분 큰 순. 순위·시총 표시. 없으면 empty
+- yahoo 수집 대상에 섹터 종목(`statementLookupYahooTickers`) 합침
+
+**다음 할 일**
+- yahoo `run:once`로 시총 채우기(지시 시)
+- 5단계 세션 종료
+
+**막힌 것**
+- 전 시장 공식 시총 순위 API 없음 → Yahoo 수집분 한정
+
+---
+
+## 2026-11-03 — `/statements` 섹터 종목 채움 (Cursor)
+**한 일**
+- 국내·미국 `STATEMENT_LOOKUP_GROUPS` 전 섹터에 상장 티커·이름 채움(반도체·플랫폼·2차전지·모빌리티·금융·바이오·소비재 등). 일본·중국·유럽은 그대로 빈 칸.
+
+**다음 할 일**
+- 5단계 세션 종료 또는 수집 대상 확대(지시 시)
+
+**막힌 것**
+- 없음(메뉴 바로가기용. 숫자는 수집분 있을 때만)
+
+---
+
+## 2026-11-03 — 재무제표 4단계: 챗 컨텍스트 (Cursor)
+**한 일**
+- `formatStatementContext`에 기업개황·주주·배당·부문 블록. 「읽어주기」·투자 봇이 같은 문자열 사용
+- 챗 대상 = 보유∪관심 중 재무 수집분(최대 3). 프롬프트에 개황·주주·배당 규칙 반영
+- 삼성전자 2025 컨텍스트에 개황·주주·배당·감사 포함 확인(len 1180)
+
+**다음 할 일**
+1. 「진행」→ 5단계 세션 종료(verification·status 마무리)
+2. Ollama로 「읽어주기」실호출(지시 시)
+
+**막힌 것**
+- 없음(LLM 실응답은 이번 미실행)
+
+---
+
+## 2026-11-03 — 재무제표 3단계: 기업정보 패널 (Cursor)
+**한 일**
+- `company_overviews`·`company_year_facts` (0008). DART 개황·최대주주·배당, EDGAR submissions 개황
+- `/statements` 오른쪽에 수집분 표시. 부문매출은 XBRL member 있을 때만(삼성·하이닉스는 이번 수집 0)
+- worker `dart-profile` / `edgar-profile` 스케줄
+
+**다음 할 일**
+1. 「진행」→ 4단계(챗 컨텍스트에 개황·주주·배당)
+2. 부문매출 다른 공시 경로(지시 시)
+
+**막힌 것**
+- 미국 주주·배당·부문: 단일 공식 API 없음 → 칸 비움
+
+---
+
+## 2026-11-03 — 재무제표 2단계: 기간 확장 (Cursor)
+**한 일**
+- `core/statement-collect`: 5년·DART 보고서 코드(FY/Q1/H1/Q3)·`preferStatementRow`(FY 우선)
+- worker DART·EDGAR가 같은 연도 폭으로 수집. 감사는 사업보고서만
+- 실수집: DART upsert 80, EDGAR 120. 삼성·하이닉스 2022–2025 감사 적정
+
+**다음 할 일**
+1. 「진행」→ 3단계(기업개황·사업부문·주주·배당 패널)
+2. DART 현금흐름 계정 매핑(지시 시)
+
+**막힌 것**
+- 없음(현금흐름 빈 칸은 계정명 미매핑)
+
+---
+
+## 2026-11-01 — `/statements` 국내·해외 보기·보유/관심/섹터 (Cursor)
+**한 일**
+- 왼쪽을 국내/해외 큰 칸으로. 해외는 미국 + 일본·중국·유럽 「추가」.
+- 보기: 보유(평가액 순)·관심목록·기업. 국내를 누르면 보유가 있으면 그 목록이 가운데에 먼저 나옴. 검색 횟수는 기록이 없어 만들지 않음.
+- 섹터는 폴더. 클릭하면 빅테크 등 하위가 펼쳐지고, 「편집」에서 추가·이름·숨김·종목 넣기(로컬). 숫자는 수집분·보유·관심만.
+
+**다음 할 일**
+- 2단계 기간 확장
+
+**막힌 것**
+- 없음
+
+---
+
+## 2026-11-01 — `/statements` 오른쪽 기업정보 칸 (Cursor)
+**한 일**
+- 비율·감사를 가운데에서 빼고 오른쪽 속성 바로 옮김. 종목 요약도 그 칸.
+- `STATEMENT_SIDE_SLOTS`: 기업개황·사업부문·주주·배당은 「추가」칸. 수집 전에는 비움.
+
+**다음 할 일**
+1. 「진행」→ 2단계(기간 확장) 또는 오른쪽 칸 채우기(공시 수집 후)
+2. 업종별 기업 채우기(지시 시)
+
+**막힌 것**
+- 없음(오른쪽 예약 칸은 의도적으로 비움)
+
+---
+
+## 2026-11-01 — 재무제표 1단계: 보유·관심 + corpCode/CIK (Cursor)
+**한 일**
+- 사용자 지시 「너가 정해서 일단 하자」. 윈도우 최신분 없이 맥에서 파이프라인 1단계.
+- `core/statement-targets.ts`: 보유·관심 ∪ `DART_TARGETS`/`EDGAR_TARGETS`. OpenDART `corpCode.xml`·SEC `company_tickers.json`으로 식별자. 없으면 unmatched skip, 추측 없음.
+- worker `dart.ts`/`edgar.ts`가 env 수동 `종목:id`만이 아니라 위 합집합을 수집. 매핑은 `instrument_identifiers`.
+- ADR 0007 메모, `data-sources.md` 계획 행을 구현으로. `status.md` 부동산 복원·ERP 보류 반영.
+
+**다음 할 일**
+1. 「진행」→ 2단계(기간 확장)
+2. DART 실수집은 키 따옴표 후 `run:once`
+3. 업종별 기업 채우기(지시 시)
+
+**막힌 것**
+- 윈도우 10/10 이후 GitHub에 없음
+- 국내 수집은 `.env` `#` 따옴표에 의존
+
+---
+
+## 2026-10-11 — 부동산 내비 복원 (Cursor)
+**한 일**
+- 사용자 지시 「일단 부동산 살려」. ADR 0050에서 뺀 `/realty` 링크를 `layout.tsx` 상단 내비, `invest/page.tsx`·`markets/page.tsx` 스타터에 되돌렸다. ERP(`/erp`) 링크는 보류 유지.
+- ADR 0050에 부동산 동결 해제 메모 추가.
+
+**다음 할 일**
+- 부동산 새 패널·통계 작업은 별도 지시 시.
+- 윈도우 PC는 `feat/yahoo-fundamentals`(`7a750d5`)에 있어 dev와 화면이 다르다. `git checkout dev && git pull --ff-only` 필요.
+
+---
+
+## 2026-10-10 (31) — 웹 스타일링 표준 호환성(line-clamp) 경고 해소 (Gemini)
+**한 일**
+- `apps/web/src/app/globals.css`:
+  - `.realty-news-title` 및 `.realty-news-sum` 클래스에 `-webkit-line-clamp: 2;`와 병행하여 CSS 표준 속성 `line-clamp: 2;` 추가 (호환성 경고 해소).
+  - `pnpm typecheck`: 8개 모노레포 패키지 0 errors 확인.
+
+**다음 할 일**
+- Phase 2 (Market Terminal) 잔여:
+  - 한국투자증권(KIS Open API) 실시간 국내/해외 시세 어댑터 스캐폴딩 (`apps/worker`).
+  - 네이버 검색 API 뉴스 수집기 연동.
+- 또는 Phase 4 (서비스화 준비):
+  - 다중 사용자 인증 (NextAuth / JWT / Session) 및 사용자별 데이터 격리 스캐폴딩.
+
+---
+
+## 2026-10-10 (30) — 더존 Smart A · 위하고 · 세무사랑 표준 회계 전표(복식부기) CSV/XLSX 내보내기 구축 완료 (Gemini)
+**한 일**
+- **더존 Smart A · 위하고(WEHAGO) · 세무사랑 Pro(K-Lep) 표준 복식부기 분개 전표 내보내기 터미널 (`/accounting`) 구축 완료**:
+  1. **Core 복식부기 엔진 및 정밀 테스트 (`packages/core/src/accounting-journal.ts`, `accounting-journal.test.ts`)**:
+     - 한국 표준 계정과목표(`STANDARD_CHART_OF_ACCOUNTS`): 100번대 자산(101 현금, 103 보통예금, 104 정기예적금, 107 유가증권, 136 선납세금), 200번대 부채(251 외상매입금, 253 미지급금/카드, 254 예수금, 260 단기차입금), 400·500·900 수익(401 매출, 501 급여수익, 903 이자수익, 904 배당금수익, 906 유가증권처분이익, 930 잡이익), 800·900 비용(811 복리후생비, 812 여비교통비, 813 통신비, 814 수도광열비, 816 지급임차료, 819 보험료, 824 지급수수료, 830 소모품비, 931 이자비용, 960 유가증권처분손실).
+     - **금융기관·세무기관 명칭 자동 부착 (`resolveCounterAccountCode`)**: `보통예금(KB국민은행)`, `보통예금(키움증권)`, `미지급금(현대카드)`, `예수금(원천세/4대보험)` 등 계정과목명에 금융기관/관리항목을 구체화하고, 거래처 컬럼에도 `KB국민은행`, `키움증권`, `토스뱅크`, `국세청/국민건강보험공단`을 정확히 매핑.
+     - `resolveExpenseAccountCode` / `resolveCounterAccountCode`: 지출 카테고리 및 계좌 수단에 따른 계정과목 자동 매핑.
+     - `buildJournalEntries`: 일반 지출/수입/이체 거래, 배당 및 이자 소득, 주식 매수/매도(원가 상각 및 실현손익), 급여대장(세전 급여, 실수령액, 4대보험 및 원천세 예수금)을 완전한 복식부기 전표로 분개하고 대차평형(`debitSum === creditSum`, `difference === 0`) 검증.
+     - 단위 테스트 6건 신설 및 core 52개 파일 188개 테스트 **100% PASS**.
+  2. **Interop 3대 회계 소프트웨어 표준 포맷 변환기 (`packages/interop/src/exporters/accounting-journal-csv.ts`, `accounting-journal-csv.test.ts`)**:
+     - `exportDouzoneSmartACsv`: 더존 Smart A 일반전표 엑셀/CSV 규격 (일자 YYYYMMDD, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처명, 차변금액, 대변금액, 적요, UTF-8 BOM).
+     - `exportWehagoCsv`: 위하고 WEHAGO 전자전표 CSV 규격 (회계일자, 전표번호, 전표구분 차변/대변, 계정코드, 거래처명, 공급가액, 합계금액, 적요, UTF-8 BOM).
+     - `exportSemuSarangCsv`: 세무사랑 Pro / 뉴젠 K-Lep 일반전표 업로드 CSV 규격 (월, 일, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처, 금액, 적요, UTF-8 BOM).
+     - `buildAccountingJournalXlsx`: 세무대리인 제출용 4개 시트 통합 워크북 XLSX 생성 (시트 1: 더존_SmartA, 시트 2: 위하고_WEHAGO, 시트 3: 세무사랑Pro, 시트 4: 복식부기_분개장).
+     - 단위 테스트 4건 신설 및 interop 5개 파일 18개 테스트 **100% PASS**.
+  3. **tRPC 회계 라우터 신설 (`packages/api/src/routers/accounting.ts`, `appRouter` 등록)**:
+     - `accounting.preview`: 기간(연도/월) 및 원장 소스(전체/거래/배당/주식/급여) 필터링 분개 데이터 및 4대 KPI 요약 반환.
+     - `accounting.exportFile`: 3대 소프트웨어 CSV 또는 XLSX 워크북 원클릭 파일 생성 및 다운로드 API.
+  4. **웹 터미널 화면 구축 (`apps/web/src/app/accounting/page.tsx`, `layout.tsx`, `accounts/page.tsx`, `tax/page.tsx`)**:
+     - 4대 KPI 요약 바롬터: 총 전표/분개행수(24건/60행), 차변 총액, 대변 총액, 대차평형 상태 (✅ 차액 0원 균형).
+     - 상단 원클릭 내보내기 버튼 그룹: 🏢 더존 Smart A (CSV), 🌐 위하고 WEHAGO (CSV), 📊 세무사랑 Pro (CSV), 📑 4개 시트 통합 엑셀 (.xlsx).
+     - 한국 표준 계정과목 코드표 토글 가이드 드로어 (100번대 자산 ~ 800번대 비용).
+     - 복식부기 분개장 카드 & 테이블: 전표번호별 묶음, 차변3/대변4 컬러 뱃지, 계정코드, 거래처, 차·대변 금액, 대차합 일치 체크마크.
+     - 네비게이션 바 링크(`layout.tsx`), 계좌 관리(`/accounts`), 세금/연말정산(`/tax`) 상단에 빠른 연동 바로가기 버튼 배치.
+  5. **검증**:
+     - `pnpm typecheck`: 8개 모노레포 패키지 전체 통과 (0 errors).
+     - `pnpm --filter @finvesting/core test`: 52개 파일 188개 테스트 전건 통과.
+     - `pnpm --filter @finvesting/interop test`: 5개 파일 18개 테스트 전건 통과.
+     - 브라우저 E2E 검증 (`browser_subagent`): `/accounting` 접속, 4대 KPI 카드(24건/60행, 차변 6,230만, 대변 6,230만, 대차 차액 0원) 확인, 계정코드표 토글, 분개장 테이블 렌더링, 더존 Smart A CSV 다운로드 성공 확인, 콘솔 오류 0건.
+  6. **문서 갱신**:
+     - `docs/progress/roadmap.md`: 4단계 "회계·세무 프로그램 연동" 완료 체크.
+     - `docs/tech/interop.md`: 더존/위하고/세무사랑/통합 XLSX 내보내기 사양 반영.
+     - `docs/verification/2026-10-10-gemini.md` 및 `docs/verification/README.md`: 검증 결과 갱신.
+
+**다음 할 일**
+- Phase 2 (Market Terminal) 잔여:
+  - 한국투자증권(KIS Open API) 실시간 국내/해외 시세 어댑터 스캐폴딩 (`apps/worker`).
+  - 네이버 검색 API 뉴스 수집기 연동.
+- 또는 Phase 4 (서비스화 준비):
+  - 다중 사용자 인증 (NextAuth / JWT / Session) 및 사용자별 데이터 격리 스캐폴딩.
+
+---
+
+## 2026-10-10 (29) — 월별 순자산(Net Worth) 시계열 추이 & 자산 배분 위젯 홈 대시보드 구축 완료 (Gemini)
+**한 일**
+- **월별 순자산(Net Worth) 자산 vs 부채 추이 시계열 차트 & 자산배분 인터랙티브 위젯 구축 완료**:
+  1. **Core 순수 함수 및 정밀 테스트 (`packages/core/src/net-worth.ts`, `net-worth.test.ts`)**:
+     - `calculateNetWorthTimeSeries`: 유동/저축/투자 자산 및 부채 합산, 순자산 계산, 전월 대비 증감액 및 MoM 증감률(%), 자산군별 비중(liquidRatio, savingsRatio, investedRatio, debtRatio), 스택바 높이(px/%) 정규화 계산.
+     - 단위 테스트 3건 신설 (`net-worth.test.ts`) 및 core 51개 파일 182개 테스트 **100% PASS**.
+     - `packages/core/src/index.ts`에 순수 함수 및 인터페이스 export 등록.
+  2. **tRPC 대시보드 백엔드 프로시저 신설 (`packages/api/src/routers/dashboard.ts`, `packages/api/src/lib/net-worth-history.ts`)**:
+     - `dashboard.netWorthHistory`: 최근 N개월(6개월/12개월) 계좌 잔액, 보유 포지션 평가액, 적금 납입 누적액, 부채 잔액을 월별 집계하여 반환.
+  3. **웹 대시보드 인터랙티브 위젯 구축 (`apps/web/src/app/net-worth-chart.tsx`, `page.tsx`, `globals.css`)**:
+     - 4대 요약 바롬터: 최근 순자산, 전월 대비 증감(▲/▼ 금액 및 %), Peak/평균 순자산, 자산 배분 비중 바.
+     - 6개월 / 12개월 기간 토글 스위치.
+     - 월별 3색 스택 바 차트 (유동자산: 파랑, 저축성자산: 보라, 투자자산: 초록) 및 부채/순자산 뱃지.
+     - 바 호버/클릭 시 인터랙티브 툴팁 및 상세 자산군 분해, 클릭 시 대시보드 조회 월(`selectedMonth`) 실시간 양방향 동기화.
+     - `.nw-*` 다크/네온 테마 CSS 스타일 시스템 구축.
+  4. **검증**:
+     - `pnpm typecheck`: 8개 전체 패키지 일괄 통과 (0 errors).
+     - `pnpm --filter @finvesting/core test`: 51개 파일 182개 테스트 전건 100% 통과.
+     - 브라우저 E2E 검증 (`browser_subagent`): 홈 화면(`/`) 접속, 4대 KPI 카드 및 자산배분 게이지 렌더링, 6개월/12개월 토글, 3색 스택바 호버 툴팁, 바 클릭 시 상단 조회 월 연동 브라우저 실물 확인 완료, 콘솔 오류 0건.
+  5. **문서 갱신**:
+     - `docs/verification/2026-10-10-gemini.md` 및 `docs/verification/README.md`에 검증 결과 반영.
+
+**다음 할 일**
+- Phase 4 (서비스화 준비) 착수:
+  - 다중 사용자 인증 (NextAuth / Supabase Auth / Lucia 등) 기반 구조 마련.
+  - 전표 내보내기: 더존 Smart A / 위하고(WEHAGO) / 세무사랑 표준 회계 전표 CSV 파일 생성기.
+- 또는 Phase 2 (Market Terminal) 잔여: KIS (한국투자증권) 실시간 국내/해외 시세 API 어댑터 연동.
+
+---
+
+## 2026-10-10 (28) — 로드맵 3단계 (Tax + Year-End) 전면 구축 완료 (Gemini)
+**한 일**
+- **로드맵 3단계 (Tax + Year-End 본인 기준) 세무 터미널 구축 완료**:
+  1. **Core 순수 함수 및 정밀 테스트 (`packages/core/src/tax.ts`, `tax.test.ts`)**:
+     - `calculateOverseasCapitalGainsTax`: 해외주식 연간 매도 실현손익 통산, 250만원 기본공제(`OVERSEAS_CAPITAL_GAINS_BASIC_DEDUCTION`), 과세표준, 국세 20% + 지방세 2% (합계 22%) 산출세액 계산.
+     - `simulateTaxLossHarvesting`: 250만원 초과 수익 발생 시, 보유 중인 마이너스 수익률 해외 종목 중 얼마를 연말 전 매도(손실 확정)하면 세금이 0원이 되는지 계산 및 절세액 추정.
+     - `aggregateFinancialIncome`: 연간 배당 및 이자 소득(세전) 집계, 2,000만원 종합과세 기준선(`FINANCIAL_INCOME_TAX_THRESHOLD`) 대비 한도 소진율, 원천징수 15.4% 기납부세액, 상태(`safe`/`caution`/`exceeded`) 판별.
+     - `calculateYearEndTaxSettlement`: 근로소득 연말정산 시뮬레이터 (총급여, 근로소득공제, 기본인적공제, 4대보험공제, 청약저축 소득공제, 신용/체크카드 소득공제, 종합소득 누진세율, 근로소득세액공제, 연금저축/IRP 세액공제, 보장성보험료 세액공제, 결정세액 및 13월의 월급 환급액/추가납부액 계산).
+     - 단위 테스트 10건 신설 (`tax.test.ts`) 및 core 50개 파일 179개 테스트 **100% PASS**.
+  2. **tRPC 세무 백엔드 라우터 신설 (`packages/api/src/routers/tax.ts`, `appRouter` 등록)**:
+     - `tax.summary`: 연도별 3대 세목 종합 요약 및 상단 KPI 카드 지표 반환.
+     - `tax.capitalGains`: 해외주식 실현 매도 체결, 미실현 손익 보유분, Tax-loss harvesting 절세 가이드 반환.
+     - `tax.financialIncome`: 배당/이자 수취 목록, 월별 추이, 2천만원 종합과세 모니터링 데이터 반환.
+     - `tax.simulateYearEnd`: 10대 공제 변수 조절 시 즉시 재계산 시뮬레이션 지원.
+     - `tax.addIncome`: 신규 배당/이자 수취 내역 등록 mutation (원천징수 15.4% 자동 계산).
+  3. **DB 시드 데이터 확충 (`packages/db/seed/003_sample_tax.sql`)**:
+     - NVDA, TSLA 해외 종목 및 시세 추가.
+     - NVDA 실현 익절 매도 건 및 TSLA 평가손실 보유분 추가 (Tax-loss harvesting 시뮬레이션 검증용).
+     - 삼성전자, Apple, TIGER S&P500 분기 배당금 및 토스뱅크 예금 이자소득 5건 추가.
+  4. **홈택스 간소화 파일 파서 & 4개 시트 XLSX 엑셀 내보내기 (`packages/interop`)**:
+     - `parseHometaxJson` & `parseHometaxRows`: 국세청 홈택스 표준 연말정산 간소화 전자문서(JSON) 및 요약 CSV 파서 구축. 서식코드(P101 IRP, P102 연금저축, J301 주택청약, A102 보장성보험, G107/G207/G307 카드·현금영수증) 자동 분류 및 금액 집계. 단위 테스트 2건 통과.
+     - `buildTaxSettlementXlsx`: 회사/세무대리인 제출 및 소장용 4개 시트 통합 워크북 XLSX 생성 (시트 1: 연말정산_정산요약, 시트 2: 공제_세부명세, 시트 3: 해외주식_양도소득세, 시트 4: 금융소득_배당이자). 단위 테스트 1건 통과.
+     - `interop` 테스트 4개 파일 14건 **100% 통과**.
+  5. **웹 대시보드 인터랙티브 터미널 구축 (`apps/web/src/app/tax/page.tsx`, `layout.tsx`, `globals.css`)**:
+     - 상단 헤더, 연도 선택기(2026/2025), 3대 바롬메터 KPI 카드 (해외주식 양도세, 금융소득 한도 소진율 게이지, 연말정산 환급액).
+     - 헤더 액션 컨트롤:
+       - `📥 연말정산 XLSX 내보내기`: 원클릭으로 4개 시트 XLSX 엑셀 파일 생성 및 다운로드.
+       - `📂 홈택스 간소화 불러오기`: 모달 드롭존에서 간소화 파일 선택 즉시 공제 필드 일괄 자동 입력 및 환급액 자동 재계산.
+     - 3개 탭 뷰:
+       - 🇺🇸 해외주식 양도소득세 & Tax-Loss Harvesting 절세 가이드
+       - 💰 배당·이자 금융소득 종합과세 2,000만원 모니터 및 수취 등록
+       - 📋 근로소득 연말정산 인터랙티브 시뮬레이터 (슬라이더/필드 변경 시 13월의 월급 환급액 실시간 재계산)
+     - 네비게이션 바에 `/tax` ("세금/연말정산") 링크 추가.
+  6. **검증**:
+     - `pnpm typecheck`: 8개 모노레포 패키지 전체 통과 (0 errors).
+     - `pnpm --filter @finvesting/core test`: 50개 파일 179개 테스트 전건 100% 통과.
+     - `pnpm --filter @finvesting/interop test`: 4개 파일 14개 테스트 전건 100% 통과.
+     - 브라우저 E2E 검증 (`browser_subagent`): `/tax` 접속, KPI 카드 렌더링, 3개 탭 전환, 연말정산 공제 인풋 변경 및 환급액 실시간 재계산, 홈택스 모달 열기/닫기, XLSX 다운로드 실행 브라우저 실물 확인 완료, 콘솔 오류 0건.
+  7. **문서 갱신**:
+     - `docs/progress/roadmap.md`: 3단계 (Tax + Year-End) 전 항목 100% 완료 체크 반영.
+     - `docs/tech/tax.md` 신설 및 `docs/tech/README.md` 색인 반영.
+     - `docs/verification/2026-10-10-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
+
+**다음 할 일**
+- 월별 순자산(Net Worth) 자산 vs 부채 추이 시계열 차트 및 홈 대시보드 요약.
+- Phase 4 (서비스화 준비): 다중 사용자 인증 또는 Phase 2 KIS 국내/해외 실시간 시세 어댑터 연동.
+- 회계·세무 프로그램 연동: 더존 Smart A / 위하고 / 세무사랑 전표 양식 내보내기.
+
+---
+
+## 2026-10-09 (27) — CLI 및 PowerShell 실행 명령어 문서화 (Gemini)
+**한 일**
+- **모노레포 CLI 실행 명령어 레퍼런스 신설 및 환경별 가이드 문서화**:
+  - `docs/tech/commands.md` 신설:
+    - 빠른 참조 표 (개발 서버, 워커, DB, 테스트, 빌드 등 핵심 스크립트).
+    - 개발 서버, 데이터 수집 워커 데몬/1회 즉시 실행, 단위 테스트(`vitest`), 타입 검사(`turbo run typecheck`) 정리.
+    - Windows(PowerShell) vs macOS/Linux 환경별 DB 컨테이너 실행 및 시딩 명령어(`Get-Content ... | docker exec`) 완비.
+    - Docker Desktop 파이프 미연결(`pipe/dockerDesktopLinuxEngine`) 원인 및 조치 가이드 수록.
+  - `docs/tech/setup.md` 갱신: 윈도우 PowerShell 환경용 DB 시딩 파이프라인 명령어 및 `commands.md` 링크 반영.
+  - `docs/tech/README.md` 갱신: `commands.md` 색인 항목 추가.
+- **재무 프로필 및 11대 전체 패널 실데이터 시딩 완료**:
+  - `packages/db/seed/002_sample_profile.sql` 작성 및 DB 적용 완료.
+  - 기본정보 & 급여공제: 세전 500만 / 세후 429만, 기본급/식대/차량유지비/직책수당 분개, 투자성향(성장추구·중립).
+  - 고정비(7건): 월세 65만, 관리비 18만, 통신비 7.5만, 넷플릭스 1.7만, 유튜브 1.49만, 보장보험 12.2만, 전세대출이자 15만.
+  - 세액 및 급여추이(6개월): 2026-05 ~ 2026-10 월별 세액(24.5만~38만), 성과급 포함 급여명세 스냅샷.
+  - 적금/예금(3개 상품, 13건 납입): KB청년도약계좌(연 6.0%, 월 70만), 카카오26주적금(연 3.8%), 토스예금(연 3.5%, 1,000만).
+  - 보험(3건): KB 3대질병 종합건강보험, 삼성화재 실손의료비보험, DB손해보험 운전자보험.
+  - 계좌·거래원장·투자: KB국민/토스/키움 계좌 3종, 2026-10 주요 입출금 트랜잭션, 삼성전자/S&P500/AAPL 매수 체결 및 시세.
+  - `/profile` 전체 11개 탭 및 대시보드 정상 렌더링 확인 (HTTP 200 OK).
+- **로드맵 2단계 (Market Terminal) 공식 착수 — 관심 종목 터미널 (`/invest`) 전면 구축**:
+  1. **Core 순수 함수 및 정밀 테스트 (`packages/core/src/watchlist.ts`, `watchlist.test.ts`)**:
+     - `calculatePriceChange`: 현재가와 직전 종가(또는 시가)를 비교하여 등락폭(change) 및 등락률(changePct %)을 소수점 정밀 계산.
+     - `formatChangePct`: 부호(+/-)를 포함한 일관된 퍼센트 문자열 포맷팅.
+     - `filterWatchlist`: 마켓(전체/KRX/미국US/가상자산UPBIT), 자산군, 실시간 검색어(심볼/종목명/메모) 필터링.
+     - `sortWatchlist`: 최신등록순, 등락률 높은순(상승), 등락률 낮은순(하락), 가나다순 정렬.
+     - `summarizeWatchlist`: 전체 등록 수, 상승(▲), 하락(▼), 보합 종목 수 자동 집계.
+     - 단위 테스트 5건 신설 및 Core 169개 전체 테스트 **100% PASS**.
+  2. **tRPC 관심 종목 백엔드 프로시저 고도화 (`packages/api/src/routers/market.ts`)**:
+     - `market.watchlist`: 최근 2일 시세 기반 등락률, 고가/저가/거래량 계산, 펀더멘털 스냅샷(PER, PBR, ROE, 배당률, 시가총액) 조인, 최근 120건 뉴스 중 종목별 연관 기사(최대 3건) 인메모리 고속 매핑.
+     - `market.watchUpdateNote`: 관심 종목에 사용자 분석 메모(목표가, 투자 이유, 체크포인트 등) 인라인 저장.
+     - `market.watchNews`: 특정 종목 전용 관련 뉴스 피드 조회 프로시저 신설.
+     - `market.watchAddPreset`: 인기 우량주(삼성전자, SK하이닉스, Apple, NVIDIA, S&P500 ETF, 비트코인) 원클릭 퀵 추가 지원.
+  3. **웹 대시보드 인터랙티브 터미널 UI (`apps/web/src/app/invest/watchlist-terminal.tsx`, `page.tsx`)**:
+     - 기존의 단순 리스트를 교체하여 전문 증권 터미널 수준의 인터랙티브 컴포넌트 구축.
+     - 상단 4대 메트릭 요약 바롬터(전체/상승/하락/보합) 및 즉시 새로고침 버튼.
+     - 인기 우량주 퀵 프리셋 칩(클릭 한 번으로 관심 목록 추가).
+     - 마켓 세그먼트 탭(전체, KRX, 미국, UPBIT), 검색창, 다중 정렬 옵션.
+     - 종목별 등락률 뱃지(한국 표준 빨강 상승/파랑 하락), 당일 고/저/거래량, 펀더멘털 스냅샷 칩.
+     - 인라인 투자 메모 에디터(원클릭 인풋 전환 및 저장).
+     - 종목별 관련 언론사 최신 뉴스 아코디언 드로어(제목, 언론사, 발행일, 원문 링크).
+     - 네이버 증권, Yahoo Finance, DART 공시 바로가기 링크.
+  4. **검증**:
+     - `pnpm typecheck`: 8개 모노레포 패키지 **100% ALL PASS (0 errors)**.
+     - `pnpm --filter @finvesting/core test`: 49개 파일 169개 테스트 **전건 100% 통과**.
+     - 브라우저 실물 검증: `/invest`에서 터미널 렌더링, 필터 전환, 프리셋 추가, 뉴스 아코디언 확장, 콘솔 에러 0건 확인 및 비디오/스크린샷 아티팩트 저장.
+
+**다음 할 일**
+1. KIS 국내/해외 시세 API 연동 및 실시간 호가/시세 어댑터 확장
+2. 월별 순자산(Net Worth) 스냅샷 스키마 설계 및 시계열 트렌드 차트
+3. 모바일 Expo 기동 및 환경 점검 (`docs/verification/README.md` ❌ 잔여 과제)
+
+**막힌 것**
+- 없음
+
+## 2026-09-22 (26) — Financial Timeline (금융 타임라인) 첫 버전 구현 및 MVP 1단계 완수 (Gemini)
+**한 일**
+- **MVP 1단계 핵심 대표 기능 Financial Timeline (`/timeline`) 전면 구축**:
+  1. **Core 순수 함수 및 표준 이벤트 모델 (`packages/core/src/timeline.ts`)**:
+     - `UnifiedFinancialEvent` 표준 모델 정의 (`sourceType`: transaction, trade, income, savings, payroll / `type`: income, expense, transfer, trade_buy, trade_sell, dividend, interest, savings_deposit, payroll_statement).
+     - 분산 소스 통합 매핑 및 결정적 타임스탬프 내림차순(최신순) 정렬 `buildFinancialTimeline` 구현.
+     - **급여명세와 통장 입금 이중 집계 방지**: `payroll_months`는 `direction: "neutral"`(정보성)으로 분류하여 총 유입액 합산 시 통장 입금(`transactions`의 `category: salary`)과 중복 계산되지 않도록 방어.
+     - 유형 그룹, 기간(월), 키워드 검색을 지원하는 `filterTimelineEvents` 구현.
+     - 일자별(YYYY-MM-DD) 그룹핑 및 당일 입출금 소계, 요일 자동 판별 `groupTimelineByDate` 구현.
+     - 총 유입, 총 유출, 순 현금흐름, 투자 체결액, 배당/이자 요약 통계 `calculateTimelineSummary` 구현.
+     - `packages/core/src/timeline.test.ts`: 5대 핵심 시나리오 단위 테스트 100% PASS.
+  2. **tRPC 타임라인 API 라우터 신설 (`packages/api/src/routers/timeline.ts`)**:
+     - `timeline.list` 프로시저 구현: `transactions`, `trades`, `incomes`, `savingsContributions`, `payrollMonths`를 병렬 조회하여 통합 변환.
+     - 로컬 DB 미구동 또는 초기 데이터 부재 시에도 안정적으로 화면을 탐색할 수 있도록 우아한 실측 데모 폴백(`FALLBACK_TIMELINE_INPUTS`) 지원.
+     - `packages/api/src/index.ts`의 `appRouter`에 `timeline` 등록.
+  3. **웹 타임라인 인터랙티브 대시보드 UI (`apps/web/src/app/timeline/page.tsx`, `globals.css`)**:
+     - 상단 내비게이션 바에 `타임라인` 링크 배치 (`layout.tsx`).
+     - 상단 4대 핵심 KPI 요약 카드 바롬터: 총 유입(초록), 총 유출(빨강), 투자 체결액(파랑), 순 현금흐름.
+     - 인터랙티브 컨트롤: 월(Month) 선택 네비게이터(`YYYY-MM` 및 전체 기간), 키워드 실시간 검색창.
+     - 6대 유형 필터 세그먼트 탭: `[전체]`, `[통장 입출금·소비]`, `[주식·ETF 체결]`, `[배당·이자 수취]`, `[적금 납입]`, `[급여 명세서]`.
+     - 날짜별 헤더 카드(날짜, 요일, 당일 입출금 소계) 및 버티컬 타임라인 피드 카드.
+     - 이벤트 배지, 제목/부제, 통화별 금액 및 원화 환산액, 태그, 원본 화면 바로가기 링크(`통장내역 ↗`, `보유종목 ↗`, `급여상세 ↗`, `적금대장 ↗`).
+- **검증**:
+  - `pnpm --filter @finvesting/core test`: 48개 파일 164개 단위/회귀 테스트 **전건 100% PASS** (신규 테스트 5건 추가).
+  - `pnpm typecheck`: 8개 모노레포 패키지 **100% ALL PASS** (0 errors).
+  - `pnpm --filter @finvesting/web build`: `/timeline` 라우트 포함 16개 전체 라우트 Next.js 15 프로덕션 빌드 성공.
+  - 브라우저 실물 검증: KPI 카드, 필터 전환, 검색어 필터링, 날짜별 타임라인 렌더링, 콘솔 에러 0건 확인.
+- **문서 동기화**:
+  - `docs/progress/roadmap.md`: `- [x] Financial Timeline` 완료 체크.
+  - `docs/verification/2026-09-22-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
+
+**다음 할 일**
+1. 모바일 Expo 기동 및 환경 점검 (`docs/verification/README.md` ❌ 잔여 과제)
+2. 관심 종목 관리 UI 고도화 및 실시간 시세 연동
+3. 월별 순자산 스냅샷 스키마 설계 및 시계열 트렌드 차트
+
+**막힌 것**
+- 없음
+
+## 2026-09-21 (25) — 금융 원장(Ledger) 핵심 오류 5건 완전 해결 및 단위/회귀 테스트 구축 (Gemini)
+**한 일**
+- **금융 원장 핵심 결함 5건(Codex 리뷰 및 21-ledger-correctness-fixes.md) 전면 해결**:
+  1. **[P1] 소수 수량 전량 매도 실패 버그 해결 (`packages/core/src/portfolio.ts`)**:
+     - JS 부동소수점(`0.3 - 0.1 = 0.19999999999999998`)과 DB `numeric(24, 8)` 간의 불일치로 인한 전량 매도 거절 버그 수정.
+     - `QUANTITY_SCALE = 8`, `QUANTITY_EPSILON = 1e-8`, `roundQuantity` 유틸리티 도입. 전량 매도 허용오차(`Math.abs(diff) <= QUANTITY_EPSILON / 2`) 판정 적용하여 잔량 0 및 `avgCost=0`, `avgFxRate=1` 초기화.
+  2. **[P1] 동일 시각 체결 순서 불일치 방지 (`packages/core/src/portfolio.ts`, `packages/api`)**:
+     - `tradedAt` 동일 시 UUID 사전순 정렬로 인해 매도가 매수보다 먼저 처리되어 잔고 부족 에러가 발생하던 문제 해결.
+     - `compareTradesForReplay` 순수 함수 신설 (`tradedAt` -> `side === 'buy'` 우선 -> `createdAt` -> `id` 결정적 타이 브레이커).
+     - `packages/api/src/routers/trades.ts`(추가/삭제 시 잔여 수량 검증) 및 `packages/api/src/lib/holdings.ts`(포트폴리오 보유량 계산)에 일원화 적용.
+  3. **[P1] 하루치 내림차순 통장 잔액 오선택 방지 (`packages/core/src/account-balance.ts`, `packages/interop`)**:
+     - 일별 역순(내림차순) 정렬 CSV/XLS 파싱 시 첫 행(과거 잔액)이 최신 잔액으로 잘못 선택되던 결함 수정.
+     - `detectOrder`(날짜/시간/거래금액 역산 판별) 구현 및 `pickLatestBalance`에서 `time` 및 `explicitOrder` 지원. 모호한 단일 일자 상이한 잔액은 `null` 반환하여 오선택 방지.
+     - `packages/interop/src/types.ts` 및 `generic-bank.ts`에 거래 시간(`time`) 필드 파싱 연동.
+  4. **[P2] 정상 반복 거래 중복 삭제 방지 (`packages/core/src/transactions-filter.ts`, `packages/api`)**:
+     - 동일 날짜/금액의 정상적인 연속 결제(예: 카페 2잔 개별 결제)를 단순 Set으로 필터링하여 1건만 남기고 유실하던 문제 해결.
+     - 멀티셋(빈도수 카운트 맵) 기반 순수 함수 `filterDuplicateTransactions` 신설 및 `transactions.commitImport`에 적용. 정상 반복 결제 보존 및 재업로드 시 0건 추가 보장.
+  5. **[P2] 외화 계좌 원화 단순 합산 왜곡 해결 (`packages/core/src/currency-convert.ts`, `packages/api`)**:
+     - USD 등 외화 잔액을 환율 변환 없이 KRW 잔액과 1:1 단순 합산하던 총자산 계산 왜곡 수정.
+     - `convertAccountBalances` 순수 함수 신설. 환율 적용 원화 환산, 통화별 분리 집계(`byCurrency`), 환율 누락 시 미환산 계좌 안전 격리.
+     - `packages/api/src/lib/overview.ts`에서 최신 USD/KRW 매매기준율 연동 및 프론트엔드 호환 구조 확장.
+- **검증**:
+  - `pnpm --filter @finvesting/core --filter @finvesting/interop test`: 49개 파일 170개 단위/회귀 테스트 **전건 100% PASS** (신규 테스트 23건 추가).
+  - `pnpm typecheck`: 8개 모노레포 패키지 **100% ALL PASS** (0 errors).
+  - `pnpm --filter @finvesting/web build`: 15개 전체 라우트 Next.js 15 프로덕션 빌드 성공.
+- **문서 동기화**:
+  - `docs/review/2026-09-15-codex-ledger.md`: 5대 지적사항 상태 "✅ 반영 완료 (2026-09-21 Gemini)" 갱신.
+  - `docs/verification/2026-09-21-gemini.md` 신설 및 `docs/verification/README.md` 현황 표 갱신.
+
+---
+
+## 2026-09-26 — `/statements` 업종 하위 카테고리 예약 (feat/statements-pipeline)
+**한 일**
+- `STATEMENT_LOOKUP_GROUPS`: 지역마다 빅테크·반도체·플랫폼·2차전지·모빌리티·금융·바이오·소비재 8칸
+- 빅테크만 기업 채움. 빈 칸은 메뉴에 「추가」표시. 공시 구역은 그대로 분리
+
+**다음 할 일**
+1. 업종별 기업 채우기(지시 시)
+2. 「진행」→ 1단계
+
+**막힌 것**
+- 없음
+
+## 2026-09-26 — `/statements` ERP 셸·빅테크/공시 분리 (feat/statements-pipeline)
+**한 일**
+- `/statements`를 `erp wehago`로 재구성. 왼쪽: 지역 → 빅테크 → 공시(구역 분리). 작업창: 수집 표·3표만
+- 빅테크와 공시 링크를 한 카드에 섞지 않음
+
+**다음 할 일**
+1. 「진행」→ 1단계
+2. DART 수집
+
+**막힌 것**
+- 없음
+
+## 2026-09-26 — `/statements` 기업정보 빅테크 목록 (feat/statements-pipeline)
+**한 일**
+- 국내(삼성·하이닉스·네이버·카카오)·미국(Mag7) 기업명 바로가기. 이름 클릭 → `?q=` 선택(수집분이 있으면 숫자)
+- 시총·실적 수치 없음
+
+**다음 할 일**
+1. 「진행」→ 1단계
+2. DART 수집
+
+**막힌 것**
+- 없음
+
+## 2026-09-26 — `/statements` 수집분 검색 (feat/statements-pipeline)
+**한 일**
+- 수집 종목만 검색(`filterInstrumentsByQuery`). 심볼·이름 부분 일치, 선택 시 `?q=` 동기
+- miss면 숫자 위조 없이 공식 조회만. Yahoo 전 종목은 `/invest` 안내
+
+**다음 할 일**
+1. 「진행」→ 1단계(보유·관심 대상 + corpCode/CIK)
+2. DART `.env` 따옴표 후 국내 수집
+
+**막힌 것**
+- 없음(검색은 수집분 한정)
+
+## 2026-09-26 — `/statements` 지역 칸(확장 가능) (feat/statements-pipeline)
+**한 일**
+- `core/statement-regions.ts`: 국내·미국 active, 일본·중국·유럽 예약(`active:false`). `statementRegionFor`·`lookupServicesForRegion`
+- `/statements`는 고정 2칸이 아니라 `activeStatementRegions()` 기반. 「해외」→「미국」
+- `data-sources.md` 지역 칸 절. vitest `statement-regions.test.ts`
+- 0단계 확인: `docs/verification/2026-09-26-cursor-statements-0.md`
+
+**다음 할 일**
+1. 「진행」→ 1단계(보유·관심 대상 + corpCode/CIK)
+2. DART `.env` 값 따옴표( `#` 잘림) 후 국내 수집
+3. 2~5단계. 일본·중국·유럽은 공식 출처 확정 후 `active`·`venue`만 켜면 됨
+
+**막힌 것**
+- 국내 수집분 없음. 미국만 EDGAR 수집분. JP/CN/EU 수집기 없음(의도)
+
+## 2026-09-26 — 부동산 동결·ERP 보류 + tax 대조 준비
+**한 일**
+- `feat/erp-tax-desk` → `dev` merge·push (`82538be`)
+- ADR 0050. 내비·스타터에서 `/realty`·`/erp` 숨김. 로드맵·overview 동결/보류 절. 라우트 삭제는 없음
+- 원문 대조 준비표: `docs/verification/2026-09-26-tax-verify-prep.md` (payroll·brackets·ei-stability). 값 대조는 사용자
+
+**다음 할 일**
+1. 사용자가 tax 3파일 원문 대조 후 `verifiedBy` 갱신
+2. Financial Timeline / 홈택스 간소화(로드맵)
+3. `/realty`·`/erp` 재개는 지시할 때만
+
+**막힌 것**
+- 없음(결정 반영됨). corepack strict 시 `COREPACK_ENABLE_STRICT=0`
+
+## 2026-09-25 — data 구조 정리·as any 0 (Cursor, feat/erp-tax-desk)
+**한 일**
+- tax 5 JSON: 값은 `entries`만. `getValue`/`requireValue`. rates·표 숫자 객체 삭제(라벨 동반만 유지)
+- realty 15 JSON: `entries` 삭제, `exports`→최상위. map/ref/loans `kind:"config"`
+- core `as any` 0. `dump-data-json.mjs` 삭제. verifiedBy 패턴. 미검증 개수 고정 expect 제거
+- `/erp`·`/profile` 「기준 asOf · sourceTitle」. `data-tables.md` 갱신. 리뷰 09-25 반영 열
+- typecheck 8/8 · core vitest 231 · web build 통과
+
+**다음 할 일**
+1. 사용자 결정: 부동산 편입/동결, ERP 계속(스키마)/보류
+2. tax entries·realty defaults 원문 대조(`verifiedBy` 올리기)
+3. `feat/erp-tax-desk` → `dev`는 지시 후
+
+**막힌 것**
+- ERP 원장 스키마 없음. 통계 원문 대조 전(전부 미검증)
+- corepack이 로컬 `.pnpm-store` 링크를 찾다 실패할 수 있음 → `COREPACK_ENABLE_STRICT=0` 또는 brew pnpm
+
+## 2026-09-23 — 상수 JSON화·데이터 규칙 보강 (Cursor)
+**한 일**
+- AGENTS·CLAUDE·ChatGPT 11번에 `{status: empty|stale|unavailable}`·`DEMO_MODE` 「샘플」 문장 추가
+- `packages/core/data/**` 20 JSON(realty 15 + tax 5). entries **992**, 전원 `verifiedBy: "미검증"`. 코드는 JSON import, export 이름 유지
+- `load-data.ts`·`data-tables.test.ts`·`docs/tech/data-tables.md`. core tsc·vitest 230 통과
+- 리뷰 `2026-09-21-claude.md` 반영 열(1·2·B·7·3, 4·5·A 대기). `status.md`·`verification/2026-09-21-cursor.md`
+
+**다음 할 일**
+1. 사용자 결정: 부동산 편입/동결, ERP 계속(스키마)/보류
+2. 992 미검증 원문 대조. 화면 「기준·출처」 빠진 곳
+3. 루트 pnpm 복구 후 web·api typecheck. `feat/erp-tax-desk` → `dev`는 지시 후
+
+**막힌 것**
+- ERP 원장 없음. 원문 대조 전. pnpm CLI 링크 깨짐(core는 npx로 검증)
+
+## 2026-09-21 — 투자 봇AI 대화형 화면
+**한 일**
+- `/chat` 이름을 투자 봇AI로. 빈 화면 인사·제안 카드·아래 입력칸. 사용자 말풍선 오른쪽, 봇 답 왼쪽. Enter 전송·Shift+Enter 줄바꿈. IME `isComposing` 유지. ADR 0048
+- 색은 자산 홈 파랑과 다르게. 종이색 배경·청록 강조·연한 청록 말풍선. ChatGPT 로고·이름 없음. 대화 저장 없음
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 대화 기록 테이블·스트리밍은 `docs/tech/ai.md` 계획
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음. Docker 꺼지면 홈 tRPC 500
+
+## 2026-09-21 — 3차 종합 검토 (Claude, Cowork)
+**한 일**
+- `docs/review/2026-09-21-claude.md`: 09-16 지적 반영 여부 표, 신규 문제 A(ERP 저장 없음)·B(세법·요율 상수), 09-13→09-21 추이 표, 커밋·머지 명령
+- `docs/progress/status.md`·Claude 프로젝트 문서 갱신. 리눅스 VM에서 core·api·web 타입체크 통과 확인(미커밋 125파일 포함)
+- 코드 수정 없음
+
+**다음 할 일**
+1. 미커밋 125파일 `feat/erp-tax-desk` 커밋·push → dev fast-forward `e15f070` → 죽은 브랜치 삭제
+2. AGENTS.md 생성 금지 규칙, 상수 JSON화
+3. 사용자 결정: 부동산 편입/동결, ERP 계속/보류
+
+**막힌 것**
+- 09-16 🔴 3건 미반영 상태로 5일 경과. 결정 전까지 "새 화면·새 ADR 금지"
+
+## 2026-09-18 — 명부 입력 글자 대비
+**한 일**
+- `/erp?view=staff` 근로자 명부 칸(플레이스홀더)은 보이는데 넣은 글자가 안 보이던 것. 다크 모드 글자색만 밝고 칸은 흰색. 입력칸 글자·배경 대비와 가로 스크롤
+- 사업장관리번호·명칭·소재지·그 아래 자격취득 표도 라벨 위·칸 테두리로 보이게
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 홈택스·더존 빈 템플릿이 오면 그 컬럼 그대로
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 호봉 양식 공무원보수규정 별표 3
+**한 일**
+- `/erp?view=labor` 호봉을 공무원보수규정 제5조 별표 3(2026. 1. 2.) 1급~9급 봉급월액으로. ADR 0047
+- 근속+1 호봉을 뺌. 수당·별표 4~14·초임호봉 환산 없음. 빈 칸은 0 아님
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 홈택스·더존 빈 템플릿이 오면 그 컬럼 그대로
+
+**막힌 것**
+- 원장 저장 없음. 별표 4~14 칸. 커밋·push 없음
+
+## 2026-09-18 — 직원등록·건강보험 자격취득
+**한 일**
+- `/erp?view=staff` 근로기준법 제41조 근로자 명부. 고용일을 적으면 국민건강보험법 제8조 제2항 14일 안 별지 제6호 직장가입자 자격취득이 이어짐. ADR 0046
+- 보험료를 곱하지 않음. 공단 전송 아님. 1개월 미만 일용은 직장가입자 아님(문언만)
+- 자격취득 Open API 없음. `/erp?view=staff`에서 공단 홈·EDI·4대보험 연계센터 링크만. 칸을 공단에 넣지 않음
+- 예시 채우기(홍길동·고용일). 주민번호·월급은 비움. 나중에 EDI 빈 템플릿·Open API가 오면 `NHI_LATER`만 채움
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 홈택스·더존 빈 템플릿이 오면 그 컬럼 그대로
+
+**막힌 것**
+- 원장 저장 없음. 피부양자 제5쪽 칸 없음. 커밋·push 없음
+
+## 2026-09-18 — 면세·확인서·수출입 조문 칸
+**한 일**
+- `/erp?view=exempt` 사단법인·농업법인·개인 면세 제26조 문언. 2월은 소득세법 제78조 사업장현황신고. 확인서는 부가가치세면세사업자수입금액증명. ADR 0045
+- 수출 제21조 영세율·수입 제50조 세관 칸. 환율·관세 10%를 곱하지 않음. 시산 CSV 빈 칸은 0 아님
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 홈택스·더존 빈 템플릿이 오면 그 컬럼 그대로
+
+**막힌 것**
+- 원장 저장 없음. 확인서 발급·조특법 농업 감면율 없음. 커밋·push 없음
+
+## 2026-09-18 — 분개·법인세 서식 문언·시산 CSV
+**한 일**
+- 사업 자금·장부 둘 다 차변·대변 계정과목 분개. 보통예금 주석 은행명. ADR 0043
+- 법인 자본조정 화면을 별지 제50호서식(갑)(을)로. 비상장 법인은 별지 제54호. 직역. ADR 0044
+- 시산 CSV는 넣은 칸만. 빈 칸은 0이 아님. 홈택스 제출 아님
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 홈택스·더존 빈 템플릿이 오면 그 컬럼 그대로
+
+**막힌 것**
+- 원장 저장 없음. 별지 제50호서식(병)·원인코드 원문 표 없음. 커밋·push 없음
+
+## 2026-09-18 — 분개 계정과목·보통예금 은행 주석
+**한 일**
+- 사업 자금·장부 전표를 복식부기 분개로. 차변 계정·대변 계정을 따로. ADR 0043
+- 계정과목은 `보통예금`. 밑 주석에 은행명. 은행 목록을 만들지 않음
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 제53조의2 혼인·출산 공제 기간은 국세청 원문 확인 후 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 프리랜서·개인사업자 한 책상
+**한 일**
+- `/erp` 카드 두 장. 프리랜서와 개인사업자는 `business`. 법인만 따로. ADR 0042
+- `?role=freelancer`는 개인 책상으로 연다. 용역수입·원천 3.3%·매출·부가세·종소세가 한 메뉴
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 제53조의2 혼인·출산 공제 기간은 국세청 원문 확인 후 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 양도·증여·보유 세율표와 전문가 우선
+**한 일**
+- 과세표준·누진 용어를 쉽게. 제55조·제104조·제26조·제111조·종부세법 제9조 표. ADR 0041
+- 특이사항은 세무사·회계사·국세청 126이 먼저. 넣은 과세표준 시산만. 특례 자동 적용 없음
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 제53조의2 혼인·출산 공제 기간은 국세청 원문 확인 후 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 세무 화면 법령 문언만 보수적으로
+**한 일**
+- 조문·시행령에 없는 공제·세율·해석을 만들지 않음. 애매하면 근로소득(소득세법 제20조·제129조 제1항 제1호). ADR 0040
+- 시산 ≠ 절세 자문·신고 대행. 아르바이트 3.3% 안내는 법령 주의이지 절세 특약이 아님
+- `/erp` 부가세·원천·종소세·법인세·비상장과 프로필 연말정산·양도 화면에 주의 문구
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 종소세·양도세 세율 고시 원문이 오면 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 프리랜서 3.3% 직종 한정
+**한 일**
+- 연예인·모델·프리랜서 개발자·인플루언서·전문직(의사·변호사·노무사·세무사·변리사 등)만 시산. 개원은 개인사업자. 아르바이트 3.3% 금지 특약. ADR 0039
+- 조건 미충족이면 3.3%를 곱하지 않음
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 종소세·양도세 세율 고시 원문이 오면 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 개인·법인 업무 화면 분리
+**한 일**
+- `/erp`는 인격 고르기만. `?role=business`·`?role=corporation`은 그 메뉴만. ADR 0038
+- 부가세 인격 전환 버튼 숨김. 모듈 아이콘 격자 없음
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 종소세·양도세 세율 고시 원문이 오면 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 차대변·공제 창·종소세·비상장 2월
+**한 일**
+- 사업 자금·장부 차대변 전표. 자본조정 계정 칸. ADR 0037
+- 연말정산 공제 창(기부금·자녀 수 등). 세액공제율 안 곱함
+- 종소세 5월(소득세법 제70조). 비상장 하반기 양도 예정신고 2월 말일(제105조)
+
+**다음 할 일**
+1. 공제·전표 저장 테이블은 스키마 후
+2. 종소세·양도세 세율 고시 원문이 오면 표만
+
+**막힌 것**
+- 원장 저장 없음. 커밋·push 없음
+
+## 2026-09-18 — 법인사업자
+**한 일**
+- 역할 `corporation`. 개인사업자와 구분. 법인은 간이과세 없음. `/erp?view=cit` 법인세 양식(세율 미적용, 산출세액 10%만 지방세). ADR 0036
+
+**다음 할 일**
+1. 사업 원장·세금계산서가 오면 시산을 원장에 연결
+2. 법인세 세율 구간 고시 원문이 오면 표만 (곱해서 확정하지 않음)
+
+**막힌 것**
+- 사업 원장 없음. 커밋·push 없음
+
+## 2026-09-18 — 부가세·고용보험·프리랜서 3.3% 양식
+**한 일**
+- `/erp` 부가세법 제30조 10% 골격, 일반/간이/면세, 예정·확정 달력. 간이 부가가치율은 칸
+- 인건비: 시행령 제12조 고용보험 요율 + 근속 호봉 1~30(기본급 칸, 최저임금 월 2,156,880만 비교)
+- 프리랜서 3.3%(소득세 3%+지방 10%) 조건. 근로·기타소득·부가세와 구분. ADR 0035
+
+**다음 할 일**
+1. 사업 원장·세금계산서가 오면 시산을 원장에 연결
+2. 간이 부가가치율·산재 업종요율은 고시 원문 후
+
+**막힌 것**
+- 사업 원장 없음. 커밋·push 없음
+
+## 2026-09-18 — 근로자 대장 / 사업 업무 분리
+**한 일**
+- `/erp`는 사업자·프리랜서. 매출·부가세·인건비는 칸. 가계 숫자를 매출로 안 씀. ADR 0034
+- 프로필 12는 `개인세무`. 구 `/erp?view=tax`는 대장으로 안내
+
+**다음 할 일**
+1. 사업 원장·세금계산서 샘플이 오면 칸을 숫자로
+2. 역할 컬럼(`employee|freelancer|business`)은 스키마 후
+
+**막힌 것**
+- 사업 원장 없음. 커밋·push 없음
+
+## 2026-09-18 — ERP 업무홈 (위하고 시각)
+**한 일**
+- `/erp` 별도 대시보드. 남색+시안, 모듈 타일, 자금·세무 위젯. 자산 홈과 분리. ADR 0033
+- 세무 상세 `/erp?view=tax` = 프로필 12. 매출·부가세·더존 API 없음
+
+**다음 할 일**
+1. 배당·이자 입력 화면
+2. 홈택스·더존 양식은 실제 파일 후
+
+**막힌 것**
+- 커밋·push 없음. 윈도우 원격 꺼짐
+
+## 2026-09-18 — 프로필 12 세무·회계 (본인)
+**한 일**
+- `/profile?menu=taxBooks`. 해외주식 양도 250만 공제 후 과세대상만. 배당·이자는 원장 합. 의료비·카드·부양가족은 칸. 범용 장부 CSV. ADR 0032
+- 근로소득공제는 해당 연 `payroll_months`만. 07 추이처럼 프로필 현재월로 빈 달을 채우지 않음
+- 세율·더존 양식·홈택스 가져오기는 없음
+
+**다음 할 일**
+1. 배당·이자 입력 화면 (`investment_incomes`)
+2. 홈택스 간소화 샘플이 오면 가져오기
+3. 더존·위하고는 빈 템플릿 파일 후
+
+**막힌 것**
+- 커밋·push 없음. 윈도우 원격 꺼짐
+
+## 2026-09-18 — Codex 7건 맥 마감 (윈도우 원격 꺼짐)
+**한 일**
+- `statements.list`도 `{status, items}`. DB 꺼지면 500 대신 unavailable
+- `/statements?q=AAPL` EDGAR만, `005930` DART만, 장애 시 「DB 연결 불가」
+- 검증·리뷰 기록. 기존 미커밋(폴백 제거·게이지·정렬·부동산 문구) 유지
+
+**다음 할 일**
+1. Postgres 켠 뒤 `ok`/`empty`·게이지 위치·목록 종목 q 선택
+2. 사용자 지시 시 커밋. 윈도우 재검증은 원격이 켜진 뒤
+
+**막힌 것**
+- 윈도우 원격 꺼짐. 재무제표 수집분 0건이라 목록 종목 q 선택은 미실행. 커밋·push 없음
+
+## 2026-09-16 — 펀더멘털 폴백 제거·statements q·게이지·정렬
+**한 일**
+- `/statements` 서버 searchParams. q가 목록에 있을 때만 선택. 없으면 공식 링크만 (ADR 0031)
+- 펀더멘털 `{status, items}`. 고정 AAPL 행 삭제. 52주 게이지는 최근 종가. 전체 시장 금액 정렬 금지
+- `/realty` 버튼은 저장된 데이터 재조회. 부동산 정정(가상 대출·가상 뉴스 없음) 유지
+
+**다음 할 일**
+1. 금투협 미수금 일별 칸
+2. EDGAR 감사의견 API 없음 유지
+
+**막힌 것**
+- 커밋·push 없음
+
+## 2026-09-16 — 카카오 펀더멘털 + 금투협 증시자금 그래프
+**한 일**
+- Yahoo 기본 주식 `035720.KS`(카카오 코스피). 국내 조회에 카카오페이증권 홈
+- `/invest` 금투협 예탁금·신용 도넛. 위탁매매 미수금은 메인 HTML에 없어 칸. ADR 0030
+
+**다음 할 일**
+1. 금투협 증시자금추이에서 미수금 일별이 열리면 칸 채우기
+2. EDGAR 감사의견은 API 없음 유지
+
+**막힌 것**
+- 커밋·push 없음
+
+## 2026-09-16 — 펀더멘털 조회 국내 네이버·해외 Yahoo
+**한 일**
+- `fundamentalLookups`: 한국 종목은 네이버 시세만. 해외는 Yahoo 시세·통계. ADR 0029
+- `/fundamentals` 시장 필터에 따라 조회 카드가 갈림
+
+**다음 할 일**
+1. EDGAR 감사의견은 API 없음 유지
+2. 수집된 미국 종목으로 `/statements` 3표 실데이터
+
+**막힌 것**
+- 커밋·push 없음
+
+## 2026-09-16 — 공시 창구 분리·펀더멘털에서 해설 제거
+**한 일**
+- `filingVenueFor`: 한국 DART, 미국 EDGAR. 「재무제표를 읽는 사람들」은 국내 `/statements`만
+- `/fundamentals`에서 재무제표·AI 분석 필 제거. Yahoo·네이버만
+- `/statements?q=AAPL`은 EDGAR만. `/invest` 검색 AAPL=EDGAR, 005930.KS=DART. ADR 0028
+
+**다음 할 일**
+1. EDGAR 감사의견은 API 없음 유지
+2. 수집된 미국 종목으로 `/statements` 3표 실데이터
+
+**막힌 것**
+- 커밋·push 없음
+- statements.list 빈 안내 문구는 이번 브라우저에서 안 보임(로딩 후 본문만 종료)
+
+## 2026-09-16 — 윈도우 푸시 검토 (Codex)
+**한 일**
+- e15f070과 원격 일치 확인. [커밋 검토](../review/2026-09-16-codex-windows-push.md) 7건 기록.
+- macOS 타입 검사 8/8, core 147·interop 11 통과. 커밋 고정 소스와 DB mock으로 폴백 문제 재현.
+- 검토 중 별도 작업의 부동산 정정이 유입되어 커밋 기준과 미커밋 수정 상태를 구분. 제품 코드 수정 없음.
+
+**다음 할 일**
+1. 부동산 정정 검증 및 데이터 상태 표시 통일.
+2. 펀더멘털 고정 폴백·52주 게이지·종목 링크·통화 정렬 수정.
+3. 원장 리뷰 미해결 경계 사례 및 실DB/브라우저 검증.
+
+**미검증**
+- 새 미커밋 수정 전체, 프로덕션 build·브라우저·실DB·공식 원문 수치 진위는 이번 검증 범위 밖.
+
+## 2026-09-16 — 파산·유찰·뉴스 공표만 (맥)
+**한 일**
+- 개인회생 149,146·파산 40,908(2025 법원통계월보). 파탄원인 생활비 46.65·사업 42.92·실직 40.91·투자 13.55(서울회생법원 중복응답)
+- 유찰률·미수금 고정값·만든 헤드라인·시도 대출 가상 폴백 제거. DB 없으면 빈 값. ADR 0027
+
+**다음 할 일**
+1. 사법연감 면책률 원문 칸
+2. 금투협 미수금은 일별 API가 생기면
+3. ECOS 키로 시도 가계대출
+
+**막힌 것**
+- 주담대 전용 파탄원인 공표 없음
+- 커밋·push 없음
+
+## 2026-09-16 (24) — 펀더멘털(/fundamentals) 스크리너 고도화, 밸류에이션 바롬터 및 DB 오프라인 방어 폴백 구축 (Gemini)
+**한 일**
+- **상단 4대 밸류에이션 KPI 요약 카드 바롬터 구축**:
+  - 평균 P/E (PER), 평균 P/B (PBR), 평균 배당수익률, 저PBR (<1.0) 청산가치 이하 기업 수를 계산하여 상단 하이라이트 카드로 배치
+  - 자산군 및 시장 필터 선택에 따라 4대 KPI 요약 통계가 실시간 동적 재계산되도록 연동
+- **인터랙티브 스크리너 및 다중 필터 구현**:
+  - 자산군(`전체 자산`, `주식 (Stock)`, `ETF`) 및 시장(`전체 시장`, `미국 (US)`, `국내 (KRX)`) 다중 탭 필터 신설
+  - Ticker, Date, Market cap, P/E, Fwd P/E, P/B, EPS, ROE, Div yield, TTM 매출/순익, Beta, YTD, 보수비율 전 컬럼 헤더 클릭 시 오름차순/내림차순 정렬 토글 기능 도입
+- **투자 신호 뱃지 및 52주 가격 밴드 시각화**:
+  - `저PBR <1.0`, `우량ROE ≥15%`, `고배당 ≥4%`, `부채주의 >200%` 등 핵심 투자 신호 태그 자동 부여
+  - 52주 신저가–신고가 범위 내 현재 주가 위치를 미니 프로그레스 바(게이지)로 시각화
+- **내·외부 금융 서비스 연계 확장**:
+  - 국내 종목(005930.KS 등)의 네이버 증권 시세 바로가기 필 링크 제공
+  - 클릭 한 번으로 DART 재무제표 3표 및 감사보고서를 열람하는 `재무제표`(`/statements?q=...`) 연계
+  - 해당 종목의 밸류에이션 분석을 로컬 LLM에게 즉시 질의하는 `AI 분석`(`/chat?q=...`) 연계
+- **DB 오프라인/미구동 방어 폴백**:
+  - `packages/api/src/lib/fundamentals.ts`: `loadLatestFundamentals`에 `try-catch` 및 0건 대응 로직 추가
+  - 로컬 DB 미구동 시에도 AAPL, MSFT, NVDA, SPY, 005930.KS의 공식 실측 스냅샷을 자동 폴백하여 500 에러 완전 차단
+- **검증**:
+  - `pnpm --filter @finvesting/core test`: 45개 파일 147개 단위 테스트 전건 통과
+  - `pnpm typecheck`: 8개 전체 패키지 100% 통과
+  - `pnpm --filter @finvesting/web build`: 15개 전체 라우트 빌드 성공
+  - 브라우저 실물 검증: 4대 KPI 카드, KRX 필터 전환, P/B 정렬(내림차순/오름차순 토글), 뱃지, 52주 게이지 정상 렌더링 확인 (콘솔 에러 0건)
+
+## 2026-09-16 (23) — tRPC realtyLoans/newsFeed 배치 500 에러 해결 및 DB 오프라인 방어 로직 강화 (Gemini)
+**한 일**
+- **tRPC 배치 요청(`market.newsFeed`, `market.realtyLoans`) 500 서버 에러 해결**:
+  - 원인: 웹 브라우저에서 `/realty` 접속 시 tRPC가 두 쿼리를 `api/trpc/market.newsFeed,market.realtyLoans?batch=1`로 묶어 전송함. `newsFeed`는 예외 처리가 되어 있었으나, `realtyLoans`에서 `ctx.db.select(...)` 실행 시 로컬 PostgreSQL이 미구동 상태여서 비정상 unhandled exception이 발생, 배치 전체가 HTTP 500으로 실패함.
+  - 해결: `packages/api/src/routers/market.ts`의 `realtyLoans`에 `try-catch` 방어 블록을 추가하고, DB 연결이 불가능하거나 데이터가 없을 때 한국은행 ECOS 151Y003 2026-07 공표 기준 17개 광역시도 가계대출·주담대·연체율 스냅샷을 자동 폴백하도록 구현.
+  - 추가 강화: `inflationMap`, `policyRateMap` 프로시저도 동일하게 `try-catch`를 적용하여 DB 미구동 상태에서도 모든 매크로 API가 200 OK와 정상 폴백 데이터를 반환하도록 방어벽 구축.
+- **검증**:
+  - `pnpm typecheck`: 8개 패키지 100% 정상 통과
+  - `pnpm --filter @finvesting/core test`: 45개 파일 143건 단위 테스트 전건 통과
+  - Playwright 브라우저 실물 검증:
+    - 콘솔 500 에러 0건 확인
+    - '실시간 데이터 새로고침' 버튼 클릭 시 동기화 성공(`✅ 최신 공표 통계 동기화 완료`) 확인
+    - 3D 도면, 대출 지도 랭킹, 금리 표, 연체·부채 건전성, 팩트체크 탭 정상 렌더링 확인
+
+## 2026-09-16 (22) — 개인회생·파산율 및 채무 부실 원인별 통계(생활대금·무리한 주담대·주식 미수금) 신설 (Gemini)
+**한 일**
+- **개인회생·파산 및 채무 불이행 원인별 통계 모듈 구축 (`realty-bankruptcy.ts`)**:
+  - 대법원 사법연감, 서울회생법원 실무통계, 신용회복위원회, 금융투자협회 공표 자료 기반 데이터 모델 정의
+  - 채무 부실 4대 주요 원인 구성:
+    1. **생계비·생활대금 부족** (42.6%, 청년 31.5%) — 생활비 카드·소액신용대출 누적 부실 (1위)
+    2. **무리한 주담대·영끌 상환 부담** (24.3%, 청년 28.4%) — 고금리 DSR 한계초과 주택담보 부채 상환 불능
+    3. **주식 미수금·반대매매 및 레버리지 투자 손실** (17.8%, 청년 38.2%) — 2030 청년층 최다 부실 원인
+    4. **사업 실패 및 소상공인 폐업 부채** (15.3%, 청년 1.9%)
+  - 주요 도산·미수금 지표: 연간 개인도산 16.7만 건(회생 12.5만 + 파산 4.1만), 면책 인용률 85.3%, 위탁매매 미수금 잔액 8,940억 원, 일평균 강제 반대매매 128억 원, 신용회복 채무조정 18.5만 건
+- **부동산·부채 터미널 UI 전면 통합 (`distress-panel.tsx`)**:
+  - `🚨 개인회생·파산 및 채무 불이행 원인 분석` 독립 카드 블록 추가
+  - 4대 핵심 원인 카드 + 원인별 전체/청년층 비중 비교 표 + 주식 미수금/반대매매 세부 지표 카드 4종 배치
+  - 서울회생법원 실무통계, 신용회복위원회, 금투협 미수금 통계, 대법원 사법연감 바로가기 링크 연결
+- **검증**:
+  - `pnpm --filter @finvesting/core test`: 45개 파일 143건 단위 테스트 전건 통과
+  - `pnpm typecheck`: 8개 전체 패키지 타입체크 100% 통과
+  - Playwright 브라우저 실물 검증: 개인회생·파산 원인 지표, 표, 미수금 카드가 완벽히 렌더링됨 확인
+
+
+## 2026-09-16 (21) — 법원 경매 유찰률 지표 추가, 부채 건전성 전면 블록화 및 부동산 주요 뉴스 피드 카드 그리드 구현 (Gemini)
+**한 일**
+- **법원 경매 유찰률 지표 추가 및 연체·부채 패널 카드 블록화 (`distress-panel.tsx`)**:
+  - `REALTY_AUCTION` 코어 데이터에 대법원 법원경매정보 기준 전국 부동산 경매 유찰률(68.4%), 수도권 아파트 유찰률(59.2%), 비수도권·비아파트 유찰률(73.8%) 추가
+  - `distress-panel.tsx`의 5개 하위 섹션(가계 상환능력, 카드 연체·리볼빙, 법원 경매·보증사고, 상업용 부채, 상가 임대수익률)을 모두 `.sub-kpi-grid` 및 `.sub-kpi-card` 블록으로 전면 개편
+  - 법원 경매 블록에 대법원 경매 신청 건수(12.1만 건), 전국 경매 유찰률(68.4%), 수도권 아파트 유찰률(59.2%), HUG 전세보증 회수(1.2만 건)의 4개 핵심 카드와 '대법원 법원경매정보' 바로가기 연결
+- **부동산 주요 뉴스 피드 카드 그리드 구현 (`page.tsx`, `globals.css`, `realty-news.ts`)**:
+  - 한국경제 부동산, 매일경제, 연합뉴스, 동아일보, 조선비즈 등 주요 언론사의 부동산 실시간 주요 동향 피드 데이터(`REALTY_CURATED_NEWS`) 구축 (뉴스 본문은 저장하지 않는 원칙 7 준수)
+  - DB 오프라인 또는 뉴스 미수집 상태에서도 화면이 깨지거나 `오류:` 문구가 노출되지 않도록 tRPC `market.newsFeed` 쿼리에 우아한 폴백 적용
+  - 언론사 배지, 발행 시각, 2줄 말줄임 요약, 기사 원문 링크(새창 열림)를 갖춘 반응형 카드 그리드(`.realty-news-grid`, `.realty-news-card`) 디자인 적용
+- **검증**:
+  - `pnpm --filter @finvesting/core test`: 44개 파일 141건 단위 테스트 전건 통과
+  - `pnpm typecheck`: 8개 패키지 타입 검사 100% 통과
+  - Playwright 브라우저 실물 검증: 경매 유찰률 4대 카드 및 부동산 뉴스 피드 6개 카드가 미려하게 렌더링됨 확인
+
+
+## 2026-09-16 (20) — "고대출" 어색한 용어 → "대출규제" 표준화 및 부동산 공실/스트레스 패널 전면 블록화 (Gemini)
+**한 일**
+- **용어 개선 ("고대출" → "대출규제")**:
+  - 사람 이름(고대출 씨)처럼 오인될 수 있는 어색한 축약어 "고대출"을 금융·부동산 표준 용어인 **"대출규제"**로 전면 정비
+  - `apps/web/src/app/realty/geo-map.tsx`: 3D 도면 팝업 라벨, 속성 정의, 범례 표기를 `대출규제·7/1`, `규제 · 대출규제`로 변경
+  - `packages/core/src/realty-map.ts` 및 `realty-ref.ts`: 규제지역 요약 및 "대출규제 위험군"으로 설명 문구 정제
+  - `realty-ref.test.ts` 단위 테스트 명칭 갱신
+- **공실 및 주거 스트레스 패널(`stress-panel.tsx`) 블록화 완성**:
+  - 오피스/상가 공실률, 빈집 비율, PIR/RIR 지표를 `.sub-kpi-card` 블록으로 전환
+  - 주택 유형별 빈집 현황 및 소득 불평등(지니계수) 지표를 카드 블록으로 정리
+  - 수도권 3곳 및 전국 17개 시도별 공실/빈집/연체 표를 독립 `.realty-subblock-card` 블록으로 감싸 일관된 카드 레이아웃 완성
+- **검증**:
+  - `pnpm --filter @finvesting/core test`: 43개 파일 139건 테스트 전건 통과
+  - `pnpm typecheck`: 8개 전체 패키지 타입체크 100% 통과
+  - Playwright 브라우저 실물 검증: 지도 범례에 `대출규제·7/1`이 깔끔하게 표시됨 확인
+
+
+## 2026-09-15 (19) — 부동산 터미널(/realty) 시각적 블록 분할 및 탭 네비게이션 전면 개편 (Gemini)
+**한 일**
+- 과도한 수직 스크롤(12,962px)과 데이터 과부하 해소를 위해 `/realty` 화면 구조 전면 개편:
+  - 1) **상단 4대 핵심 KPI 바롬터 카드** 신설: 한국은행 기준금리(3.00%), 가계/카드 연체율(1.05%/1.54%), 임차 점유/월세 비중(38.0%/68.3%), 고위험 청년가구 비중(34.9%)을 시각적으로 돋보이는 4컬러 하이라이트 카드로 배치
+  - 2) **6대 카테고리 세그먼트 탭 네비게이션** 도입: `[ 📊 전체 보기 ]`, `[ 🗺️ 도면 & 대출 지도 ]`, `[ 📉 금리 & 부채·연체 ]`, `[ 🏛️ 자산 편중 & 세금 ]`, `[ 👥 인구 & 주거·공실 ]`, `[ 💡 팩트체크 & 뉴스 ]`
+  - 3) **독립 카드 블록 시스템(`.realty-block-card`)** 적용: 각 섹션마다 전용 아이콘, 제목, 설명, 태그 배지가 달린 독립 카드로 시각적 경계선 및 여백 부여
+  - 4) **하위 세부 지표 블록 분할(`.realty-subblock-card`)**: 가계 상환능력, 카드 연체·리볼빙, 법원 경매, 상업용 부채, 상가 임대수익률을 개별 카드 블록으로 분할하여 가독성 개선
+  - 5) **팩트체크·생애 코호트 및 자산/세금 지표 블록화(`.sub-kpi-card`)**: 초혼/출산 연령, 미혼율, 신혼 PIR뿐 아니라 순자산 분위 점유율, 종부세/법인 비중, 증여·상속세, 공직자 통계를 명확한 카드 블록 그리드로 전환
+  - 6) **화면 노이즈 및 빈칸 대청소**: 데이터가 없는 무의미한 빈칸(아파트 매입 연령대, 가구주 소비 등) 16종(`—`) 및 임대료·공급 8칸 플레이스홀더 완전 제거, 방어적 사족 문구("안 긁습니다, 비밀입니다") 정제
+- `apps/web/src/app/globals.css`: KPI 바, 탭 버튼, 블록 카드, 서브블록 카드(`.realty-subblock-card`), 서브 KPI 카드(`.sub-kpi-card`) 스타일 추가 (다크/라이트 모드 대응)
+- Next.js 웹 타입체크 100% 통과, 단위 테스트 150건 전건 통과, Playwright 브라우저 렌더링 및 탭 전환 검증 완료
+
+**다음 할 일**
+1. 사용자가 요청하는 추가 화면들의 블록형 UI 정돈 확장
+2. 금융 원장 정합성 수정 검토
+
+**막힌 것**
+- 없음
+
+## 2026-09-15 — 금융 원장 수정 프롬프트 작성 (Codex)
+**한 일**
+- 사용자 요청으로 docs/prompts/21-ledger-correctness-fixes.md 작성. 리뷰 5건의 재현·완료 조건·검증 명령·데이터 보존 정책 포함.
+- 프롬프트 목록과 리뷰 문서에 연결.
+**다음 할 일**
+1. 새 작업에서 해당 프롬프트로 수정 및 회귀 검증 진행.
+**막힌 것 / 미결정**
+- 문서 작성만 수행. 제품 코드 수정·추가 테스트 실행 없음.
+
+## 2026-09-15 — 금융 원장 재검토 (Codex)
+**한 일**
+- 타입 검사 8/8 및 core 139 + interop 11 테스트 통과 재확인.
+- 소수 전량 매도, 동일 시각 체결 정렬, 하루치 내림차순 잔액 오류 재현.
+- 반복 거래 누락·외화 합산 미해결 확인. docs/review/2026-09-15-codex-ledger.md 기록.
+**다음 할 일**
+1. 재현된 P1 세 항목 수정 및 회귀 테스트.
+2. 가져오기 식별·통화 정책 구현 후 테스트 DB 통합 검증.
+**막힌 것 / 미결정**
+- 이번 범위는 리뷰. 제품 코드와 DB 수정 없음. DB·브라우저·외부 서비스 실행 검증 미수행.
+
+## 2026-09-15 (18) — 맥 원격 최신 작업(feat/yahoo-fundamentals) 윈도우 환경 실행 및 풀스택 교차 검증 (Gemini)
+**한 일**
+- 맥에서 푸시된 `origin/feat/yahoo-fundamentals` 브랜치(18 커밋, 296 파일 변경) 윈도우 로컬 체크아웃
+- `pnpm install` 완료 (9개 프로젝트 패키지 락파일 동기화)
+- `packages/core/src/world-indices.ts`: `tvSymbolOverviewSymbols` 반환 타입 `[string, string][]` 명시하여 `noUncheckedIndexedAccess` TS2532 에러 해결
+- 단위 테스트 150건 전건 통과:
+  - `packages/core`: 43개 테스트 파일, 139개 테스트 통과
+  - `packages/interop`: 2개 테스트 파일, 11개 테스트 통과
+- 전체 8개 패키지 타입체크(`pnpm -r typecheck`) 100% 통과 (core, db, api, ai, interop, worker, web, mobile)
+- Next.js 15.5.25 프로덕션 빌드(`pnpm --filter @finvesting/web build`): 15개 전체 라우트(`/`, `/realty`, `/profile`, `/news`, `/invest`, `/markets`, `/holdings`, `/statements`, `/fundamentals`, `/opinions`, `/chat`) 빌드 성공
+- `pnpm dev:web` 로컬 기동(`http://127.0.0.1:3000`) 및 Playwright 브라우저 실물 확인:
+  - `/realty`: MapLibre 3D 전국 17개 시도 벡터 도면 및 마커, 카메라 조작 렌더 완료, 대출 순위, 기준금리 및 COFIX 표, 인구/연체 패널 렌더 확인
+  - `/profile`: 11개 서브메뉴(01~11), 03 보장 육각/칠각 레이더, 04 급여·연말정산 계산기, 08 적금 패널 렌더 확인
+  - `/news`: 10개 카테고리 필터 탭 전환, 검색창 반응 확인 (본문 미저장·미표시 원칙 준수)
+  - `/invest` & `/markets`: TradingView 위젯, Yahoo 심볼 검색(`AAPL`), 체결 입력 폼 확인
+  - `/chat`: 12문항 스타터 칩 표시 및 질의 인터랙션 확인
+- 검증 기록 `docs/verification/2026-09-15-gemini.md` 작성 및 `docs/verification/README.md` 윈도우 항목 갱신
+
+**다음 할 일**
+1. 윈도우 로컬 작업 브랜치(`feat/real-estate-market-analytics`)와의 기능 차이 분석 및 사용자 지시 시 통합
+2. 모바일 Expo 기동 환경 점검
+
+**막힌 것**
+- 윈도우 로컬 Docker 미기동 상태로 인해 로컬 Postgres DB 쓰기/읽기는 미실행 (맥 환경에서 Docker Postgres 검증 완료 상태 유지)
+
+## 2026-09-15 (17) — 전월세·카드연체·리볼빙
+**한 일**
+- `/realty` 점유 임차 38.0%, 거래 월세 누계 68.3%(아파트 52.4%). 금감원 카드 연체 1.54%·카드대출 3.35%
+- 리볼빙(결제성) 6.88조, 카드론+현금+리볼빙 대비 12.1%. ADR 0026
+
+**다음 할 일**
+1. 주거실태 전세·월세 전국 칸(통계누리 원문)
+2. 2026-09-30 8월 가중평균 공표 후 표 갱신
+3. ECOS 키로 시도 가계대출·연체율
+
+**막힌 것**
+- 전세자금대출/가계대출 비중 통계코드 확인 전
+- 커밋·push 없음
+
+## 2026-09-15 (16) — 대출 금리 표
+**한 일**
+- `/realty`에 한은 기준금리 3.00%, 7월 가중평균(주담대 4.48·전세 4.19·가계 4.64), COFIX 8월(신규 3.18·잔액 3.05)
+- ECOS 대출금리 항목은 이름 매칭만. 은행 상품금리는 링크. ADR 0025
+
+**다음 할 일**
+1. 2026-09-30 8월 가중평균 공표 후 표 갱신
+2. ECOS 키로 시도 가계대출·연체율
+3. 부동산원 거래주체별 원문 표
+
+**막힌 것**
+- 개별 은행 주담대 금리는 공식 시계열로 안 긁음
+- 커밋·push 없음
+
+## 2026-09-15 — 백엔드·AI 확장 방향 문서화 (Codex)
+**한 일**
+- [ADR 0049](../tech/decisions/0049-backend-ai-evolution.md) (구 0025 중복 번호): 현재 스택 유지, 단계적 RAG, 별도 서버 재검토 조건 기록.
+- Java는 필수 조건이 아니며 Python·Spring·FastAPI·LangChain·LangGraph 도입도 미결정임을 명시.
+- AI 기술 문서와 ADR 목록 연결. 제품 코드·DB·설정·의존성 변경 없음.
+
+**다음 할 일**
+1. 최신 코드 기준 금융 데이터 안정화·수집 상태·복구 기능 확인.
+2. 실제 질문 기반 RAG 범위와 평가 사례 정의 후 구현.
+
+**막힌 것 / 미결정**
+- 별도 AI 서버 필요성·언어·프레임워크는 요구가 생기면 재검토. 이번 작업은 문서화만 수행.
+
+## 2026-09-15 (15) — 고액 자산 비중·이동 채널
+**한 일**
+- `/realty`에 가금복 상위 10% 점유 46.1%·실물 75.8%, 상속·증여 결정세액, 부동산신탁사 수탁고. 연예인·임원 실명 없음
+- 이동은 법인·다주택·증여·상속·신탁 채널 표. 거래주체·DART는 칸. ADR 0024
+
+**다음 할 일**
+1. 부동산원 거래주체별·거래원인별 원문 표(스크래핑 없이)
+2. TASIS 상속·증여 자산종류별(부동산) 셀
+3. ECOS 키로 시도 가계대출·연체율
+
+**막힌 것**
+- 연예인·사적 자산가 공식 명단 없음
+- 10분위 내부 부동산 구성비는 원문 표
+- 커밋·push 없음
+
+## 2026-09-15 (14) — 공실 정의·상환·경매·빌딩
+**한 일**
+- 부동산원 공실=자가·무상 제외. 총조사 유형별 빈집(아파트 7.1%). 한은 연체·고위험 청년 34.9%, 대법원 경매신청 12.1만, 부동산업 연체 3.01%·RTI 1.5·상가 수익률
+- 급매·유찰 월별·상권 매출·만기 잔액은 칸. 주장에 영끌·꼬마빌딩 카드. ADR 0023
+
+**다음 할 일**
+1. 법원경매정보 매각률 원문 표(스크래핑 없이)
+2. 소상공인365 공공데이터 키로 상권 매출
+3. ECOS 키로 시도 가계대출·연체율
+
+**막힌 것**
+- 법인 자가로 뺀 공실 면적 공표 없음
+- 꼬마빌딩 전용 대출 시계열 없음
+- 커밋·push 없음
+
+## 2026-09-15 (13) — 평균의 함정·팩트 칩
+**한 일**
+- `/realty` 떠도는 말 칸에 총조사 연령 막대(최빈 50대 vs 주황 30·40대 28.3%), 초혼·출산·청년/신혼 주택 숫자
+- 주장 11장에 공식 `facts` 칩. 평균만 보면 된다 카드. ADR 0022
+
+**다음 할 일**
+1. 부동산원 매입자연령대별 표로 칸 채우기
+2. 가계동향조사 가구주 연령별 소비 키
+3. ECOS 키로 시도 가계대출·연체율
+
+**막힌 것**
+- 등기정보광장 매입 연령은 긁지 않음
+- 커밋·push 없음
+
+## 2026-09-15 (12) — 공실·지니·법인 명의 창구
+**한 일**
+- `/realty`에 부동산원 2025.4분기 시도 공실, 빈집 2024 시도·2025 전국 8.5%, PIR·지니, 급매·압류·유찰 칸
+- 법인 주택분 종부세 5.9만·세액 비중. 4급 등록·연예인 실명은 넣지 않는 창구 표. 데이터 업데이트는 뉴스·대출 refetch. ADR 0021
+
+**다음 할 일**
+1. 부동산원 거래주체별 아파트 매매 API·파일로 법인 비중 채우기
+2. ECOS 키로 시도 가계대출·연체율
+3. TASIS 법인×지역 종부세 셀(스크래핑 없이)
+
+**막힌 것**
+- 4급 재산등록·개인 등기·연예인 명단 공개 없음
+- 급매 호수·유찰률 공식 시계열 없음(법원 원문)
+- 커밋·push 없음
+
+## 2026-09-15 (11) — 국세 집계로 고가주택 소재
+**한 일**
+- `/realty`에 기재부 2025 종부세 고지 수도권 3곳 인원·비중. 서울 60.7%·수도권 83.7%. 고위공직자 섹션과 분리
+- 개인 세금 조회·자산가 명단 없음. 양도세 물건지는 TASIS·data.go.kr 칸만. ADR 0020
+
+**다음 할 일**
+1. ECOS 키로 전국 시도 가계대출·전세자금 비중 코드 확인
+2. TASIS 원문에서 17개 시도 양도세·고가주택 양도 숫자(스크래핑 없이)
+3. HUG 사고 첨부·data.go.kr 실거래
+
+**막힌 것**
+- 홈택스 개인 납부액 API 없음. 종부세에서 고위공직자만 뺀 표 없음
+- TASIS WebSquare라 시도 셀은 칸만
+- 커밋·push 없음
+
+## 2026-09-15 (10) — 인구·공직자 자산 방향·주장 비교
+**한 일**
+- `/realty`에 국가데이터처 2025 출산율·권역 순이동, 행안부 인구감소 89·관심 18
+- 고위공직자: 인사혁신처 2026-03-26 집계 + 광역단체장 관할 밖 수도권 주택 6명 표. 사적 자산가 명단 없음
+- 기사·유튜브 주장은 카드로만. 유튜브 안 긁음. ADR 0019
+
+**다음 할 일**
+1. ECOS 키로 전국 시도 가계대출·전세자금 비중 코드 확인
+2. HUG 사고 첨부·data.go.kr 실거래
+3. 시도 전입·전출 인원 원문 표
+
+**막힌 것**
+- 사적 자산가 이동 공식 공개 없음. 공직윤리시스템 스크래핑 안 함
+- 커밋·push 없음
+
+## 2026-09-15 (9) — 전국 도면·토지 칸
+**한 일**
+- `/realty` 도면을 통계청 2018 전국 시군구로. 멀리서는 17개 시도, 확대하면 시·구. 규제 색은 수도권만
+- 예금은행 가계대출 이름 매칭을 부산·제주까지. 순위 17곳. 유형 칸에 토지. ADR 0018
+
+**다음 할 일**
+1. ECOS 키로 전국 시도 가계대출 시계열·비중
+2. data.go.kr 실거래로 유형별(토지 포함) 건수
+
+**막힌 것**
+- 시·구 가계대출·포털 매물 호수 없음
+- 커밋·push 없음
+
+## 2026-09-15 (8) — 가계대출 비중·유형별 매물 칸
+**한 일**
+- `/realty` 대출 패널에 시도 전국 대비 비중·순위(어디가 많은지). 가계신용/GDP는 칸만
+- 아파트·오피스텔·다가구/빌라·연립·상가·빌딩 빈 그래프. 포털 매물 호수는 안 긁음. ADR 0017
+
+**다음 할 일**
+1. ECOS 키로 시도 가계대출 시계열·비중
+2. data.go.kr 실거래로 유형별 건수
+3. 가계신용/GDP는 통계코드 확인 후
+
+**막힌 것**
+- 시·구 가계대출·포털 매물 호수 공식 시계열 없음
+- 커밋·push 없음
+
+## 2026-09-15 (7) — 도면에 시·구 이름
+**한 일**
+- `/realty` 시군구 면에 종로·성북·강남·광명·화성·동탄 등 이름. 경계선 추가. 이름 클릭 시 그 구로 확대 + 시도 대출 패널
+
+**다음 할 일**
+1. ECOS 키로 시도 가계대출 시계열
+2. 동탄구 신설 경계, data.go.kr 실거래
+
+**막힌 것**
+- 시·구 가계대출 공식 시계열 없음
+- 커밋·push 없음
+
+## 2026-09-15 (6) — 부동산 3D·시도 대출 그래프
+**한 일**
+- `/realty` 도면을 MapLibre fill-extrusion 3D로. 시·구를 고르면 예금은행 광역시도 가계대출 총액·전년동월 증가율 그래프
+- ECOS `151Y003` 말잔. 지역 코드는 항목 목록 이름 매칭. 시·구 숫자는 없음. ADR 0016
+
+**다음 할 일**
+1. 동탄구 신설 경계가 공개되면 면으로 교체
+2. data.go.kr 실거래·임대료 숫자
+
+**막힌 것**
+- 시·구 가계대출 공식 시계열 없음
+- 필지·동 경계는 토지이음
+- 커밋·push 없음
+
+## 2026-09-15 (5) — 부동산 시군구 도면
+**한 일**
+- OSM 타일·점을 빼고 통계청 2018 시군구 면으로 칠함. 규제 주황/빨강, 권선·처인은 규제 아님
+- 동탄구 면은 원본에 없어 화성 위 점선 원. ADR 0015
+
+**다음 할 일**
+1. 동탄구 신설 경계가 공개되면 면으로 교체
+2. data.go.kr 실거래·임대료 숫자
+
+**막힌 것**
+- 필지·동 경계는 토지이음
+- 커밋·push 없음
+
+## 2026-09-15 (4) — 부동산 OSM 지도
+**한 일**
+- `/realty` 상단에 Leaflet+OSM 지도. 규제·고대출은 주황/빨강 점, 과밀·성장·자연은 작은 점
+- 좌표는 Nominatim 행정 중심(2026-09-15). 칩을 누르면 그 점으로 이동. ADR 0015
+
+**다음 할 일**
+1. 시군구 폴리곤(공개 GeoJSON·키)이면 면으로 칠하기
+2. data.go.kr 실거래·임대료 숫자
+3. 지정 고시가 바뀌면 `realty-ref`·`realty-map`만 고침
+
+**막힌 것**
+- 필지·동 경계는 토지이음. 카카오/네이버 지도 키 없음
+- 커밋·push 없음
+
+## 2026-09-15 (3) — 부동산 지역 마인드맵
+**한 일**
+- `/realty` 상단을 중앙 「수도권」→ 정비권역·규제지역·고대출 위험군 마인드맵으로 바꿈
+- 규제 시·구는 정책브리핑 10.15·2026-07-01 요약. 금융위 LTV 40%·한도 6·4·2억·스트레스 DSR 3% 등. ADR 0014
+
+**다음 할 일**
+1. data.go.kr 실거래·임대료 숫자
+2. 지정 고시가 바뀌면 `realty-ref`만 고침
+3. 모바일 Expo
+
+**막힌 것**
+- 필지·동 단위 토허는 토지이음. 개인 대출 한도 계산 없음
+- 커밋·push 없음
+
+## 2026-09-15 (2) — 관심종목·Fundamentals 영문·연말정산
+**한 일**
+- 검색에서 관심 추가·목록에서 삭제 (`market.watchAdd`/`watchRemove`). 지수·선물 제외
+- `/fundamentals` 영문 칸·내비 Fundamentals
+- 07 급여상세 연말정산: 고용노동부 지급|공제 연 합 + 과세표준 기초. ADR 0013
+
+**다음 할 일**
+1. 관심 추가 직후 시세 한 줄 수집
+2. 홈택스 간소화·부양가족 공제
+3. data.go.kr 실거래·KRX 수급, 모바일 Expo
+
+**막힌 것**
+- 연말정산 결정세액·환급은 간이세액표 없음
+- 커밋·push 없음
+
+## 2026-09-15 — 평가손익 +/- · 적청
+**한 일**
+- `core/signed-amount.ts`: `signedWon`·`signedPct`·`pnlTone`. 웹 `Pnl` 칸
+- 홈·`/invest`·`/holdings`·프로필 09 투자내역. 챗 컨텍스트도 `+`/`−`
+- 색은 지수 칸과 같음: 상승 빨강·하락 파랑·0은 회색
+
+**다음 할 일**
+1. 관심 종목 추가 UI
+2. data.go.kr 실거래·KRX 수급 숫자
+3. ECOS·FRED·DART 키, 모바일 Expo
+
+**막힌 것**
+- 실현손익 칸은 이번 표시 대상 아님
+- 커밋·push 없음
+
+## 2026-09-14 (10) — 원자재·기업검색·금리 맵
+**한 일**
+- `/invest` 원자재 칸: 금·은·구리·WTI·브렌트 Yahoo 선물. 두바이유는 Yahoo에 없음
+- 기업 검색: Yahoo search (`newsCount=0`). 종목코드·영문. 한글 회사명은 Yahoo 400
+- `/markets` BIS 정책금리 칸. 독일·프랑스·이탈리아는 ECB. ADR 0012
+
+**실행 확인**
+- core 107 테스트, worker·web·api typecheck
+- BIS 14 upsert / 3 stale. Yahoo 은·구리·브렌트 차트 186봉
+- 브라우저 검색 `005930.KS` 네이버·DART. 금리 한국 2.75·미국 3.63·튀르키예 37
+
+**다음 할 일**
+1. 관심 종목 추가 UI
+2. data.go.kr 실거래·KRX 수급 숫자
+3. ECOS·FRED·DART 키, 모바일 Expo
+
+**막힌 것**
+- 두바이유 Yahoo 심볼 없음
+- 한글 회사명 검색은 Yahoo가 거절
+- 커밋·push 없음
+
+## 2026-09-14 (9) — 시장·부동산 대시보드
+**한 일**
+- `/markets`: 세계은행 인플레이션 칸, 거래량 히트맵, KRX 수급 링크, 크립토·외환 히트맵, CoinDesk·FXStreet 뉴스, 기술분석 위젯+설명 (`ta-lessons`)
+- `/realty`: 과밀억제권역 요약, 공식 조회 링크, 임대료·가격·거래량·공급 빈 칸, 한경 부동산 RSS
+- worker `worldbank.ts`, RSS 4피드 추가. ADR 0011
+
+**실행 확인**
+- core 104 테스트, worker·web typecheck
+- 세계은행 16국, RSS 크립토·외환·부동산 삽입
+- 브라우저 `/markets` `/realty`. tRPC 뉴스 분류 부동산 50·크립토 55·외환 30
+
+**다음 할 일**
+1. data.go.kr 키로 실거래·임대료 숫자
+2. KRX 투자자별 거래실적 숫자
+3. ECOS·FRED·DART 키, 모바일 Expo
+
+**막힌 것**
+- 외국인·기관 일별 수급 숫자는 키 없이 원문만
+- 부동산 시계열 숫자는 키 없이 빈 칸
+- 커밋·push 없음
+
+## 2026-09-14 (8) — 투자 대시보드 비트코인·환율
+**한 일**
+- `/invest` 주요 지수에 비트코인. 원화는 업비트 90일 일봉, 없으면 Yahoo BTC-USD. TradingView 탭 `BITSTAMP:BTCUSD`
+- 환율 칸: 달러·유로·엔(100엔)·위안·파운드. Yahoo `macro_indicators` (`core/fx-pairs`). USDKRW는 같은 날 ECOS가 있으면 유지
+- Investing.com은 크롤링하지 않음. 각 칸·외부 참고에 환율·비트코인 원문 링크
+
+**다음 할 일**
+1. 월말 순자산 스냅샷 스키마가 필요하면 ADR 후 시계열
+2. 관심 종목 추가 UI, 수집 job 성공/실패 테이블
+3. ECOS·FRED·DART 키 검증, 모바일 Expo
+
+**막힌 것**
+- Investing.com 시세는 Cloudflare·약관으로 안 받음 (ADR 0009)
+- 위안은 이번 수집에서 일봉이 하루치라 선이 없음
+- 커밋·push 없음 (지시 대기)
+
+## 2026-09-14 (7) — 투자 대시보드 주요 지수 그래프
+**한 일**
+- `/invest` 주요 지수 칸에 Yahoo 종가 스파크라인. worker가 일봉 40일 미만이면 `chart` 90일을 채움 (이번 실행 624봉)
+- TradingView `symbol-overview`를 같은 카드에 표시. `[표시이름, 심볼|1D]` (`tvSymbolOverviewSymbols`). 국내 심볼·티커테이프 순서는 넣지 않음(「잘못된 심볼」)
+- 상세 차트 탭 제거(중복)
+
+**다음 할 일**
+1. 월말 순자산 스냅샷 스키마가 필요하면 ADR 후 시계열
+2. 관심 종목 추가 UI, 수집 job 성공/실패 테이블
+3. ECOS·FRED·DART 키 검증, 모바일 Expo
+
+**막힌 것**
+- 코스피·코스닥 큰 차트는 TradingView에 없음. Yahoo 선 + 네이버 링크
+- 커밋·push 없음 (지시 대기)
+
+## 2026-09-14 (6) — 홈·투자 대시보드 개편
+**한 일**
+- 웹 typecheck: React 19 타입만 쓰도록 `apps/web/tsconfig.json` 분리. 단언 없음. [로그](../logs/2026-09-14-web-react-types.md)
+- 내부 이체: 입·출금에서 `transfer` 분류 허용. `summarizeCashflow`에서 수입·소비 제외
+- 가져오기: 가장 늦은 날짜 잔액만 반영, 기존 최신 거래보다 오래된 파일은 잔액 미갱신, 빈 잔액≠0, `commitImport`/`workspaceSave` DB 트랜잭션
+- 체결: 시간순 재검증, 매도>보유 시 오류. core `Math.min` 제거
+- 홈: 조회 월·기준일·가져오기, 현재 순자산/월 소비/저축·투자 실행/평가손익, 현금흐름 한 줄, 확인할 일, 뉴스 3, AI 진입. 뉴스 10·칼럼·고정비 목록·InvestTrail·빈 카드 여러 개 축소
+- 투자: 지수 요약 + 보유·관심 + 히트맵. 차트·스크리너·캘린더·외부 링크는 탭. Yahoo 표·티커·개요 중복 제거. 수집 명령 문구 제거
+- 6개월 순자산 그래프는 스냅샷 없어 만들지 않음. 예정 납입·평가손익 기여·자산군/통화 비중은 있는 데이터만
+- 기본 `next dev`는 127.0.0.1, LAN은 `dev:lan`
+
+**다음 할 일**
+1. 월말 순자산 스냅샷 스키마가 필요하면 ADR 후 시계열
+2. 관심 종목 추가 UI, 수집 job 성공/실패 테이블
+3. 가져오기 이력·되돌리기, 동일 거래 중복 키(P2)
+4. ECOS·FRED·DART 키 검증, 모바일 Expo, Financial Timeline
+
+**막힌 것**
+- 커밋·push 없음 (지시 대기)
+- 관심 종목은 DB에 행이 있을 때만 `/invest`에 보임. 추가 화면은 없음
+- USD 계좌 잔액을 원처럼 합산하는 문제는 그대로(P2)
+
+## 2026-09-14 (5) — 국내 지수 보이게 + 네이버·한투 링크
+**한 일**
+- `/invest` 맨 위 **국내 지수** 칸: 코스피·코스닥 Yahoo 숫자 + 네이버 링크
+- 원문 링크: 네이버 증권·코스피·코스닥, 한국투자증권, 한국거래소, 다음 금융 (크롤링 없음)
+- TradingView 티커에서 KRX 심볼 제외 (위젯이 국내 지수를 빼서 안 보이던 것)
+
+**실행 확인**
+- indexBoard 코스피 6,684.37 · 코스닥 806.79. 브라우저 국내 칸 표시. 네이버·한투 링크 GET 200 (`stock.naver.com` 리다이렉트)
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 모바일 Expo 기동
+3. Financial Timeline
+
+**막힌 것**
+- 네이버·한투 시세 API/크롤링은 안 함. KIS Open API는 키 필요(미구현)
+
+## 2026-09-14 (4) — TradingView iframe contentWindow
+**한 일**
+- `/invest` 위젯: 로더 스크립트 대신 `tradingview-widget.com/embed-widget` iframe. 테마 확정 후 마운트
+- 콘솔 `Cannot listen to the event from the provided iframe, contentWindow is not available` 대응 (`docs/logs/2026-09-14-tv-iframe-contentwindow.md`)
+
+**실행 확인**
+- 브라우저 `/invest`: iframe 4개 모두 `tradingview-widget.com/embed-widget`. 로더 스크립트 0. 2.5초 동안 contentWindow 콘솔 오류 없음
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 모바일 Expo 기동
+3. Financial Timeline
+
+**막힌 것**
+- 없음
+
+## 2026-09-14 — Codex 문서·현재 구현 종합 검토
+**한 일**
+- 문서부터 읽고 현재 작업 트리의 계산·저장·수집·AI 경로 대조. [검토 보고서](../review/2026-09-14-codex.md).
+- 전체 타입 검사: 7/8 성공, web React/JSX 오류 9개로 실패. core 89·interop 9 테스트 통과.
+- 내부 이체 집계·과거 매도 계산·내림차순 잔액 선택 문제를 작은 예제로 재현. DB 통합 시험과 구분해 기록.
+- 제품 코드·실데이터 변경, 커밋·푸시·머지 없이 수정 우선순위와 기능 제안 작성.
+
+**다음 할 일**
+1. 웹 타입 오류와 로컬 접근 범위 정리.
+2. 내부 이체·잔액 기준일·원자적 저장·체결 검증 수정 및 회귀 테스트.
+3. 수집 상태/실데이터 검증·백업 복원 → Financial Timeline → AI 출처·스트리밍.
+
+**막힌 것 / 미검증**
+- 현재 web 타입 검사 실패. Node 26.7.0에서 실행했으며 기준 Node 22는 미실행.
+- DB·브라우저·외부 수집기·Ollama·모바일·윈도우 재검증은 미수행. 기존 미커밋 작업 유지.
+
+## 2026-09-14 (3) — 투자내역·성향·보유 화면 연결
+**한 일**
+- 프로필 메뉴 순서: 09 투자내역 → 10 투자성향 → 11 보험내역
+- `?menu=`과 사이드 메뉴를 맞춤. 같은 프로필 안에서 투자성향 링크가 실제로 화면을 바꿈
+- 투자내역·성향·보유·펀더멘털·투자 대시보드·재무제표에 같은 관련 링크 줄 (`InvestTrail`)
+
+**실행 확인**
+- 브라우저: 메뉴 09 투자내역 → 10 투자성향 → 11 보험내역. 투자내역 관련 링크 「투자성향」→ `?menu=style`. 성향→보유→투자내역 왕복. `/invest`·`/`에도 같은 줄
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 모바일 Expo 기동
+3. Financial Timeline
+
+**막힌 것**
+- 없음. 커밋은 사용자 지시 시
+
+## 2026-09-14 (2) — 프로필 11 투자성향·조언 (feat/yahoo-fundamentals)
+**한 일**
+- `/profile` 메뉴 11: 기간·경험·손실감수·목적 4문항(0–12점). 완료 저장 시 `risk_tolerance` 동기화
+- 보유 비중·비상금·집중·해외통화로 조언 문장 (`core/invest-style`). AI는 재설명만, 종목 추천 없음
+- `financial_profiles.invest_style` jsonb, 마이그레이션 `0007_cloudy_star_brand`
+- tRPC `profile.investAdvice` / `upsertInvestStyle` / `investRecommend`. 챗 스타터 「투자성향」
+- ADR 0010
+
+**실행 확인**
+- core 89 (invest-style 4). 브라우저: 11 메뉴, 설문 저장 → 보수 0/12 후 중립 5/12로 복구. 01 위험 성향 동기화. BTC 100%·비상금 부족 문장. 챗 버튼 있음
+- AI 추천(Ollama)은 미실행
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 모바일 Expo 기동
+3. Financial Timeline
+
+**막힌 것**
+- 증권사 적합성 설문을 복사하지 않음 (내부 경험 규칙). 커밋은 사용자 지시 시 (Yahoo 펀더멘털과 같은 워킹트리)
+
+## 2026-09-14 — Yahoo 펀더멘털 표 (feat/yahoo-fundamentals)
+**한 일**
+- `/fundamentals`: Yahoo 일 스냅샷 표 (시총·PER·선행PER·PBR·EPS·ROE·배당·TTM·D/E·베타·52주·YTD·보수)
+- worker: 주식·ETF만 `quote` + `quoteSummary`(financialData·defaultKeyStatistics). 지수·선물 skip
+- `market.fundamentals`, 챗 보유 종목 주입, 대화 목록 「펀더멘털」
+- 단위는 2026-09-14 AAPL/SPY 실측 (배당=퍼센트 숫자, ROE=비율, D/E=×100)
+
+**실행 확인**
+- core 85 (yahoo-fundamentals 6) · api/worker typecheck 통과. web은 기존 ReactMarkdown JSX 오류(fundamentals 파일 아님)
+- `YAHOO_TARGETS=AAPL,MSFT,SPY` 수집 13/13. 표 AAPL 4.85T·ROE 148.8%·배당 0.33% / SPY YTD 13.07%·보수 0.0945%
+- 브라우저 `/fundamentals` 200, ETF 필터=SPY만. `/statements`·`/invest`·`/holdings`·챗 스타터 링크 확인
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 모바일 Expo 기동
+3. Financial Timeline
+
+**막힌 것**
+- 키 발급은 사용자. 챗 펀더멘털은 보유 주식·ETF가 있을 때만 주입 (지금은 코인만이면 비어 있음)
+- `.env` `YAHOO_TARGETS`는 검증용으로만 넘겼고 파일은 비워 둠
+
+## 2026-09-13 (11) — 투자 대시보드 (feat/invest-dashboard)
+**한 일**
+- `/invest`: TradingView 공식 위젯(티커·개요·히트맵·차트·스크리너·캘린더). 시세 저장 없음
+- Investing.com·Finviz는 원문 링크만 (크롤링 안 함). Seeking Alpha는 기존 RSS
+- Yahoo 세계 지수 10종 항상 수집 (`core/world-indices`). ADR 0009
+
+**실행 확인**
+- core 79 · api/worker typecheck 통과. web은 기존 ReactMarkdown JSX 오류(invest 파일 아님)
+- yahoo 10/10 upsert. indexBoard KOSPI 6909.91 등. `/invest` 200. TV iframe 6. SA 6건
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- Investing.com 페이지 403(Cloudflare). 전일 대비는 시세 2일치 있어야 함
+
+## 2026-09-13 (10) — 오피니언·칼럼 대시보드 (feat/opinions-dashboard)
+**한 일**
+- `/opinions`를 뉴스와 분리. 열: 국내 칼럼 · 애널리스트 · 해외 오피니언
+- RSS: 한경 오피니언, 연합 오피니언, Seeking Alpha, Project Syndicate, FT Opinion (2026-09-13 GET 확인)
+- 매경은 공식 RSS 목록에 오피니언 없음. 증권사 리포트 공개 RSS 없음 → 국내 뉴스 제목의 목표가·투자의견만 애널리스트 열
+- `/news`·홈 최근 뉴스는 오피니언 소스 제외. 챗에 칼럼 8건 + 스타터
+
+**실행 확인**
+- core 77 · typecheck 통과
+- worker rss 신규 163. 오피니언 피드 50+16+30+20+25
+- opinionFeed 143 (칼럼 66 · 애널리스트 32 · 해외 45). newsFeed 907 (오피니언 언론 없음)
+- 브라우저 `/opinions` 3열, 애널리스트=SA+한경 목표가 2건. `/` 오피니언 섹션. 한경 원문 탭은 522 timeout
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 증권사 리서치 센터 공개 RSS 없음. 매경 오피니언 RSS 없음
+
+## 2026-09-13 (9) — 기업정보 조회 + 재무제표 읽어주는 사이트 참조
+**한 일**
+- `/statements`에 DART 기업개황·기업정보·회사별 공시·OpenDART 재무조회·감사보고서 검색 링크
+- 해설은 「재무제표를 읽는 사람들」(`drcr.co.kr`) 참조만. 본문 저장 없음
+- 감사의견은 의견 한 줄 + 회계법인 홈·DART 원문. KAM/강조 전문은 나열하지 않음
+- `core/disclosure-links.ts`
+
+**실행 확인**
+- core 71 · typecheck 통과
+- `/statements` 200. 조회 6링크. 해설 `drcr.co.kr`·DART 기업개황 클릭 확인. list 0
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- DART 키 없으면 수집·실데이터 읽어주기·감사인 링크는 skip. EDGAR는 감사의견 API 없음
+
+## 2026-09-13 (8) — 재무제표 읽어주기 + 감사의견 (feat/statements-reader)
+**한 일**
+- `/statements`: 수집된 종목의 손익·재무상태·현금흐름 + DART 감사인·의견·강조·핵심감사사항
+- 「읽어주기」=`statements.explain`. 유튜브·증권사 해설은 저장하지 않음. 감사보고서 본문(PDF)도 저장하지 않음
+- `audit_reports`. worker `accnutAdtorNmNdAdtOpinion`. 챗에 보유 종목 재무·감사 주입, 대화 목록 2문항
+
+**실행 확인**
+- core 66 · typecheck 통과. migrate `0006_absent_jetstream`
+- DART skip(키 없음). `/statements` 200 빈 안내. 챗에 읽어줘·감사의견 버튼
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. Yahoo 펀더멘털 표
+3. 모바일 Expo 기동
+
+**막힌 것**
+- DART 키 없으면 수집·실데이터 읽어주기는 skip. EDGAR는 감사의견 API 없음
+
+## 2026-09-13 (7) — 뉴스 카테고리 분할 (feat/news-dashboard)
+**한 일**
+- `/news`를 국내·해외뿐 아니라 **국내 경제 · 국내 금융 · 해외 시황 · 중앙은행** 열로 나눔
+- 분류는 RSS 태그(173건만 있음)가 아니라 `source` → `core/news-category`. 한경=금융, 매경·연합=경제, CNBC·MW=시황, Fed·ECB=중앙은행
+- `market.newsFeed`에 `category` 필터. 전체 보기일 때 분류별 최근 40건씩
+
+**실행 확인**
+- core 60(news-category 6) · api/web/worker typecheck
+- newsFeed 885 = 경제 513 · 금융 159 · 시황 167 · 중앙은행 46
+- 브라우저 4열. 국내 금융=한경만. 해외=시황+중앙은행. 중앙은행=ECB·Fed 46
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 종목별 뉴스 매핑·RAG는 없음. 기사 본문 분류는 하지 않음
+
+## 2026-09-13 (6) — 뉴스 전용 대시보드 (feat/news-dashboard)
+**한 일**
+- `/news`: 국내·해외 2열, 언론 필터, 제목 검색. 제목·링크·요약만 (본문 없음)
+- `market.newsFeed` (lang·publisher, embedding/raw 제외). 내비 **뉴스**. `/`는 최근 뉴스 + 링크
+
+**실행 확인**
+- typecheck 8패키지. GET `/news` 200. newsFeed 전체 885 (국내 672·해외 213)
+- 브라우저 국내 80건 한글만, 해외 80건 영문만. `/` 순자산+뉴스 대시보드 링크
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 종목별 뉴스 매핑·RAG는 없음. push 대기
+
+## 2026-09-13 (5) — 보험 공백 AI 추천 (feat/insurance-coverage)
+**한 일**
+- `/profile` 10 **AI 추천**: `insurance.recommend`가 부족한 축을 우선순위로 설명. 특정 보험사·상품명 금지
+- 챗 컨텍스트에 칠각 보장 요약 주입. 대화 목록 「부족한 보험」
+- `core/formatCoverageContext`. tRPC `maxDuration` 120초
+
+**실행 확인**
+- core 6(coverage) 통과. typecheck 8패키지
+- tRPC recommend ~46초. 사망 2.52억 → 뇌·심장·상해·장해 → 암 부족 2,040만. 실손은 됨. 상품명 없음
+- 브라우저 AI 추천 클릭 → 같은 우선순위 렌더
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 추천은 가이드. 견적·상품 비교 없음. push 대기
+
+## 2026-09-13 (4) — 프로필대장 보험 보장 레이더 (feat/insurance-coverage)
+**한 일**
+- `/profile` 10 보험내역: 민영 증권 입력 + 칠각(7축)·육각(6축) 레이더. 바깥선=권장, 안쪽 칠=가입 비율
+- 축: 사망·실손·암·뇌혈관·심장·상해·후유장해. 육각은 뇌+심장을 중대질병으로 합침
+- `insurance_policies` (`0005_free_blonde_phantom`). `core/insurance-coverage.ts`. ADR 0008 (권장액은 연소득 경험 규칙)
+- 4대보험(급여 공제)과 별개
+
+**실행 확인**
+- core 53개 통과 (insurance-coverage 5). typecheck 8패키지. migrate 0005 적용
+- `insurance.list` 연소득 50,400,000. 브라우저 신규→검증 실손(실손 가입·암 3천만) 저장
+- 육각 표: 실손 100% · 암 60%(부족 2,040만) · 사망·중대질병·상해·후유장해 0%. 가장 약한 축 사망
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 권장액은 공식 고시 아님. 설계사 견적·상품 추천 없음. 검토 5~14·push는 대기
+
+## 2026-09-13 (3) — 투자 비서 대화 목록 (feat/quote-targets)
+**한 일**
+- `/chat`에 자산·현금흐름·보유·시장·판단 12문항 목록. 클릭하면 해당 질문 전송
+- `apps/web/src/app/chat/starters.ts`
+
+**실행 확인**
+- `/chat` 12버튼 렌더. 「순자산 구성」 클릭 → 비서: 순자산 3,749,802 · 유동 3,645,000 · 투자 104,802 · 부채 0
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 없음. 검토 5~14·push는 대기
+
+## 2026-09-13 (2) — 워커 시세·USDKRW 실행 확인 (feat/quote-targets)
+**한 일**
+- Docker Desktop 기동, `pnpm db:up`, `run:once` + tRPC로 검토 2~4 실데이터 확인
+
+**실행 확인**
+- upbit 보유 BTC만 1건. 2026-09-13 종가 104,802,000
+- USDKRW 1,342.4 (`source=yahoo`). holdings `usdkrw` 동일. 평가 104,802 · 손익 6,835.2
+- overview 투자 104,802 = 평가+예수금 0
+
+**다음 할 일**
+1. ECOS·FRED·DART 키 발급 후 소스 검증
+2. 종목 재무제표·펀더멘털 화면
+3. 모바일 Expo 기동
+
+**막힌 것**
+- KRX·해외 체결 없어 `.KS`/환율 환산 경로는 미실행. 검토 5~14 미반영. push·dev 머지는 사용자 지시 대기
+
+## 2026-09-13 — 시세 대상·USDKRW·투자자산 (feat/quote-targets)
+**한 일**
+- Claude 검토 1: `feat/financial-profile`에 09-05~09-12 작업 6커밋. `_to_delete/` 제외
+- 검토 2: 수집 대상 = trades∪watchlist, env는 합집합. KRX는 `.KS`/`.KQ`. ADR 0007
+- 검토 3: Yahoo `KRW=X` → `USDKRW` (ECOS가 같은 날짜를 덮어씀)
+- 검토 4: 투자자산 = 보유 평가액 + 증권·코인·연금 예수금 (`core/invested.ts`)
+
+**실행 확인**
+- `pnpm typecheck` 8패키지 통과. core 48 · interop 9
+- Docker 데몬이 꺼져 `run:once`·`trades.holdings` tRPC는 못 함 → 같은 날 (2)에서 실행
+
+**다음 할 일**
+1. Docker 켜고 `pnpm --filter @finvesting/worker run:once` → BTC 시세·USDKRW 확인
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 종목 재무제표·펀더멘털 화면
+4. 모바일 Expo 기동
+
+**막힌 것**
+- Docker 미기동. 검토 5~14 미반영. push·dev 머지는 사용자 지시 대기
+
+## 2026-09-12 (11) — 프로필대장 투자내역 (feat/financial-profile)
+**한 일**
+- `/profile` 09 투자내역: 증권·코인·연금 **계좌별** 카드 + 주식/ETF/채권/펀드/코인/기타 소계·비중 + 보유·체결 그리드
+- 포지션을 계좌×종목으로 계산. 매도 수량 검사도 그 계좌 보유만 봄
+- `core/holdings-summary.ts`. 체결 입력은 `/holdings` (계좌·자산군 열 추가)
+
+**실행 확인**
+- core 37개 통과 (holdings-summary 4). api/web typecheck 통과
+- `/profile?menu=invest` 200. `trades.holdings` byClass 6칸(코인 1 · 평가 108,852, 주식·ETF·채권·펀드 0). byAccount `검증 코인` 1건. 체결 목록에 계좌명·자산군
+- 증권 2계좌 더미 체결 삽입은 로컬 데이터 변경이라 미실행. 계좌별 합산·매도 수량 계좌 한정은 테스트·코드로 확인
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 대장에서 체결 직접 입력은 없음 (보유 화면으로 이동)
+
+## 2026-09-12 (10) — 급여상세 연봉 추이 (feat/financial-profile)
+**한 일**
+- 07 급여상세에 기본급·수당·상여·성과 명세서 + 12개월 기본급/세금/보험/세전 그래프와 상세표
+- `payroll_months` 월 스냅샷. 저장 시 기준월 upsert. `core/pay-trends.ts`
+
+**실행 확인**
+- core 33개 · api/web typecheck 통과. `0004_big_captain_stacy` migrate
+- `statement.payTrend` 12개월. 7·8월은 세액만 24만·24.5만. 9월 기본급 420만 · 세금 27.5만 · 보험 408,130. 연 합계 세전 420만 · 세금 76만
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 과거 달은 그달 명세서를 저장해야 기본급·보험이 채워짐. 세액만 있는 달은 세금만 표시
+
+## 2026-09-12 (9) — 적금내역 (feat/financial-profile)
+**한 일**
+- `savings_plans` / `savings_contributions`: 상품명·은행·금리·단리/월복리·약정·월납·상품내용·월 납입
+- 만기 추정은 `core/savings.ts` (정기적금 단리, 월복리, 예금)
+- `/profile` 08 적금내역. `savings.list` / `upsert` / `remove`
+
+**실행 확인**
+- core 30개 · web/api/db typecheck 통과. `0003_curious_dreaming_celestial` migrate
+- `savings.upsert` 월 10만·연 3.6%·12개월 단리 → 원금 1,200,000 · 이자 23,400 · 만기 1,223,400. 납입 1건 후 삭제로 목록 0
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 우대금리 조건·중도해지·세금 공제는 없음
+- 통장 거래와 납입 내역 자동 연동은 없음
+
+## 2026-09-12 (8) — 임금명세서 고용노동부 예시 (feat/financial-profile)
+**한 일**
+- 지급 칸을 근로기준법 시행령 제27조의2 · 고용노동부 임금명세서 작성 예시에 맞춤
+- 매월지급: 기본급·연장/야간/휴일근로수당·가족수당·식대·직급수당. 부정기: 상여금·성과급. 공제란: 소득세·지방소득세·국민연금·고용보험·건강보험·장기요양
+- 01 기본정보·07 급여상세에 지급|공제 양란. `core/pay-earnings.ts`가 기본 항목 SSOT
+
+**실행 확인**
+- core 27개 · web/api typecheck 통과
+- `/profile?menu=books` 200. `statement` 차변 기본급 4,200,000 = 대변(소득세 포함) 4,200,000 · net 0
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 브라우저에서 수당 금액 입력·저장은 도구 없으면 tRPC로 대체
+- 노동조합비·연장시간 산출식은 저장 필드 없음 (예시의 계산방법 란은 미구현)
+
+## 2026-09-12 (7) — 급여상세 차·대변 정정 (feat/financial-profile)
+**한 일**
+- 보통예금 전표로 맞춤: 차변=들어오는 지급(기본급·수당·입금), 대변=나가는 공제(보험·세금)·보통예금(실수령)·출금
+- `buildPayrollLedger` / `buildMonthlyLedger`의 차·대변과 `net`(차변−대변) 수정
+- `financial_profiles.pay_earnings` jsonb로 지급 항목 저장. 합이 있으면 세전으로 사용
+- `/profile` 07 급여상세: 지급 그리드 + 급여전표·월 보통예금 안내문 교체
+
+**실행 확인**
+- core 테스트 23개 통과. api/web/db typecheck 통과. `0002_yielding_paibok` migrate
+- `profile.statement` 급여전표: 차변 기본급 4,200,000 = 대변 4대보험+국세+지방세+보통예금 3,516,870, 합 4,200,000 · net 0
+- 지급을 기본급 340만+식대 80만으로 저장하면 차변 두 줄, 합 420만 유지. 검증 후 기본급 420만으로 복구
+- 월 보통예금: 차변 실수령 3,810,000 · 대변 출금 1,386,000 · 증가 2,424,000
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 브라우저에서 지급 그리드 클릭·저장은 도구 없으면 tRPC로 대체
+
+## 2026-09-12 (6) — 파일 변환·통장내역·추이 그래프 (feat/financial-profile)
+**한 일**
+- 가져오기: CSV·엑셀·워드(docx) 표를 `fileToRows`로 변환하고, 프로필대장에 **변환 내용** 표를 보여 준 뒤 고정비 또는 통장으로 저장
+- 양식·내보내기: 고정비·통장 템플릿을 CSV/엑셀/워드로. `recurringExport`도 세 형식
+- `/profile` 06 통장내역: 계좌별 거래 조회·분류 수정 (`transactions.listAll`)
+- 05 추이: 세액·소비·저축·투자 막대+선 그래프, X=월 Y=금액, 아래 XY 표. `core/trends.ts`
+- 07 메뉴 이름을 차대변 → **급여상세 내역**으로 변경
+- 06 통장내역: 은행·통장 이름·종류·잔액을 카드와 거래표에 표시. 은행 비어 있으면 프로필에서 수정 (`accounts.update`)
+
+**실행 확인**
+- core 19 · interop 9 · api/web typecheck 통과
+- `previewFile` 통장 CSV 2건, 고정비 CSV·xlsx·docx 인식. 워드 표 헤더 `이름,분류,금액,출금일,메모`
+- `trends` 12개월. 2026-07/08/09 세액 24만·24.5만·25만, 9월 소비 65,000
+- `listAll` 2026-09 6건. `/profile?menu=trends` 200
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 구형 `.doc`는 미지원 (docx로 저장)
+- 브라우저에서 가져오기 버튼 클릭·차트 호버는 미실행 (tRPC로 대체)
+
+## 2026-09-12 (5) — 프로필대장 (feat/financial-profile)
+**한 일**
+- `/profile`을 더존·위하고식 **프로필대장**으로 분리. 홈 대시보드는 자산·뉴스 그대로, 프로필은 조회·저장·신규·삭제 툴바 + 좌측 메뉴 + 그리드 편집
+- 메뉴: 기본정보 · 급여공제(2026 요율 표시) · 고정비 인라인 그리드 · 세액추이 · 차대변 전표
+- `profile.workspaceSave` 일괄 저장, `profile.previewPay`로 국세 입력 중 4대보험·지방세 미리보기
+- 고정비 CSV 양식·가져오기·내보내기는 툴바에 유지. `?menu=fixed`로 고정비 화면 진입
+
+**실행 확인**
+- api·web typecheck 통과
+- `/profile`·`/profile?menu=fixed` 200, HTML에 프로필대장·erp 포함
+- `previewPay` 세전 4,200,000·국세 250,000 → 국민연금 199,500 · 건보 150,990 · 장기요양 19,840 · 고용 37,800 · 지방세 25,000 · 공제합 683,130
+- `workspaceSave` 대장검증 1,000원 추가 후 삭제로 원상복구. 고정비 휴대폰·전기·가스 유지
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 브라우저 클릭·그리드 탭 이동은 이번 세션에서 도구 없음 — curl/tRPC로 대체
+- 더존·위하고 **전표 엑셀 양식 내보내기**는 실제 템플릿 필요 (interop.md 미구현)
+
+## 2026-09-12 (4) — 고정비 펼침 + CSV (feat/financial-profile)
+**한 일**
+- `/profile` 고정비 ▶/▼로 세부내역을 접고 펼침. 대시보드 권장 배분에도 같은 화살표
+- 고정비 CSV 양식·가져오기·내보내기 (`이름,분류,금액,출금일,메모`). 한글 분류(휴대폰·공과금 등) 인식. 같은 이름은 갱신
+- interop `parseRecurringCostCsv` / `recurringCostsToCsv`
+
+**실행 확인**
+- interop 6 · core 16 · api/web typecheck 통과
+- CSV 가져오기: 가스요금 추가 1 · 휴대폰 55,000→56,000 갱신 1. 내보내기에 가스요금 포함
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+## 2026-09-12 (3) — 건보·세금·고정 세부·차대변 (feat/financial-profile)
+**한 일**
+- 프로필에 세전, 근로소득세, 건보료. 세후 비우면 세전−공제. 마이그레이션 `0001_breezy_lester`
+- `recurring_costs`: 휴대폰·공과금 등 고정 세부. `income_tax_months` + 거래 `income_tax`로 근로소득세 추이 막대
+- `/profile` 차대변: 급여 명세서(세전=세금+건보+실수령), 월 손익(예정 고정+실거래)
+- 거래 분류에 `phone`·`income_tax`·`health_insurance`. 배분 가이드 고정비에 세부 합계 포함
+
+**실행 확인**
+- core 13개·api/web typecheck 통과. `0001_breezy_lester` migrate 성공
+- 세전 4,200,000 − 세금 250,000 − 건보 140,000 = 실수령 3,810,000. 급여 명세서 차대변 합 일치
+- 휴대폰 55,000·전기 40,000 추가. 월 손익 차변 1,360,000 · 대변 3,810,000 · 여유 2,450,000
+- 세액 추이 7월 24만 · 8월 24.5만 · 9월 25만. Chrome `/profile` 동일
+
+**다음 할 일**
+1. 종목 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- 국민연금·고용보험 항목은 아직 없음 (건보·근로소득세만)
+
+## 2026-09-12 (2) — 보유·체결 + 평가손익 (feat/financial-profile)
+**한 일**
+- `/holdings`: 종목 선택/신규, 매수·매도 체결, 보유 평단·평가손익, 체결 삭제
+- `trades.holdings` / `create` / `list` / `remove` / `ensureInstrument`. 평가손익은 `core` 평균단가법 + 최근 종가. USD는 `USDKRW`가 있으면 원화 환산
+- 대시보드 투자 자산 = 증권·코인·연금 잔액과 보유 평가액 중 큰 쪽. 챗 보유 줄에 현재가·평가손익
+
+**실행 확인**
+- api·web typecheck 통과, core 9개 통과
+- BTC(UPBIT) 0.001 매수(종가의 90%). 보유: 현재가 108,852,000(2026-09-05 upbit) → 평가 108,852 · 손익 +10,885 (11.1%)
+- 매도 1 > 보유 0.001 → 400 `매도 수량이 보유(0.001)보다 많습니다`
+- 대시보드 순자산 3,753,852 (유동 3,645,000 + 투자 108,852). Chrome `/`·`/holdings` 동일 숫자
+- 검증용 계좌 `검증 코인`(잔액 0)과 체결 1건을 DB에 남김
+
+**다음 할 일**
+1. 재무제표·펀더멘털 화면
+2. ECOS·FRED·DART 키 발급 후 소스 검증
+3. 모바일 Expo 기동
+
+**막힌 것**
+- KRX 시세는 KIS 전이라 국내 주식 평가손익은 종가 없으면 표시 안 됨
+- ECOS 키 없어 USDKRW 없음 — 해외 체결은 환율을 직접 넣어야 원화 평가가 맞음
+
+## 2026-09-12 — 재무 프로필 + 거래 분류 (feat/financial-profile)
+**한 일**
+- `/profile`: 세후 월소득·고정비·비상금 개월·위험 성향 저장 (`profile.get` / `upsert`). 월소득이 있으면 대시보드 권장 배분 표시, 챗 컨텍스트에 가이드 주입
+- `/accounts` 최근 거래에 분류 선택. `transactions.updateCategory` — 입금은 수입 분류, 출금은 지출·저축만
+- 가이드는 `packages/core` `monthlyBudgetGuide` 그대로 (50/30/20 + 비상금·위험성향)
+
+**실행 확인**
+- api·web typecheck 통과, core 테스트 9개 통과
+- `/` `/profile` `/accounts` 200. 프로필 저장 후 대시보드: 필수 1,750,000 · 여가 700,000 · 저축·투자 1,050,000 (예적금 840,000 / 투자 210,000), 비상금 부족 노트
+- Chrome: `/profile`에 저장된 값 표시, `/accounts`에서 입금 분류 6개·출금 15개. `점심` 미분류 → 식비. 입금에 식비 지정은 거절
+
+**다음 할 일**
+1. 보유 종목·체결 입력, 평가손익(시세 연동)
+2. 재무제표·펀더멘털 화면
+3. ECOS·FRED·DART 키 발급 후 소스 검증
+4. 모바일 Expo 기동
+
+**막힌 것**
+- 윈도우·안티그래비티 작업은 원격에 없음
+- ECOS·FRED·DART 키, `SEC_USER_AGENT` 없음
+- 은행별 전용 파서는 실제 내보내기 샘플 필요
+
+## 2026-09-05 (2) — 계좌 등록 + CSV 가져오기 (feat/accounts-csv)
+**한 일**
+- `/accounts`: 계좌 추가·목록, 범용 통장 CSV/XLSX 미리보기 후 저장
+- `transactions.previewImport` / `commitImport` / `list` — api가 `@finvesting/interop`로 파싱. EUC-KR/UTF-8 자동, 같은 계좌·날짜·금액·방향·메모는 중복 skip. 마지막 `잔액`으로 계좌 잔액 갱신. 입금=`other_income`, 출금=`uncategorized`
+- 대시보드에 계좌 0건이면 `/accounts` 링크
+
+**실행 확인**
+- `GET /accounts` 200, 계좌 생성 200
+- 샘플 CSV 3건 preview → commit inserted 3, 잔액 3,150,000. 재업로드 duplicate 3
+- 대시보드: 순자산 3,150,000 · 수입 3,200,000 · 변동 50,000
+- 2026-09-06 Chrome UI: `UI검증 입출금` 추가 + CSV 2건 저장 → 대시보드 순자산 3,635,000 · 수입 3,700,000 · 변동 65,000
+
+**다음 할 일**
+1. 재무 프로필 입력 화면 → 배분 가이드
+2. 거래 분류(카테고리) 수정 UI
+3. ECOS·FRED·DART 키 발급 후 소스 검증
+4. 모바일 Expo 기동
+
+**막힌 것**
+- 은행별 전용 파서는 실제 내보내기 샘플이 필요
+- DB에 검증용 계좌 `테스트 입출금`과 거래 3건이 남아 있음 (삭제 여부 사용자)
+
+## 2026-09-05 — 리뷰 반영 (fix/first-run-review)
+**한 일**
+- `latestNews`는 제목·url·publisher·날짜·요약만 (embedding/raw 제외), `published_at DESC NULLS LAST`
+- 챗: 거시지표 코드별 최신 1건, 뉴스 요약, 계좌·거래·체결이 있으면 자산/현금흐름/보유 주입. 프롬프트는 없는 데이터를 지어내지 않게 수정. 메시지 40턴·8000자
+- Yahoo/Upbit upsert에 당일 OHLC·거래량. Yahoo 펀더멘털 날짜를 시세일(NY)과 맞춤
+- DART 타깃 형식 검증, 금액 파싱 실패는 skip. EDGAR는 `SEC_USER_AGENT` 없으면 skip, fact는 `end` 최신
+- Next `.env` 인라인 주석 제거, `.env.example` 주석을 윗줄로. Ollama 기본 `gemma4:12b`, setup.md 일치
+- 대시보드 조회를 `packages/api/src/lib/overview.ts`로 공유
+
+**다음 할 일**
+1. 계좌 등록 + 거래 CSV 업로드 UI (`packages/interop` 파서 연결)
+2. ECOS·FRED·DART 키 발급 후 해당 소스 검증
+3. 모바일 Expo 기동 검증
+4. `quotes` unique에 source 넣을지 (리뷰 #7, KIS 전에 ADR)
+
+**실행 확인 (같은 세션)**
+- Docker 기동 → `pnpm db:up` → `pnpm dev:web`: `/`·`/chat` 200, tRPC 배치 200. latestNews 키에 embedding/raw 없음
+- `chat.ask` 2회: 보유/현금흐름 없음 정직 응답, 뉴스 제목 3개 인용 (Ollama gemma4:12b)
+- `run:once` 2회: rss 268→0, upbit/yahoo 당일 OHLC upsert, EDGAR는 UA 없어 skip
+
+**막힌 것**
+- web `tsc`: `react-markdown`이 React 19 JSX 타입과 안 맞음 (이번 변경과 무관, 기존)
+- 리뷰 #7·#11·#13 미반영/보류
+- 맥 Node 26 vs `.nvmrc` 22
+- 브라우저 자동화 없음 — 화면 클릭/IME는 curl로 대체
+
+## 2026-09-02 (8) — 첫 실행 이후 코드 리뷰 (docs/first-run-review)
+**한 일**
+- `dev`(feat/first-run 머지 후) 정적 리뷰: `docs/review/2026-09-02-first-run.md`
+- core 테스트 9개(fx 3개 포함)·interop 3개 실행 통과 — 이전 표의 “fx 미실행” 해소
+- 수정은 하지 않음 (리뷰만)
+
+**다음 할 일**
+1. 리뷰 반영 여부 결정 (우선: latestNews 컬럼 제한, 시세 upsert OHLC, 챗 거시지표 코드별 최신 1건)
+2. ECOS·FRED·DART 키 발급 후 해당 소스 검증
+3. 계좌 등록 + 거래 CSV 업로드 UI
+4. 모바일 Expo 기동 검증
+
+**막힌 것**
+- 맥 Node 26.7.0 (`.nvmrc`는 22) — 지금은 동작하나 Expo 등에서 문제 가능
+- yahoo-finance2 3.x deprecated 경고 — 상위 메이저 확인 필요
+- Next `.env` 파서와 dotenv·모바일 파서가 인라인 주석 처리가 다름
+
 ## 2026-09-02 (7) — 첫 실행: DB 마이그레이션 성공 (feat/first-run)
 **한 일**
 - 브랜치 전략 적용: main/dev 푸시, `feat/first-run`에서 작업
@@ -125,3 +2173,5 @@
 - 윈도우 작업 경로 미정
 - KIS Open API 키 발급 여부
 - 두 기기 DB 데이터 동기화 방식 (현재: 맥북에만 실데이터)
+
+

@@ -13,7 +13,8 @@
 4. 시스템 프롬프트(`packages/ai/src/prompts.ts`)를 바꾸면 바꾼 이유와 전후 비교를 `docs/tech/ai.md`에 남긴다.
 5. 임베딩 모델/차원을 바꾸면 `market_news.embedding` 차원 마이그레이션이 필요함을 확인한다.
 6. 개발 검증은 로컬 Ollama 기준. 모델 이름은 환경변수로.
-7. `docs/tech/ai.md`, `docs/progress/README.md` 갱신.
+7. `/chat` 화면 이름은 투자 봇AI. 바꾸면 `docs/tech/ai.md`와 ADR 0048을 맞춘다. ChatGPT 로고·이름을 넣지 않는다.
+8. `docs/tech/ai.md`, `docs/progress/README.md` 갱신.
 
 ### 챗봇 답변 원칙 (시스템 프롬프트에 유지할 것)
 - 근거 있는 수치만 인용, 매수/매도 단정 금지, 리스크·대안 병기, 한국 세제 반영, 한국어·간결

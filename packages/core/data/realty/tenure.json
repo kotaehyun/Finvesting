@@ -1,0 +1,51 @@
+{
+  "defaults": {
+    "asOf": "2026-01..07",
+    "effectiveFrom": null,
+    "effectiveTo": null,
+    "sourceTitle": "국토교통부 2026년 7월 주택통계",
+    "sourceUrl": "https://www.korea.kr/briefing/pre",
+    "article": null,
+    "verifiedBy": "미검증",
+    "verifiedOn": null
+  },
+  "REALTY_LEASE_TRADE": {
+    "asOf": "2026-01..07",
+    "month": "2026-07",
+    "published": "2026-08-31",
+    "source": "국토교통부 2026년 7월 주택통계",
+    "wolseYtd": 68.3,
+    "wolseYtdPrev": 61.8,
+    "wolseYtdDelta": 6.5,
+    "seoulYtd": 69.7,
+    "sudoYtd": 66.9,
+    "provinceYtd": 70.9,
+    "aptYtd": 52.4,
+    "aptYtdPrev": 46.4,
+    "nonAptYtd": 80.4,
+    "julyDeals": 210985,
+    "julyJeonse": 68462,
+    "julyWolse": 142523,
+    "julyMomPct": -3.5,
+    "julyYoyPct": -13.5,
+    "note": "실거래 신고 건수입니다. 점유 가구 비중이 아닙니다."
+  },
+  "REALTY_TENURE": {
+    "asOf": "2024",
+    "source": "국토교통부 2024년도 주거실태조사",
+    "own": 58.4,
+    "ownPrev": 57.4,
+    "rent": 38,
+    "rentPrev": 38.8,
+    "free": 3.6,
+    "hold": 61.4,
+    "sudoRent": 44.4,
+    "metroRent": 36.8,
+    "provinceRent": 28.3,
+    "note": "점유입니다. 거래 건수 비중과 다릅니다. 전세·월세를 임차에서 더 나눈 전국 칸은 통계누리 원문."
+  },
+  "REALTY_TENURE_LINKS": {
+    "survey": "https://stat.molit.go.kr/portal/cate/statView.do?hRsId=327",
+    "stats": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156776040"
+  }
+}

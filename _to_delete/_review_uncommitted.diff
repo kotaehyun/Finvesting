@@ -1,0 +1,1457 @@
+diff --git a/apps/web/package.json b/apps/web/package.json
+index 552e165..b7dc0b6 100644
+--- a/apps/web/package.json
++++ b/apps/web/package.json
+@@ -10,6 +10,7 @@
+   },
+   "dependencies": {
+     "@finvesting/api": "workspace:*",
++    "@finvesting/core": "workspace:*",
+     "@tanstack/react-query": "^5.62.11",
+     "@trpc/client": "^11.0.0-rc.660",
+     "@trpc/react-query": "^11.0.0-rc.660",
+diff --git a/apps/web/src/app/accounts/page.tsx b/apps/web/src/app/accounts/page.tsx
+index c4fffcc..50c4cfd 100644
+--- a/apps/web/src/app/accounts/page.tsx
++++ b/apps/web/src/app/accounts/page.tsx
+@@ -1,6 +1,7 @@
+ "use client";
+ import { useState, type FormEvent } from "react";
+ import { trpc } from "@/lib/trpc";
++import { categoriesFor, categoryLabel, type TxnCategoryId } from "@/lib/categories";
+ 
+ const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
+ 
+@@ -103,7 +104,7 @@ export default function AccountsPage() {
+   return (
+     <>
+       <h1>계좌 · 거래</h1>
+-      <p className="muted">통장·카드 계좌를 등록하고, 은행 내보내기 CSV/XLSX를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어갑니다.</p>
++      <p className="muted">통장·카드 계좌를 등록하고, 은행 내보내기 CSV/엑셀/워드를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 분류를 바꿀 수 있습니다. 프로필대장 통장내역에서도 같은 파일을 볼 수 있습니다.</p>
+ 
+       <div className="card" style={{ marginBottom: 16 }}>
+         <h3>계좌 추가</h3>
+@@ -134,8 +135,8 @@ export default function AccountsPage() {
+ 
+       {accountId && (
+         <div className="card" style={{ marginBottom: 16 }}>
+-          <h3>CSV/XLSX 가져오기</h3>
+-          <input type="file" accept=".csv,.xlsx,.xls,text/csv" onChange={(e) => onFile(e.target.files?.[0])} disabled={preview.isPending} />
++          <h3>CSV/엑셀/문서 가져오기</h3>
++          <input type="file" accept=".csv,.xlsx,.xls,.docx,.doc,text/csv" onChange={(e) => onFile(e.target.files?.[0])} disabled={preview.isPending} />
+           {detected && <p className="muted">인식: {detected} · {previewRows?.length ?? 0}건</p>}
+           {!!skipped.length && <p className="muted">건너뜀 {skipped.length}행 (예: {skipped[0]?.reason})</p>}
+           {previewRows && previewRows.length > 0 && (
+@@ -165,25 +166,67 @@ export default function AccountsPage() {
+       )}
+ 
+       {accountId && !!txns.data?.length && (
+-        <div className="card">
+-          <h3>최근 거래</h3>
+-          <div className="table-wrap">
+-            <table>
+-              <thead><tr><th>날짜</th><th>방향</th><th>금액</th><th>내용</th></tr></thead>
+-              <tbody>
+-                {txns.data.map((t) => (
+-                  <tr key={t.id}>
+-                    <td>{String(t.date)}</td>
+-                    <td>{t.direction === "in" ? "입금" : t.direction === "out" ? "출금" : "이체"}</td>
+-                    <td>{won(Number(t.amount))}</td>
+-                    <td>{t.memo ?? t.merchant ?? ""}</td>
+-                  </tr>
+-                ))}
+-              </tbody>
+-            </table>
+-          </div>
+-        </div>
++        <TxnTable rows={txns.data} onChanged={() => { txns.refetch(); utils.dashboard.overview.invalidate(); }} />
+       )}
+     </>
+   );
+ }
++
++type TxnRow = {
++  id: string;
++  date: string | Date;
++  amount: string | number;
++  direction: "in" | "out" | "transfer";
++  category: string;
++  merchant: string | null;
++  memo: string | null;
++};
++
++function TxnTable({ rows, onChanged }: { rows: TxnRow[]; onChanged: () => void }) {
++  const update = trpc.transactions.updateCategory.useMutation();
++  const [err, setErr] = useState("");
++
++  async function onCategory(id: string, category: string) {
++    setErr("");
++    try {
++      await update.mutateAsync({ id, category: category as TxnCategoryId });
++      onChanged();
++    } catch (e) {
++      setErr(e instanceof Error ? e.message : String(e));
++    }
++  }
++
++  return (
++    <div className="card">
++      <h3>최근 거래</h3>
++      <div className="table-wrap">
++        <table>
++          <thead><tr><th>날짜</th><th>방향</th><th>금액</th><th>분류</th><th>내용</th></tr></thead>
++          <tbody>
++            {rows.map((t) => (
++              <tr key={t.id}>
++                <td>{String(t.date)}</td>
++                <td>{t.direction === "in" ? "입금" : t.direction === "out" ? "출금" : "이체"}</td>
++                <td>{won(Number(t.amount))}</td>
++                <td>
++                  <select
++                    value={t.category}
++                    aria-label={`${categoryLabel(t.category)} 분류`}
++                    onChange={(e) => onCategory(t.id, e.target.value)}
++                    disabled={update.isPending}
++                  >
++                    {categoriesFor(t.direction).map((c) => (
++                      <option key={c.id} value={c.id}>{c.label}</option>
++                    ))}
++                  </select>
++                </td>
++                <td>{t.memo ?? t.merchant ?? ""}</td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      </div>
++      {err && <p className="muted" style={{ marginTop: 8 }}>{err}</p>}
++    </div>
++  );
++}
+diff --git a/apps/web/src/app/globals.css b/apps/web/src/app/globals.css
+index dda648f..30f88e2 100644
+--- a/apps/web/src/app/globals.css
++++ b/apps/web/src/app/globals.css
+@@ -29,3 +29,154 @@ button.link.on { color: var(--accent); }
+ table { width: 100%; border-collapse: collapse; font-size: 14px; }
+ th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+ .md p { margin: 0 0 8px; } .md ul, .md ol { margin: 4px 0 8px 20px; } .md li { margin: 2px 0; } .md strong { font-weight: 700; }
++.t-books { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 8px; }
++.t-col { padding: 12px; }
++.t-col + .t-col { border-left: 1px solid var(--border); }
++.t-col h4 { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
++.t-line { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
++.t-total { display: flex; justify-content: space-between; font-weight: 700; margin-top: 8px; }
++.bars { display: flex; align-items: flex-end; gap: 6px; height: 160px; margin-top: 12px; }
++.bar-col { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
++.bar { width: 100%; max-width: 40px; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; }
++.bar-col span { font-size: 11px; color: var(--muted); margin-top: 4px; white-space: nowrap; }
++.arrow { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
++.arrow .chev { display: inline-block; width: 1em; text-align: center; }
++
++/* 프로필대장 — 더존·위하고식 업무 화면 */
++.main:has(.erp) { max-width: none; padding: 0; }
++.erp {
++  --erp-navy: #1e3a5f;
++  --erp-navy-2: #163050;
++  --erp-line: #c5cdd8;
++  --erp-head: #e8eef6;
++  --erp-sel: #d6e8ff;
++  --erp-toolbar: #eef2f6;
++  --erp-cell: #ffffff;
++  display: flex;
++  flex-direction: column;
++  min-height: calc(100vh - 49px);
++  background: #dfe4ea;
++  color: #1a1d21;
++  font-size: 13px;
++}
++.erp-titlebar {
++  display: flex; align-items: center; justify-content: space-between; gap: 12px;
++  background: var(--erp-navy); color: #f4f7fb; padding: 8px 12px;
++}
++.erp-titlebar h1 { margin: 0; font-size: 15px; font-weight: 700; }
++.erp-titlebar .path { opacity: .8; font-size: 12px; margin-left: 8px; font-weight: 400; }
++.erp-titlebar label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
++.erp-titlebar input { width: auto; background: #fff; color: #1a1d21; border-radius: 2px; padding: 3px 8px; }
++.erp-toolbar {
++  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
++  background: var(--erp-toolbar); border-bottom: 1px solid var(--erp-line); padding: 6px 10px;
++}
++.erp-toolbar button, .erp-toolbar label.erp-file {
++  background: #f7f9fb; color: #1a1d21; border: 1px solid #b8c0cb; border-radius: 2px;
++  padding: 4px 10px; font-size: 12px; cursor: pointer;
++}
++.erp-toolbar button.primary { background: var(--erp-navy); color: #fff; border-color: var(--erp-navy); }
++.erp-toolbar button:disabled { opacity: .45; }
++.erp-toolbar label.erp-file { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
++.erp-toolbar label.erp-file input { display: none; }
++.erp-toolbar .sep { width: 1px; height: 18px; background: var(--erp-line); margin: 0 4px; }
++.erp-body { display: grid; grid-template-columns: 180px 1fr; flex: 1; min-height: 0; }
++.erp-menu { background: #f3f6f9; border-right: 1px solid var(--erp-line); padding: 8px 0; }
++.erp-menu h2 { margin: 0 12px 6px; font-size: 11px; color: #5c6470; font-weight: 700; }
++.erp-menu button {
++  display: block; width: 100%; text-align: left; background: transparent; color: #1a1d21;
++  border: 0; border-radius: 0; padding: 7px 12px; font-size: 13px;
++}
++.erp-menu button.on { background: var(--erp-navy); color: #fff; }
++.erp-work { display: flex; flex-direction: column; min-width: 0; background: #fff; }
++.erp-panel { padding: 10px 12px 16px; overflow: auto; flex: 1; }
++.erp-panel h3 { margin: 0 0 8px; font-size: 13px; color: var(--erp-navy); }
++.erp-hint { color: #5c6470; font-size: 12px; margin: 0 0 10px; }
++.erp-hint button { background: #f7f9fb; color: #1a1d21; border: 1px solid #b8c0cb; border-radius: 2px; padding: 3px 8px; font-size: 12px; }
++.erp-props { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
++.erp-props th, .erp-props td { border: 1px solid var(--erp-line); padding: 0; }
++.erp-props th { width: 140px; background: var(--erp-head); font-weight: 600; font-size: 12px; padding: 0 8px; text-align: left; color: #334155; }
++.erp-grid { width: 100%; border-collapse: collapse; }
++.erp-grid th, .erp-grid td { border: 1px solid var(--erp-line); padding: 0; }
++.erp-grid th { background: var(--erp-head); font-size: 12px; font-weight: 700; padding: 5px 8px; color: #334155; }
++.erp-grid td { background: var(--erp-cell); }
++.erp-grid tr.sel td { background: var(--erp-sel); }
++.erp-grid .num { text-align: right; font-variant-numeric: tabular-nums; }
++.erp-grid .ro { padding: 5px 8px; }
++.erp-grid tfoot td { background: var(--erp-head); font-weight: 700; padding: 5px 8px; }
++.erp-slip { margin-bottom: 8px; }
++.erp-slip button { background: #f7f9fb; color: #1a1d21; border: 1px solid #b8c0cb; border-radius: 2px; padding: 4px 10px; font-size: 12px; }
++.erp input, .erp select {
++  width: 100%; box-sizing: border-box; border: 0; border-radius: 0; background: transparent;
++  padding: 5px 8px; font-size: 13px;
++}
++.erp input:focus, .erp select:focus { outline: 1px solid #2b6cb0; outline-offset: -1px; background: #fff; }
++.erp-journal { width: 100%; border-collapse: collapse; }
++.erp-journal th, .erp-journal td { border: 1px solid var(--erp-line); padding: 5px 8px; }
++.erp-journal th { background: var(--erp-head); font-size: 12px; }
++.erp-journal .num { text-align: right; font-variant-numeric: tabular-nums; }
++.erp-journal tfoot td { font-weight: 700; background: var(--erp-head); }
++.erp-bars { display: flex; align-items: flex-end; gap: 6px; height: 140px; margin: 12px 0; }
++.erp-status {
++  display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
++  border-top: 1px solid var(--erp-line); background: var(--erp-toolbar);
++  padding: 5px 12px; font-size: 12px; color: #334155;
++}
++.erp-dirty { color: #b45309; font-weight: 700; }
++.erp-accts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 8px 0 12px; }
++.erp-acct {
++  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
++  background: var(--erp-cell); color: inherit; border: 1px solid var(--erp-line);
++  border-radius: 2px; padding: 8px 10px; text-align: left; cursor: pointer;
++}
++.erp-acct.on { outline: 2px solid var(--erp-navy); background: var(--erp-sel); }
++.erp-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
++.erp-pills button {
++  background: #f7f9fb; color: #1a1d21; border: 1px solid #b8c0cb; border-radius: 2px;
++  padding: 4px 10px; font-size: 12px; cursor: pointer;
++}
++.erp-pills button.on { background: var(--erp-navy); color: #fff; border-color: var(--erp-navy); }
++.erp-bar { display: block; height: 6px; background: #d9dde3; overflow: hidden; }
++.erp-bar > i { display: block; height: 100%; background: #3b6fb6; }
++.erp-acct-bank { font-size: 11px; color: #5c6470; font-weight: 700; }
++.erp-acct strong { font-size: 14px; }
++.erp-preview { border: 1px solid var(--erp-line); padding: 10px; margin-bottom: 14px; background: var(--erp-head); }
++.erp-preview button { background: #f7f9fb; color: #1a1d21; border: 1px solid #b8c0cb; border-radius: 2px; padding: 4px 10px; font-size: 12px; }
++.erp-preview button.primary { background: var(--erp-navy); color: #fff; border-color: var(--erp-navy); }
++.erp-chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
++.erp-chart { border: 1px solid var(--erp-line); padding: 8px; background: var(--erp-cell); }
++.erp-svg { width: 100%; height: auto; display: block; }
++.erp-chart-title { font-size: 13px; font-weight: 700; fill: #1e3a5f; }
++.erp-chart-axis { font-size: 11px; fill: #5c6470; }
++.erp-chart-tick { font-size: 10px; fill: #5c6470; }
++.erp-chart-gridline { stroke: #d9dde3; stroke-width: 1; }
++.erp-chart-axisline { stroke: #334155; stroke-width: 1.2; }
++.erp-chart-bar { fill: #3b6fb6; }
++.erp-chart-line { fill: none; stroke: #c2410c; stroke-width: 2; }
++.erp-chart-dot { fill: #c2410c; }
++@media (max-width: 900px) { .erp-chart-grid { grid-template-columns: 1fr; } }
++@media (prefers-color-scheme: dark) {
++  .erp-chart-title { fill: #dbeafe; }
++  .erp-chart-axis, .erp-chart-tick { fill: #9aa3ad; }
++  .erp-chart-gridline { stroke: #3a4452; }
++  .erp-chart-axisline { stroke: #9aa3ad; }
++}
++@media (max-width: 800px) {
++  .erp-body { grid-template-columns: 1fr; }
++  .erp-menu { display: flex; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--erp-line); padding: 4px; }
++  .erp-menu h2 { display: none; }
++  .erp-menu button { width: auto; }
++}
++@media (prefers-color-scheme: dark) {
++  .erp {
++    --erp-navy: #1b3354; --erp-line: #3a4452; --erp-head: #243044; --erp-sel: #1e3a5f;
++    --erp-toolbar: #1a222d; --erp-cell: #141a22; background: #0f141b; color: #e6e8eb;
++  }
++  .erp-menu { background: #151b24; }
++  .erp-menu button { color: #e6e8eb; }
++  .erp-work { background: #141a22; }
++  .erp-toolbar button, .erp-toolbar label.erp-file, .erp-pills button { background: #243044; color: #e6e8eb; border-color: #3a4452; }
++  .erp-bar { background: #3a4452; }
++  .erp input, .erp select { color: #e6e8eb; }
++  .erp-hint, .erp-status { color: #9aa3ad; }
++}
+diff --git a/apps/web/src/app/layout.tsx b/apps/web/src/app/layout.tsx
+index ae33b51..5499346 100644
+--- a/apps/web/src/app/layout.tsx
++++ b/apps/web/src/app/layout.tsx
+@@ -12,6 +12,8 @@ export default function RootLayout({ children }: { children: React.ReactNode })
+           <nav className="nav">
+             <a href="/">Finvesting</a>
+             <a href="/accounts">계좌</a>
++            <a href="/holdings">보유</a>
++            <a href="/profile">프로필대장</a>
+             <a href="/chat">Chat</a>
+           </nav>
+           <main className="main">{children}</main>
+diff --git a/apps/web/src/app/page.tsx b/apps/web/src/app/page.tsx
+index 4d5bf30..6ca7e21 100644
+--- a/apps/web/src/app/page.tsx
++++ b/apps/web/src/app/page.tsx
+@@ -1,4 +1,5 @@
+ "use client";
++import { useState } from "react";
+ import { trpc } from "@/lib/trpc";
+ 
+ const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
+@@ -7,11 +8,12 @@ const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
+ export default function Dashboard() {
+   const { data, isLoading, error } = trpc.dashboard.overview.useQuery();
+   const news = trpc.market.latestNews.useQuery({ limit: 10 });
++  const [fixedOpen, setFixedOpen] = useState(false);
+ 
+   if (isLoading) return <p>불러오는 중…</p>;
+   if (error) return <p>오류: {error.message}</p>;
+   if (!data) return null;
+-  const { assets, cashflow, guide, month } = data;
++  const { assets, cashflow, guide, month, holdings, profile } = data;
+ 
+   return (
+     <>
+@@ -21,15 +23,44 @@ export default function Dashboard() {
+           <div className="muted">유동 {won(assets.liquid)} · 투자 {won(assets.invested)} · 부채 {won(assets.debt)}</div></div>
+         <div className="card"><h3>이번 달 수입</h3><div className="big">{won(cashflow.income)}</div></div>
+         <div className="card"><h3>소비율 / 저축·투자율</h3><div className="big">{pct(cashflow.spendingRate)} / {pct(cashflow.savingRate)}</div>
+-          <div className="muted">고정비 {won(cashflow.fixedCost)} · 변동비 {won(cashflow.variableCost)}</div></div>
++          <div className="muted">이번 달 거래 고정 {won(cashflow.fixedCost)} · 변동비 {won(cashflow.variableCost)}</div></div>
+         {guide && (
+           <div className="card"><h3>권장 배분 (월)</h3>
+             <div>필수 {won(guide.needs)} · 여가 {won(guide.wants)}</div>
+             <div>저축·투자 {won(guide.saveAndInvest)} → 예적금 {won(guide.ofWhichDeposit)} / 투자 {won(guide.ofWhichInvest)}</div>
+             {guide.notes.map((n, i) => <div key={i} className="muted">• {n}</div>)}
++            {profile && (
++              <div style={{ marginTop: 8 }}>
++                <button type="button" className="link arrow" aria-expanded={fixedOpen} onClick={() => setFixedOpen((v) => !v)}>
++                  <span className="chev">{fixedOpen ? "▼" : "▶"}</span>
++                  고정비 {won(profile.monthlyFixedCost)}
++                </button>
++                {fixedOpen && (
++                  <ul className="plain" style={{ marginTop: 6 }}>
++                    {profile.recurring.map((r) => (
++                      <li key={r.name}>{r.name} <span className="muted">{won(r.amount)}</span></li>
++                    ))}
++                    {profile.otherFixed > 0 && <li>기타 고정비 <span className="muted">{won(profile.otherFixed)}</span></li>}
++                    {!profile.recurring.length && profile.otherFixed === 0 && <li className="muted">세부내역 없음 — <a href="/profile?menu=fixed">프로필대장에서 추가</a></li>}
++                  </ul>
++                )}
++              </div>
++            )}
++            <div className="muted" style={{ marginTop: 8 }}><a href="/profile">프로필대장에서 수정</a></div>
+           </div>
+         )}
+-        {!guide && <div className="card"><h3>권장 배분</h3><div className="muted">financial_profiles에 월 소득·고정비를 입력하면 표시됩니다.</div></div>}
++        {!guide && <div className="card"><h3>권장 배분</h3><div className="muted">월 소득·고정비를 넣으면 표시됩니다. <a href="/profile">프로필대장</a></div></div>}
++        {holdings.totals.openCount > 0 && (
++          <div className="card"><h3>보유 평가손익</h3>
++            <div className="big">{won(holdings.totals.pnlKrw)}</div>
++            <div className="muted">평가 {won(holdings.totals.marketValueKrw)} · 원가 {won(holdings.totals.costKrw)} · {holdings.totals.openCount}종목</div>
++            {holdings.totals.missingQuote > 0 && <div className="muted">시세 없는 종목 {holdings.totals.missingQuote} — worker 수집 후 반영</div>}
++            <div className="muted" style={{ marginTop: 8 }}><a href="/holdings">보유·체결</a></div>
++          </div>
++        )}
++        {holdings.totals.openCount === 0 && (
++          <div className="card"><h3>보유</h3><div className="muted">체결이 없습니다. <a href="/holdings">보유·체결 입력</a></div></div>
++        )}
+         {assets.accountCount === 0 && (
+           <div className="card"><h3>계좌</h3><div className="muted">등록된 계좌가 없습니다. <a href="/accounts">계좌·거래 가져오기</a></div></div>
+         )}
+diff --git a/docs/progress/README.md b/docs/progress/README.md
+index 62d9122..b9810a6 100644
+--- a/docs/progress/README.md
++++ b/docs/progress/README.md
+@@ -2,6 +2,227 @@
+ 
+ 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
+ 
++## 2026-09-12 (11) — 프로필대장 투자내역 (feat/financial-profile)
++**한 일**
++- `/profile` 09 투자내역: 증권·코인·연금 **계좌별** 카드 + 주식/ETF/채권/펀드/코인/기타 소계·비중 + 보유·체결 그리드
++- 포지션을 계좌×종목으로 계산. 매도 수량 검사도 그 계좌 보유만 봄
++- `core/holdings-summary.ts`. 체결 입력은 `/holdings` (계좌·자산군 열 추가)
++
++**실행 확인**
++- core 37개 통과 (holdings-summary 4). api/web typecheck 통과
++- `/profile?menu=invest` 200. `trades.holdings` byClass 6칸(코인 1 · 평가 108,852, 주식·ETF·채권·펀드 0). byAccount `검증 코인` 1건. 체결 목록에 계좌명·자산군
++- 증권 2계좌 더미 체결 삽입은 로컬 데이터 변경이라 미실행. 계좌별 합산·매도 수량 계좌 한정은 테스트·코드로 확인
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 대장에서 체결 직접 입력은 없음 (보유 화면으로 이동)
++
++## 2026-09-12 (10) — 급여상세 연봉 추이 (feat/financial-profile)
++**한 일**
++- 07 급여상세에 기본급·수당·상여·성과 명세서 + 12개월 기본급/세금/보험/세전 그래프와 상세표
++- `payroll_months` 월 스냅샷. 저장 시 기준월 upsert. `core/pay-trends.ts`
++
++**실행 확인**
++- core 33개 · api/web typecheck 통과. `0004_big_captain_stacy` migrate
++- `statement.payTrend` 12개월. 7·8월은 세액만 24만·24.5만. 9월 기본급 420만 · 세금 27.5만 · 보험 408,130. 연 합계 세전 420만 · 세금 76만
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 과거 달은 그달 명세서를 저장해야 기본급·보험이 채워짐. 세액만 있는 달은 세금만 표시
++
++## 2026-09-12 (9) — 적금내역 (feat/financial-profile)
++**한 일**
++- `savings_plans` / `savings_contributions`: 상품명·은행·금리·단리/월복리·약정·월납·상품내용·월 납입
++- 만기 추정은 `core/savings.ts` (정기적금 단리, 월복리, 예금)
++- `/profile` 08 적금내역. `savings.list` / `upsert` / `remove`
++
++**실행 확인**
++- core 30개 · web/api/db typecheck 통과. `0003_curious_dreaming_celestial` migrate
++- `savings.upsert` 월 10만·연 3.6%·12개월 단리 → 원금 1,200,000 · 이자 23,400 · 만기 1,223,400. 납입 1건 후 삭제로 목록 0
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 우대금리 조건·중도해지·세금 공제는 없음
++- 통장 거래와 납입 내역 자동 연동은 없음
++
++## 2026-09-12 (8) — 임금명세서 고용노동부 예시 (feat/financial-profile)
++**한 일**
++- 지급 칸을 근로기준법 시행령 제27조의2 · 고용노동부 임금명세서 작성 예시에 맞춤
++- 매월지급: 기본급·연장/야간/휴일근로수당·가족수당·식대·직급수당. 부정기: 상여금·성과급. 공제란: 소득세·지방소득세·국민연금·고용보험·건강보험·장기요양
++- 01 기본정보·07 급여상세에 지급|공제 양란. `core/pay-earnings.ts`가 기본 항목 SSOT
++
++**실행 확인**
++- core 27개 · web/api typecheck 통과
++- `/profile?menu=books` 200. `statement` 차변 기본급 4,200,000 = 대변(소득세 포함) 4,200,000 · net 0
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 브라우저에서 수당 금액 입력·저장은 도구 없으면 tRPC로 대체
++- 노동조합비·연장시간 산출식은 저장 필드 없음 (예시의 계산방법 란은 미구현)
++
++## 2026-09-12 (7) — 급여상세 차·대변 정정 (feat/financial-profile)
++**한 일**
++- 보통예금 전표로 맞춤: 차변=들어오는 지급(기본급·수당·입금), 대변=나가는 공제(보험·세금)·보통예금(실수령)·출금
++- `buildPayrollLedger` / `buildMonthlyLedger`의 차·대변과 `net`(차변−대변) 수정
++- `financial_profiles.pay_earnings` jsonb로 지급 항목 저장. 합이 있으면 세전으로 사용
++- `/profile` 07 급여상세: 지급 그리드 + 급여전표·월 보통예금 안내문 교체
++
++**실행 확인**
++- core 테스트 23개 통과. api/web/db typecheck 통과. `0002_yielding_paibok` migrate
++- `profile.statement` 급여전표: 차변 기본급 4,200,000 = 대변 4대보험+국세+지방세+보통예금 3,516,870, 합 4,200,000 · net 0
++- 지급을 기본급 340만+식대 80만으로 저장하면 차변 두 줄, 합 420만 유지. 검증 후 기본급 420만으로 복구
++- 월 보통예금: 차변 실수령 3,810,000 · 대변 출금 1,386,000 · 증가 2,424,000
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 브라우저에서 지급 그리드 클릭·저장은 도구 없으면 tRPC로 대체
++
++## 2026-09-12 (6) — 파일 변환·통장내역·추이 그래프 (feat/financial-profile)
++**한 일**
++- 가져오기: CSV·엑셀·워드(docx) 표를 `fileToRows`로 변환하고, 프로필대장에 **변환 내용** 표를 보여 준 뒤 고정비 또는 통장으로 저장
++- 양식·내보내기: 고정비·통장 템플릿을 CSV/엑셀/워드로. `recurringExport`도 세 형식
++- `/profile` 06 통장내역: 계좌별 거래 조회·분류 수정 (`transactions.listAll`)
++- 05 추이: 세액·소비·저축·투자 막대+선 그래프, X=월 Y=금액, 아래 XY 표. `core/trends.ts`
++- 07 메뉴 이름을 차대변 → **급여상세 내역**으로 변경
++- 06 통장내역: 은행·통장 이름·종류·잔액을 카드와 거래표에 표시. 은행 비어 있으면 프로필에서 수정 (`accounts.update`)
++
++**실행 확인**
++- core 19 · interop 9 · api/web typecheck 통과
++- `previewFile` 통장 CSV 2건, 고정비 CSV·xlsx·docx 인식. 워드 표 헤더 `이름,분류,금액,출금일,메모`
++- `trends` 12개월. 2026-07/08/09 세액 24만·24.5만·25만, 9월 소비 65,000
++- `listAll` 2026-09 6건. `/profile?menu=trends` 200
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 구형 `.doc`는 미지원 (docx로 저장)
++- 브라우저에서 가져오기 버튼 클릭·차트 호버는 미실행 (tRPC로 대체)
++
++## 2026-09-12 (5) — 프로필대장 (feat/financial-profile)
++**한 일**
++- `/profile`을 더존·위하고식 **프로필대장**으로 분리. 홈 대시보드는 자산·뉴스 그대로, 프로필은 조회·저장·신규·삭제 툴바 + 좌측 메뉴 + 그리드 편집
++- 메뉴: 기본정보 · 급여공제(2026 요율 표시) · 고정비 인라인 그리드 · 세액추이 · 차대변 전표
++- `profile.workspaceSave` 일괄 저장, `profile.previewPay`로 국세 입력 중 4대보험·지방세 미리보기
++- 고정비 CSV 양식·가져오기·내보내기는 툴바에 유지. `?menu=fixed`로 고정비 화면 진입
++
++**실행 확인**
++- api·web typecheck 통과
++- `/profile`·`/profile?menu=fixed` 200, HTML에 프로필대장·erp 포함
++- `previewPay` 세전 4,200,000·국세 250,000 → 국민연금 199,500 · 건보 150,990 · 장기요양 19,840 · 고용 37,800 · 지방세 25,000 · 공제합 683,130
++- `workspaceSave` 대장검증 1,000원 추가 후 삭제로 원상복구. 고정비 휴대폰·전기·가스 유지
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 브라우저 클릭·그리드 탭 이동은 이번 세션에서 도구 없음 — curl/tRPC로 대체
++- 더존·위하고 **전표 엑셀 양식 내보내기**는 실제 템플릿 필요 (interop.md 미구현)
++
++## 2026-09-12 (4) — 고정비 펼침 + CSV (feat/financial-profile)
++**한 일**
++- `/profile` 고정비 ▶/▼로 세부내역을 접고 펼침. 대시보드 권장 배분에도 같은 화살표
++- 고정비 CSV 양식·가져오기·내보내기 (`이름,분류,금액,출금일,메모`). 한글 분류(휴대폰·공과금 등) 인식. 같은 이름은 갱신
++- interop `parseRecurringCostCsv` / `recurringCostsToCsv`
++
++**실행 확인**
++- interop 6 · core 16 · api/web typecheck 통과
++- CSV 가져오기: 가스요금 추가 1 · 휴대폰 55,000→56,000 갱신 1. 내보내기에 가스요금 포함
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++## 2026-09-12 (3) — 건보·세금·고정 세부·차대변 (feat/financial-profile)
++**한 일**
++- 프로필에 세전, 근로소득세, 건보료. 세후 비우면 세전−공제. 마이그레이션 `0001_breezy_lester`
++- `recurring_costs`: 휴대폰·공과금 등 고정 세부. `income_tax_months` + 거래 `income_tax`로 근로소득세 추이 막대
++- `/profile` 차대변: 급여 명세서(세전=세금+건보+실수령), 월 손익(예정 고정+실거래)
++- 거래 분류에 `phone`·`income_tax`·`health_insurance`. 배분 가이드 고정비에 세부 합계 포함
++
++**실행 확인**
++- core 13개·api/web typecheck 통과. `0001_breezy_lester` migrate 성공
++- 세전 4,200,000 − 세금 250,000 − 건보 140,000 = 실수령 3,810,000. 급여 명세서 차대변 합 일치
++- 휴대폰 55,000·전기 40,000 추가. 월 손익 차변 1,360,000 · 대변 3,810,000 · 여유 2,450,000
++- 세액 추이 7월 24만 · 8월 24.5만 · 9월 25만. Chrome `/profile` 동일
++
++**다음 할 일**
++1. 종목 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- 국민연금·고용보험 항목은 아직 없음 (건보·근로소득세만)
++
++## 2026-09-12 (2) — 보유·체결 + 평가손익 (feat/financial-profile)
++**한 일**
++- `/holdings`: 종목 선택/신규, 매수·매도 체결, 보유 평단·평가손익, 체결 삭제
++- `trades.holdings` / `create` / `list` / `remove` / `ensureInstrument`. 평가손익은 `core` 평균단가법 + 최근 종가. USD는 `USDKRW`가 있으면 원화 환산
++- 대시보드 투자 자산 = 증권·코인·연금 잔액과 보유 평가액 중 큰 쪽. 챗 보유 줄에 현재가·평가손익
++
++**실행 확인**
++- api·web typecheck 통과, core 9개 통과
++- BTC(UPBIT) 0.001 매수(종가의 90%). 보유: 현재가 108,852,000(2026-09-05 upbit) → 평가 108,852 · 손익 +10,885 (11.1%)
++- 매도 1 > 보유 0.001 → 400 `매도 수량이 보유(0.001)보다 많습니다`
++- 대시보드 순자산 3,753,852 (유동 3,645,000 + 투자 108,852). Chrome `/`·`/holdings` 동일 숫자
++- 검증용 계좌 `검증 코인`(잔액 0)과 체결 1건을 DB에 남김
++
++**다음 할 일**
++1. 재무제표·펀더멘털 화면
++2. ECOS·FRED·DART 키 발급 후 소스 검증
++3. 모바일 Expo 기동
++
++**막힌 것**
++- KRX 시세는 KIS 전이라 국내 주식 평가손익은 종가 없으면 표시 안 됨
++- ECOS 키 없어 USDKRW 없음 — 해외 체결은 환율을 직접 넣어야 원화 평가가 맞음
++
++## 2026-09-12 — 재무 프로필 + 거래 분류 (feat/financial-profile)
++**한 일**
++- `/profile`: 세후 월소득·고정비·비상금 개월·위험 성향 저장 (`profile.get` / `upsert`). 월소득이 있으면 대시보드 권장 배분 표시, 챗 컨텍스트에 가이드 주입
++- `/accounts` 최근 거래에 분류 선택. `transactions.updateCategory` — 입금은 수입 분류, 출금은 지출·저축만
++- 가이드는 `packages/core` `monthlyBudgetGuide` 그대로 (50/30/20 + 비상금·위험성향)
++
++**실행 확인**
++- api·web typecheck 통과, core 테스트 9개 통과
++- `/` `/profile` `/accounts` 200. 프로필 저장 후 대시보드: 필수 1,750,000 · 여가 700,000 · 저축·투자 1,050,000 (예적금 840,000 / 투자 210,000), 비상금 부족 노트
++- Chrome: `/profile`에 저장된 값 표시, `/accounts`에서 입금 분류 6개·출금 15개. `점심` 미분류 → 식비. 입금에 식비 지정은 거절
++
++**다음 할 일**
++1. 보유 종목·체결 입력, 평가손익(시세 연동)
++2. 재무제표·펀더멘털 화면
++3. ECOS·FRED·DART 키 발급 후 소스 검증
++4. 모바일 Expo 기동
++
++**막힌 것**
++- 윈도우·안티그래비티 작업은 원격에 없음
++- ECOS·FRED·DART 키, `SEC_USER_AGENT` 없음
++- 은행별 전용 파서는 실제 내보내기 샘플 필요
++
+ ## 2026-09-05 (2) — 계좌 등록 + CSV 가져오기 (feat/accounts-csv)
+ **한 일**
+ - `/accounts`: 계좌 추가·목록, 범용 통장 CSV/XLSX 미리보기 후 저장
+diff --git a/docs/progress/roadmap.md b/docs/progress/roadmap.md
+index edbab70..4cd997e 100644
+--- a/docs/progress/roadmap.md
++++ b/docs/progress/roadmap.md
+@@ -4,10 +4,12 @@
+ - [x] 스캐폴딩, 스키마, 수집기 뼈대
+ - [x] 첫 실행 검증
+ - [x] 계좌·거래 입력 — `/accounts` + 범용 통장 CSV/XLSX (은행별 전용 파서는 샘플 필요)
+-- [ ] 재무제표·펀더멘털 화면 (DART/EDGAR/Yahoo 수집분 표시)
+-- [ ] 보유 종목·체결 입력, 평가손익 표시 (시세 연동)
+-- [ ] 재무 프로필 입력 → 배분 가이드
+-- [x] 챗봇에 보유·현금흐름 컨텍스트 추가 (계좌/거래/체결이 있을 때만 주입. 평가손익·배분 가이드는 미완)
++- [x] 개인 월 차대변 손익 + 고정 세부 + 세액·소비·저축·투자 추이 (`/profile` 프로필대장. 종목 DART/EDGAR 재무제표 화면은 별도)
++- [ ] 종목 재무제표·펀더멘털 화면 (DART/EDGAR/Yahoo 수집분 표시)
++- [x] 보유 종목·체결 입력, 평가손익 표시 (`/holdings`, 최근 종가 연동. 시세 없으면 평단만)
++- [x] 재무 프로필 입력 → 배분 가이드 (`/profile` 프로필대장, 월소득 있으면 대시보드·챗에 가이드)
++- [x] 거래 분류 수정 (`/accounts`에서 입금=수입, 출금=지출·저축)
++- [x] 챗봇에 보유·현금흐름 컨텍스트 추가 (계좌/거래/체결이 있을 때만 주입. 배분 가이드·평가손익은 데이터 있을 때)
+ - [ ] Financial Timeline (모든 금융 이벤트 시간순) 첫 버전
+ 
+ ## 2단계 — Market Terminal
+diff --git a/docs/progress/status.md b/docs/progress/status.md
+index 7a02283..e674c40 100644
+--- a/docs/progress/status.md
++++ b/docs/progress/status.md
+@@ -26,7 +26,7 @@
+ - 윈도우: 미정
+ 
+ ## 다음 할 일
+-1. 재무 프로필 입력 화면 → 배분 가이드, 거래 카테고리 수정
++1. 종목 재무제표·펀더멘털 화면 (DART/EDGAR/Yahoo)
+ 2. ECOS·FRED·DART 키 발급 → 거시지표·재무제표 수집 검증
+ 3. Expo 모바일 기동 확인, 윈도우 경로 정하고 clone
+-4. 뉴스 임베딩 RAG, 평가손익(시세 연동)
++4. 뉴스 임베딩 RAG
+diff --git a/docs/tech/architecture.en.md b/docs/tech/architecture.en.md
+index 8e98811..dcb2e77 100644
+--- a/docs/tech/architecture.en.md
++++ b/docs/tech/architecture.en.md
+@@ -21,7 +21,7 @@
+       │  apps/worker (cron)
+       ▼
+ [PostgreSQL] market_news · market_quotes · macro_indicators · economic_events · financial_statements
+-             accounts · transactions · trades · financial_profiles
++             accounts · transactions · trades · financial_profiles · savings_plans
+       │  packages/db (Drizzle)
+       ▼
+ [packages/api] tRPC routers ── packages/core (calculations) ── packages/ai (LLM)
+diff --git a/docs/tech/architecture.md b/docs/tech/architecture.md
+index e6237c3..e6f03b8 100644
+--- a/docs/tech/architecture.md
++++ b/docs/tech/architecture.md
+@@ -21,7 +21,7 @@
+       │  apps/worker (cron)
+       ▼
+ [PostgreSQL] market_news · market_quotes · macro_indicators · economic_events
+-             accounts · transactions · trades · financial_profiles
++             accounts · transactions · trades · financial_profiles · savings_plans
+       │  packages/db (Drizzle)
+       ▼
+ [packages/api] tRPC 라우터 ── packages/core(계산) ── packages/ai(LLM)
+diff --git a/docs/tech/data-model.md b/docs/tech/data-model.md
+index e67d7da..a728775 100644
+--- a/docs/tech/data-model.md
++++ b/docs/tech/data-model.md
+@@ -6,21 +6,26 @@
+ | 테이블 | 역할 |
+ |---|---|
+ | `users` | 단일 사용자로 시작. 서비스화 대비 |
+-| `financial_profiles` | 세후 월소득, 월 고정비, 비상금 목표 개월, 위험 성향, 목표 배분(JSON). **배분 가이드 계산 입력** |
++| `financial_profiles` | 세전/세후 월소득, 근로소득세, 건보료, 기타 고정비, 비상금 개월, 위험 성향. `pay_earnings` jsonb: 임금 구성항목 `[{ name, amount }]`. 기본 칸은 고용노동부 임금명세서 예시(기본급·연장/야간/휴일근로수당·가족수당·식대·직급수당·상여금·성과급). 지급 합이 있으면 그게 세전. 웹 `/profile` 프로필대장. 세후가 없으면 세전−세금−건보. 배분 가이드의 고정비 = 기타 고정비 + `recurring_costs` 합 |
++| `recurring_costs` | 매달 빠져나가는 고정 세부내역 (휴대폰, 공과금, 주거 등). `/profile` 고정비 그리드에서 인라인 수정. CSV 가져오기/내보내기 (`이름,분류,금액,출금일,메모`). `profile.workspaceSave`로 기본정보·고정비·세액을 한 번에 저장 |
++| `income_tax_months` | 근로소득세 월별 추이. 프로필 저장 시 해당 월 upsert. 거래 `income_tax`와 합쳐 그래프. `/profile` 추이 메뉴는 세액·소비·저축·투자 막대+선(X=월, Y=금액) |
++| `payroll_months` | 월 급여 스냅샷(기본급·수당·상여·그 밖·세전·세금·보험·실수령). 프로필 저장 시 기준월 upsert. `/profile` 07 연봉 추이 12개월 그래프+상세표 |
+ 
+ ## 계좌·거래 (Account)
+ | 테이블 | 역할 |
+ |---|---|
+-| `accounts` | 계좌. `type`(checking/savings/installment/brokerage/crypto/card/cash/pension/loan)이 자산 배분 분류 기준. `balance`는 현재 잔액 |
+-| `transactions` | 입출금 원장. `amount`는 항상 양수, `direction`(in/out/transfer)으로 방향. `category`로 수입/고정비/변동비/저축·투자 분류. CSV 가져오기는 입금=`other_income`, 출금=`uncategorized`. `source`는 `csv:<파서id>`, `raw`에 원본 행. 같은 계좌·날짜·금액·방향·메모는 재업로드 시 건너뜀 |
++| `accounts` | 계좌. `name` 통장 이름, `institution` 은행/증권사. `type`(checking/savings/installment/brokerage/crypto/card/cash/pension/loan)이 자산 배분 분류 기준. `balance`는 현재 잔액. `/profile` 통장내역에서 은행·통장을 구분해 보고 `accounts.update`로 수정 |
++| `savings_plans` | 예·적금 상품. 상품명·은행·종류(적금/예금)·연금리·단리/월복리·약정개월·월납(예금은 가입원금)·시작·만기·상품내용. 통장 `account_id`는 선택. `/profile` 08 적금내역 |
++| `savings_contributions` | 상품별 월 납입. `(plan_id, month)` 유니크. 금액은 numeric |
++| `transactions` | 입출금 원장. `amount`는 항상 양수, `direction`(in/out/transfer)으로 방향. `category`로 수입/고정비/변동비/저축·투자 분류. CSV 가져오기는 입금=`other_income`, 출금=`uncategorized`. `/accounts`에서 `transactions.updateCategory`로 수정(입금은 수입 분류, 출금은 지출·저축 분류만). `source`는 `csv:<파서id>`, `raw`에 원본 행. 같은 계좌·날짜·금액·방향·메모는 재업로드 시 건너뜀 |
+ 
+-카테고리 → 현금흐름 분류 매핑은 `packages/core/src/cashflow.ts`의 상수가 기준.
++카테고리 → 현금흐름 분류 매핑은 `packages/core/src/cashflow.ts`의 상수가 기준. 고정비에 `phone`·`income_tax`·`health_insurance` 포함. `/profile` 07 임금명세서는 근로기준법 시행령 제27조의2·고용노동부 작성 예시(지급|공제 양란, 매월지급·격월/부정기). 차변=지급, 대변=공제·보통예금(실수령). 급여전표 차변합=대변합=세전. 월 보통예금 여유=차변−대변. 추이(`core/trends.ts`) 소비는 이체·저축·투자·근로소득세를 뺀 출금. 통장내역은 `transactions.listAll`.
+ 
+ ## 투자 (Investment)
+ | 테이블 | 역할 |
+ |---|---|
+-| `instruments` | 종목 마스터. `(symbol, market)` **유니크**. 시세·뉴스·보유가 모두 참조 |
+-| `trades` | 체결 원장. 보유 수량·평단·실현손익은 저장하지 않고 `core/portfolio.ts`로 계산 |
++| `instruments` | 종목 마스터. `(symbol, market)` **유니크**. 시세·뉴스·보유가 모두 참조. 워커 `ensureInstrument` 또는 `trades.ensureInstrument`로 생성 |
++| `trades` | 체결 원장. 보유 수량·평단·실현손익은 저장하지 않고 `core/portfolio.ts`로 계산. **계좌별**로 포지션을 나눔(같은 종목이 증권사마다 있으면 행이 둘). 자산군·계좌 소계는 `core/holdings-summary.ts`. 웹 `/holdings`에서 입력, `/profile` 09 투자내역에서 전체·계좌·주식/ETF/채권/펀드/코인을 조회. 평가손익은 종목 최근 `market_quotes.close` (해외는 `USDKRW`가 있으면 원화 환산). 대시보드 투자 자산은 증권·코인·연금 계좌 잔액과 보유 평가액 중 큰 쪽 |
+ | `investment_incomes` | 배당·이자 수취 (세금·현금흐름 양쪽에 사용) |
+ | `research_notes` | 종목 노트, 매수/매도 근거 |
+ | `watchlist` | 관심 종목. `user_id` → `users.id` FK |
+@@ -48,4 +53,7 @@
+ pnpm db:generate   # 스키마 변경 → drizzle/ SQL 생성
+ pnpm db:migrate    # 적용
+ ```
++`0002_yielding_paibok`: `financial_profiles.pay_earnings` jsonb.
++`0003_curious_dreaming_celestial`: `savings_plans` · `savings_contributions`.
++`0004_big_captain_stacy`: `payroll_months`.
+ pgvector 확장은 첫 마이그레이션 전에 `CREATE EXTENSION IF NOT EXISTS vector;` 필요 (seed/000_extensions.sql).
+diff --git a/docs/tech/interop.md b/docs/tech/interop.md
+index fd9eb3e..3e9d942 100644
+--- a/docs/tech/interop.md
++++ b/docs/tech/interop.md
+@@ -6,7 +6,8 @@
+ ## 가져오기 (Import)
+ | 대상 | 파일 | 파서 | 상태 |
+ |---|---|---|---|
+-| 은행 통장 거래내역 (공통) | CSV/XLSX | `importers/generic-bank.ts` — 헤더 이름으로 날짜/입금/출금/내용/잔액 컬럼 탐지. 웹 `/accounts` → `transactions.previewImport`/`commitImport` | 연결됨 |
++| 은행 통장 거래내역 (공통) | CSV/XLSX/DOCX | `importers/generic-bank.ts` + `fileToRows`. 웹 `/accounts`·`/profile` 통장내역 → `profile.previewFile` 변환 미리보기 후 `transactions.commitImport` | 연결됨 |
++| 고정비 세부내역 | CSV/XLSX/DOCX | `importers/recurring-costs.ts` — 헤더 이름·분류·금액·출금일·메모. 프로필대장 가져오기 → 변환 내용 표시 후 `recurringImport`. 같은 이름은 갱신. 내보내기 CSV·엑셀·워드 | 연결됨 |
+ | 은행별 전용 (카카오뱅크, 토스, 국민, 신한 …) | 각 은행 내보내기 | 은행별 파서 — 실제 파일 샘플 받아서 작성 | 미구현 |
+ | 카드 이용내역 | CSV/XLSX | 승인일·가맹점·금액·할부 | 미구현 |
+ | 증권사 체결내역 (한투, 키움 …) | CSV/XLSX | `TradeImporter` | 미구현 |
+@@ -14,8 +15,9 @@
+ | 홈택스 자료 (연말정산 간소화 PDF/XLSX, 카드·현금영수증) | PDF/XLSX | 3단계 | 미구현 |
+ | 급여대장 / 4대보험 고지 | XLSX | 4단계 | 미구현 |
+ 
+-흐름: 파일 업로드 → `csvToRows`/`xlsxToRows` → `detectTransactionImporter` → 미리보기(중복·잔액 검증) → 사용자 확인 → `transactions` 저장(`source`에 파서 id, `raw`에 원본 행).
++흐름: 파일 업로드 → `fileToRows`(csv/`xlsxToRows`/`docxToRows`) → `detectTransactionImporter` 또는 고정비 헤더 → 변환 내용 표 → 사용자 확인 → 저장.
+ 인코딩: 국내 은행 CSV는 EUC-KR인 경우가 많음 — 업로드 시 `TextDecoder("euc-kr")` 시도 후 깨지면 UTF-8.
++워드: `.docx` 표만. 구형 `.doc`는 거절하고 docx로 저장하라고 안내.
+ 
+ ## 내보내기 (Export)
+ | 대상 | 형식 | 상태 |
+diff --git a/docs/verification/README.md b/docs/verification/README.md
+index e8d3aab..1492140 100644
+--- a/docs/verification/README.md
++++ b/docs/verification/README.md
+@@ -37,11 +37,18 @@
+ |---|---|---|---|
+ | `pnpm install` | ✅ | 2026-09-02 | Cursor |
+ | 타입체크 (web 포함 8패키지) | ✅ | 2026-09-02 | Cursor, Claude 재확인(7패키지, web 제외) |
+-| core 테스트 (vitest) | ✅ 9개 (cashflow 2 + allocation 2 + portfolio 5, fx 포함) | 2026-09-02 | Cursor, Grok 재실행 |
++| core 테스트 (vitest) | ✅ 37개 (holdings-summary 4 · statement 6 · payroll 5 · trends 3 포함) | 2026-09-12 | Grok |
+ | interop 테스트 | ✅ 3개 | 2026-09-02 | Cursor |
+-| `pnpm db:generate` / `db:migrate` | ✅ 16 테이블, `0000_blue_carlie_cooper.sql` | 2026-09-02 | 사용자(맥 터미널), Claude 기록 |
++| `pnpm db:generate` / `db:migrate` | ✅ `0002_yielding_paibok` (`pay_earnings`) 적용 | 2026-09-12 | Grok |
+ | seed SQL 적용 (extensions, default user) | ✅ | 2026-09-02 | 사용자(맥 터미널) |
+-| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-05 재확인: latestNews에 embedding/raw 없음 | 2026-09-05 | 사용자(09-02), Grok curl 재확인 |
++| `pnpm dev:web` 기동 + `/` 렌더 + tRPC `dashboard.overview`,`market.latestNews` 200 | ✅ Next 15.5.25. 2026-09-08 `dev` 머지 후 Chrome: 순자산 3,635,000 | 2026-09-08 | Grok Chrome |
++| `/profile` 프로필대장 + `workspaceSave`/`previewPay` | ✅ 페이지 200, 저장 추가·삭제 원상복구, 4대보험 미리보기 숫자 확인. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
++| `/profile` 급여상세 차·대변 (보통예금 전표) | ✅ 차변 지급=대변 공제+보통예금=세전 4,200,000. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
++| `/profile` 임금명세서 고용노동부 예시 칸 | ✅ core 27 · statement 대변 라벨 소득세. 칸 클릭·수당 입력은 미실행 | 2026-09-12 | Grok tRPC |
++| `/profile` 08 적금내역 | ✅ upsert 월10만·3.6%·12개월 단리 만기 1,223,400. 삭제 후 0건. 브라우저 클릭 미실행 | 2026-09-12 | Grok tRPC |
++| `/profile` 07 연봉 추이 12개월 | ✅ payTrend 12포인트. 9월 기본급 420만·세금 27.5만·보험 408,130. 그래프 클릭 미실행 | 2026-09-12 | Grok tRPC |
++| `/profile` 09 투자내역 (계좌·자산군) | ✅ 페이지 200. holdings byClass 6칸·byAccount 검증 코인·BTC 평가 108,852. 브라우저 클릭·복수 증권 체결은 미실행 | 2026-09-12 | Grok tRPC |
++| `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
+ | `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
+ | worker — RSS 국내 (한경·매경·연합) | ✅ 3/3 피드, 1차 325건 | 2026-09-02 | 사용자 실행, Claude 기록 |
+ | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
+@@ -58,6 +65,14 @@
+ ## 목록
+ | 날짜 | 모델/도구 | 파일 |
+ |---|---|---|
++| 2026-09-12 | Cursor Grok (투자내역) | [2026-09-12-grok-7.md](./2026-09-12-grok-7.md) |
++| 2026-09-12 | Cursor Grok (연봉 추이) | [2026-09-12-grok-6.md](./2026-09-12-grok-6.md) |
++| 2026-09-12 | Cursor Grok (적금내역) | [2026-09-12-grok-5.md](./2026-09-12-grok-5.md) |
++| 2026-09-12 | Cursor Grok (임금명세서 양식) | [2026-09-12-grok-4.md](./2026-09-12-grok-4.md) |
++| 2026-09-12 | Cursor Grok (급여상세 차대변) | [2026-09-12-grok-3.md](./2026-09-12-grok-3.md) |
++| 2026-09-12 | Cursor Grok (파일 변환·추이) | [2026-09-12-grok-2.md](./2026-09-12-grok-2.md) |
++| 2026-09-12 | Cursor Grok (프로필대장) | [2026-09-12-grok.md](./2026-09-12-grok.md) |
++| 2026-09-08 | Cursor Grok (dev 머지 후 실행) | [2026-09-08-grok.md](./2026-09-08-grok.md) |
+ | 2026-09-05 | Cursor Grok (계좌·CSV) | [2026-09-05-grok-2.md](./2026-09-05-grok-2.md) |
+ | 2026-09-05 | Cursor Grok (리뷰 반영) | [2026-09-05-grok.md](./2026-09-05-grok.md) |
+ | 2026-09-02 | Cursor Grok (first-run 리뷰) | [2026-09-02-grok.md](./2026-09-02-grok.md) |
+diff --git a/packages/api/src/index.ts b/packages/api/src/index.ts
+index b540d1b..d7094fa 100644
+--- a/packages/api/src/index.ts
++++ b/packages/api/src/index.ts
+@@ -4,6 +4,9 @@ import { dashboardRouter } from "./routers/dashboard";
+ import { marketRouter } from "./routers/market";
+ import { chatRouter } from "./routers/chat";
+ import { transactionsRouter } from "./routers/transactions";
++import { profileRouter } from "./routers/profile";
++import { tradesRouter } from "./routers/trades";
++import { savingsRouter } from "./routers/savings";
+ 
+ export const appRouter = router({
+   accounts: accountsRouter,
+@@ -11,6 +14,9 @@ export const appRouter = router({
+   market: marketRouter,
+   chat: chatRouter,
+   transactions: transactionsRouter,
++  profile: profileRouter,
++  trades: tradesRouter,
++  savings: savingsRouter,
+ });
+ export type AppRouter = typeof appRouter;
+ export { createContext } from "./trpc";
+diff --git a/packages/api/src/lib/overview.ts b/packages/api/src/lib/overview.ts
+index ab2c755..b64b16b 100644
+--- a/packages/api/src/lib/overview.ts
++++ b/packages/api/src/lib/overview.ts
+@@ -1,6 +1,7 @@
+ import { and, eq, gte, lte } from "drizzle-orm";
+-import { accounts, transactions, financialProfiles, type Db } from "@finvesting/db";
+-import { summarizeCashflow, monthlyBudgetGuide } from "@finvesting/core";
++import { accounts, transactions, financialProfiles, recurringCosts, type Db } from "@finvesting/db";
++import { summarizeCashflow, monthlyBudgetGuide, resolvePay } from "@finvesting/core";
++import { loadHoldings } from "./holdings";
+ 
+ export function currentKstMonth() {
+   return new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 7);
+@@ -20,19 +21,33 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
+   const txns = await db.select().from(transactions)
+     .where(and(eq(transactions.userId, userId), gte(transactions.date, from), lte(transactions.date, to)));
+   const [profile] = await db.select().from(financialProfiles).where(eq(financialProfiles.userId, userId));
++  const recurring = await db.select().from(recurringCosts)
++    .where(and(eq(recurringCosts.userId, userId), eq(recurringCosts.isActive, true)));
++  const recurringSum = recurring.reduce((s, r) => s + Number(r.amount), 0);
+ 
+   const byType: Record<string, number> = {};
+   for (const a of accts) byType[a.type] = (byType[a.type] ?? 0) + Number(a.balance);
+   const liquid = (byType.cash ?? 0) + (byType.checking ?? 0) + (byType.savings ?? 0) + (byType.installment ?? 0);
+-  const invested = (byType.brokerage ?? 0) + (byType.crypto ?? 0) + (byType.pension ?? 0);
++  const accountInvested = (byType.brokerage ?? 0) + (byType.crypto ?? 0) + (byType.pension ?? 0);
+   const debt = (byType.card ?? 0) + (byType.loan ?? 0);
++  const holdings = await loadHoldings(db, userId);
++  // 증권·코인 계좌 잔액과 체결 평가액이 겹치면 큰 쪽만 투자 자산으로 (이중 합산 방지)
++  const invested = Math.max(accountInvested, holdings.totals.marketValueKrw);
+ 
+   const cashflow = summarizeCashflow(txns.map((t) => ({ amount: Number(t.amount), direction: t.direction, category: t.category })));
+ 
+-  const guide = profile
++  const pay = resolvePay({
++    monthlyGrossIncome: profile?.monthlyGrossIncome,
++    monthlyNetIncome: profile?.monthlyNetIncome,
++    monthlyIncomeTax: profile?.monthlyIncomeTax,
++    monthlyHealthInsurance: profile?.monthlyHealthInsurance,
++  });
++  const monthlyNetIncome = pay.net;
++  const monthlyFixedCost = Number(profile?.monthlyFixedCost ?? 0) + recurringSum;
++  const guide = profile && monthlyNetIncome > 0
+     ? monthlyBudgetGuide({
+-        monthlyNetIncome: Number(profile.monthlyNetIncome ?? 0),
+-        monthlyFixedCost: Number(profile.monthlyFixedCost ?? 0),
++        monthlyNetIncome,
++        monthlyFixedCost,
+         liquidAssets: liquid,
+         investedAssets: invested,
+         emergencyFundMonths: profile.emergencyFundMonths,
+@@ -42,9 +57,24 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
+ 
+   return {
+     month,
+-    assets: { byType, liquid, invested, debt, net: liquid + invested - debt, accountCount: accts.length },
++    assets: { byType, liquid, invested, accountInvested, debt, net: liquid + invested - debt, accountCount: accts.length },
++    holdings,
+     cashflow,
+     txnCount: txns.length,
++    profile: profile
++      ? {
++          monthlyNetIncome,
++          monthlyGrossIncome: pay.gross,
++          monthlyIncomeTax: pay.tax,
++          monthlyHealthInsurance: pay.health,
++          monthlyFixedCost,
++          otherFixed: Number(profile.monthlyFixedCost ?? 0),
++          recurringSum,
++          recurring: recurring.map((r) => ({ name: r.name, amount: Number(r.amount), category: r.category })),
++          emergencyFundMonths: profile.emergencyFundMonths,
++          riskTolerance: profile.riskTolerance,
++        }
++      : null,
+     guide,
+   };
+ }
+diff --git a/packages/api/src/lib/parse-upload.ts b/packages/api/src/lib/parse-upload.ts
+index 6d093d7..7b78252 100644
+--- a/packages/api/src/lib/parse-upload.ts
++++ b/packages/api/src/lib/parse-upload.ts
+@@ -1,32 +1,21 @@
+-import { csvToRows, xlsxToRows, detectTransactionImporter, genericBankImporter } from "@finvesting/interop";
++import { detectTransactionImporter, genericBankImporter } from "@finvesting/interop";
+ import type { ImportResult, ParsedTransaction } from "@finvesting/interop";
++import { uploadToRows } from "./table-file";
++export { decodeText } from "./table-file";
+ 
+ const MAX_BYTES = 2_000_000;
+ 
+-/** UTF-8 BOM이면 UTF-8, 아니면 EUC-KR을 먼저 시도하고 한글이 더 많이 나온 쪽을 고른다. */
+-export function decodeText(buf: Buffer): string {
+-  if (buf.length >= 3 && buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
+-    return new TextDecoder("utf-8").decode(buf.subarray(3));
+-  }
+-  const utf = new TextDecoder("utf-8").decode(buf);
+-  let euc = utf;
+-  try { euc = new TextDecoder("euc-kr").decode(buf); } catch { /* Node가 euc-kr을 모르면 UTF-8 */ }
+-  const hangul = (s: string) => (s.match(/[가-힣]/g) ?? []).length;
+-  const bad = (s: string) => (s.match(/\uFFFD/g) ?? []).length;
+-  if (bad(utf) === 0 && hangul(utf) >= hangul(euc)) return utf;
+-  if (bad(euc) < bad(utf) || hangul(euc) > hangul(utf)) return euc;
+-  return utf;
+-}
+-
+ export function parseUpload(filename: string, contentBase64: string): ImportResult<ParsedTransaction> {
+   const buf = Buffer.from(contentBase64, "base64");
+   if (!buf.length) return { rows: [], skipped: [{ line: 1, reason: "빈 파일" }], detected: "" };
+   if (buf.length > MAX_BYTES) return { rows: [], skipped: [{ line: 1, reason: `파일이 ${MAX_BYTES}바이트를 넘음` }], detected: "" };
+ 
+-  const lower = filename.toLowerCase();
+-  const rows = (lower.endsWith(".xlsx") || lower.endsWith(".xls"))
+-    ? xlsxToRows(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
+-    : csvToRows(decodeText(buf));
++  let rows;
++  try {
++    rows = uploadToRows(filename, contentBase64);
++  } catch (e) {
++    return { rows: [], skipped: [{ line: 1, reason: e instanceof Error ? e.message : String(e) }], detected: "" };
++  }
+ 
+   const importer = detectTransactionImporter(rows) ?? genericBankImporter;
+   const parsed = importer.parse(rows);
+diff --git a/packages/api/src/routers/accounts.ts b/packages/api/src/routers/accounts.ts
+index 7ab8716..54d0200 100644
+--- a/packages/api/src/routers/accounts.ts
++++ b/packages/api/src/routers/accounts.ts
+@@ -19,4 +19,24 @@ export const accountsRouter = router({
+       const [row] = await ctx.db.insert(accounts).values({ ...input, userId: ctx.userId, balance: String(input.balance) }).returning();
+       return row;
+     }),
++
++  update: publicProcedure
++    .input(z.object({
++      id: z.string().uuid(),
++      name: z.string().min(1).max(80).optional(),
++      institution: z.string().max(80).optional(),
++      type: z.enum(["checking", "savings", "installment", "brokerage", "crypto", "card", "cash", "pension", "loan"]).optional(),
++    }))
++    .mutation(async ({ ctx, input }) => {
++      const { id, ...patch } = input;
++      const values: { name?: string; institution?: string | null; type?: typeof input.type } = {};
++      if (patch.name != null) values.name = patch.name.trim();
++      if (patch.institution != null) values.institution = patch.institution.trim() || null;
++      if (patch.type != null) values.type = patch.type;
++      const [row] = await ctx.db.update(accounts).set(values)
++        .where(and(eq(accounts.id, id), eq(accounts.userId, ctx.userId)))
++        .returning();
++      if (!row) throw new Error("계좌를 찾을 수 없습니다");
++      return row;
++    }),
+ });
+diff --git a/packages/api/src/routers/chat.ts b/packages/api/src/routers/chat.ts
+index b5bf0da..be5120d 100644
+--- a/packages/api/src/routers/chat.ts
++++ b/packages/api/src/routers/chat.ts
+@@ -1,7 +1,6 @@
+ import { z } from "zod";
+-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+-import { news, macroIndicators, trades, instruments } from "@finvesting/db";
+-import { buildPositions } from "@finvesting/core";
++import { and, eq, sql } from "drizzle-orm";
++import { news, macroIndicators } from "@finvesting/db";
+ import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock } from "@finvesting/ai";
+ import { router, publicProcedure } from "../trpc";
+ import { loadOverview } from "../lib/overview";
+@@ -43,28 +42,15 @@ export const chatRouter = router({
+         .from(macroIndicators)
+         .innerJoin(latest, and(eq(macroIndicators.code, latest.code), eq(macroIndicators.date, latest.maxDate)));
+ 
+-      const tradeRows = await ctx.db.select().from(trades)
+-        .where(eq(trades.userId, ctx.userId))
+-        .orderBy(asc(trades.tradedAt));
+-      const open = [...buildPositions(tradeRows.map((t) => ({
+-        instrumentId: t.instrumentId,
+-        side: t.side,
+-        quantity: Number(t.quantity),
+-        price: Number(t.price),
+-        fee: Number(t.fee),
+-        tax: Number(t.tax),
+-        fxRate: t.fxRate != null ? Number(t.fxRate) : undefined,
+-      }))).values()].filter((p) => p.quantity > 0);
+-
+-      let holdings: string | undefined;
+-      if (open.length) {
+-        const insts = await ctx.db.select({ id: instruments.id, symbol: instruments.symbol, name: instruments.name, currency: instruments.currency })
+-          .from(instruments).where(inArray(instruments.id, open.map((p) => p.instrumentId)));
+-        const label = new Map(insts.map((i) => [i.id, `${i.symbol} ${i.name}`]));
+-        holdings = open.map((p) => `- ${label.get(p.instrumentId) ?? p.instrumentId}: ${p.quantity}주 평단 ${p.avgCost}`).join("\n");
+-      }
+-
+-      const { assets, cashflow, txnCount, month } = overview;
++      const { assets, cashflow, txnCount, month, guide, holdings: h, profile } = overview;
++      const holdings = h.positions.length
++        ? h.positions.map((p) => {
++          const px = p.lastPrice != null ? ` 현재 ${p.lastPrice}` : " 시세 없음";
++          const pnl = p.pnlKrw != null ? ` 평가손익 ${won(p.pnlKrw)}` : "";
++          const acct = p.accountName ? `${p.accountName} · ` : "";
++          return `- ${acct}${p.symbol} ${p.name}: ${p.quantity} ${p.currency} 평단 ${p.avgCost}${px}${pnl}`;
++        }).join("\n")
++        : undefined;
+       const context = buildContextBlock({
+         "자산 현황": assets.accountCount
+           ? `${month} 순자산 ${won(assets.net)} (유동 ${won(assets.liquid)} · 투자 ${won(assets.invested)} · 부채 ${won(assets.debt)})`
+@@ -72,6 +58,12 @@ export const chatRouter = router({
+         "이번 달 현금흐름": txnCount
+           ? `수입 ${won(cashflow.income)} · 고정 ${won(cashflow.fixedCost)} · 변동 ${won(cashflow.variableCost)} · 저축·투자 ${won(cashflow.savingAndInvest)}`
+           : undefined,
++        "월 배분 가이드": guide
++          ? `필수 ${won(guide.needs)} · 여가 ${won(guide.wants)} · 저축·투자 ${won(guide.saveAndInvest)} (예적금 ${won(guide.ofWhichDeposit)} / 투자 ${won(guide.ofWhichInvest)})`
++          : undefined,
++        "공제·고정비": profile && (profile.monthlyIncomeTax > 0 || profile.monthlyHealthInsurance > 0 || profile.recurringSum > 0)
++          ? `근로소득세 ${won(profile.monthlyIncomeTax)} · 건보료 ${won(profile.monthlyHealthInsurance)} · 고정 세부 ${won(profile.recurringSum)}`
++          : undefined,
+         "보유 종목": holdings,
+         "최근 뉴스": recentNews.map((n) => `- [${n.p ?? ""}] ${n.t}${n.s ? ` — ${n.s.slice(0, 160)}` : ""}`).join("\n"),
+         "거시지표": macro.map((m) => `- ${m.code} ${m.date}: ${m.value}${m.unit ?? ""}`).join("\n"),
+diff --git a/packages/api/src/routers/transactions.ts b/packages/api/src/routers/transactions.ts
+index ebac9d9..c5dd499 100644
+--- a/packages/api/src/routers/transactions.ts
++++ b/packages/api/src/routers/transactions.ts
+@@ -1,5 +1,6 @@
+ import { z } from "zod";
+-import { and, desc, eq } from "drizzle-orm";
++import { TRPCError } from "@trpc/server";
++import { and, desc, eq, gte, lte } from "drizzle-orm";
+ import { accounts, transactions } from "@finvesting/db";
+ import { router, publicProcedure } from "../trpc";
+ import { parseUpload } from "../lib/parse-upload";
+@@ -14,10 +15,33 @@ const parsedRow = z.object({
+   raw: z.record(z.unknown()),
+ });
+ 
++const txnCategory = z.enum([
++  "salary", "bonus", "interest", "dividend", "other_income",
++  "housing", "utilities", "insurance", "subscription", "phone",
++  "income_tax", "health_insurance",
++  "food", "transport", "shopping", "leisure", "health", "education", "misc",
++  "saving", "investment", "loan_repayment",
++  "transfer", "uncategorized",
++]);
++
++const IN_CATEGORIES = new Set(["salary", "bonus", "interest", "dividend", "other_income", "uncategorized"]);
++const OUT_CATEGORIES = new Set([
++  "housing", "utilities", "insurance", "subscription", "phone",
++  "income_tax", "health_insurance",
++  "food", "transport", "shopping", "leisure", "health", "education", "misc",
++  "saving", "investment", "loan_repayment", "uncategorized",
++]);
++
+ function categoryFor(direction: "in" | "out") {
+   return direction === "in" ? "other_income" as const : "uncategorized" as const;
+ }
+ 
++function allowedCategories(direction: "in" | "out" | "transfer") {
++  if (direction === "in") return IN_CATEGORIES;
++  if (direction === "out") return OUT_CATEGORIES;
++  return new Set(["transfer"]);
++}
++
+ function dupKey(r: { date: string; amount: number | string; direction: string; memo?: string | null; merchant?: string | null }) {
+   return `${r.date}|${Number(r.amount)}|${r.direction}|${r.memo ?? ""}|${r.merchant ?? ""}`;
+ }
+@@ -35,6 +59,62 @@ export const transactionsRouter = router({
+         .limit(input.limit);
+     }),
+ 
++  listAll: publicProcedure
++    .input(z.object({
++      accountId: z.string().uuid().optional(),
++      month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
++      limit: z.number().min(1).max(500).default(200),
++    }).optional())
++    .query(async ({ ctx, input }) => {
++      const conds = [eq(transactions.userId, ctx.userId)];
++      if (input?.accountId) {
++        conds.push(eq(transactions.accountId, input.accountId));
++      }
++      if (input?.month) {
++        const [y, m] = input.month.split("-").map(Number) as [number, number];
++        conds.push(gte(transactions.date, `${input.month}-01`));
++        conds.push(lte(transactions.date, `${input.month}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`));
++      }
++      return ctx.db.select({
++        id: transactions.id,
++        date: transactions.date,
++        amount: transactions.amount,
++        direction: transactions.direction,
++        category: transactions.category,
++        merchant: transactions.merchant,
++        memo: transactions.memo,
++        accountId: transactions.accountId,
++        accountName: accounts.name,
++        institution: accounts.institution,
++        accountType: accounts.type,
++        currency: accounts.currency,
++        accountBalance: accounts.balance,
++      }).from(transactions)
++        .innerJoin(accounts, eq(accounts.id, transactions.accountId))
++        .where(and(...conds))
++        .orderBy(desc(transactions.date))
++        .limit(input?.limit ?? 200);
++    }),
++
++  updateCategory: publicProcedure
++    .input(z.object({ id: z.string().uuid(), category: txnCategory }))
++    .mutation(async ({ ctx, input }) => {
++      const [row] = await ctx.db.select().from(transactions)
++        .where(and(eq(transactions.id, input.id), eq(transactions.userId, ctx.userId)));
++      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "거래를 찾을 수 없습니다" });
++      if (!allowedCategories(row.direction).has(input.category)) {
++        throw new TRPCError({
++          code: "BAD_REQUEST",
++          message: row.direction === "in" ? "입금은 수입 분류만 선택할 수 있습니다" : "출금은 지출·저축 분류만 선택할 수 있습니다",
++        });
++      }
++      const [updated] = await ctx.db.update(transactions)
++        .set({ category: input.category })
++        .where(eq(transactions.id, input.id))
++        .returning();
++      return updated;
++    }),
++
+   previewImport: publicProcedure
+     .input(z.object({
+       filename: z.string().min(1).max(200),
+diff --git a/packages/core/src/cashflow.ts b/packages/core/src/cashflow.ts
+index bad121d..bf6e5c4 100644
+--- a/packages/core/src/cashflow.ts
++++ b/packages/core/src/cashflow.ts
+@@ -6,7 +6,10 @@ export type TxnLike = {
+   category: string;
+ };
+ 
+-export const FIXED_COST_CATEGORIES = new Set(["housing", "utilities", "insurance", "subscription", "loan_repayment"]);
++export const FIXED_COST_CATEGORIES = new Set([
++  "housing", "utilities", "insurance", "subscription", "phone", "loan_repayment",
++  "income_tax", "health_insurance",
++]);
+ export const SAVING_CATEGORIES = new Set(["saving", "investment"]);
+ export const INCOME_CATEGORIES = new Set(["salary", "bonus", "interest", "dividend", "other_income"]);
+ 
+diff --git a/packages/core/src/index.ts b/packages/core/src/index.ts
+index 768856f..84de206 100644
+--- a/packages/core/src/index.ts
++++ b/packages/core/src/index.ts
+@@ -1,3 +1,10 @@
+ export * from "./allocation";
+ export * from "./cashflow";
+ export * from "./portfolio";
++export * from "./statement";
++export * from "./payroll";
++export * from "./pay-earnings";
++export * from "./pay-trends";
++export * from "./savings";
++export * from "./holdings-summary";
++export * from "./trends";
+diff --git a/packages/db/drizzle/meta/_journal.json b/packages/db/drizzle/meta/_journal.json
+index 32babc1..ac0d9f7 100644
+--- a/packages/db/drizzle/meta/_journal.json
++++ b/packages/db/drizzle/meta/_journal.json
+@@ -8,6 +8,34 @@
+       "when": 1788335379089,
+       "tag": "0000_blue_carlie_cooper",
+       "breakpoints": true
++    },
++    {
++      "idx": 1,
++      "version": "7",
++      "when": 1789203232464,
++      "tag": "0001_breezy_lester",
++      "breakpoints": true
++    },
++    {
++      "idx": 2,
++      "version": "7",
++      "when": 1789205420664,
++      "tag": "0002_yielding_paibok",
++      "breakpoints": true
++    },
++    {
++      "idx": 3,
++      "version": "7",
++      "when": 1789206238700,
++      "tag": "0003_curious_dreaming_celestial",
++      "breakpoints": true
++    },
++    {
++      "idx": 4,
++      "version": "7",
++      "when": 1789206560209,
++      "tag": "0004_big_captain_stacy",
++      "breakpoints": true
+     }
+   ]
+ }
+\ No newline at end of file
+diff --git a/packages/db/src/index.ts b/packages/db/src/index.ts
+index 50c1b89..0dbe106 100644
+--- a/packages/db/src/index.ts
++++ b/packages/db/src/index.ts
+@@ -5,7 +5,11 @@ import * as schema from "./schema/index";
+ const url = process.env.DATABASE_URL;
+ if (!url) throw new Error("DATABASE_URL is not set");
+ 
+-export const sql = postgres(url, { max: 10 });
+-export const db = drizzle(sql, { schema });
++// Next 핫리로드가 모듈을 다시 평가해도 풀을 하나만 유지한다.
++const g = globalThis as unknown as { __finvestingSql?: ReturnType<typeof postgres>; __finvestingDb?: ReturnType<typeof drizzle<typeof schema>> };
++export const sql = g.__finvestingSql ?? postgres(url, { max: 4 });
++export const db = g.__finvestingDb ?? drizzle(sql, { schema });
++g.__finvestingSql = sql;
++g.__finvestingDb = db;
+ export type Db = typeof db;
+ export * from "./schema/index";
+diff --git a/packages/db/src/schema/index.ts b/packages/db/src/schema/index.ts
+index ab76150..f1558d7 100644
+--- a/packages/db/src/schema/index.ts
++++ b/packages/db/src/schema/index.ts
+@@ -4,4 +4,5 @@ export * from "./transactions";
+ export * from "./investments";
+ export * from "./market";
+ export * from "./profile";
++export * from "./savings";
+ export * from "./fundamentals";
+diff --git a/packages/db/src/schema/profile.ts b/packages/db/src/schema/profile.ts
+index 734df2c..74af240 100644
+--- a/packages/db/src/schema/profile.ts
++++ b/packages/db/src/schema/profile.ts
+@@ -1,14 +1,57 @@
+-import { pgTable, uuid, numeric, integer, jsonb, text } from "drizzle-orm/pg-core";
++import { pgTable, uuid, numeric, integer, jsonb, text, boolean, uniqueIndex, index } from "drizzle-orm/pg-core";
+ import { users, timestamps } from "./common";
+ 
+ // 배분 가이드 계산에 필요한 본인 재무 프로필
+ export const financialProfiles = pgTable("financial_profiles", {
+   id: uuid("id").primaryKey().defaultRandom(),
+   userId: uuid("user_id").notNull().references(() => users.id).unique(),
++  monthlyGrossIncome: numeric("monthly_gross_income", { precision: 20, scale: 0 }), // 세전 월 근로소득
+   monthlyNetIncome: numeric("monthly_net_income", { precision: 20, scale: 0 }), // 세후 월 근로소득
+-  monthlyFixedCost: numeric("monthly_fixed_cost", { precision: 20, scale: 0 }), // 주거·보험 등 고정비
++  monthlyIncomeTax: numeric("monthly_income_tax", { precision: 20, scale: 0 }), // 근로소득세(원천징수)
++  monthlyHealthInsurance: numeric("monthly_health_insurance", { precision: 20, scale: 0 }), // 건보료(장기요양 포함 가능)
++  monthlyFixedCost: numeric("monthly_fixed_cost", { precision: 20, scale: 0 }), // 세부내역에 안 넣는 기타 고정비
+   emergencyFundMonths: integer("emergency_fund_months").notNull().default(6),
+   riskTolerance: text("risk_tolerance").notNull().default("moderate"), // conservative|moderate|aggressive
+   targetAllocation: jsonb("target_allocation"), // { cash:0.1, deposit:0.3, stock:0.5, crypto:0.1 } 등 사용자 지정
++  payEarnings: jsonb("pay_earnings"), // [{ name:"기본급", amount:3200000 }, { name:"식대", amount:200000 }]
+   ...timestamps,
+ });
++
++// 매달 고정으로 빠져나가는 돈 (휴대폰, 공과금, 주거 등)
++export const recurringCosts = pgTable("recurring_costs", {
++  id: uuid("id").primaryKey().defaultRandom(),
++  userId: uuid("user_id").notNull().references(() => users.id),
++  name: text("name").notNull(),
++  category: text("category").notNull(), // phone|utilities|housing|...
++  amount: numeric("amount", { precision: 20, scale: 0 }).notNull(),
++  dayOfMonth: integer("day_of_month"), // 1~31, 출금일
++  memo: text("memo"),
++  isActive: boolean("is_active").notNull().default(true),
++  ...timestamps,
++}, (t) => [index("recurring_costs_user_idx").on(t.userId)]);
++
++// 근로소득세 월별 추이. 프로필 저장 시 해당 월을 갱신하거나 직접 입력.
++export const incomeTaxMonths = pgTable("income_tax_months", {
++  id: uuid("id").primaryKey().defaultRandom(),
++  userId: uuid("user_id").notNull().references(() => users.id),
++  month: text("month").notNull(), // YYYY-MM
++  amount: numeric("amount", { precision: 20, scale: 0 }).notNull(),
++  ...timestamps,
++}, (t) => [uniqueIndex("income_tax_months_user_month_uq").on(t.userId, t.month)]);
++
++// 월별 급여 스냅샷. 연봉 추이(기본급·수당·상여·세금·보험)의 원장.
++export const payrollMonths = pgTable("payroll_months", {
++  id: uuid("id").primaryKey().defaultRandom(),
++  userId: uuid("user_id").notNull().references(() => users.id),
++  month: text("month").notNull(), // YYYY-MM
++  baseAmount: numeric("base_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  allowanceAmount: numeric("allowance_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  bonusAmount: numeric("bonus_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  otherAmount: numeric("other_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  grossAmount: numeric("gross_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  taxAmount: numeric("tax_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  insuranceAmount: numeric("insurance_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  netAmount: numeric("net_amount", { precision: 20, scale: 0 }).notNull().default("0"),
++  earnings: jsonb("earnings"),
++  ...timestamps,
++}, (t) => [uniqueIndex("payroll_months_user_month_uq").on(t.userId, t.month)]);
+diff --git a/packages/db/src/schema/transactions.ts b/packages/db/src/schema/transactions.ts
+index 487c915..c6280e5 100644
+--- a/packages/db/src/schema/transactions.ts
++++ b/packages/db/src/schema/transactions.ts
+@@ -7,7 +7,8 @@ export const txnDirection = pgEnum("txn_direction", ["in", "out", "transfer"]);
+ // 소비/수입 분류. 배분 가이드(고정비·변동비·저축·투자)의 입력이 된다.
+ export const txnCategory = pgEnum("txn_category", [
+   "salary", "bonus", "interest", "dividend", "other_income",
+-  "housing", "utilities", "insurance", "subscription",           // 고정비
++  "housing", "utilities", "insurance", "subscription", "phone", // 고정비
++  "income_tax", "health_insurance",                             // 공제
+   "food", "transport", "shopping", "leisure", "health", "education", "misc", // 변동비
+   "saving", "investment", "loan_repayment",                     // 저축·투자·상환
+   "transfer", "uncategorized",
+diff --git a/packages/interop/src/importers/generic-bank.ts b/packages/interop/src/importers/generic-bank.ts
+index 0fe3016..327b8eb 100644
+--- a/packages/interop/src/importers/generic-bank.ts
++++ b/packages/interop/src/importers/generic-bank.ts
+@@ -11,6 +11,8 @@ const COLS = {
+   merchant: ["거래처", "상대", "받는분", "보낸분", "가맹점"],
+   balance: ["잔액", "거래후잔액"],
+ };
++export const BANK_CSV_HEADER = ["거래일", "입금", "출금", "내용", "잔액"] as const;
++
+ const find = (headers: string[], keys: string[]) => headers.findIndex((h) => keys.some((k) => h.replace(/\s/g, "").includes(k)));
+ 
+ export const genericBankImporter: TransactionImporter = {
+diff --git a/packages/interop/src/index.ts b/packages/interop/src/index.ts
+index ba7f7ea..e148c14 100644
+--- a/packages/interop/src/index.ts
++++ b/packages/interop/src/index.ts
+@@ -1,6 +1,15 @@
+ export * from "./types";
+ export * from "./parse-file";
+-export { genericBankImporter } from "./importers/generic-bank";
++export { rowsToDocx, docxToRows } from "./docx";
++export { genericBankImporter, BANK_CSV_HEADER } from "./importers/generic-bank";
++export {
++  parseRecurringCostCsv,
++  parseRecurringCostRows,
++  recurringCostsToCsv,
++  recurringCostsToXlsx,
++  recurringCostsToDocx,
++  RECURRING_CSV_HEADER,
++} from "./importers/recurring-costs";
+ import { genericBankImporter } from "./importers/generic-bank";
+ import { genericCsvExporter } from "./exporters/generic-csv";
+ import type { TransactionImporter, TradeImporter, LedgerExporter } from "./types";
+diff --git a/packages/interop/src/parse-file.test.ts b/packages/interop/src/parse-file.test.ts
+index ab3e1b8..625c8f2 100644
+--- a/packages/interop/src/parse-file.test.ts
++++ b/packages/interop/src/parse-file.test.ts
+@@ -1,6 +1,8 @@
+ import { describe, expect, it } from "vitest";
+-import { toIsoDate, toNumber } from "./parse-file";
++import { fileToRows, rowsToXlsx, toIsoDate, toNumber } from "./parse-file";
++import { docxToRows, rowsToDocx } from "./docx";
+ import { genericBankImporter } from "./importers/generic-bank";
++import { parseRecurringCostRows, recurringCostsToDocx, recurringCostsToXlsx } from "./importers/recurring-costs";
+ 
+ describe("toIsoDate", () => {
+   it("여러 구분자를 YYYY-MM-DD로 맞춘다", () => {
+@@ -32,3 +34,30 @@ describe("genericBankImporter", () => {
+     expect(r.rows[1]).toMatchObject({ direction: "out", amount: 12_000, date: "2026-09-02" });
+   });
+ });
++
++describe("xlsx / docx 표 변환", () => {
++  const table = [
++    ["이름", "분류", "금액", "출금일", "메모"],
++    ["휴대폰", "휴대폰", "55000", "15", ""],
++  ];
++
++  it("엑셀로 썼다 다시 읽는다", () => {
++    const bin = rowsToXlsx(table, "고정비");
++    const rows = fileToRows("fixed.xlsx", bin);
++    expect(rows[0]).toEqual(table[0]);
++    expect(rows[1]?.[0]).toBe("휴대폰");
++    expect(parseRecurringCostRows(rows).rows[0]).toMatchObject({ name: "휴대폰", amount: 55000, category: "phone" });
++  });
++
++  it("워드 표로 썼다 다시 읽는다", () => {
++    const bin = rowsToDocx(table);
++    const rows = docxToRows(bin);
++    expect(rows).toEqual(table);
++  });
++
++  it("고정비 엑셀·워드 내보내기를 다시 파싱한다", () => {
++    const src = [{ name: "월세", category: "housing", amount: 500000, dayOfMonth: 1, memo: "관리비 별도" }];
++    expect(parseRecurringCostRows(fileToRows("a.xlsx", recurringCostsToXlsx(src))).rows).toEqual(src);
++    expect(parseRecurringCostRows(fileToRows("a.docx", recurringCostsToDocx(src))).rows).toEqual(src);
++  });
++});
+diff --git a/packages/interop/src/parse-file.ts b/packages/interop/src/parse-file.ts
+index c33daa3..3515670 100644
+--- a/packages/interop/src/parse-file.ts
++++ b/packages/interop/src/parse-file.ts
+@@ -1,5 +1,18 @@
+ import Papa from "papaparse";
+ import * as XLSX from "xlsx";
++import { docxToRows } from "./docx";
++
++export type TableFileKind = "csv" | "xlsx" | "xls" | "docx" | "doc" | "unknown";
++
++export function detectTableFileKind(filename: string): TableFileKind {
++  const lower = filename.toLowerCase();
++  if (lower.endsWith(".csv") || lower.endsWith(".txt")) return "csv";
++  if (lower.endsWith(".xlsx")) return "xlsx";
++  if (lower.endsWith(".xls")) return "xls";
++  if (lower.endsWith(".docx")) return "docx";
++  if (lower.endsWith(".doc")) return "doc";
++  return "unknown";
++}
+ 
+ // CSV/XLSX 파일을 문자열 2차원 배열로. 은행 내보내기는 EUC-KR인 경우가 있어 호출 측에서 디코딩 후 넘긴다.
+ export function csvToRows(text: string): string[][] {
+@@ -24,6 +37,26 @@ export function toNumber(s: string): number {
+   return Number.isFinite(n) ? n : 0;
+ }
+ 
++export function rowsToXlsx(rows: string[][], sheetName = "Sheet1"): Uint8Array {
++  const wb = XLSX.utils.book_new();
++  const ws = XLSX.utils.aoa_to_sheet(rows);
++  XLSX.utils.book_append_sheet(wb, ws, sheetName);
++  return new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer);
++}
++
++/** CSV·엑셀·워드 표를 같은 2차원 배열로. 호출 측이 CSV 텍스트를 디코딩해 넘긴다. */
++export function fileToRows(filename: string, buf: Uint8Array, csvText?: string): string[][] {
++  const kind = detectTableFileKind(filename);
++  if (kind === "doc") throw new Error("구형 .doc는 지원하지 않습니다. Word에서 .docx로 저장하세요");
++  if (kind === "xlsx" || kind === "xls") {
++    const ab = new ArrayBuffer(buf.byteLength);
++    new Uint8Array(ab).set(buf);
++    return xlsxToRows(ab);
++  }
++  if (kind === "docx") return docxToRows(buf);
++  return csvToRows(csvText ?? new TextDecoder("utf-8").decode(buf));
++}
++
+ export function toIsoDate(s: string): string {
+   // 2026.09.02 / 2026-09-02 / 20260902 / 2026/09/02 → 2026-09-02
+   const m = s.match(/(\d{4})[.\-\/]?(\d{2})[.\-\/]?(\d{2})/);
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index f2a61a5..2433b36 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -60,6 +60,9 @@ importers:
+       '@finvesting/api':
+         specifier: workspace:*
+         version: link:../../packages/api
++      '@finvesting/core':
++        specifier: workspace:*
++        version: link:../../packages/core
+       '@tanstack/react-query':
+         specifier: ^5.62.11
+         version: 5.102.8(react@19.2.8)
+@@ -1557,7 +1560,7 @@ packages:
+ 
+   '@expo/bunyan@4.0.1':
+     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
+-    engines: {node: '>=0.10.0'}
++    engines: {'0': node >=0.10.0}
+ 
+   '@expo/cli@0.22.28':
+     resolution: {integrity: sha512-lvt72KNitGuixYD2l3SZmRKVu2G4zJpmg5V7WfUBNpmUU5oODBw/6qmiJ6kSLAlfDozscUk+BBGknBBzxUrwrA==}

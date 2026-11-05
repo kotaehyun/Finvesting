@@ -16,4 +16,5 @@
 5-1. `docs/verification/YYYY-MM-DD-<모델>.md` 작성: 환경, **실제 실행해 확인한 것**(방법·결과), 정적 검토만 한 것, 검증 못 한 것. `verification/README.md` 검증 현황 표의 해당 행을 갱신. 실행 안 한 것을 ✅로 바꾸지 않는다
 6. 프롬프트가 부족해서 헤맨 부분이 있었으면 `docs/prompts/`의 해당 파일을 고치고 README 변경 이력에 남김
 7. 현재 브랜치가 기능 브랜치인지 확인한 뒤 변경 파일을 `type(scope): 요약` 형식으로 커밋 (push·dev merge는 사용자가 지시할 때만)
-8. 마지막으로 다음 세션의 AI가 바로 이어받을 수 있도록 **3~5문장 인수인계 요약**을 출력
+8. Claude 세션이면 `docs/progress/status.md`와 Claude 프로젝트 문서 `claude/finvesting-status.md`를 같은 내용으로 갱신
+9. 마지막으로 다음 세션의 AI가 바로 이어받을 수 있도록 **3~5문장 인수인계 요약**을 출력
