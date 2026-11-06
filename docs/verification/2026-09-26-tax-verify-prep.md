@@ -68,3 +68,8 @@
 1. JSON만 수정. 새 숫자·새 id 금지.
 2. `pnpm --filter @finvesting/core test` (data-tables는 미검증 개수 고정 없음).
 3. 이 파일에 대조한 날짜·결과를 한 줄 남기거나 `docs/verification/YYYY-MM-DD-사용자.md`에 ✅.
+
+## 보조 대조 (2026-11-06 Cursor)
+- [2026-11-06-cursor-tax-verify-assist.md](./2026-11-06-cursor-tax-verify-assist.md): payroll·ei-stability·itaArt55 값과 공식 출처 비교. **숫자·verifiedBy 미변경.**
+- 주의: 국민연금 상·하한 저장값은 2026.7.1 고시와 일치하나 JSON 적용기간이 연초부터로 되어 있음(1~6월은 다른 상·하한).
+- 사용자: 맞으면 `verifiedBy`/`verifiedOn`만 갱신. 상속·지방·종부 brackets는 아직.
