@@ -2,6 +2,20 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-06 — tax 원문 대조 보조 (Cursor)
+**한 일**
+- `main`은 이미 `dcf1f0f`에 통합됨. `origin/dev` fast-forward 동기화
+- payroll·ei-stability·소득세법 제55조(itaArt55)를 공식 고시·4insure·복지부 보도와 비교 → verification 기록. JSON 값·verifiedBy 미변경
+- 국민연금 상·하한: 값=2026.7 고시, JSON 적용시작일이 1월로 되어 있어 ⚠️
+
+**다음 할 일**
+1. 사용자 `verifiedBy` 갱신 · brackets 상속·지방·종부 대조 · 홈택스 XLSX
+
+**막힌 것**
+- 없음(값 확정 스탬프는 사용자)
+
+---
+
 ## 2026-11-05 — feat/statements-pipeline → dev merge (Cursor)
 **한 일**
 - `turbo typecheck` 8패키지 통과 후 `dev`에 `--no-ff` merge·push (`c37e38e`)
