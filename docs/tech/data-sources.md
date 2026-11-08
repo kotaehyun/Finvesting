@@ -59,7 +59,7 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 - 숫자는 공시 표준 항목만. Yahoo 전 종목은 `/invest`
 
 ## `/invest` 시가총액 보드
-- API `market.mcapBoard`: `buildMcapBoards`로 국내·해외 분리. 종목마다 `matchNewsForSymbol`(제목·`news.symbols`, 본문 없음)
+- API `market.mcapBoard`: `buildMcapBoards`로 국내·해외 분리. 종목마다 `matchNewsForSymbol`(제목·`news.symbols`, 본문 없음). `symbols`는 정확히 일치할 때만. 제목의 영문 티커는 단어 경계이고 3글자 이하는 제목에 잡지 않는다. 한글 회사명만 포함 검색. RSS 저장 시 `symbolsMentionedInTitle`로 같은 규칙을 넣는다 (ADR 0052)
 - UI: 관심 터미널 위. 「해외 · 수집분」= Yahoo 수집분(주로 미국). 전 세계 공식 순위 아님
 - 연계: 뉴스 펼침·원문 링크, `/statements?area=&browse=mcap&q=` 재무·개황
 
@@ -77,7 +77,7 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 | 소스 | 방식 | 용도 | 상태 |
 |---|---|---|---|
 | 한국투자증권 KIS Open API | API (키 필요) | 국내·해외 주식 시세 | 미구현 |
-| 네이버 뉴스 검색 API | API | 종목별 뉴스 | 미구현 |
+| 네이버 뉴스 검색 API | API | 종목별 뉴스 | **안 씀** (ADR 0051). 종량제라 호출하지 않음. 키 없음 |
 | 경제 캘린더 (예: investing.com / 금통위·FOMC 일정) | 크롤링 | `economic_events` | 미구현 |
 | DART corpCode.xml / SEC company_tickers.json | 파일 | 종목코드↔corp_code, 티커↔CIK 자동 매핑. `instrument_identifiers`에 저장 | **구현** (`core/statement-targets.ts`, worker `catalogs.ts`) |
 | watchlist·trades 테이블 → 수집 대상 자동화 | 내부 | 보유+관심 종목이 본 대상, env는 보조. 시세는 `quote-targets`, 재무제표는 `statement-targets` | **구현** (ADR 0007). KIS 국내 시세는 미구현 |

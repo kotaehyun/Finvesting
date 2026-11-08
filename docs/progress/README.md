@@ -2,6 +2,31 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-08 — 종목 뉴스 매핑 (Cursor)
+**한 일**
+- `titleMentionsInstrument`·`symbolsMentionedInTitle`. 3글자 이하 티커는 회사명만. RSS insert에 종목 코드. 관심·`watchNews`가 같은 함수. ADR 0052
+- `statement-mcap.test.ts` 6건 통과
+
+**다음 할 일**
+1. KIS 시세는 키 없음. RAG는 임베딩 생성 후
+
+**막힌 것**
+- `KIS_APP_KEY`·`KIS_APP_SECRET` 비어 있음
+
+---
+
+## 2026-11-08 — 네이버 뉴스 검색 API 제외 (Cursor)
+**한 일**
+- 종량제라 호출하지 않음. ADR 0051. `.env`·`.env.example`의 `NAVER_CLIENT_ID`·`NAVER_CLIENT_SECRET` 삭제. 수집 코드는 원래 없었음
+
+**다음 할 일**
+1. 재무제표 기간 수정 이어서 (EDGAR 재수집·화면 확인·항목별 커밋)
+
+**막힌 것**
+- 없음
+
+---
+
 ## 2026-11-06 — tax 원문 대조 보조 (Cursor)
 **한 일**
 - `main`은 이미 `dcf1f0f`에 통합됨. `origin/dev` fast-forward 동기화

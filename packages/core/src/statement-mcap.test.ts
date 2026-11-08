@@ -4,6 +4,7 @@ import {
   formatMcapLabel,
   matchNewsForSymbol,
   rankByMarketCap,
+  symbolsMentionedInTitle,
   statementLookupYahooTickers,
 } from "./statement-mcap";
 
@@ -49,5 +50,15 @@ describe("시가총액 순위", () => {
     ];
     expect(matchNewsForSymbol(news, "AAPL", "Apple").map((n) => n.id)).toEqual(["1"]);
     expect(matchNewsForSymbol(news, "005930", "삼성전자").map((n) => n.id)).toEqual(["2"]);
+  });
+
+  it("3글자 이하 티커는 제목에 잡지 않고 회사 이름만 잡는다", () => {
+    const news = [
+      { id: "1", title: "Very strong demand", url: "u1", publisher: null, publishedAt: null },
+      { id: "2", title: "Visa raises dividend", url: "u2", publisher: null, publishedAt: null },
+    ];
+    expect(matchNewsForSymbol(news, "V", "Visa").map((n) => n.id)).toEqual(["2"]);
+    expect(symbolsMentionedInTitle("Very strong demand", [{ symbol: "V", name: "Visa" }])).toEqual([]);
+    expect(symbolsMentionedInTitle("Visa raises dividend", [{ symbol: "V", name: "Visa" }])).toEqual(["V"]);
   });
 });

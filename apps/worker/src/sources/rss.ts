@@ -1,6 +1,6 @@
 import Parser from "rss-parser";
-import { newsCategoryForSource, opinionCategoryForSource } from "@finvesting/core";
-import { db, news } from "@finvesting/db";
+import { newsCategoryForSource, opinionCategoryForSource, symbolsMentionedInTitle } from "@finvesting/core";
+import { db, instruments, news } from "@finvesting/db";
 
 // 제목·링크·요약만 저장 (본문 저장 X — 저작권). 피드는 자유롭게 추가.
 // 뉴스 분류: core/news-category. 오피니언: core/opinion-category. 증권사 리포트 공개 RSS는 없음.
@@ -38,6 +38,7 @@ function feedCategory(source: string, board: "news" | "opinion") {
 
 export async function collectRssNews() {
   const parser = new Parser({ timeout: 10_000 });
+  const known = await db.select({ symbol: instruments.symbol, name: instruments.name }).from(instruments);
   let inserted = 0;
   const perFeed: Record<string, number | string> = {};
   for (const f of FEEDS) {
@@ -53,6 +54,7 @@ export async function collectRssNews() {
           publisher: f.publisher,
           publishedAt: item.isoDate ? new Date(item.isoDate) : null,
           summary: (item.contentSnippet ?? "").slice(0, 500),
+          symbols: symbolsMentionedInTitle(item.title, known),
           source,
           raw: {
             guid: item.guid,

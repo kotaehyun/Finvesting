@@ -53,3 +53,5 @@
 | 0048 | 투자 봇AI 화면은 대화형 채팅 배치 | 채택 |
 | 0049 | [현재 백엔드 유지와 단계적 AI·RAG 확장](./0049-backend-ai-evolution.md) | 채택 (후속 기술 미결정) |
 | 0050 | [부동산 동결 · ERP 보류](./0050-realty-freeze-erp-defer.md) | 채택 |
+| 0051 | [네이버 뉴스 검색 API는 호출하지 않음](./0051-no-naver-news-api.md) | 채택 |
+| 0052 | [종목 뉴스는 제목의 회사명·긴 티커만](./0052-news-symbol-match.md) | 채택 |

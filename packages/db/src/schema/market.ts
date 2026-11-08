@@ -36,7 +36,7 @@ export const news = pgTable("market_news", {
   publishedAt: timestamp("published_at", { withTimezone: true }),
   summary: text("summary"),
   symbols: text("symbols").array(),      // 관련 종목 심볼
-  source: text("source").notNull(),      // "rss:hankyung" | "naver" | "crawler:..."
+  source: text("source").notNull(),      // "rss:hankyung" | "crawler:..."  네이버 검색 API는 안 씀 (ADR 0051)
   raw: jsonb("raw"),
   embedding: vector("embedding", { dimensions: 768 }),
   fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),

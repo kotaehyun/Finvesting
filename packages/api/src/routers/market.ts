@@ -502,22 +502,7 @@ export const marketRouter = router({
 
       const fInfo = fundMap.get(r.instrumentId);
 
-      const symLower = r.symbol.toLowerCase();
-      const nameLower = r.name.toLowerCase();
-      const itemNews = recentNews
-        .filter((n) => {
-          if (n.symbols && Array.isArray(n.symbols) && n.symbols.some((s) => s.toLowerCase() === symLower)) return true;
-          if (n.title.toLowerCase().includes(symLower) || n.title.toLowerCase().includes(nameLower)) return true;
-          return false;
-        })
-        .slice(0, 3)
-        .map((n) => ({
-          id: n.id,
-          title: n.title,
-          url: n.url,
-          publisher: n.publisher,
-          publishedAt: n.publishedAt ? new Date(n.publishedAt).toISOString() : null,
-        }));
+      const itemNews = matchNewsForSymbol(recentNews, r.symbol, r.name, 3);
 
       return {
         id: r.id,
@@ -569,20 +554,17 @@ export const marketRouter = router({
     }))
     .query(async ({ ctx, input }) => {
       const sym = input.symbol.trim();
-      const name = input.name?.trim();
-      const conds = [
-        sql`${news.symbols} @> ARRAY[${sym}]::text[]`,
-        sql`${news.title} ILIKE ${`%${sym}%`}`,
-      ];
-      if (name && name.length >= 2) {
-        conds.push(sql`${news.title} ILIKE ${`%${name}%`}`);
-      }
-      return ctx.db
-        .select(newsListCols)
+      const name = input.name?.trim() ?? "";
+      const recent = await ctx.db
+        .select({ ...newsListCols, symbols: news.symbols })
         .from(news)
-        .where(or(...conds))
         .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
-        .limit(input.limit);
+        .limit(400);
+      const matched = new Set(matchNewsForSymbol(recent, sym, name, input.limit).map((n) => n.id));
+      return recent
+        .filter((n) => matched.has(n.id))
+        .slice(0, input.limit)
+        .map(({ symbols: _symbols, ...row }) => row);
     }),
 
   watchAddPreset: publicProcedure
