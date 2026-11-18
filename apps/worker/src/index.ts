@@ -11,10 +11,12 @@ import { collectDartCompanyProfile, collectEdgarCompanyProfile } from "./sources
 import { collectWorldBankInflation } from "./sources/worldbank";
 import { collectBisPolicyRates } from "./sources/bis";
 import { collectKofiaFunds } from "./sources/kofia";
+import { collectNaverNews } from "./sources/naver-news";
 
 // 수집 스케줄 (KST). 각 소스는 실패해도 다른 소스에 영향 없음.
 const jobs: Array<[string, string, () => Promise<unknown>]> = [
   ["뉴스 RSS",       "*/15 * * * *", collectRssNews],   // 15분마다
+  ["네이버 뉴스",    "0 8,12,16,20 * * *", collectNaverNews], // 하루 4회. 보유·관심과 저장된 KRX 한글 이름, 회당 최대 40검색
   ["업비트 시세",     "*/5 * * * *",  collectUpbit],     // 5분마다
   ["ECOS 거시지표",   "0 9,18 * * *", collectEcos],      // 하루 2회
   ["FRED 미국지표",   "0 7,19 * * *", collectFred],      // 하루 2회 (미국 장 마감 후 반영)

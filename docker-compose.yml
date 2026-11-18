@@ -11,3 +11,17 @@ services:
       - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+
+  worker:
+    build: .
+    container_name: finvesting-worker
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://finvesting:finvesting@db:5432/finvesting
+      WORKER_RUN_ON_START: "false"
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

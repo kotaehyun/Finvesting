@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+.git
+pgdata
+.env
+**/.env
+**/.next
+**/dist
+docs
+apps/mobile
+apps/web

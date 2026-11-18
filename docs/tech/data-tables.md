@@ -44,6 +44,6 @@
 4. `/erp`·`/profile` 화면에 「기준 … · …」(`dataSourceLine`)이 보이는지 확인. (`/erp`는 ADR 0050 보류·내비 숨김이어도 URL·프로필 세율표는 유지.)
 5. `docs/verification/`에 원문 대조만 ✅로 올린다(렌더만이면 ⏸).
 
-## 원문 대조 우선 (2026-09-26)
-사용자 대조용 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`  
-대상: `payroll-rates-2026.json` · `brackets.json` · `ei-stability.json`만. 나머지는 미착수.
+## 원문 대조 (2026-11-12)
+준비표: `docs/verification/2026-09-26-tax-verify-prep.md`  
+`payroll-rates-2026.json` · `brackets.json` · `ei-stability.json`은 `verifiedBy` 「사용자」, `verifiedOn` `2026-11-12`. 숫자는 그대로. `civil-pay-2026.json` · `corp-local-rate.json`은 미검증.

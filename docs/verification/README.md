@@ -39,7 +39,7 @@
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
 | 타입체크 (web 포함 8패키지) | ✅ `turbo typecheck` 8패키지 통과 (statements pipeline·mcap-board 포함) | 2026-11-03 | Cursor |
 | core 테스트 (vitest) | ✅ 52개 파일 188개 단위/회귀 테스트 전건 통과 (`accounting-journal.test.ts` 6건 포함) | 2026-10-10 | Gemini |
-| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 원문 대조는 전원 미검증(⏸). 3파일 준비표 09-26 | 2026-09-26 | Cursor |
+| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). payroll·brackets·ei-stability는 `verifiedBy` 사용자(2026-11-12). 미검증 259는 civil-pay·corp-local | 2026-11-12 | Cursor |
 | 부동산·ERP 범위 | ✅ 동결·보류(ADR 0050). 내비 숨김 | 2026-09-26 | Cursor |
 | interop 테스트 | ✅ 5개 파일 18개 테스트 전건 통과 (`accounting-journal-csv.test.ts` 4건 포함) | 2026-10-10 | Gemini |
 | `pnpm db:generate` / `db:migrate` | ✅ 마이그레이션 23개 테이블 전건 적용 | 2026-10-09 | Gemini |
@@ -75,17 +75,18 @@
 | `/profile` 10 보험내역 (육각·칠각) | ✅ 페이지 200. 검증 실손 저장. 실손 100% · 암 60% · 사망 0%(부족 2.52억). 육각 중대질병 1억. **메뉴 번호는 2026-09-14부터 11** | 2026-09-13 | Grok Chrome |
 | `/profile` 10 AI 추천 (`insurance.recommend`) | ✅ tRPC·브라우저. 사망→뇌·심장·상해·장해→암. 실손 됨. ~46–56초 | 2026-09-13 | Grok Ollama |
 | `/profile` 10 투자성향·조언 | ✅ 페이지 200. 저장 0/12 보수 → 5/12 중립. 01 성향 동기화. BTC·비상금 문장. AI 추천 미실행. **메뉴 번호 11→10, 투자내역 다음** | 2026-09-14 | Grok Chrome |
-| `/news` 뉴스 대시보드 | ✅ 페이지 200. 2026-09-14 feed 1246. 분류 654/210/50/200/55/30/47 (경제·금융·부동산·시황·크립토·외환·중앙은행) | 2026-09-14 | Grok tRPC+Chrome |
+| `/news` 뉴스 대시보드 | ✅ 페이지 200. 2026-09-14 feed 1246. 2026-11-12 화면 전체 3076(국내 2098·해외 978). 국내 금융에서 `삼성SDI` 검색 10건, 네이버 수집 제목 보임 | 2026-11-12 | Cursor |
 | `/opinions` 오피니언·칼럼 | ✅ 143=66/32/45. RSS 5피드 수집. 3열·애널리스트 필터 브라우저 | 2026-09-13 | Grok Chrome |
 | `/statements` 재무제표·감사 | ✅ `?q=AAPL` EDGAR만. `?q=005930` DART·국내 해설. 09-18 DB 꺼짐 `unavailable`+「DB 연결 불가」(500 아님). 목록 종목 선택·3표 실데이터 미실행 | 2026-09-18 | Grok Chrome |
 | `/profile` CSV·엑셀·워드 변환 + 통장내역 + 추이 그래프 | ✅ previewFile csv/xlsx/docx, trends 12개월, listAll 6건. 브라우저 클릭은 미실행 | 2026-09-12 | Grok tRPC |
-| `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용 | 2026-09-05 | 사용자(09-02), Grok tRPC 재확인 |
+| `/chat` 렌더 + Ollama 질의 응답 | ✅ gemma4:12b. 2026-09-05: 보유 없음 정직 응답 + 뉴스 제목 인용. 2026-11-12 스트림 간격 확인, 화면 첫 글자는 5분 내 없음. 멈추기는 「멈췄습니다.」 | 2026-11-12 | Cursor |
 | `/chat` 대화 목록 12문항 | ✅ 5그룹 버튼. 「순자산 구성」 클릭 후 순자산 3,749,802·투자 104,802 인용 | 2026-09-13 | Grok Chrome |
 | worker — RSS 국내 (한경·매경·연합) | ✅ 한경·연합 수집. 2026-09-14 mk `ENOTFOUND www.mk.co.kr` | 2026-09-14 | Grok collectRssNews |
+| worker — NAVER API HUB 뉴스 검색 | ✅ `collectNaverNews` 검색 4·저장 39·오류 0. 삼성전자·삼성SDI·펄어비스 10, 에코프로비엠 9. 임베딩 16 | 2026-11-12 | Cursor |
 | worker — RSS 해외 (CNBC×2·MarketWatch·Fed·ECB) | ✅ 5/5 피드 응답 | 2026-09-02 | 사용자 실행 |
 | worker — RSS 크립토·외환·부동산 | ✅ CoinDesk 25, Cointelegraph 30, FXStreet 30, 한경 부동산 50 | 2026-09-14 | Grok collectRssNews |
 | worker — Upbit (보유·관심 ∪ UPBIT_TARGETS) | ✅ 보유 BTC만 1 upsert. 종가 104,802,000 (2026-09-13). 구버전 고정 4종은 09-02 | 2026-09-13 | Grok run:once |
-| worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip. 2026-09-15 가계대출 수집도 `ECOS_API_KEY not set` | 2026-09-15 | Grok collectEcos |
+| worker — ECOS (통계코드 유효성) | ⏸ 키 없음, skip. 2026-11-13 `collectEcos`도 `ECOS_API_KEY not set`. `ECOS_HHLOAN%` 0행 | 2026-11-13 | Cursor |
 | worker — FRED | ⏸ 키 없음, skip 동작 확인 | 2026-09-02 | |
 | worker — Yahoo (보유·관심 + KRW=X USDKRW) | ✅ 13/13 (지수10+AAPL/MSFT/SPY). 이후 지수 chart 90일 624봉. 펀더멘털 주식·ETF만. USDKRW yahoo | 2026-09-14 | Grok collectYahoo |
 | 대시보드 투자자산 = 평가액+예수금 | ✅ overview invested 104,802 = 평가 104,802 + 예수금 0. 브라우저 문구는 미클릭 | 2026-09-13 | Grok tRPC |
@@ -101,6 +102,40 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-18 | Cursor (점유 지역·연령·성별) | [2026-11-18-cursor-tenure-detail.md](./2026-11-18-cursor-tenure-detail.md) |
+| 2026-11-18 | Cursor (지방끼리 이동 화살표) | [2026-11-18-cursor-move-local.md](./2026-11-18-cursor-move-local.md) |
+| 2026-11-18 | Cursor (지방·수도권 이동 화살표) | [2026-11-18-cursor-move-capital.md](./2026-11-18-cursor-move-capital.md) |
+| 2026-11-18 | Cursor (인구이동 연령·성별) | [2026-11-18-cursor-move-ages.md](./2026-11-18-cursor-move-ages.md) |
+| 2026-11-18 | Cursor (서울·경기 인구 화살표) | [2026-11-18-cursor-move-arrows.md](./2026-11-18-cursor-move-arrows.md) |
+| 2026-11-18 | Cursor (고른 지역만 상승) | [2026-11-18-cursor-map-lift.md](./2026-11-18-cursor-map-lift.md) |
+| 2026-11-18 | Cursor (말잔 빌딩 파랑·빨강) | [2026-11-18-cursor-loan-skyline-4.md](./2026-11-18-cursor-loan-skyline-4.md) |
+| 2026-11-18 | Cursor (말잔 빌딩 색) | [2026-11-18-cursor-loan-skyline-3.md](./2026-11-18-cursor-loan-skyline-3.md) |
+| 2026-11-18 | Cursor (말잔 빌딩 높이) | [2026-11-18-cursor-loan-skyline-2.md](./2026-11-18-cursor-loan-skyline-2.md) |
+| 2026-11-18 | Cursor (지역 위 말잔 빌딩) | [2026-11-18-cursor-loan-skyline.md](./2026-11-18-cursor-loan-skyline.md) |
+| 2026-11-18 | Cursor (도면 3D 막대) | [2026-11-18-cursor-loan-bars.md](./2026-11-18-cursor-loan-bars.md) |
+| 2026-11-18 | Cursor (ECOS 수집 2) | [2026-11-18-cursor-ecos-run-2.md](./2026-11-18-cursor-ecos-run-2.md) |
+| 2026-11-18 | Cursor (ECOS 수집) | [2026-11-18-cursor-ecos-run.md](./2026-11-18-cursor-ecos-run.md) |
+| 2026-11-18 | Cursor (국고채 5년) | [2026-11-18-cursor-ktb5.md](./2026-11-18-cursor-ktb5.md) |
+| 2026-11-18 | Cursor (단계 문장·서버) | [2026-11-18-cursor-docs-stage.md](./2026-11-18-cursor-docs-stage.md) |
+| 2026-11-13 | Cursor (경기 주변 이름) | [2026-11-13-cursor-gyeonggi-labels.md](./2026-11-13-cursor-gyeonggi-labels.md) |
+| 2026-11-13 | Cursor (광역시 이름) | [2026-11-13-cursor-realty-cities.md](./2026-11-13-cursor-realty-cities.md) |
+| 2026-11-13 | Cursor (도면 위 대출 그래프) | [2026-11-13-cursor-realty-graph-2.md](./2026-11-13-cursor-realty-graph-2.md) |
+| 2026-11-13 | Cursor (고른 지역 대출 그래프) | [2026-11-13-cursor-realty-graph.md](./2026-11-13-cursor-realty-graph.md) |
+| 2026-11-12 | Cursor (도면·대출 지도) | [2026-11-12-cursor-realty-map.md](./2026-11-12-cursor-realty-map.md) |
+| 2026-11-12 | Cursor (챗 대화 저장) | [2026-11-12-cursor-chat-save.md](./2026-11-12-cursor-chat-save.md) |
+| 2026-11-12 | Cursor (챗 스트리밍) | [2026-11-12-cursor-chat-stream.md](./2026-11-12-cursor-chat-stream.md) |
+| 2026-11-12 | Cursor (세율 사용자 스탬프) | [2026-11-12-cursor-tax-stamp.md](./2026-11-12-cursor-tax-stamp.md) |
+| 2026-11-12 | Cursor (세율 문언 재확인) | [2026-11-12-cursor-tax-wording.md](./2026-11-12-cursor-tax-wording.md) |
+| 2026-11-12 | Cursor (네이버 뉴스 1회) | [2026-11-12-cursor-naver-run.md](./2026-11-12-cursor-naver-run.md) |
+| 2026-11-11 | Cursor (네이버 뉴스 검색) | [2026-11-11-cursor-naver-news.md](./2026-11-11-cursor-naver-news.md) |
+| 2026-11-11 | Cursor (로컬 비밀번호 세션) | [2026-11-11-cursor-local-session.md](./2026-11-11-cursor-local-session.md) |
+| 2026-11-11 | Cursor (종목 뉴스 오탐) | [2026-11-11-cursor-news-match.md](./2026-11-11-cursor-news-match.md) |
+| 2026-11-09 | Cursor (worker 컨테이너) | [2026-11-09-cursor-worker-image.md](./2026-11-09-cursor-worker-image.md) |
+| 2026-11-09 | Cursor (국민연금 기간·해외주식 제12호) | [2026-11-09-cursor-tax-split.md](./2026-11-09-cursor-tax-split.md) |
+| 2026-11-09 | Cursor (양도 단일세율·증여공제) | [2026-11-09-cursor-tax-cgt-gift.md](./2026-11-09-cursor-tax-cgt-gift.md) |
+| 2026-11-09 | Cursor (brackets 상속·지방·종부) | [2026-11-09-cursor-tax-brackets.md](./2026-11-09-cursor-tax-brackets.md) |
+| 2026-11-09 | Cursor (질문 유사 뉴스) | [2026-11-09-cursor-news-rag.md](./2026-11-09-cursor-news-rag.md) |
+| 2026-11-08 | Cursor (종목 뉴스 매핑) | [2026-11-08-cursor-news-match.md](./2026-11-08-cursor-news-match.md) |
 | 2026-11-06 | Cursor (tax 대조 보조) | [2026-11-06-cursor-tax-verify-assist.md](./2026-11-06-cursor-tax-verify-assist.md) |
 | 2026-11-05 | Cursor (미국 10-K 부문) | [2026-11-05-cursor-edgar-segments.md](./2026-11-05-cursor-edgar-segments.md) |
 | 2026-11-05 | Cursor (국내 부문 재수집) | [2026-11-05-cursor-dart-segments-recollect.md](./2026-11-05-cursor-dart-segments-recollect.md) |

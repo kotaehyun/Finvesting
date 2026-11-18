@@ -6,8 +6,8 @@
     "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
     "sourceUrl": "https://www.moel.go.kr/",
     "article": "고용산재보험료징수법 시행령 제12조",
-    "verifiedBy": "미검증",
-    "verifiedOn": null
+    "verifiedBy": "사용자",
+    "verifiedOn": "2026-11-12"
   },
   "industrialAccidentNote": "산재보험요율은 업종별 고시입니다. 숫자를 만들지 않습니다.",
   "minWage2026": {
@@ -46,8 +46,8 @@
       "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
       "sourceUrl": "https://www.moel.go.kr/",
       "article": "고용산재보험료징수법 시행령 제12조",
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "minWage2026.monthly209",
@@ -59,8 +59,8 @@
       "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
       "sourceUrl": "https://www.moel.go.kr/",
       "article": "고용산재보험료징수법 시행령 제12조",
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "eiStabilityBands[0].rateBp",
@@ -72,8 +72,8 @@
       "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
       "sourceUrl": "https://www.moel.go.kr/",
       "article": "고용산재보험료징수법 시행령 제12조",
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "eiStabilityBands[1].rateBp",
@@ -85,8 +85,8 @@
       "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
       "sourceUrl": "https://www.moel.go.kr/",
       "article": "고용산재보험료징수법 시행령 제12조",
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "eiStabilityBands[2].rateBp",
@@ -98,8 +98,8 @@
       "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
       "sourceUrl": "https://www.moel.go.kr/",
       "article": "고용산재보험료징수법 시행령 제12조",
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "eiStabilityBands[3].rateBp",
@@ -111,8 +111,8 @@
       "sourceTitle": "고용노동부 고시 제2025-47호 · 고용산재보험료징수법 시행령 제12조",
       "sourceUrl": "https://www.moel.go.kr/",
       "article": "고용산재보험료징수법 시행령 제12조",
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     }
   ]
 }

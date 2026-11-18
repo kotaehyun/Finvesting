@@ -41,12 +41,12 @@ Converts external files to/from internal models (import bank/card/brokerage expo
 - `worker` uses `db` + `core` (quote-target mapping) + `ai` for embeddings; it does not go through `api`.
 
 ## Auth
-Single-user mode, fixed via `DEFAULT_USER_ID`. Every user-data table has `user_id`, so productizing only requires adding authentication.
+Single user, fixed via `DEFAULT_USER_ID`. An empty `APP_PASSWORD` leaves the app open. A value requires an HMAC cookie for that same user before the UI or tRPC responds (ADR 0056). The password is not stored in the database.
 
 ## Web type resolution
 `apps/web/tsconfig.json` pins `@types/react` 19 via `typeRoots` and `paths`. Mobile Expo’s `@types/react` 18 leaking through Next `styled-jsx` breaks JSX component types. Do not hide this with type assertions.
 
 ## Runtime
 - Local: `pnpm dev` (web + worker together), Docker Postgres
-- Mobile: Expo Go on the same Wi-Fi, calling the MacBook's IP on port 3000. Default `pnpm dev:web` binds `127.0.0.1` only. Use `pnpm --filter @finvesting/web dev:lan` (`0.0.0.0`) for a phone. The API has no auth.
-- As a service: web on Vercel/container, worker as one container, DB on Supabase/RDS — swap `DATABASE_URL` only, no code change
+- Mobile: Expo Go on the same Wi-Fi, calling the MacBook's IP on port 3000. Default `pnpm dev:web` binds `127.0.0.1` only. Use `pnpm --filter @finvesting/web dev:lan` (`0.0.0.0`) for a phone. With `APP_PASSWORD` set, mobile has no login screen and the API rejects it.
+- As a service: web on Vercel/container, worker as one container, DB on Supabase/RDS — swap `DATABASE_URL` only. No hosted URL yet.

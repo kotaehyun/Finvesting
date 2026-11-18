@@ -48,8 +48,10 @@
 |---|---|---|
 | `macro_indicators` | 환율·기준금리·CPI·국채금리 등. `code`로 구분. 환율: USDKRW 등. 인플레이션 맵: `WB_INFL_KR`. 금리 맵: `BIS_POL_KR`. 부동산 시도 가계대출: `ECOS_HHLOAN_SE` 등(십억원, 시·구 아님). 예금은행 가중평균 대출금리: `ECOS_LOAN_NEW_HH` 등(%). 금투협 증시자금: `KOFIA_INVESTOR_DEPOSIT`·`KOFIA_CREDIT`(백만원. 미수금은 메인 HTML에 있을 때만 `KOFIA_MARGIN`). 웹 `/invest` 환율·증시자금 · `/markets` 물가·금리 · `/realty` 대출 그래프·금리 표 | (code, date) |
 | `market_quotes` | 일봉 시세. 세계 지수는 `instruments.market=INDEX`, 비트코인 Yahoo는 `CRYPTO`(`BTC-USD`). 업비트 BTC는 원화 칸. 웹 `/invest` | (instrument_id, date) |
-| `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용. `/news`=`newsFeed`(오피니언 소스 제외). `/opinions`=`opinionFeed`(전용 RSS + 제목 투자의견). `/markets` 크립토·외환, `/realty` 한경 부동산. 뉴스 분류 `core/news-category`(realty·crypto·fx 포함), 오피니언 `core/opinion-category` | url |
+| `market_news` | 제목·링크·요약만 저장 (본문 X). `embedding` vector(768)는 RAG용. 출처 `rss:*`와 `naver:news`(ADR 0057). `/news`=`newsFeed`(오피니언 소스 제외). `/opinions`=`opinionFeed`(전용 RSS + 제목 투자의견). `/markets` 크립토·외환, `/realty` 한경 부동산. 뉴스 분류 `core/news-category`(realty·crypto·fx 포함), 오피니언 `core/opinion-category` | url |
 | `economic_events` | 경제 캘린더 | (title, scheduled_at) |
+| `chat_sessions` | 투자 봇AI 대화. `title`은 첫 질문 앞 40자. `user_id` → `users` | |
+| `chat_messages` | 그 대화의 사용자 질문·봇 답. 시스템 프롬프트·뉴스 본문 없음. 세션 삭제 시 같이 삭제 | |
 
 ## 금액 타입
 `numeric`으로 저장, 앱에서는 `Number()`로 변환. 코인은 수량 소수점 8자리.
@@ -66,4 +68,5 @@ pnpm db:migrate    # 적용
 `0006_absent_jetstream`: `audit_reports`.
 `0007_cloudy_star_brand`: `financial_profiles.invest_style` jsonb (투자성향 설문).
 `0008_company_profiles`: `company_overviews` · `company_year_facts`.
+`0009_chat_sessions`: `chat_sessions` · `chat_messages`.
 pgvector 확장은 첫 마이그레이션 전에 `CREATE EXTENSION IF NOT EXISTS vector;` 필요 (seed/000_extensions.sql).

@@ -6,7 +6,65 @@ import {
   type MetroLoanRankRow,
   type RealtyMetroId,
 } from "@finvesting/core";
-import { RealtySpark } from "./spark";
+export function RealtyMapLoanCard({
+  focusId,
+  focusLabel,
+  loans,
+}: {
+  focusId: string | null;
+  focusLabel: string | null;
+  loans: Loans | undefined;
+}) {
+  const metroId = focusId ? realtyMetroForPlace(focusId) : null;
+  const pack = metroId && loans ? loans.metros[metroId] : null;
+  const balance = (pack?.total ?? []).map((p) => ({ date: p.date, value: eokToJo(p.value) }));
+  const yoyPct = pack?.yoy == null ? null : pack.yoy * 100;
+  if (!focusId) return null;
+  const label = pack?.label ?? focusLabel ?? "광역시도";
+  if (balance.length < 1) {
+    return (
+      <div className="realty-skyline">
+        <span className="sky-name">{label}</span>
+        <span className="sky-note">시계열이 없습니다</span>
+      </div>
+    );
+  }
+  const years = yearEnds(balance);
+  const vals = years.map((p) => p.value);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const span = max - min || 1;
+  const ceiling = metroCeiling(loans) || max;
+  const cap = Math.max(22, (max / ceiling) * SKY_MAX);
+  return (
+    <div className="realty-skyline">
+      <div className="sky-row" key={focusId} style={{ ["--sky-cap" as string]: `${SKY_MAX}px` }}>
+        {years.map((p, i) => {
+          const t = (p.value - min) / span;
+          const h = Math.max(12, cap * (0.42 + 0.58 * t));
+          const last = i === years.length - 1;
+          return (
+            <span key={p.date} className="sky-bldg">
+              <em>{joDigits(p.value)}</em>
+              <i
+                className={last ? "sky-tower on" : "sky-tower"}
+                style={{ height: h, ["--h" as string]: `${h}px`, animationDelay: `${i * 70}ms` }}
+                title={`${p.date.slice(0, 7)} ${p.value.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}조`}
+              />
+              <small>{p.date.slice(0, 4)}</small>
+            </span>
+          );
+        })}
+      </div>
+      <span className="sky-name">{label}</span>
+      {yoyPct != null && (
+        <span className={yoyPct >= 0 ? "sky-yoy up" : "sky-yoy down"}>
+          전년동월 {yoyPct >= 0 ? "+" : ""}{yoyPct.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}%
+        </span>
+      )}
+    </div>
+  );
+}
 
 type MetroPack = {
   id: RealtyMetroId;
@@ -34,6 +92,32 @@ type Loans = {
   rank: MetroLoanRankRow[];
   metros: Record<RealtyMetroId, MetroPack>;
 };
+
+const SKY_MAX = 156;
+
+function joDigits(n: number) {
+  const small = n < 20;
+  return n.toLocaleString("ko-KR", { minimumFractionDigits: small ? 1 : 0, maximumFractionDigits: small ? 1 : 0 });
+}
+
+function yearEnds(points: { date: string; value: number }[]) {
+  const last = new Map<string, { date: string; value: number }>();
+  for (const p of points) {
+    const y = p.date.slice(0, 4);
+    const prev = last.get(y);
+    if (!prev || p.date > prev.date) last.set(y, p);
+  }
+  return [...last.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function metroCeiling(loans: Loans | undefined) {
+  if (!loans) return 0;
+  let ceiling = 0;
+  for (const metro of Object.values(loans.metros)) {
+    for (const p of metro.total) ceiling = Math.max(ceiling, eokToJo(p.value));
+  }
+  return ceiling;
+}
 
 function jo(n: number) {
   return `${n.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}조`;
@@ -77,86 +161,93 @@ export function RealtyLoanPanel({
   }));
   const maxShare = Math.max(...rank.map((r) => r.shareOfKr ?? 0), 0.01);
 
+  const hasShare = rank.some((r) => r.shareOfKr != null);
+  const hasSeries = pack != null && (pack.latest != null || pack.yoy != null || pack.shareOfKr != null);
+
   return (
     <aside className="realty-loan-panel">
-      <h4>가계대출 어디가 많은지</h4>
-      <p className="muted">예금은행 광역시도 말잔의 전국 대비 비중입니다. 가계신용/GDP가 아닙니다.</p>
-      <ol className="loan-rank">
-        {rank.map((r) => {
-          const on = metroId === r.id;
-          const w = r.shareOfKr != null ? Math.max(6, (r.shareOfKr / maxShare) * 100) : 6;
-          return (
-            <li key={r.id}>
-              <button type="button" className={`loan-rank-row${on ? " on" : ""}`} onClick={() => onFocus(r.id, r.label)}>
-                <span className="loan-rank-n">{r.rank ?? "—"}</span>
-                <span>{r.label}</span>
-                <span className="loan-rank-track" aria-hidden="true">
-                  <span className="loan-rank-bar" style={{ width: `${w}%` }} />
-                </span>
-                <strong>{sharePct(r.shareOfKr)}</strong>
-                <span className="muted">{r.latest != null ? jo(eokToJo(r.latest)) : "—"}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-
-      <h4>대출 총액 · 증가율</h4>
-      {!focusId && <p className="muted">도면에서 시·구를 고르면 그 광역시도 그래프가 나옵니다.</p>}
-      {focusId && (
-        <p className="loan-place">
-          <strong>{focusLabel ?? focusId}</strong>
-          <span className="muted"> · {pack?.label} 예금은행</span>
+      <div className="loan-panel-head">
+        <h4>{focusLabel ?? "시도별 가계대출"}</h4>
+        <p className="muted">
+          {focusId
+            ? `${pack?.label ?? "광역시도"} 예금은행 말잔. 시·구 숫자는 없습니다.`
+            : (loans?.note ?? "도면의 지역을 누르면 그 자리에서 말잔 빌딩이 올라옵니다.")}
         </p>
-      )}
-      <p className="muted">{loans?.note ?? "시·구 가계대출 숫자는 없습니다."}</p>
+      </div>
 
       {loading && <p className="muted">불러오는 중…</p>}
-      {focusId && pack && pack.latest == null && !loading && (
-        <p className="muted">이 시도 시계열이 없습니다. worker ECOS를 한 번 돌리세요.</p>
+
+      {focusId && (
+        <div className="loan-hero">
+          <div className="loan-hero-nums">
+            <div>
+              <span className="muted">말잔</span>
+              <strong>{pack?.latestJo != null ? jo(pack.latestJo) : "—"}</strong>
+              <span className="muted">{pack?.date ? `${ym(pack.date)} · ` : ""}전월 {pack?.mom != null ? pct(pack.mom) : "—"}</span>
+            </div>
+            <div>
+              <span className="muted">전년동월</span>
+              <strong className={pack?.yoy == null ? "" : pack.yoy >= 0 ? "up" : "down"}>
+                {pack?.yoy != null ? pct(pack.yoy) : "—"}
+              </strong>
+              <span className="muted">{ym(pack?.date ?? null)}</span>
+            </div>
+          </div>
+        </div>
       )}
-      <div className="loan-charts">
-        <div className="loan-chart">
-          <div className="muted">가계대출 말잔</div>
-          <div className="big" style={{ fontSize: 22 }}>{pack?.latestJo != null ? jo(pack.latestJo) : "—"}</div>
-          <div className="muted">{ym(pack?.date ?? null)} · 전월 {pack?.mom != null ? pct(pack.mom) : "—"}</div>
-          <RealtySpark values={pack?.total.map((p) => p.value) ?? []} up={pack?.mom == null ? null : pack.mom >= 0} />
+      {!focusId && !loading && (
+        <p className="muted loan-hint">도면의 지역을 누르면 그 자리에서 말잔 빌딩이 올라옵니다.</p>
+      )}
+
+      {hasShare ? (
+        <ol className="loan-rank">
+          {rank.map((r) => {
+            const on = metroId === r.id;
+            const w = r.shareOfKr != null ? Math.max(6, (r.shareOfKr / maxShare) * 100) : 0;
+            return (
+              <li key={r.id}>
+                <button type="button" className={`loan-rank-row${on ? " on" : ""}`} onClick={() => onFocus(r.id, r.label)}>
+                  <span className="loan-rank-n">{r.rank ?? ""}</span>
+                  <span>{r.label}</span>
+                  <span className="loan-rank-track" aria-hidden="true">
+                    {w > 0 ? <span className="loan-rank-bar" style={{ width: `${w}%` }} /> : null}
+                  </span>
+                  <strong>{sharePct(r.shareOfKr)}</strong>
+                  <span className="muted">{r.latest != null ? jo(eokToJo(r.latest)) : ""}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      ) : (
+        <div className="loan-metro-picks" aria-label="광역시도">
+          {rank.map((r) => (
+            <button
+              type="button"
+              key={r.id}
+              className={metroId === r.id ? "on" : ""}
+              onClick={() => onFocus(r.id, r.label)}
+            >
+              {r.label}
+            </button>
+          ))}
         </div>
-        <div className="loan-chart">
-          <div className="muted">전년동월 증가율</div>
-          <div className={`big ${pack?.yoy == null ? "" : pack.yoy >= 0 ? "up" : "down"}`} style={{ fontSize: 22 }}>
-            {pack?.yoy != null ? pct(pack.yoy) : "—"}
-          </div>
-          <div className="muted">{ym(pack?.date ?? null)}</div>
-          <RealtySpark values={pack?.yoySeries.map((p) => p.value) ?? []} up={pack?.yoy == null ? null : pack.yoy >= 0} />
-        </div>
-        <div className="loan-chart">
-          <div className="muted">전국 대비 비중</div>
-          <div className="big" style={{ fontSize: 22 }}>{sharePct(pack?.shareOfKr)}</div>
-          <div className="muted">{ym(pack?.date ?? null)} · 예금은행 말잔</div>
-          <RealtySpark values={pack?.shareSeries.map((p) => p.value) ?? []} up={null} />
-        </div>
-        <div className="loan-mini">
-          <div>
-            <div className="muted">주택관련</div>
-            <div>{pack?.housingJo != null ? jo(pack.housingJo) : "—"}</div>
-            <div className="muted">가계대출 대비 {sharePct(pack?.housingShare)}</div>
-          </div>
-          <div>
-            <div className="muted">연체율</div>
-            <div>{pack?.npl != null ? `${pack.npl.toFixed(2)}%` : "—"}</div>
-          </div>
-        </div>
-        <div className="loan-chart">
-          <div className="muted">가계신용 / GDP</div>
-          <div className="big" style={{ fontSize: 18 }}>—</div>
-          <RealtySpark values={[]} up={null} />
-          <p className="muted" style={{ margin: "6px 0 0" }}>통계코드 확인 전. ECOS·통계청 원문을 엽니다. 지어내지 않습니다.</p>
-        </div>
+      )}
+
+      <div className="loan-detail">
+        {hasSeries && pack && (
+          <p className="muted">
+            주택관련 {pack.housingJo != null ? jo(pack.housingJo) : "—"}
+            {" · "}가계대출 대비 {sharePct(pack.housingShare)}
+            {" · "}연체율 {pack.npl != null ? `${pack.npl.toFixed(2)}%` : "—"}
+            {" · "}전국 비중 {sharePct(pack.shareOfKr)}
+          </p>
+        )}
+        {loans?.kr && (
+          <p className="muted">전국 예금은행 가계 {jo(loans.kr.latestJo)} ({ym(loans.kr.date)})</p>
+        )}
+        <p className="muted">가계신용/GDP는 통계코드 확인 전이라 비워 둡니다.</p>
       </div>
-      {loans?.kr && (
-        <p className="muted" style={{ marginTop: 10 }}>전국 예금은행 가계 {jo(loans.kr.latestJo)} ({ym(loans.kr.date)})</p>
-      )}
     </aside>
   );
 }

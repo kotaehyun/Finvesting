@@ -89,7 +89,83 @@ export function buildMcapBoards<T extends {
   };
 }
 
-/** 제목·symbols 배열로 종목 관련 뉴스만. 본문 없음. */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * 한글 회사명 바로 뒤에만 허용하는 조사.
+ * 카카오뱅크·현대차증권처럼 다른 회사로 이어지면 매칭하지 않는다.
+ */
+export const HANGUL_NAME_PARTICLES = [
+  "까지",
+  "부터",
+  "보다",
+  "으로",
+  "가",
+  "이",
+  "는",
+  "은",
+  "를",
+  "을",
+  "의",
+  "도",
+  "와",
+  "과",
+  "에",
+  "로",
+  "만",
+] as const;
+
+const HANGUL_NAME_PARTICLE_SET = new Set<string>(HANGUL_NAME_PARTICLES);
+
+/** 앞이 한글·숫자이거나, 뒤에 조사가 아닌 한글이 붙으면 제외한다. */
+function hangulNameInTitle(title: string, name: string): boolean {
+  let from = 0;
+  while (from < title.length) {
+    const at = title.indexOf(name, from);
+    if (at < 0) return false;
+    const prev = at > 0 ? title.charAt(at - 1) : "";
+    const prevBlocked = prev !== "" && /[가-힣0-9]/.test(prev);
+    if (!prevBlocked) {
+      const run = title.slice(at + name.length).match(/^[가-힣]+/)?.[0] ?? "";
+      if (run === "" || HANGUL_NAME_PARTICLE_SET.has(run)) return true;
+    }
+    from = at + name.length;
+  }
+  return false;
+}
+
+/** 영문 티커·영문 회사명은 저장된 대소문자와 단어 경계. 3글자 이하 티커와 숫자 종목코드는 제목에서 찾지 않는다. */
+export function titleMentionsInstrument(title: string, symbol: string, name: string): boolean {
+  const sym = symbol.trim();
+  const nm = name.trim();
+  if (nm.length >= 2) {
+    if (/[가-힣]/.test(nm)) {
+      if (hangulNameInTitle(title, nm)) return true;
+    } else if (new RegExp(`\\b${escapeRegExp(nm)}\\b`).test(title)) {
+      return true;
+    }
+  }
+  if (sym.length <= 3 || /^\d+$/.test(sym)) return false;
+  return new RegExp(`\\b${escapeRegExp(sym)}\\b`).test(title);
+}
+
+/** 수집 시 제목에 나온 종목 코드만. 본문은 보지 않는다. */
+export function symbolsMentionedInTitle(
+  title: string,
+  instruments: readonly { symbol: string; name: string }[],
+): string[] {
+  const found: string[] = [];
+  for (const inst of instruments) {
+    const sym = inst.symbol.trim();
+    if (!sym || found.some((s) => s.toLowerCase() === sym.toLowerCase())) continue;
+    if (titleMentionsInstrument(title, sym, inst.name)) found.push(sym);
+  }
+  return found;
+}
+
+/** 제목으로 종목 관련 뉴스만. 저장된 symbols는 조회 조건이 아니다. 본문 없음. */
 export function matchNewsForSymbol<T extends {
   id: string;
   title: string;
@@ -110,16 +186,9 @@ export function matchNewsForSymbol<T extends {
   publishedAt: string | null;
 }> {
   const sym = symbol.trim().toLowerCase();
-  const nm = name.trim().toLowerCase();
   if (!sym) return [];
   return rows
-    .filter((n) => {
-      if (Array.isArray(n.symbols) && n.symbols.some((s) => String(s).toLowerCase() === sym)) return true;
-      const t = n.title.toLowerCase();
-      if (t.includes(sym)) return true;
-      if (nm.length >= 2 && t.includes(nm)) return true;
-      return false;
-    })
+    .filter((n) => titleMentionsInstrument(n.title, symbol, name))
     .slice(0, limit)
     .map((n) => ({
       id: n.id,

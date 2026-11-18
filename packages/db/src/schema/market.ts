@@ -19,7 +19,7 @@ export const quotes = pgTable("market_quotes", {
 // 거시 지표: 환율, 기준금리, CPI(물가), 국채금리 등. ECOS 등에서 수집.
 export const macroIndicators = pgTable("macro_indicators", {
   id: uuid("id").primaryKey().defaultRandom(),
-  code: text("code").notNull(),      // "USDKRW", "BOK_BASE_RATE", "CPI_YOY", "KTB_3Y"
+  code: text("code").notNull(),      // "USDKRW", "BOK_BASE_RATE", "CPI_YOY", "KTB_5Y"
   date: date("date").notNull(),
   value: numeric("value", { precision: 20, scale: 6 }).notNull(),
   unit: text("unit"),
@@ -36,7 +36,7 @@ export const news = pgTable("market_news", {
   publishedAt: timestamp("published_at", { withTimezone: true }),
   summary: text("summary"),
   symbols: text("symbols").array(),      // 관련 종목 심볼
-  source: text("source").notNull(),      // "rss:hankyung" | "naver" | "crawler:..."
+  source: text("source").notNull(),      // "rss:hankyung" | "naver:news"
   raw: jsonb("raw"),
   embedding: vector("embedding", { dimensions: 768 }),
   fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),

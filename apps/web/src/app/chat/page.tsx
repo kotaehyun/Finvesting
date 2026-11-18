@@ -10,7 +10,12 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [more, setMore] = useState(false);
-  const ask = trpc.chat.ask.useMutation();
+  const [pending, setPending] = useState(false);
+  const sessions = trpc.chat.sessions.useQuery();
+  const utils = trpc.useUtils();
+  const abortRef = useRef<AbortController | null>(null);
+  const turnRef = useRef(0);
+  const sessionRef = useRef<string | null>(null);
   const threadRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLTextAreaElement>(null);
 
@@ -23,7 +28,7 @@ export default function ChatPage() {
     const el = threadRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [messages, ask.isPending]);
+  }, [messages, pending]);
 
   useEffect(() => {
     const el = boxRef.current;
@@ -32,22 +37,69 @@ export default function ChatPage() {
     el.style.height = `${Math.min(Math.max(el.scrollHeight, 24), 200)}px`;
   }, [input]);
 
+  function stop() {
+    abortRef.current?.abort();
+  }
+
   async function send(text = input) {
     const q = text.trim();
-    if (!q || ask.isPending) return;
+    if (!q || pending) return;
+    const id = ++turnRef.current;
     const next: Msg[] = [...messages, { role: "user", content: q }];
-    setMessages(next);
+    setMessages([...next, { role: "assistant", content: "" }]);
     setInput("");
+    setPending(true);
+    const ac = new AbortController();
+    abortRef.current = ac;
+    let acc = "";
+    const still = () => turnRef.current === id;
     try {
-      const r = await ask.mutateAsync({ messages: next });
-      setMessages([...next, { role: "assistant", content: r.answer }]);
+      const stream = await utils.client.chat.askStream.mutate({
+        sessionId: sessionRef.current ?? undefined,
+        content: q,
+      }, { signal: ac.signal });
+      for await (const part of stream) {
+        if (!still()) return;
+        if (part.sessionId) sessionRef.current = part.sessionId;
+        if (!part.delta) continue;
+        acc += part.delta;
+        setMessages([...next, { role: "assistant", content: acc }]);
+      }
+      if (!still()) return;
+      if (!acc && !ac.signal.aborted) {
+        setMessages([...next, { role: "assistant", content: "응답이 비었습니다." }]);
+      }
     } catch (e) {
-      setMessages([...next, { role: "assistant", content: `오류: ${e instanceof Error ? e.message : String(e)}` }]);
+      if (!still()) return;
+      const aborted = ac.signal.aborted;
+      const note = aborted ? "멈췄습니다." : `오류: ${e instanceof Error ? e.message : String(e)}`;
+      setMessages([...next, { role: "assistant", content: acc ? `${acc}\n\n${note}` : note }]);
+    } finally {
+      void utils.chat.sessions.invalidate();
+      if (still()) {
+        setPending(false);
+        abortRef.current = null;
+      }
+    }
+  }
+
+  async function openSession(id: string) {
+    if (pending) return;
+    try {
+      const thread = await utils.client.chat.thread.query({ sessionId: id });
+      sessionRef.current = id;
+      setMessages(thread.messages);
+      setMore(false);
+    } catch (e) {
+      setMessages([{ role: "assistant", content: `오류: ${e instanceof Error ? e.message : String(e)}` }]);
     }
   }
 
   function reset() {
-    if (ask.isPending) return;
+    turnRef.current += 1;
+    abortRef.current?.abort();
+    setPending(false);
+    sessionRef.current = null;
     setMessages([]);
     setInput("");
     setMore(false);
@@ -69,7 +121,7 @@ export default function ChatPage() {
       <header className="chat-top">
         <h1>투자 봇AI</h1>
         {messages.length > 0 ? (
-          <button type="button" className="chat-ghost" onClick={reset} disabled={ask.isPending}>새 대화</button>
+          <button type="button" className="chat-ghost" onClick={reset}>새 대화</button>
         ) : null}
       </header>
       <div className="chat-thread" ref={threadRef}>
@@ -83,7 +135,7 @@ export default function ChatPage() {
                   <button
                     key={`${g.group}-${item.label}`}
                     type="button"
-                    disabled={ask.isPending}
+                    disabled={pending}
                     title={item.prompt}
                     onClick={() => void send(item.prompt)}
                   >
@@ -96,6 +148,16 @@ export default function ChatPage() {
             {more ? null : (
               <button type="button" className="chat-ghost" onClick={() => setMore(true)}>다른 질문</button>
             )}
+            {sessions.data && sessions.data.length > 0 ? (
+              <div className="chat-suggest" aria-label="이전 대화" style={{ marginTop: 16 }}>
+                {sessions.data.map((s) => (
+                  <button key={s.id} type="button" disabled={pending} onClick={() => void openSession(s.id)}>
+                    <strong>{s.title}</strong>
+                    <span>{new Date(s.updatedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : (
           <ol className="chat-log">
@@ -103,18 +165,15 @@ export default function ChatPage() {
               <li key={i} className={`chat-row ${m.role}`}>
                 <div className="chat-bubble">
                   {m.role === "assistant" ? (
-                    <div className="md"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+                    m.content
+                      ? <div className="md"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+                      : <span className="chat-wait">생각 중…</span>
                   ) : (
                     <div className="chat-plain">{m.content}</div>
                   )}
                 </div>
               </li>
             ))}
-            {ask.isPending ? (
-              <li className="chat-row assistant" aria-live="polite">
-                <div className="chat-bubble"><span className="chat-wait">생각 중…</span></div>
-              </li>
-            ) : null}
           </ol>
         )}
       </div>
@@ -141,9 +200,13 @@ export default function ChatPage() {
             aria-label="메시지"
             autoComplete="off"
           />
-          <button type="submit" disabled={ask.isPending || !input.trim()} aria-label="보내기">보내기</button>
+          {pending ? (
+            <button type="button" onClick={stop} aria-label="멈추기">멈추기</button>
+          ) : (
+            <button type="submit" disabled={!input.trim()} aria-label="보내기">보내기</button>
+          )}
         </label>
-        <p className="chat-foot">로컬 Ollama. 대화는 저장하지 않습니다. Enter 전송 · Shift+Enter 줄바꿈</p>
+        <p className="chat-foot">로컬 Ollama. 답은 오는 대로 이어 붙입니다. 대화는 이 기기에 남습니다. Enter 전송 · Shift+Enter 줄바꿈</p>
       </form>
     </div>
   );

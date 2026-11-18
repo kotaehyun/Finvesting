@@ -9,6 +9,7 @@ import {
   REALTY_REGULATED_SEOUL,
   REALTY_ZONES,
   REALTY_NEWS_FEEDS,
+  REALTY_LEASE_TRADE,
   metroHeightScale,
   realtyMetroForPlace,
 } from "@finvesting/core";
@@ -20,7 +21,7 @@ import { RealtyWealthPanel } from "./wealth-panel";
 import { RealtyCorpPanel } from "./corp-panel";
 import { RealtyDistressPanel } from "./distress-panel";
 import { RealtyListingsPanel } from "./listings-panel";
-import { RealtyLoanPanel } from "./loan-panel";
+import { RealtyLoanPanel, RealtyMapLoanCard } from "./loan-panel";
 import { RealtyRatesPanel } from "./rates-panel";
 import { RealtyNtsPanel } from "./nts-panel";
 import { RealtyOfficialsPanel } from "./officials-panel";
@@ -178,7 +179,7 @@ export default function RealtyPage() {
           <div className="realty-kpi-value emerald">
             38.0% <span style={{ fontSize: 18, color: "var(--muted)" }}>/</span> 68.3%
           </div>
-          <div className="realty-kpi-sub">서울 아파트 거래 월세 비중 52.4%</div>
+          <div className="realty-kpi-sub">아파트 거래 월세 {REALTY_LEASE_TRADE.aptYtd}% · 서울 전월세 거래 중 월세 {REALTY_LEASE_TRADE.seoulYtd}%</div>
         </div>
 
         <div className="realty-kpi-card red">
@@ -224,7 +225,9 @@ export default function RealtyPage() {
               <span className="realty-block-badge">3D 인터랙티브 맵</span>
             </div>
             <div className="realty-3d-board">
-              <RealtyGeoMap focusId={focusId} focusCode={focusCode} heights={heights} onFocus={onFocus} />
+              <RealtyGeoMap focusId={focusId} focusCode={focusCode} heights={heights} onFocus={onFocus}>
+                <RealtyMapLoanCard focusId={focusId} focusLabel={focusLabel} loans={loans.data} />
+              </RealtyGeoMap>
               <RealtyLoanPanel
                 focusId={focusId}
                 focusLabel={focusLabel}

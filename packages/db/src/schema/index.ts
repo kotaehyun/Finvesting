@@ -7,3 +7,4 @@ export * from "./profile";
 export * from "./savings";
 export * from "./insurance";
 export * from "./fundamentals";
+export * from "./chat";

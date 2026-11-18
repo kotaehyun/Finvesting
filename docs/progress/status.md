@@ -12,12 +12,11 @@
 - **Git:** `origin/main` = `origin/dev` = `dcf1f0f` (statements-pipeline 포함).
 - **활성 화면:** 근로자 대장·투자·시장·뉴스·챗·타임라인·세금·회계전표·재무제표·부동산.
 - **보류:** `/erp`는 URL로만.
-- **데이터:** `packages/core/data` tax=entries / realty=defaults. 보조 대조(2026-11-06): payroll·ei·itaArt55 값은 출처와 대체로 일치, `verifiedBy`는 미검증 유지. 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`.
+- **데이터:** `packages/core/data` tax=entries / realty=defaults. payroll·brackets·ei-stability는 2026-11-12 `verifiedBy` 사용자. 미검증은 civil-pay·corp-local. 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`.
 - **재무제표:** 0~4단계 + DART `cfo`·국내/미국 부문 XBRL. `/invest` 시총·뉴스.
 - **사용자 확인(2026-11-04):** `/invest`·딥링크 브라우저, Ollama 「읽어주기」완료.
 - **최근 수집(2026-11-05):** 국내 segment 46행·23종목. 미국 edgar segment 81행·38종목.
 
 ## 미해결 우선 과제
-1. 🟠 tax `verifiedBy` 사용자 스탬프 · brackets 상속·지방·종부 · 국민연금 상·하한 적용기간
-2. 🟡 홈택스 간소화·연말정산 XLSX (로드맵 3단계)
-3. ⏸ `/erp` 재개 — 사용자 지시 전 금지
+1. 🟡 홈택스 간소화·연말정산 XLSX (로드맵 3단계 화면은 있음. 2026년 매도·금융소득 저장분은 없음)
+2. ⏸ `/erp` 재개 — 사용자 지시 전 금지

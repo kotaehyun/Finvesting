@@ -39,7 +39,7 @@ export const REALTY_MOVE_NOTE = dataFile.REALTY_MOVE_NOTE;
 /** 국가데이터처 2025년 출생통계 확정. 정책브리핑 2026-08-26. 세계은행 연간과 값이 다를 수 있음. */
 export const REALTY_TFR_KOSTAT = dataFile.REALTY_TFR_KOSTAT;
 
-/** 국가데이터처 2025년 국내인구이동통계. 정책브리핑 2026-01-29. 시도 전입·전출 인원은 보도 원문 표가 없어 율·권역만. */
+/** 국가데이터처 2025년 국내인구이동 보도자료. 연령·성별은 전국(표 2·표 6). 시도 연령 순이동은 표 4. 수도권 안은 표 5의 서울·인천·경기. 지방끼리는 표 5의 3대 전입·전출 가운데 수도권 밖 이웃만. 지방과 수도권 전체는 표 12. */
 export const REALTY_MOVE_2025 = dataFile.REALTY_MOVE_2025;
 
 export const REALTY_JEONSE_SLOTS = dataFile.REALTY_JEONSE_SLOTS;

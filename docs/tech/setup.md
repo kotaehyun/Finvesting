@@ -30,8 +30,18 @@ psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db
 pnpm db:generate && pnpm db:migrate
 psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db/seed/001_default_user.sql
 pnpm dev:web                     # http://127.0.0.1:3000 (로컬만)
+# APP_PASSWORD 가 비어 있으면 로그인 없이 연다. 값을 두면 그 비밀번호의 쿠키가 있어야 한다.
 # 같은 Wi‑Fi의 폰에서 볼 때만: pnpm --filter @finvesting/web dev:lan  → 0.0.0.0:3000
 pnpm dev:worker                  # 또는 pnpm --filter @finvesting/worker run:once 로 1회 수집
+```
+
+## worker 컨테이너
+
+로컬 개발은 `pnpm dev:worker`다. 이미지로 띄울 때만 아래를 쓴다. DB는 compose 서비스 이름 `db`로 붙고, 기동 즉시 수집은 꺼 둔다(`WORKER_RUN_ON_START=false`). `.env`는 이미지에 넣지 않는다.
+
+```bash
+docker compose build worker
+docker compose up -d worker
 ```
 
 ## 모바일
