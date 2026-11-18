@@ -13,7 +13,7 @@
 - Enter 전송, Shift+Enter 줄바꿈. 한글 IME는 `isComposing`을 본다 (`docs/logs/2026-09-02-chat-ime-enter.md`).
 - 제안 카드는 `starters.ts` 그대로. 처음엔 그룹당 1개, 「다른 질문」으로 나머지. 대화가 시작되면 제안은 접는다.
 - ChatGPT 로고·이름·복제 UI 키트를 쓰지 않는다. OpenAI API를 붙이지 않는다. 답은 로컬 Ollama.
-- 대화 기록 테이블은 아직 없다. 「새 대화」는 이 탭 상태만 비운다. 저장·스트리밍은 `docs/tech/ai.md` 계획.
+- 「새 대화」는 저장분을 지우지 않고 빈 화면으로 돌아간다. 스트리밍은 ADR 0058. 저장은 ADR 0059.
 
 ## 결과
 `apps/web/src/app/chat/page.tsx`, `.chat-shell`. 내비 라벨은 투자 봇AI.

@@ -32,12 +32,12 @@
 - ~~업무 `/erp`~~ **보류**(ADR 0050). 라우트·시산 유지, 내비·원장 스키마 후속 금지. 본인 세율표는 프로필 13
 - 프로필대장 투자성향·조언 (`/profile` 10. 09 투자내역 다음. 설문 점수 → 위험 성향. 보유 대비 조언. 종목 추천 없음)
 - Market 수집: 뉴스 RSS, 업비트 시세, ECOS 거시지표 (worker)
-- 투자 봇AI: 로컬 Ollama + 수집 데이터 컨텍스트. `/chat`은 대화형 채팅 배치(빈 화면 인사·아래 입력칸. ADR 0048). ChatGPT가 아님. 대화 저장 없음
+- 투자 봇AI: 로컬 Ollama + 수집 데이터 컨텍스트. `/chat`은 대화형 채팅 배치(빈 화면 인사·아래 입력칸. ADR 0048). 답은 오는 대로 이어 붙이고 멈출 수 있다 (ADR 0058). 대화는 이 기기에 남는다 (ADR 0059). ChatGPT가 아님
 ### 이후
-- 2단계: Market Terminal UI(관심 종목, 차트, 경제 캘린더), KIS 국내·해외 시세
-- 3단계: Tax + Year-End (본인 근로소득 기준 연말정산, 해외주식 양도세, 배당소득)
-- 4단계: Accounting + Labor/HR — **보류**(ADR 0050). 서비스화 시 재개
-- 5단계: AI 고도화 (RAG, 이상 지출 탐지, 리스크 설명)
+- 2단계 Market Terminal: 관심 종목, 종목 뉴스 매핑, RAG까지 됨. 한투 시세는 하지 않음. 시세는 Yahoo·업비트 (ADR 0053)
+- 3단계 Tax + Year-End: 본인 기준 연말정산, 해외주식 양도세, 배당·이자 모니터링까지 됨
+- 4단계: 더존·위하고·세무사랑 내보내기는 됨. 다중 사용자 인증, 호스팅 DB 이전, worker 컨테이너, 급여·4대보험은 아직. 급여·4대보험은 ADR 0050 보류
+- 5단계: 챗 스트리밍·대화 저장은 됨 (ADR 0058·0059). 남은 것은 이상 지출 탐지, 리스크 설명, 반복 실수 패턴, 능동 알림, DGX Spark/vLLM
 
 ## 원본 기획서
 `Finvesting_프로젝트_소개서.pdf` (Concept Brief v0.1) — 9개 모듈(Account, Investment, Market Terminal, Tax, Year-End, Accounting, Labor/HR, Research, AI Assistant), 대표 기능 Financial Timeline.

@@ -13,6 +13,7 @@ describe("newsCategoryForSource", () => {
     expect(newsCategoryForSource("rss:yonhap")).toBe("kr_economy");
     expect(newsCategoryForSource("rss:mk")).toBe("kr_economy");
     expect(newsCategoryForSource("rss:hankyung")).toBe("kr_finance");
+    expect(newsCategoryForSource("naver:news")).toBe("kr_finance");
   });
 
   it("CNBC·마켓워치는 해외 시황, 연준·ECB는 중앙은행", () => {

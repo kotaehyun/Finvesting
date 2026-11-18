@@ -1,5 +1,5 @@
 // 뉴스 피드 → 대시보드 분류. RSS item.categories는 언론마다 들쑥날쑥해서 쓰지 않는다.
-// 기준은 market_news.source (`rss:<feedId>`).
+// 기준은 market_news.source (`rss:<feedId>`, `naver:news`).
 
 export const NEWS_CATEGORY_IDS = ["kr_economy", "kr_finance", "realty", "global_markets", "crypto", "fx", "central_bank"] as const;
 export type NewsCategoryId = (typeof NEWS_CATEGORY_IDS)[number];
@@ -18,6 +18,7 @@ const SOURCE_CATEGORY: Record<string, NewsCategoryId> = {
   "rss:yonhap": "kr_economy",
   "rss:mk": "kr_economy",
   "rss:hankyung": "kr_finance",
+  "naver:news": "kr_finance",
   "rss:hankyung-realestate": "realty",
   "rss:cnbc-top": "global_markets",
   "rss:cnbc-markets": "global_markets",

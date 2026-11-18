@@ -53,5 +53,14 @@
 | 0048 | 투자 봇AI 화면은 대화형 채팅 배치 | 채택 |
 | 0049 | [현재 백엔드 유지와 단계적 AI·RAG 확장](./0049-backend-ai-evolution.md) | 채택 (후속 기술 미결정) |
 | 0050 | [부동산 동결 · ERP 보류](./0050-realty-freeze-erp-defer.md) | 채택 |
-| 0051 | [네이버 뉴스 검색 API는 호출하지 않음](./0051-no-naver-news-api.md) | 채택 |
+| 0051 | [네이버 뉴스 검색 API는 호출하지 않음](./0051-no-naver-news-api.md) | 대체 (0057) |
 | 0052 | [종목 뉴스는 제목의 회사명·긴 티커만](./0052-news-symbol-match.md) | 채택 |
+| 0053 | [한투 시세 API는 지금 호출하지 않음](./0053-no-kis-quotes.md) | 채택 |
+| 0054 | [국민연금 상·하한은 고시 기간으로, 해외주식은 제12호](./0054-pension-band-and-foreign-stock.md) | 채택 |
+| 0055 | [worker 는 컨테이너 한 개로 띄울 수 있다](./0055-worker-container.md) | 채택 |
+| 0056 | [로그인은 환경변수 비밀번호와 쿠키](./0056-local-password-session.md) | 채택 |
+| 0057 | [네이버 뉴스 검색은 보유·관심과 저장된 KRX 한글 이름](./0057-naver-news-search.md) | 채택 |
+| 0058 | [챗 답은 토큰이 오는 대로 보낸다](./0058-chat-stream.md) | 채택 |
+| 0059 | [챗 대화는 세션 테이블에 남긴다](./0059-chat-sessions.md) | 채택 |
+| 0060 | [금리 표의 시장금리는 국고채 5년](./0060-ktb-5y.md) | 채택 |
+| 0061 | [고른 시도 말잔은 도면 위 3D 막대](./0061-realty-loan-bars.md) | 채택 |

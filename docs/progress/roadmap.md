@@ -20,8 +20,9 @@
 
 ## 2단계 — Market Terminal
 - [x] 관심 종목(Watchlist) 터미널 고도화 (전일대비 등락률, 펀더멘털 스냅샷, 인라인 분석 메모, 종목별 뉴스 매핑, 마켓 필터 및 빠른 프리셋 추가)
-- [ ] KIS 국내/해외 시세(키 없음), RAG. 네이버 뉴스 검색 API는 안 씀 (ADR 0051)
-- [x] 종목별 뉴스 매핑: 짧은 티커는 회사명만, RSS 저장 시 종목 코드 (ADR 0052)
+- [x] 한투 시세는 키 발급이 복잡해 지금은 안 함. 시세는 Yahoo·업비트 (ADR 0053). 네이버 뉴스 검색은 보유·관심과 저장된 KRX 한글 이름 (ADR 0057. 0051은 대체)
+- [x] RAG: 질문과 가까운 뉴스 8건. 임베딩 없으면 최근 뉴스로 폴백 (`nomic-embed-text` 768)
+- [x] 종목별 뉴스 매핑: 짧은 티커는 회사명만. 영문 티커·회사명은 대소문자 구분, 한글은 조사만. RSS 저장 시 종목 코드 (ADR 0052)
 
 ## 3단계 — Tax + Year-End (본인 기준)
 - [x] 배당·이자 원장 합, 금융소득 2,000만원 종합과세 모니터링 (분리과세 15.4% 추적)
@@ -29,13 +30,15 @@
 - [x] Tax-Loss Harvesting (손실 통산 절세 가이드 및 시뮬레이터)
 - [x] 근로소득 연말정산 인터랙티브 시뮬레이터 & 10대 공제 체크리스트 (연금저축/IRP, 청약, 보험, 카드공제, 13월의 월급 환급액 예측)
 - [x] 홈택스 간소화 자료 가져오기(JSON/CSV), 연말정산 제출 자료 4개 시트 XLSX 내보내기
-- [ ] `packages/core/data/tax` 요율·세율 원문 대조 — 우선 `payroll-rates-2026` · `brackets` · `ei-stability` (값 대조는 사용자)
+- [x] `packages/core/data/tax` 요율·세율 원문 대조 — `payroll-rates-2026` · `brackets` · `ei-stability`. 2026-11-12 `verifiedBy` 「사용자」. 숫자는 그대로. `civil-pay-2026` · `corp-local-rate`는 미검증(ERP 보류)
 
 ## 4단계 — 서비스화 준비
 - [x] 회계·세무 프로그램 연동: 더존 Smart A · 위하고(WEHAGO) · 세무사랑 Pro(K-Lep) 일반전표 CSV/XLSX 내보내기 및 복식부기 분개장 대차평형 검증 (`/accounting`)
 - [ ] 인증(다중 사용자), 호스팅 DB 이전, worker 컨테이너 배포, Accounting/Labor 모듈(인건비·급여대장·4대보험·원천세 신고 패키지)
 
 ## 5단계 — AI 고도화
+- [x] 챗 스트리밍 (`chat.askStream`. 델타를 이어 붙이고 멈출 수 있다. ADR 0058)
+- [x] 대화 저장 (`chat_sessions` · `chat_messages`. 질문과 답만. ADR 0059)
 - 이상 지출 탐지, 리스크 설명, 반복 실수 패턴, 능동 알림, DGX Spark/vLLM 프로바이더
 
 ## 동결·보류 (2026-09-26, ADR 0050)

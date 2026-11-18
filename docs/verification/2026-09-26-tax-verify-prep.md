@@ -72,4 +72,7 @@
 ## 보조 대조 (2026-11-06 Cursor)
 - [2026-11-06-cursor-tax-verify-assist.md](./2026-11-06-cursor-tax-verify-assist.md): payroll·ei-stability·itaArt55 값과 공식 출처 비교. **숫자·verifiedBy 미변경.**
 - 주의: 국민연금 상·하한 저장값은 2026.7.1 고시와 일치하나 JSON 적용기간이 연초부터로 되어 있음(1~6월은 다른 상·하한).
-- 사용자: 맞으면 `verifiedBy`/`verifiedOn`만 갱신. 상속·지방·종부 brackets는 아직.
+- 사용자: 맞으면 `verifiedBy`/`verifiedOn`만 갱신.
+- [2026-11-09-cursor-tax-brackets.md](./2026-11-09-cursor-tax-brackets.md): 상속 제26조·지방세 제111조 주택·종부세 제9조 제1항. 저장값과 현행 조문 표가 같음. **숫자·verifiedBy 미변경.**
+- [2026-11-12-cursor-tax-wording.md](./2026-11-12-cursor-tax-wording.md): 기본공제는 소득세법 제50조 제1항 1명당 연 150만원과 같음. 지방소득세 0.1은 제103조의13 제1항 특별징수와 같음. 제92조 표준세율표·조례 가감은 이 칸이 아님. **숫자·verifiedBy 미변경.**
+- [2026-11-12-cursor-tax-stamp.md](./2026-11-12-cursor-tax-stamp.md): 사용자 확인으로 세 파일 `verifiedBy` 「사용자」, `verifiedOn` `2026-11-12`. 숫자는 그대로. 공무원 봉급·법인지방소득세는 미검증.

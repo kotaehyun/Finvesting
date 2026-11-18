@@ -32,12 +32,12 @@ A personal finance work terminal that connects scattered account, card, brokerag
 - ~~Work `/erp`~~ **deferred** (ADR 0050). Route and trial worksheets kept; no nav or ledger-schema follow-up. Own rate tables stay on profile 13
 - Profile investment style & advice (`/profile` menu 10, after holdings; questionnaire maps to risk tolerance; no product picks)
 - Market collection: news RSS (KR + global), Upbit quotes, ECOS/FRED macro, Yahoo quotes & fundamentals, DART/EDGAR financial statements (worker)
-- Invest Bot AI (`투자 봇AI`): local Ollama + collected data as context. `/chat` is a conversation layout (greeting, composer at the bottom; ADR 0048). It is not ChatGPT. Turns are not stored.
+- Invest Bot AI (`투자 봇AI`): local Ollama + collected data as context. `/chat` is a conversation layout (greeting, composer at the bottom; ADR 0048). Replies append as tokens arrive and can be stopped (ADR 0058). Turns stay on this machine (ADR 0059). It is not ChatGPT.
 ### Later
-- Phase 2: Market Terminal UI (watchlist, charts, economic calendar), KIS domestic/overseas quotes
-- Phase 3: Tax + Year-End (year-end tax settlement on own salary, overseas stock capital gains, dividend income)
-- Phase 4: Accounting + Labor/HR — **deferred** (ADR 0050); reopen when productizing
-- Phase 5: AI upgrades (RAG, anomaly spending detection, risk explanations)
+- Phase 2 Market Terminal: watchlist, per-symbol news mapping, and RAG are done. Korea Investment quotes are not used. Quotes are Yahoo and Upbit (ADR 0053)
+- Phase 3 Tax + Year-End: own year-end settlement, overseas-stock capital gains, and dividend/interest monitoring are done
+- Phase 4: Douzone, WEHAGO, and Semusarang export is done. Multi-user auth, hosted DB move, worker container, and payroll/social insurance are not. Payroll and social insurance stay deferred (ADR 0050)
+- Phase 5: chat streaming and saved conversations are done (ADR 0058, 0059). Still open: anomaly spending detection, risk explanations, repeated-mistake patterns, proactive alerts, DGX Spark/vLLM provider
 
 ## Original brief
 `Finvesting_프로젝트_소개서.pdf` (Concept Brief v0.1) — 9 modules (Account, Investment, Market Terminal, Tax, Year-End, Accounting, Labor/HR, Research, AI Assistant); signature feature: Financial Timeline.

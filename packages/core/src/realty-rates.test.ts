@@ -27,7 +27,7 @@ describe("realty rates", () => {
     expect(formatRateDelta(-0.04)).toBe("-0.04%p");
     const live = applyLiveRates(rows, {
       BOK_BASE_RATE: { date: "2026-08-27", value: 3 },
-      KTB_3Y: { date: "2026-09-14", value: 2.91 },
+      KTB_5Y: { date: "2026-09-14", value: 2.91 },
     });
     expect(live.find((r: any) => r.id === "ktb")?.rate).toBe(2.91);
     expect(applyLiveRates(rows, { ECOS_LOAN_NEW_MORT: { date: "2026-06-01", value: 9 } }).find((r: any) => r.id === "newMort")?.rate).toBe(4.48);

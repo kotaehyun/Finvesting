@@ -3,6 +3,7 @@ import {
   REALTY_MOVE_2025,
   REALTY_POP_WATCH,
   REALTY_TENURE,
+  REALTY_TENURE_DETAIL,
   REALTY_TENURE_LINKS,
   REALTY_TFR_KOSTAT,
   leaseJulyWolseShare,
@@ -156,7 +157,7 @@ export function RealtyPeoplePanel() {
               <span>🔑</span> 주택 점유 임차 비중
             </div>
             <div className="sub-kpi-val highlight">{REALTY_TENURE.rent}%</div>
-            <p className="sub-kpi-sub">자가 점유 {REALTY_TENURE.own}% (수도권 임차 비중 {REALTY_TENURE.sudoRent}%)</p>
+            <p className="sub-kpi-sub">자가 점유 {REALTY_TENURE.own}% · 수도권 자가 {REALTY_TENURE_DETAIL.regions.find((r) => r.id === "sudo")?.own}% · 임차 {REALTY_TENURE.sudoRent}%. 연령·성별은 도면 아래</p>
           </div>
 
           <div className="sub-kpi-card">

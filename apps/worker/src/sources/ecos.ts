@@ -23,7 +23,7 @@ const SERIES: Array<{ code: string; stat: string; item: string; cycle: "D" | "M"
   { code: "USDKRW",        stat: "731Y001", item: "0000001", cycle: "D", unit: "KRW" },   // 원/달러 환율
   { code: "BOK_BASE_RATE", stat: "722Y001", item: "0101000", cycle: "D", unit: "%" },     // 기준금리
   { code: "CPI",           stat: "901Y009", item: "0",       cycle: "M", unit: "index" }, // 소비자물가지수
-  { code: "KTB_3Y",        stat: "817Y002", item: "010200000", cycle: "D", unit: "%" },   // 국고채 3년
+  { code: "KTB_5Y",        stat: "817Y002", item: "010200001", cycle: "D", unit: "%" },   // 국고채 5년 (ADR 0060)
 ];
 
 type ItemRow = {
@@ -50,6 +50,11 @@ async function upsertMacro(code: string, date: string, value: string, unit: stri
     .onConflictDoUpdate({ target: [macroIndicators.code, macroIndicators.date], set: { value, source: "ecos", fetchedAt: new Date() } });
 }
 
+/** 키의 # 는 URL 조각으로 잘린다. 경로에 넣기 전에 인코딩한다. */
+function ecosKey(key: string) {
+  return encodeURIComponent(key);
+}
+
 async function ecosJson(url: string): Promise<unknown | null> {
   const res = await fetch(url);
   if (!res.ok) {
@@ -60,7 +65,7 @@ async function ecosJson(url: string): Promise<unknown | null> {
 }
 
 async function listItems(key: string, stat: string): Promise<ItemRow[]> {
-  const json = await ecosJson(`https://ecos.bok.or.kr/api/StatisticItemList/${key}/json/kr/1/500/${stat}`) as {
+  const json = await ecosJson(`https://ecos.bok.or.kr/api/StatisticItemList/${ecosKey(key)}/json/kr/1/500/${stat}`) as {
     StatisticItemList?: { row?: ItemRow[] };
     RESULT?: { MESSAGE?: string };
   } | null;
@@ -100,7 +105,7 @@ async function searchSeries(
 ): Promise<Array<{ TIME: string; DATA_VALUE: string }>> {
   const path = items.map(encodeURIComponent).join("/");
   const json = await ecosJson(
-    `https://ecos.bok.or.kr/api/StatisticSearch/${key}/json/kr/1/400/${stat}/${cycle}/${start}/${end}/${path}`,
+    `https://ecos.bok.or.kr/api/StatisticSearch/${ecosKey(key)}/json/kr/1/400/${stat}/${cycle}/${start}/${end}/${path}`,
   ) as {
     StatisticSearch?: { row?: Array<{ TIME: string; DATA_VALUE: string }> };
     RESULT?: { MESSAGE?: string };
@@ -192,7 +197,7 @@ export async function collectEcos() {
   let upserted = 0;
   for (const s of SERIES) {
     const json = await ecosJson(
-      `https://ecos.bok.or.kr/api/StatisticSearch/${key}/json/kr/1/100/${s.stat}/${s.cycle}/${fmt(start, s.cycle)}/${fmt(end, s.cycle)}/${s.item}`,
+      `https://ecos.bok.or.kr/api/StatisticSearch/${ecosKey(key)}/json/kr/1/100/${s.stat}/${s.cycle}/${fmt(start, s.cycle)}/${fmt(end, s.cycle)}/${s.item}`,
     ) as { StatisticSearch?: { row?: Array<{ TIME: string; DATA_VALUE: string }> } } | null;
     upserted += await storeRows(s.code, s.unit, json?.StatisticSearch?.row ?? []);
   }

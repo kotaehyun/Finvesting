@@ -1,12 +1,25 @@
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { cookieValue, readSession, SESSION_COOKIE } from "@finvesting/core";
 import { db } from "@finvesting/db";
 
 export type Context = { db: typeof db; userId: string };
 
-export function createContext(): Context {
-  // 단일 사용자 모드. 서비스화 시 세션/JWT에서 userId를 꺼내도록 교체.
-  return { db, userId: process.env.DEFAULT_USER_ID ?? "00000000-0000-0000-0000-000000000001" };
+function defaultUserId(): string {
+  return process.env.DEFAULT_USER_ID?.trim() || "00000000-0000-0000-0000-000000000001";
+}
+
+/** 비밀번호가 없으면 로컬 단일 사용자. 있으면 쿠키의 사용자만 통과한다. */
+export async function createContext(opts?: { req?: Request }): Promise<Context> {
+  const userId = defaultUserId();
+  const secret = process.env.APP_PASSWORD?.trim() ?? "";
+  if (!secret) return { db, userId };
+  const token = cookieValue(opts?.req?.headers.get("cookie"), SESSION_COOKIE);
+  const sessionUser = token ? await readSession(token, secret) : null;
+  if (sessionUser !== userId) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "로그인이 필요합니다." });
+  }
+  return { db, userId };
 }
 
 const t = initTRPC.context<Context>().create({ transformer: superjson });

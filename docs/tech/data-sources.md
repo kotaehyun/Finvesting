@@ -7,11 +7,12 @@
 ## 현재 구현
 | 소스 | 어댑터 | 방식 | 스케줄 | 키 | 저장 테이블 |
 |---|---|---|---|---|---|
-| 국내 뉴스 RSS — 한국경제(금융)·매일경제·연합뉴스(경제)·한경 부동산 | `rss.ts` | RSS | 15분 | 불필요 | `market_news`. 웹 `/news`·`/realty` |
+| 국내 뉴스 RSS — 한국경제(금융)·매일경제·연합뉴스(경제)·한경 부동산 | `rss.ts` | RSS. 저장 뒤 임베딩 없는 글 16건을 `nomic-embed-text`로 채움. 모델이 없으면 수집만 하고 건너뜀 | 15분 | Ollama 임베딩 모델(없으면 skip) | `market_news`. 웹 `/news`·`/realty`. 챗은 질문과 코사인 거리 |
+| NAVER API HUB 뉴스 검색 | `naver-news.ts` | `GET /search/v1/news`. 보유·관심과 저장된 KRX 종목의 한글 이름, 회당 최대 40·`display=10`·최신순. 제목·원문 링크·요약 500자. 본문 없음. 키 없으면 skip | 08·12·16·20시 | `NAVER_CLIENT_ID`·`NAVER_CLIENT_SECRET` | `market_news` `source=naver:news` (국내 금융). ADR 0057 |
 | 해외 뉴스 RSS — CNBC, MarketWatch, Fed·ECB, CoinDesk, Cointelegraph, FXStreet | `rss.ts` | RSS. 2026-09-14 CoinDesk·Cointelegraph·FXStreet·한경 부동산 GET 확인 | 15분 | 불필요 | `market_news`. `/news`·`/markets` |
 | 오피니언 RSS — 한경·연합 오피니언, Seeking Alpha, Project Syndicate, FT Opinion | `rss.ts` | RSS. 2026-09-13 GET 확인. 매경 공식 RSS 목록에 오피니언 없음. 증권사 리포트 공개 RSS 없음 | 15분 | 불필요 | `market_news` (raw.board=opinion). 웹 `/opinions`: 국내 칼럼·애널리스트·해외 오피니언. 애널리스트 열은 SA + 국내 뉴스 제목(목표가·투자의견) |
 | 업비트 일봉 | `upbit.ts` | 공개 API. 대상 = 보유·관심 `market=UPBIT` ∪ `UPBIT_TARGETS`(있으면). 최근 90일 일봉 | 5분 | 불필요 | `market_quotes`. 웹 `/invest` 비트코인 칸(원화) |
-| 한국은행 ECOS — 원/달러, 기준금리, CPI, 국고채3년, **예금은행 지역별 가계대출 말잔**, **예금은행 가중평균 대출금리** | `ecos.ts` | API. 대출 잔액은 `151Y003` 월. 금리는 `121Y006`·`121Y015` 항목 이름 매칭. 시·구 없음 | 09·18시 | `ECOS_API_KEY` | `macro_indicators` (USDKRW, BOK_BASE_RATE, CPI, KTB_3Y, `ECOS_HHLOAN_*`, `ECOS_LOAN_*`) |
+| 한국은행 ECOS — 원/달러, 기준금리, CPI, 국고채5년, **예금은행 지역별 가계대출 말잔**, **예금은행 가중평균 대출금리** | `ecos.ts` | API. 대출 잔액은 `151Y003` 월. 국고채는 `817Y002` 항목 `010200001` (ADR 0060). 금리는 `121Y006`·`121Y015` 항목 이름 매칭. 시·구 없음 | 09·18시 | `ECOS_API_KEY` | `macro_indicators` (USDKRW, BOK_BASE_RATE, CPI, KTB_5Y, `ECOS_HHLOAN_*`, `ECOS_LOAN_*`) |
 | 미국 FRED — 연방기금금리, CPI, 국채 2y/10y, 달러지수, 실업률, VIX | `fred.ts` | API | 07·19시 | `FRED_API_KEY` (무료) | `macro_indicators` (US_*, DXY_BROAD, VIX) |
 | Yahoo Finance — 보유·관심 종목 시세 + 세계 지수·비트코인·원자재 + 원환율 + `KRW=X`→USDKRW + 주식·ETF 펀더멘털 | `yahoo.ts` | 비공식 `yahoo-finance2` v3. 대상 = trades∪watchlist ∪ `YAHOO_TARGETS` ∪ `DEFAULT_YAHOO_STOCKS`(카카오 `035720.KS`) ∪ `/statements` 섹터 종목(`statementLookupYahooTickers`) ∪ `core/world-indices`. 세계 지수는 `quote` 당일 + 일봉이 40일 미만이면 `chart` 90일. 환율은 `core/fx-pairs`. USDKRW는 같은 날짜 ECOS가 있으면 덮지 않음. KRX는 `.KS` 실패 시 `.KQ`. 주식·ETF는 `quote` + `quoteSummary`. 지수·상품·코인은 시세만. 429 → `YAHOO_GAP_MS` | 30분 | 불필요 | `market_quotes`, `instrument_fundamentals`, `macro_indicators`. 웹 `/invest`(시총 보드·관심)·`/fundamentals`·`/statements` 시가총액 |
 | 금투협 FreeSIS — 투자자예탁금·신용융자 | `kofia.ts` | 메인 HTML (`stat/main.do`) 파싱. 단위 백만원. 위탁매매 미수금은 메인에 없어 저장하지 않음 | 평일 08·18시 | 불필요 | `macro_indicators` (`KOFIA_INVESTOR_DEPOSIT`, `KOFIA_CREDIT`, HTML에 있으면 `KOFIA_MARGIN`). 웹 `/invest` 도넛 |
@@ -37,7 +38,7 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 | **네이버 증권** | 없음 | 크롤링 안 함. `/fundamentals` **국내** 조회 링크(`stock.naver.com/.../price`). `/invest`에 국내증시·코스피·코스닥 원문 링크 (2026-09-14 GET 200) |
 | **카카오페이증권** | 없음 | 크롤링 안 함. `/fundamentals` 국내 조회 보조 링크(홈만. 종목별 URL 없음) |
 | **금융투자협회 FreeSIS** | 일별 미수금 API 없음 | 메인 HTML만. `/invest` 예탁금·신용 그래프. 위탁매매 미수금은 칸(ADR 0030) |
-| **한국투자증권** | KIS Open API(키) | HTS 크롤링 금지. `/invest`에 홈 링크만. API 시세는 미구현 |
+| **한국투자증권** | 없음 | HTS 크롤링 금지. `/invest`에 홈 링크만. API 시세는 호출하지 않음 (ADR 0053). 키 발급은 하지 않음 |
 | **한국거래소** | 공공데이터(키) | `/invest`에 `open.krx.co.kr` 링크만 |
 | **재무제표 해설 서비스** (예: 증권사 리포트, 유튜브 요약) | 없음 | 저장하지 않음. DART/EDGAR 숫자 + 감사의견을 로컬 LLM이 `/statements` 「읽어주기」·챗에서 설명 (`docs/tech/ai.md`) |
 | **재무제표를 읽는 사람들** (`drcr.co.kr`) | 없음 | 국내 한정. `/statements` 한국 조회에만 링크. `/fundamentals`·해외 종목에는 없음. 본문·크롤링 금지 |
@@ -59,7 +60,7 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 - 숫자는 공시 표준 항목만. Yahoo 전 종목은 `/invest`
 
 ## `/invest` 시가총액 보드
-- API `market.mcapBoard`: `buildMcapBoards`로 국내·해외 분리. 종목마다 `matchNewsForSymbol`(제목·`news.symbols`, 본문 없음). `symbols`는 정확히 일치할 때만. 제목의 영문 티커는 단어 경계이고 3글자 이하는 제목에 잡지 않는다. 한글 회사명만 포함 검색. RSS 저장 시 `symbolsMentionedInTitle`로 같은 규칙을 넣는다 (ADR 0052)
+- API `market.mcapBoard`·관심 목록·`watchNews`: 종목마다 `matchNewsForSymbol`(제목만, 본문 없음). 영문 티커·영문 회사명은 저장된 대소문자와 단어 경계. 3글자 이하·숫자 종목코드는 제목에 잡지 않는다. 한글 회사명은 앞이 한글·숫자이거나 뒤에 조사가 아닌 한글이 붙으면 제외. 저장된 `symbols`만으로는 통과시키지 않는다. RSS 저장 시 `symbolsMentionedInTitle`로 같은 규칙을 넣는다. 세 조회 모두 그 배열·제목으로 전체 기간에서 종목당 후보 200건을 고른 뒤 같은 함수로 거른다. 시가총액 보드는 오피니언 소스를 제외한다 (ADR 0052)
 - UI: 관심 터미널 위. 「해외 · 수집분」= Yahoo 수집분(주로 미국). 전 세계 공식 순위 아님
 - 연계: 뉴스 펼침·원문 링크, `/statements?area=&browse=mcap&q=` 재무·개황
 
@@ -76,8 +77,8 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 ## 계획
 | 소스 | 방식 | 용도 | 상태 |
 |---|---|---|---|
-| 한국투자증권 KIS Open API | API (키 필요) | 국내·해외 주식 시세 | 미구현 |
-| 네이버 뉴스 검색 API | API | 종목별 뉴스 | **안 씀** (ADR 0051). 종량제라 호출하지 않음. 키 없음 |
+| 한국투자증권 KIS Open API | API (키 필요) | 국내·해외 주식 시세 | **안 씀** (ADR 0053). 키 없음. 발급은 하지 않음. 시세는 Yahoo·업비트 |
+| 네이버 뉴스 검색 API | API | 종목별 뉴스 | **구현** (ADR 0057). 0051은 대체. 키는 `NAVER_CLIENT_ID`·`NAVER_CLIENT_SECRET` |
 | 경제 캘린더 (예: investing.com / 금통위·FOMC 일정) | 크롤링 | `economic_events` | 미구현 |
 | DART corpCode.xml / SEC company_tickers.json | 파일 | 종목코드↔corp_code, 티커↔CIK 자동 매핑. `instrument_identifiers`에 저장 | **구현** (`core/statement-targets.ts`, worker `catalogs.ts`) |
 | watchlist·trades 테이블 → 수집 대상 자동화 | 내부 | 보유+관심 종목이 본 대상, env는 보조. 시세는 `quote-targets`, 재무제표는 `statement-targets` | **구현** (ADR 0007). KIS 국내 시세는 미구현 |
@@ -86,11 +87,11 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 | 한국 부동산 실거래·임대료 | 공공데이터 API (키) | `/realty` 유형별 건수·임대료 | 미구현 (아파트·오피스텔·다가구·연립·상가·빌딩·토지 칸만). 포털 매물 호수 크롤링 없음 (ADR 0017·0018) |
 | 수도권 규제지역·대출 위험 | 정책브리핑·금융위 보도 요약 (`core/realty-ref`) | `/realty` 마인드맵 | **구현** (ADR 0014). 스크래핑 없음. 지정은 고시로 바뀜 |
 | 전국 시·구 도면 | 통계청 2018 시군구 (`korea-plan.json`, MapLibre 3D 타일 없음) | `/realty` 도면 | **구현** (ADR 0015·0016·0018). 동탄구 면 없음(원). 높이는 시도 대출 비율. 규제 색은 수도권 |
-| 예금은행 시도 가계대출 | ECOS `151Y003` 말잔(십억원) | `/realty` 17개 시도 총액·증가율·전국 대비 비중 | **구현** (ADR 0016·0017·0018). 시·구 숫자 없음. 가계신용/GDP 아님 |
-| 예금은행 대출 금리 | 한은 가중평균 보도 + ECOS `121Y006`·`121Y015` 이름 매칭, COFIX 공시 | `/realty` 금리 표 | **구현** (ADR 0025). 은행 상품금리 스크래핑 없음. 8월 가중평균은 9/30 공표 |
-| 전월세 점유·거래 비중 | 주거실태조사 2024 + 국토부 2026-07 주택통계 | `/realty` 전월세 칸 | **구현** (ADR 0026). 점유와 거래 건수는 분리. 전세만의 전국 칸은 원문 |
+| 예금은행 시도 가계대출 | ECOS `151Y003` 말잔(십억원) | `/realty` 도면에서 고른 광역시도의 연말 말잔이 그 자리에서 빌딩으로 올라옴. 꼭대기는 17개 시도 중 최대 말잔 대비 | **구현** (ADR 0016·0017·0018·0061). 시·구 숫자 없음. 점이 없으면 바닥만. 가계신용/GDP 아님 |
+| 예금은행 대출 금리 | 한은 가중평균 보도 + ECOS `121Y006`·`121Y015` 이름 매칭, COFIX 공시. 시장 칸은 국고채 5년 `817Y002`/`010200001` | `/realty` 금리 표 | **구현** (ADR 0025·0060). 은행 상품금리 스크래핑 없음. 8월 가중평균은 9/30 공표 |
+| 전월세 점유·거래 비중 | 주거실태조사 2024(통계보고서 표 4, 특성가구 연구보고서 표 Ⅱ-6·Ⅱ-7, 보도자료) + 국토부 2026-07 주택통계 | `/realty` 전월세 칸·도면 아래 | **구현** (ADR 0026). 점유와 거래 건수는 분리. 임차는 전세+월세. 성별·연령은 전국. 직업별 점유와 광역시·도 무상은 없음 |
 | 카드 연체·리볼빙 | 금감원 여전사 실적 + 여신금융협회 9개사 잔액 | `/realty` 상환 칸 | **구현** (ADR 0026). 리볼빙=결제성 이월. 스크래핑 없음 |
-| 인구·출산·인구감소 | 국가데이터처 출생·국내이동 확정 공표, 행안부 인구감소지역 고시 | `/realty` 표·목록 | **구현** (ADR 0019). KOSIS API 키 없음. 시도 전입·전출 인원은 원문 PDF |
+| 인구·출산·인구감소 | 국가데이터처 출생·국내이동 확정 공표, 행안부 인구감소지역 고시 | `/realty` 표·목록. 도면은 수도권 안 비중(표 5), 지방끼리 3대 전입·전출(표 5), 지방↔수도권 천 명(표 12). 아래 막대는 연령·성별·사유 | **구현** (ADR 0019). 3대 밖에 있는 지방 이동은 없음 |
 | 고위공직자 재산·주택 방향 | 인사혁신처 보도 + 관보. 공직윤리시스템 링크 | `/realty` 집계·광역단체장 소재 표 | **구현** (ADR 0019). 스크래핑 없음. 사적 자산가 명단 없음 |
 | 종부세·양도세 지역 집계 | 기재부 고지(KDI) + TASIS·data.go.kr 링크 | `/realty` 고가주택 세금 방향 | **구현** (ADR 0020). 개인 조회·스크래핑 없음. 수도권 3곳만 인원. 양도세는 칸 |
 | 공실·빈집·PIR·지니 | 부동산원 임대동향, 주택총조사, 주거실태조사, 가계금융복지조사 | `/realty` 시도 표 | **구현** (ADR 0021·0023). 공실은 자가·무상 제외. 급매·유찰은 칸 |

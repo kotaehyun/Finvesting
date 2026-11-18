@@ -36,6 +36,53 @@
     "housingSharePct": 33.7,
     "seoulFromGgPct": 53.8,
     "seoulToGgPct": 59.5,
+    "withinCapital": {
+      "moversThou": 2851,
+      "sharePct": 46.6,
+      "nets": [
+        { "id": "seoul", "thou": -54 },
+        { "id": "incheon", "thou": 28 },
+        { "id": "gyeonggi", "thou": 26 }
+      ]
+    },
+    "capitalPairs": [
+      { "from": "seoul", "to": "gyeonggi", "outPct": 59.5, "inPct": 53.8, "outLabel": "서울 전출 중 경기", "inLabel": "서울 전입 중 경기" },
+      { "from": "seoul", "to": "incheon", "outPct": 10.0, "inPct": 7.8, "outLabel": "서울 전출 중 인천", "inLabel": "서울 전입 중 인천" },
+      { "from": "incheon", "to": "gyeonggi", "outPct": 44.3, "inPct": 45.1, "outLabel": "인천 전출 중 경기", "inLabel": "인천 전입 중 경기" }
+    ],
+    "localPairs": [
+      { "from": "busan", "to": "gyeongnam", "outPct": 36.4, "inPct": 38.3, "outLabel": "부산 전출 중 경남", "inLabel": "부산 전입 중 경남" },
+      { "from": "daegu", "to": "gyeongbuk", "outPct": 37.6, "inPct": 44.6, "outLabel": "대구 전출 중 경북", "inLabel": "대구 전입 중 경북" },
+      { "from": "gwangju", "to": "jeonnam", "outPct": 43.3, "inPct": 46.0, "outLabel": "광주 전출 중 전남", "inLabel": "광주 전입 중 전남" },
+      { "from": "daejeon", "to": "chungnam", "outPct": 17.1, "inPct": 17.4, "outLabel": "대전 전출 중 충남", "inLabel": "대전 전입 중 충남" },
+      { "from": "ulsan", "to": "busan", "outPct": 20.4, "inPct": 21.5, "outLabel": "울산 전출 중 부산", "inLabel": "울산 전입 중 부산" },
+      { "from": "ulsan", "to": "gyeongnam", "outPct": 15.1, "inPct": 16.5, "outLabel": "울산 전출 중 경남", "inLabel": "울산 전입 중 경남" },
+      { "from": "ulsan", "to": "gyeongbuk", "outPct": 16.8, "inPct": 16.5, "outLabel": "울산 전출 중 경북", "inLabel": "울산 전입 중 경북" },
+      { "from": "sejong", "to": "daejeon", "outPct": 21.6, "inPct": 22.5, "outLabel": "세종 전출 중 대전", "inLabel": "세종 전입 중 대전" },
+      { "from": "chungbuk", "to": "daejeon", "outPct": 11.1, "inPct": 10.8, "outLabel": "충북 전출 중 대전", "inLabel": "충북 전입 중 대전" },
+      { "from": "jeju", "to": "busan", "outPct": 7.5, "inPct": 6.9, "outLabel": "제주 전출 중 부산", "inLabel": "제주 전입 중 부산" }
+    ],
+    "localOne": [
+      { "from": "chungnam", "to": "sejong", "pct": 13.8, "kind": "in", "label": "세종 전입 중 충남" },
+      { "from": "gwangju", "to": "jeonbuk", "pct": 10.2, "kind": "in", "label": "전북 전입 중 광주" },
+      { "from": "jeonbuk", "to": "chungnam", "pct": 9.5, "kind": "out", "label": "전북 전출 중 충남" }
+    ],
+    "provinceCapital": [
+      { "id": "busan", "toCapital": 36, "fromCapital": 27 },
+      { "id": "daegu", "toCapital": 28, "fromCapital": 20 },
+      { "id": "gwangju", "toCapital": 21, "fromCapital": 15 },
+      { "id": "daejeon", "toCapital": 30, "fromCapital": 28 },
+      { "id": "ulsan", "toCapital": 13, "fromCapital": 10 },
+      { "id": "sejong", "toCapital": 11, "fromCapital": 11 },
+      { "id": "gangwon", "toCapital": 47, "fromCapital": 47 },
+      { "id": "chungbuk", "toCapital": 35, "fromCapital": 39 },
+      { "id": "chungnam", "toCapital": 57, "fromCapital": 61 },
+      { "id": "jeonbuk", "toCapital": 29, "fromCapital": 26 },
+      { "id": "jeonnam", "toCapital": 24, "fromCapital": 23 },
+      { "id": "gyeongbuk", "toCapital": 35, "fromCapital": 31 },
+      { "id": "gyeongnam", "toCapital": 34, "fromCapital": 27 },
+      { "id": "jeju", "toCapital": 18, "fromCapital": 16 }
+    ],
     "sejongNet": -47,
     "regions": [
       {
@@ -90,6 +137,54 @@
         "label": "광주",
         "rate": -1
       }
+    ],
+    "sex": {
+      "maleMovers": 3139,
+      "femaleMovers": 2978,
+      "maleRate": 12.4,
+      "femaleRate": 11.6
+    },
+    "ages": [
+      { "id": "u10", "label": "10세 미만", "movers": 394, "male": 202, "female": 192, "rate": 12.9, "maleRate": 12.9, "femaleRate": 12.9 },
+      { "id": "a10", "label": "10대", "movers": 455, "male": 232, "female": 223, "rate": 9.9, "maleRate": 9.8, "femaleRate": 9.9 },
+      { "id": "a20", "label": "20–24세", "movers": 568, "male": 272, "female": 297, "rate": 22.4, "maleRate": 20.6, "femaleRate": 24.2 },
+      { "id": "a25", "label": "25–29세", "movers": 845, "male": 440, "female": 405, "rate": 25.9, "maleRate": 25.9, "femaleRate": 25.9 },
+      { "id": "a30", "label": "30–34세", "movers": 818, "male": 436, "female": 382, "rate": 23.4, "maleRate": 23.6, "femaleRate": 23.1 },
+      { "id": "a35", "label": "35–39세", "movers": 530, "male": 288, "female": 243, "rate": 17.0, "maleRate": 17.8, "femaleRate": 16.1 },
+      { "id": "a40", "label": "40대", "movers": 847, "male": 451, "female": 396, "rate": 11.1, "maleRate": 11.7, "femaleRate": 10.6 },
+      { "id": "a50", "label": "50대", "movers": 756, "male": 395, "female": 361, "rate": 8.8, "maleRate": 9.1, "femaleRate": 8.4 },
+      { "id": "a60", "label": "60대", "movers": 549, "male": 282, "female": 267, "rate": 7.0, "maleRate": 7.3, "femaleRate": 6.7 },
+      { "id": "a70", "label": "70대", "movers": 219, "male": 103, "female": 116, "rate": 5.0, "maleRate": 5.1, "femaleRate": 5.0 },
+      { "id": "a80", "label": "80세 이상", "movers": 136, "male": 39, "female": 97, "rate": 5.5, "maleRate": 4.5, "femaleRate": 6.1 }
+    ],
+    "reasons": [
+      { "id": "housing", "label": "주택", "movers": 2065, "sharePct": 33.7 },
+      { "id": "family", "label": "가족", "movers": 1584, "sharePct": 25.9 },
+      { "id": "job", "label": "직업", "movers": 1310, "sharePct": 21.4 },
+      { "id": "other", "label": "기타", "movers": 405, "sharePct": 6.6 },
+      { "id": "edu", "label": "교육", "movers": 366, "sharePct": 6.0 },
+      { "id": "env", "label": "주거환경", "movers": 322, "sharePct": 5.3 },
+      { "id": "nature", "label": "자연환경", "movers": 67, "sharePct": 1.1 }
+    ],
+    "ageNetBands": ["0–9세", "10대", "20대", "30대", "40대", "50대", "60대", "70대", "80세 이상"],
+    "metroAges": [
+      { "id": "seoul", "net": [-4.4, 9.0, 35.9, -18.7, -8.5, -14.6, -14.6, -6.6, -4.3] },
+      { "id": "busan", "net": [0.4, 0.5, -4.5, -2.7, -1.0, -1.8, -2.0, -0.7, -0.3] },
+      { "id": "daegu", "net": [1.7, 0.4, -4.9, 0.2, 0.7, -1.1, -1.3, 0.0, 0.1] },
+      { "id": "incheon", "net": [3.8, 1.8, 5.0, 7.5, 5.1, 3.7, 2.4, 1.5, 1.5] },
+      { "id": "gwangju", "net": [0.1, -1.0, -5.2, -2.8, -1.3, -2.0, -1.6, -0.1, 0.3] },
+      { "id": "daejeon", "net": [0.1, 1.4, 2.2, 0.2, 0.3, -0.9, -0.8, 0.0, 0.2] },
+      { "id": "ulsan", "net": [-0.5, -1.5, -1.2, 0.0, -0.5, -0.7, -1.4, -0.1, 0.3] },
+      { "id": "sejong", "net": [0.2, -0.5, 0.3, 1.0, -0.3, -0.4, -0.2, 0.0, 0.0] },
+      { "id": "gyeonggi", "net": [0.8, -2.5, 7.4, 13.6, -0.4, 2.4, 3.4, 3.5, 4.6] },
+      { "id": "gangwon", "net": [-0.4, -0.3, -3.8, -0.4, 0.3, 1.6, 1.9, 0.1, -0.2] },
+      { "id": "chungbuk", "net": [0.5, 0.2, 0.5, 2.1, 1.9, 2.8, 2.3, 0.4, 0.1] },
+      { "id": "chungnam", "net": [0.0, -0.2, -1.1, 1.4, 1.7, 2.7, 3.2, 0.8, -0.1] },
+      { "id": "jeonbuk", "net": [0.0, -0.6, -5.4, -0.6, 0.5, 1.3, 1.4, 0.3, -0.4] },
+      { "id": "jeonnam", "net": [-0.4, -1.1, -5.1, 0.9, 1.6, 3.3, 2.8, 0.3, -1.1] },
+      { "id": "gyeongbuk", "net": [-1.7, -1.3, -8.8, -1.9, -0.2, 2.1, 2.8, 0.3, -0.4] },
+      { "id": "gyeongnam", "net": [-0.3, -3.2, -9.1, 0.6, 0.4, 1.7, 1.7, 0.6, 0.0] },
+      { "id": "jeju", "net": [0.0, -1.1, -2.2, -0.2, -0.1, -0.2, -0.2, -0.2, -0.1] }
     ]
   },
   "REALTY_MOVE_NOTE": "시도 순이동(전입−전출)은 통계청 국내인구이동통계입니다. 세계은행 순이동은 국가 단위라 시·도와 다릅니다.",

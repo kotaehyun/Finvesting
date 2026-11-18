@@ -22,6 +22,14 @@ describe("statutoryWithholding", () => {
     expect(w.pensionBase).toBe(6_590_000);
     expect(w.nationalPension).toBe(313_025);
   });
+
+  it("2026년 1~6월 상한은 637만, 7월부터는 659만", () => {
+    expect(statutoryWithholding(20_000_000, 0, "2026-01").pensionBase).toBe(6_370_000);
+    expect(statutoryWithholding(20_000_000, 0, "2026-06").pensionBase).toBe(6_370_000);
+    expect(statutoryWithholding(20_000_000, 0, "2026-07").pensionBase).toBe(6_590_000);
+    expect(statutoryWithholding(100_000, 0, "2026-03").pensionBase).toBe(400_000);
+    expect(statutoryWithholding(100_000, 0, "2026-08").pensionBase).toBe(410_000);
+  });
 });
 
 describe("earnedIncomeDeduction / incomeTaxBaseFromMonthly", () => {

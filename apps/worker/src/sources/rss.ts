@@ -1,5 +1,16 @@
 import Parser from "rss-parser";
-import { newsCategoryForSource, opinionCategoryForSource, symbolsMentionedInTitle } from "@finvesting/core";
+import { and, desc, eq, isNull, notInArray, sql } from "drizzle-orm";
+import { createProvider } from "@finvesting/ai";
+import {
+  NEWS_EMBED_DIM,
+  NEWS_EMBED_MODEL,
+  isNewsEmbedVector,
+  newsCategoryForSource,
+  allOpinionSources,
+  newsEmbedInput,
+  opinionCategoryForSource,
+  symbolsMentionedInTitle,
+} from "@finvesting/core";
 import { db, instruments, news } from "@finvesting/db";
 
 // 제목·링크·요약만 저장 (본문 저장 X — 저작권). 피드는 자유롭게 추가.
@@ -69,5 +80,34 @@ export async function collectRssNews() {
       perFeed[f.id] = `${n}/${feed.items.length}`;
     } catch (e) { perFeed[f.id] = `FAIL ${((e as Error).message ?? String(e)).split("\n")[0]?.slice(0, 60)}`; }
   }
-  return { inserted, perFeed };
+  const embedded = await embedMissingNews();
+  return { inserted, perFeed, embedded };
+}
+
+/** 임베딩이 없는 뉴스 일부만. 모델이 없으면 수집은 그대로 두고 건너뛴다. */
+export async function embedMissingNews(): Promise<{ embedded: number; skipped: string | null }> {
+  const pending = await db.select({
+    id: news.id,
+    title: news.title,
+    summary: news.summary,
+  }).from(news).where(and(isNull(news.embedding), notInArray(news.source, allOpinionSources()))).orderBy(desc(news.fetchedAt)).limit(16);
+  if (!pending.length) return { embedded: 0, skipped: null };
+  let vectors: number[][];
+  try {
+    vectors = await createProvider().embed(pending.map((row) => newsEmbedInput(row.title, row.summary)));
+  } catch (e) {
+    return { embedded: 0, skipped: ((e as Error).message ?? String(e)).split("\n")[0]?.slice(0, 120) ?? "embed failed" };
+  }
+  let embedded = 0;
+  for (let i = 0; i < pending.length; i++) {
+    const vec = vectors[i];
+    const row = pending[i];
+    if (!row || !isNewsEmbedVector(vec)) continue;
+    await db.update(news).set({
+      embedding: vec,
+      raw: sql`coalesce(${news.raw}, '{}'::jsonb) || ${JSON.stringify({ embedModel: NEWS_EMBED_MODEL, embedDim: NEWS_EMBED_DIM })}::jsonb`,
+    }).where(eq(news.id, row.id));
+    embedded += 1;
+  }
+  return { embedded, skipped: embedded === pending.length ? null : "차원 불일치" };
 }

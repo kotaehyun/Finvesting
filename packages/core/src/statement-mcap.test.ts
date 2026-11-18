@@ -6,6 +6,7 @@ import {
   rankByMarketCap,
   symbolsMentionedInTitle,
   statementLookupYahooTickers,
+  titleMentionsInstrument,
 } from "./statement-mcap";
 
 describe("시가총액 순위", () => {
@@ -60,5 +61,37 @@ describe("시가총액 순위", () => {
     expect(matchNewsForSymbol(news, "V", "Visa").map((n) => n.id)).toEqual(["2"]);
     expect(symbolsMentionedInTitle("Very strong demand", [{ symbol: "V", name: "Visa" }])).toEqual([]);
     expect(symbolsMentionedInTitle("Visa raises dividend", [{ symbol: "V", name: "Visa" }])).toEqual(["V"]);
+  });
+
+  it("영문 티커는 대소문자를 구분한다", () => {
+    expect(titleMentionsInstrument("Rising costs hit retailers", "COST", "Costco")).toBe(false);
+    expect(titleMentionsInstrument("COST beats estimates", "COST", "Costco")).toBe(true);
+    expect(titleMentionsInstrument("Heavy snow closes roads", "SNOW", "Snowflake")).toBe(false);
+    expect(titleMentionsInstrument("Meta-analysis shows...", "META", "Meta Platforms")).toBe(false);
+    expect(symbolsMentionedInTitle("Rising costs hit retailers", [{ symbol: "COST", name: "Costco" }])).toEqual([]);
+  });
+
+  it("영문 회사명은 저장된 표기 그대로 찾는다", () => {
+    expect(titleMentionsInstrument("meta-analysis of trials", "META", "Meta")).toBe(false);
+    expect(titleMentionsInstrument("Meta unveils new model", "META", "Meta")).toBe(true);
+  });
+
+  it("한글 회사명은 조사만 뒤에 붙을 때 찾는다", () => {
+    expect(titleMentionsInstrument("카카오뱅크 실적 발표", "035720", "카카오")).toBe(false);
+    expect(titleMentionsInstrument("카카오, 3분기 흑자", "035720", "카카오")).toBe(true);
+    expect(titleMentionsInstrument("카카오가 인수", "035720", "카카오")).toBe(true);
+    expect(titleMentionsInstrument("카카오의 신사업", "035720", "카카오")).toBe(true);
+    expect(titleMentionsInstrument("현대차증권 리포트", "005380", "현대차")).toBe(false);
+    expect(titleMentionsInstrument("현대차 노조 파업", "005380", "현대차")).toBe(true);
+    expect(titleMentionsInstrument("1만도 안 되는 거래량", "204320", "만도")).toBe(false);
+    expect(titleMentionsInstrument("만도, 자율주행 수주", "204320", "만도")).toBe(true);
+  });
+
+  it("저장된 symbols만으로는 오탐 제목을 통과시키지 않는다", () => {
+    const news = [
+      { id: "1", title: "Rising costs hit retailers", url: "u1", publisher: null, publishedAt: null, symbols: ["COST"] },
+      { id: "2", title: "COST beats estimates", url: "u2", publisher: null, publishedAt: null, symbols: ["COST"] },
+    ];
+    expect(matchNewsForSymbol(news, "COST", "Costco").map((n) => n.id)).toEqual(["2"]);
   });
 });

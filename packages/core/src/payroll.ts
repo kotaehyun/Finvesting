@@ -7,6 +7,40 @@ assertDataFile(dataFile, "tax/payroll-rates-2026.json");
 
 export const PAYROLL_RATES_SOURCE = dataSourceLine(dataFile.defaults);
 
+export type NationalPensionBand = {
+  id: "h1" | "h2";
+  floor: number;
+  cap: number;
+  from: string;
+  to: string;
+};
+
+/** 고시 적용월. 달 없으면 2026-07 고시(h2). 고시 밖 달은 null. */
+export const NATIONAL_PENSION_BANDS: readonly NationalPensionBand[] = [
+  {
+    id: "h1",
+    floor: requireValue(dataFile, "rates.nationalPensionFloorH1"),
+    cap: requireValue(dataFile, "rates.nationalPensionCapH1"),
+    from: "2026-01",
+    to: "2026-06",
+  },
+  {
+    id: "h2",
+    floor: requireValue(dataFile, "rates.nationalPensionFloor"),
+    cap: requireValue(dataFile, "rates.nationalPensionCap"),
+    from: "2026-07",
+    to: "2027-06",
+  },
+];
+
+export function nationalPensionBand(payMonth?: string): NationalPensionBand | null {
+  const ym = payMonth?.slice(0, 7);
+  if (ym && /^\d{4}-\d{2}$/.test(ym)) {
+    return NATIONAL_PENSION_BANDS.find((b) => ym >= b.from && ym <= b.to) ?? null;
+  }
+  return NATIONAL_PENSION_BANDS.find((b) => b.id === "h2") ?? null;
+}
+
 export const PAYROLL_RATES_2026 = {
   year: requireValue(dataFile, "rates.year"),
   nationalPensionEmployee: requireValue(dataFile, "rates.nationalPensionEmployee"),
@@ -89,10 +123,11 @@ export function incomeTaxBaseFromMonthly(monthlyGross: number, monthlyPension = 
   return incomeTaxBaseFromAnnual(monthly * 12, pension * 12);
 }
 
-export function statutoryWithholding(grossIncome: number, nationalTax = 0): StatutoryWithholding {
+export function statutoryWithholding(grossIncome: number, nationalTax = 0, payMonth?: string): StatutoryWithholding {
   const gross = Math.max(0, Number(grossIncome) || 0);
-  const r = PAYROLL_RATES_2026;
-  const pensionBase = gross <= 0 ? 0 : Math.min(Math.max(gross, r.nationalPensionFloor), r.nationalPensionCap);
+  const band = nationalPensionBand(payMonth);
+  // 고시 밖 달은 상·하한을 만들지 않는다. 세전을 그대로 기준소득월액으로 둔다.
+  const pensionBase = gross <= 0 ? 0 : band ? Math.min(Math.max(gross, band.floor), band.cap) : gross;
   // 정수 분수로 계산해 0.009 * 3000000 = 26999.999… 같은 부동소수 오차를 피한다.
   const nationalPension = truncWon(pensionBase * 475 / 10_000);
   const healthInsurance = truncWon(gross * 719 / 20_000);

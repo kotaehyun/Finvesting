@@ -6,8 +6,8 @@
     "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
     "sourceUrl": "https://www.4insure.or.kr/",
     "article": null,
-    "verifiedBy": "미검증",
-    "verifiedOn": null
+    "verifiedBy": "사용자",
+    "verifiedOn": "2026-11-12"
   },
   "entries": [
     {
@@ -20,8 +20,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.nationalPensionEmployee",
@@ -33,34 +33,60 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
+    },
+    {
+      "id": "rates.nationalPensionFloorH1",
+      "value": 400000,
+      "unit": "",
+      "asOf": "2026-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-06-30",
+      "sourceTitle": "보건복지부고시 제2025-24호",
+      "sourceUrl": "https://www.mohw.go.kr/board.es?act=view&bid=0026&list_no=1484511&mid=a10409020000",
+      "article": "국민연금법 제3조 제1항 제5호",
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
+    },
+    {
+      "id": "rates.nationalPensionCapH1",
+      "value": 6370000,
+      "unit": "",
+      "asOf": "2026-01",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-06-30",
+      "sourceTitle": "보건복지부고시 제2025-24호",
+      "sourceUrl": "https://www.mohw.go.kr/board.es?act=view&bid=0026&list_no=1484511&mid=a10409020000",
+      "article": "국민연금법 제3조 제1항 제5호",
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.nationalPensionFloor",
       "value": 410000,
       "unit": "",
-      "asOf": "2026",
-      "effectiveFrom": "2026-01-01",
-      "effectiveTo": "2026-12-31",
-      "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
-      "sourceUrl": "https://www.4insure.or.kr/",
-      "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "asOf": "2026-07",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2027-06-30",
+      "sourceTitle": "보건복지부고시 제2026-31호",
+      "sourceUrl": "https://www.law.go.kr/admRulLsInfoR.do?admRulSeq=2100000274228",
+      "article": "국민연금법 제3조 제1항 제5호",
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.nationalPensionCap",
       "value": 6590000,
       "unit": "",
-      "asOf": "2026",
-      "effectiveFrom": "2026-01-01",
-      "effectiveTo": "2026-12-31",
-      "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
-      "sourceUrl": "https://www.4insure.or.kr/",
-      "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "asOf": "2026-07",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2027-06-30",
+      "sourceTitle": "보건복지부고시 제2026-31호",
+      "sourceUrl": "https://www.law.go.kr/admRulLsInfoR.do?admRulSeq=2100000274228",
+      "article": "국민연금법 제3조 제1항 제5호",
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.healthInsuranceTotal",
@@ -72,8 +98,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.healthInsuranceEmployeeShare",
@@ -85,8 +111,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.longTermCareIncomeRate",
@@ -98,8 +124,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.employmentInsuranceEmployee",
@@ -111,8 +137,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "rates.localIncomeTaxOnNational",
@@ -124,8 +150,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     },
     {
       "id": "basicPersonalExemption",
@@ -137,8 +163,8 @@
       "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
       "sourceUrl": "https://www.4insure.or.kr/",
       "article": null,
-      "verifiedBy": "미검증",
-      "verifiedOn": null
+      "verifiedBy": "사용자",
+      "verifiedOn": "2026-11-12"
     }
   ]
 }

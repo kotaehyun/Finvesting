@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { and, desc, eq, inArray, isNotNull, notInArray, or, sql, type SQL } from "drizzle-orm";
-import { news, macroIndicators, quotes, instruments, watchlist, fundamentals } from "@finvesting/db";
+import { news, macroIndicators, quotes, instruments, watchlist, fundamentals, type Db } from "@finvesting/db";
 import {
   calculatePriceChange,
   ANALYST_TITLE_RE,
@@ -69,6 +69,55 @@ const newsListCols = {
   publishedAt: news.publishedAt,
   summary: news.summary,
 };
+
+/** 종목 뉴스는 전체 기간에서 이 건수만 가져온 뒤 core가 오탐을 거른다. */
+const WATCH_NEWS_CANDIDATES = 200;
+
+function titleContains(column: typeof news.title, value: string): SQL {
+  const escaped = value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+  return sql`${column} ILIKE ${`%${escaped}%`} ESCAPE '\\'`;
+}
+
+function symbolNewsKey(symbol: string, name: string): string {
+  return `${symbol.trim()}\n${name.trim()}`;
+}
+
+/** 종목 코드가 symbols에 있거나 제목에 티커·회사명이 있는 글. 최신 200건. */
+async function newsCandidateRows(db: Db, symbol: string, name: string, extra?: SQL) {
+  const sym = symbol.trim();
+  const nm = name.trim();
+  if (!sym) return [];
+  const conds: SQL[] = [sql`${news.symbols} @> ARRAY[${sym}]::text[]`];
+  if (sym.length >= 4) conds.push(titleContains(news.title, sym));
+  if (nm.length >= 2) conds.push(titleContains(news.title, nm));
+  const matched = or(...conds);
+  if (!matched) return [];
+  return db
+    .select({ ...newsListCols, symbols: news.symbols })
+    .from(news)
+    .where(extra ? and(matched, extra) : matched)
+    .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
+    .limit(WATCH_NEWS_CANDIDATES);
+}
+
+async function loadSymbolNewsMap(
+  db: Db,
+  items: readonly { symbol: string; name: string }[],
+  limit: number,
+  extra?: SQL,
+) {
+  const unique = new Map<string, { symbol: string; name: string }>();
+  for (const item of items) {
+    const key = symbolNewsKey(item.symbol, item.name);
+    if (!unique.has(key)) unique.set(key, item);
+  }
+  const out = new Map<string, ReturnType<typeof matchNewsForSymbol>>();
+  await Promise.all([...unique.entries()].map(async ([key, item]) => {
+    const rows = await newsCandidateRows(db, item.symbol, item.name, extra);
+    out.set(key, matchNewsForSymbol(rows, item.symbol, item.name, limit));
+  }));
+  return out;
+}
 
 function ni(v: unknown) {
   return Number(v) || 0;
@@ -478,19 +527,11 @@ export const marketRouter = router({
       }
     }
 
-    // 3. 최근 뉴스 중 종목 관련 뉴스 매핑 (최대 3건)
-    const recentNews = await ctx.db
-      .select({
-        id: news.id,
-        title: news.title,
-        url: news.url,
-        publisher: news.publisher,
-        publishedAt: news.publishedAt,
-        symbols: news.symbols,
-      })
-      .from(news)
-      .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
-      .limit(120);
+    const newsByKey = await loadSymbolNewsMap(
+      ctx.db,
+      rows.map((r) => ({ symbol: r.symbol, name: r.name })),
+      3,
+    );
 
     return rows.map((r) => {
       const qInfo = quoteMap.get(r.instrumentId);
@@ -502,7 +543,7 @@ export const marketRouter = router({
 
       const fInfo = fundMap.get(r.instrumentId);
 
-      const itemNews = matchNewsForSymbol(recentNews, r.symbol, r.name, 3);
+      const itemNews = newsByKey.get(symbolNewsKey(r.symbol, r.name)) ?? [];
 
       return {
         id: r.id,
@@ -555,11 +596,8 @@ export const marketRouter = router({
     .query(async ({ ctx, input }) => {
       const sym = input.symbol.trim();
       const name = input.name?.trim() ?? "";
-      const recent = await ctx.db
-        .select({ ...newsListCols, symbols: news.symbols })
-        .from(news)
-        .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
-        .limit(400);
+      if (!sym) return [];
+      const recent = await newsCandidateRows(ctx.db, sym, name);
       const matched = new Set(matchNewsForSymbol(recent, sym, name, input.limit).map((n) => n.id));
       return recent
         .filter((n) => matched.has(n.id))
@@ -755,24 +793,12 @@ export const marketRouter = router({
         return { status: board.status, asOf: null as string | null, kr: [], world: [] };
       }
       const { kr, world } = buildMcapBoards(board.items, limit);
-      const recentNews = await ctx.db
-        .select({
-          id: news.id,
-          title: news.title,
-          url: news.url,
-          publisher: news.publisher,
-          publishedAt: news.publishedAt,
-          symbols: news.symbols,
-        })
-        .from(news)
-        .where(newsOnly)
-        .orderBy(sql`${news.publishedAt} DESC NULLS LAST`)
-        .limit(200);
+      const newsByKey = await loadSymbolNewsMap(ctx.db, [...kr, ...world], 3, newsOnly);
 
       const attach = (rows: typeof kr) => rows.map((r) => ({
         ...r,
         marketCapLabel: formatMcapLabel(r.marketCap, r.currency),
-        recentNews: matchNewsForSymbol(recentNews, r.symbol, r.name, 3),
+        recentNews: newsByKey.get(symbolNewsKey(r.symbol, r.name)) ?? [],
       }));
 
       const asOf = board.items.reduce<string | null>((best, r) => {

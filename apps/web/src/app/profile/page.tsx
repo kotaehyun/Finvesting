@@ -16,6 +16,7 @@ import {
   payEarningGroupOf,
   PAY_DEDUCTION_PRESETS,
   PAY_EARNING_GROUP_LABEL,
+  NATIONAL_PENSION_BANDS,
   PAYROLL_RATES_SOURCE,
   type PayEarningGroup,
 } from "@finvesting/core";
@@ -683,7 +684,7 @@ function ProfileWorkspace() {
                   </thead>
                   <tbody>
                     <tr><td className="ro">세전 근로소득</td><td className="ro">월 입력</td><td className="ro num">{pay ? won(pay.gross) : "—"}</td></tr>
-                    <tr><td className="ro">국민연금</td><td className="ro">4.75% (하한 41만 · 상한 659만)</td><td className="ro num">{pay ? won(pay.nationalPension) : "—"}</td></tr>
+                    <tr><td className="ro">국민연금</td><td className="ro">4.75%. {NATIONAL_PENSION_BANDS.map((b) => `${b.from}~${b.to} 하한 ${b.floor / 10000}만 · 상한 ${b.cap / 10000}만`).join(". ")}. 이 금액은 2026-07 고시</td><td className="ro num">{pay ? won(pay.nationalPension) : "—"}</td></tr>
                     <tr><td className="ro">건강보험</td><td className="ro">7.19% × 50%</td><td className="ro num">{pay ? won(pay.healthInsurance) : "—"}</td></tr>
                     <tr><td className="ro">장기요양보험</td><td className="ro">건보료 × (0.9448 / 7.19)</td><td className="ro num">{pay ? won(pay.longTermCare) : "—"}</td></tr>
                     <tr><td className="ro">고용보험</td><td className="ro">0.9%</td><td className="ro num">{pay ? won(pay.employmentInsurance) : "—"}</td></tr>

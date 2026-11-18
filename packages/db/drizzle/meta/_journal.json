@@ -64,6 +64,13 @@
       "when": 1793693063991,
       "tag": "0008_company_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794463219715,
+      "tag": "0009_chat_sessions",
+      "breakpoints": true
     }
   ]
 }

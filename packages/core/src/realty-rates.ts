@@ -61,7 +61,7 @@ export function matchEcosLoanRateItem(stat: string, name: string): EcosLoanRateS
 export function ecosLoanRateMacroCodes(): string[] {
   return [
     REALTY_BASE_RATE.liveCode,
-    "KTB_3Y",
+    "KTB_5Y",
     ...ECOS_LOAN_RATE_SPECS.map((s) => s.code),
   ];
 }
@@ -72,7 +72,7 @@ export function realtyRateSnapshot(): RealtyRateRow[] {
   const b = REALTY_BASE_RATE;
   return [
     { id: "base", group: "정책", label: "한국은행 기준금리", rate: b.rate, delta: b.delta, asOf: b.asOf, basis: "policy", basisLabel: "금통위", liveCode: b.liveCode },
-    { id: "ktb", group: "시장", label: "국고채 3년", rate: null, delta: null, asOf: "", basis: "market", basisLabel: "ECOS", liveCode: "KTB_3Y", note: "수집되면 채웁니다." },
+    { id: "ktb", group: "시장", label: "국고채 5년", rate: null, delta: null, asOf: "", basis: "market", basisLabel: "ECOS", liveCode: "KTB_5Y", note: "수집되면 채웁니다." },
     { id: "newLoan", group: "신규취급액", label: "예금은행 대출", rate: a.newLoan, delta: a.newLoanDelta, asOf: a.asOf, basis: "new", basisLabel: "신규", liveCode: "ECOS_LOAN_NEW_ALL" },
     { id: "newHh", group: "신규취급액", label: "가계대출", rate: a.newHh, delta: a.newHhDelta, asOf: a.asOf, basis: "new", basisLabel: "신규", liveCode: "ECOS_LOAN_NEW_HH" },
     { id: "newMort", group: "신규취급액", label: "주택담보대출", rate: a.newMort, delta: a.newMortDelta, asOf: a.asOf, basis: "new", basisLabel: "신규", liveCode: "ECOS_LOAN_NEW_MORT" },

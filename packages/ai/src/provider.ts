@@ -7,6 +7,6 @@ export type ChatMessage = { role: "system" | "user" | "assistant"; content: stri
 export interface LlmProvider {
   readonly name: string;
   chat(messages: ChatMessage[], opts?: { temperature?: number; maxTokens?: number }): Promise<string>;
-  chatStream?(messages: ChatMessage[], opts?: { temperature?: number }): AsyncIterable<string>;
+  chatStream?(messages: ChatMessage[], opts?: { temperature?: number; signal?: AbortSignal }): AsyncIterable<string>;
   embed(texts: string[]): Promise<number[][]>;
 }
