@@ -82,3 +82,22 @@ export function parseDartAmount(raw: string | null | undefined): number | null {
   const n = Number(s);
   return Number.isFinite(n) ? n : null;
 }
+
+export type DartAmountPeriod = "FY" | "Q1" | "H1" | "Q3";
+
+/**
+ * 손익의 반기·3분기에서 `thstrm_amount`는 3개월, `thstrm_add_amount`가 연초부터 누적이다.
+ * `thstrm_dt`는 3개월 행에도 연초~기말로 적혀 있어 기간 판정에 쓰지 않는다.
+ * 누적 칸이 없으면 null. 그 행은 저장하지 않는다.
+ * 재무상태(시점)·현금흐름·1분기·연간은 `thstrm_amount`.
+ */
+export function dartReportedAmount(input: {
+  statement: DartStatementKind;
+  period: DartAmountPeriod;
+  thstrmAmount?: string | null;
+  thstrmAddAmount?: string | null;
+}): number | null {
+  const cumulative = input.statement === "income" && (input.period === "H1" || input.period === "Q3");
+  if (cumulative) return parseDartAmount(input.thstrmAddAmount);
+  return parseDartAmount(input.thstrmAmount);
+}
