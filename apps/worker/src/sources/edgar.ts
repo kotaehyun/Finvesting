@@ -2,7 +2,10 @@ import { db, financialStatements } from "@finvesting/db";
 import {
   edgarMinFiscalYear,
   edgarNeedsCatalog,
+  heldInstrumentKey,
+  indexHeldPreferFirst,
   parseEdgarTarget,
+  pickEdgarFact,
   parseEnvTargets,
   resolveEdgarTargets,
   statementLookupHeldRefs,
@@ -30,7 +33,7 @@ const TAGS: Array<{ tag: string; key: string; statement: "income" | "balance" | 
   { tag: "NetCashProvidedByUsedInOperatingActivities", key: "cfo", statement: "cashflow" },
 ];
 
-type Fact = { end: string; val: number; fy: number; fp: string; form: string };
+type Fact = { start?: string; end: string; val: number; fy: number; fp: string; form: string };
 
 export async function collectEdgar() {
   if (!UA) return { skipped: "SEC_USER_AGENT not set" };
@@ -52,7 +55,7 @@ export async function collectEdgar() {
     return { skipped: "no edgar targets", catalog: catalogStatus, unmatched };
   }
   let upserted = 0;
-  const heldByTicker = new Map(held.map((h) => [h.symbol.trim().toUpperCase(), h]));
+  const heldByTicker = indexHeldPreferFirst(held, (h) => heldInstrumentKey(h.symbol));
   for (const t of targets) {
     const heldRow = heldByTicker.get(t.ticker);
     const market = heldRow && /^(US|NYSE|NASDAQ|AMEX)$/i.test(heldRow.market) ? heldRow.market : "US";
@@ -63,24 +66,42 @@ export async function collectEdgar() {
     const json = (await res.json()) as { facts?: { "us-gaap"?: Record<string, { units: Record<string, Fact[]> }> } };
     const gaap = json.facts?.["us-gaap"] ?? {};
 
-    // (fy, fp, statement) → items
-    const groups = new Map<string, { fy: number; fp: string; statement: string; end: string; items: Record<string, number> }>();
+    // (fy, fp, statement) → 항목별 후보. 손익·현금흐름은 누적 개월이 맞는 fact만 남긴다.
+    const groups = new Map<string, {
+      fy: number;
+      fp: string;
+      statement: "income" | "balance" | "cashflow";
+      facts: Map<string, Fact[]>;
+    }>();
     for (const { tag, key, statement } of TAGS) {
       const units = gaap[tag]?.units; if (!units) continue;
-      const facts = [...(units["USD"] ?? units["USD/shares"] ?? [])].sort((a, b) => b.end.localeCompare(a.end));
+      const facts = units["USD"] ?? units["USD/shares"] ?? [];
       for (const f of facts) {
         if (!["10-K", "10-Q"].includes(f.form) || f.fy < edgarMinFiscalYear()) continue;
         const k = `${f.fy}|${f.fp}|${statement}`;
-        const g = groups.get(k) ?? { fy: f.fy, fp: f.fp, statement, end: f.end, items: {} };
-        if (!(key in g.items)) g.items[key] = f.val; // end 내림차순이므로 첫 값이 최신
-        if (f.end > g.end) g.end = f.end;
+        const g = groups.get(k) ?? { fy: f.fy, fp: f.fp, statement, facts: new Map() };
+        const list = g.facts.get(key) ?? [];
+        list.push(f);
+        g.facts.set(key, list);
         groups.set(k, g);
       }
     }
     for (const g of groups.values()) {
+      const items: Record<string, number> = {};
+      let end = "";
+      for (const [key, facts] of g.facts) {
+        const picked = pickEdgarFact(g.statement, g.fp, facts);
+        if (!picked) {
+          console.warn(`edgar skip ${t.ticker} ${g.fy} ${g.fp} ${g.statement} ${key}: duration mismatch`);
+          continue;
+        }
+        items[key] = picked.val;
+        if (picked.end > end) end = picked.end;
+      }
+      if (!Object.keys(items).length || !end) continue;
       await db.insert(financialStatements).values({
-        instrumentId: inst.id, fiscalYear: g.fy, fiscalPeriod: g.fp, statement: g.statement, consolidated: "CFS", currency: "USD", periodEnd: g.end, items: g.items, source: "edgar",
-      }).onConflictDoUpdate({ target: [financialStatements.instrumentId, financialStatements.fiscalYear, financialStatements.fiscalPeriod, financialStatements.statement, financialStatements.consolidated, financialStatements.source], set: { items: g.items, periodEnd: g.end, fetchedAt: new Date() } });
+        instrumentId: inst.id, fiscalYear: g.fy, fiscalPeriod: g.fp, statement: g.statement, consolidated: "CFS", currency: "USD", periodEnd: end, items, source: "edgar",
+      }).onConflictDoUpdate({ target: [financialStatements.instrumentId, financialStatements.fiscalYear, financialStatements.fiscalPeriod, financialStatements.statement, financialStatements.consolidated, financialStatements.source], set: { items, periodEnd: end, fetchedAt: new Date() } });
       upserted++;
     }
     await new Promise((r) => setTimeout(r, 150)); // SEC rate limit 배려
