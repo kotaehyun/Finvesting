@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cookieValue,
+  loginBackoffMs,
   passwordsMatch,
   readSession,
   SESSION_COOKIE,
@@ -31,6 +32,13 @@ describe("쿠키 세션", () => {
     const token = await signSession(userId, secret, 1_700_000_000_000);
     const flipped = `${token.slice(0, -1)}${token.endsWith("a") ? "b" : "a"}`;
     expect(await readSession(flipped, secret)).toBeNull();
+  });
+
+  it("로그인 실패 지연은 횟수 × 500ms, 최대 5초", () => {
+    expect(loginBackoffMs(1)).toBe(500);
+    expect(loginBackoffMs(3)).toBe(1_500);
+    expect(loginBackoffMs(20)).toBe(5_000);
+    expect(loginBackoffMs(0)).toBe(0);
   });
 
   it("쿠키 헤더에서 세션 값만 꺼낸다", () => {

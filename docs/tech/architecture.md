@@ -41,7 +41,7 @@
 - `worker`는 `db` + `core`(수집 대상 매핑) + `ai` 임베딩. `api`를 거치지 않는다.
 
 ## 인증
-단일 사용자. `DEFAULT_USER_ID`로 고정. `APP_PASSWORD`가 비어 있으면 로그인 없이 연다. 값이 있으면 HMAC 쿠키가 이 사용자와 같을 때만 화면과 tRPC를 연다 (ADR 0056). 비밀번호는 DB에 없다. 계정은 한 명이다.
+단일 사용자. `DEFAULT_USER_ID`로 고정. `APP_PASSWORD`가 비어 있으면 로그인 없이 연다. 값이 있으면 `SESSION_SECRET`으로 서명한 HMAC 쿠키가 이 사용자와 같을 때만 화면과 tRPC를 연다 (ADR 0056). 비밀번호는 DB에 없고 서명 키와 다르다. 계정은 한 명이다.
 
 ## 웹 타입 해석
 `apps/web/tsconfig.json`은 `typeRoots`와 `paths`로 `@types/react` 19만 보게 한다. 모노레포의 모바일 Expo(`@types/react` 18)가 Next `styled-jsx`를 통해 섞이면 JSX 컴포넌트 오류가 난다. 타입 단언으로 가리지 않는다.
