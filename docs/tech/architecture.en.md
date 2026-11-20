@@ -41,7 +41,7 @@ Converts external files to/from internal models (import bank/card/brokerage expo
 - `worker` uses `db` + `core` (quote-target mapping) + `ai` for embeddings; it does not go through `api`.
 
 ## Auth
-Single user, fixed via `DEFAULT_USER_ID`. An empty `APP_PASSWORD` leaves the app open. A value requires an HMAC cookie for that same user before the UI or tRPC responds (ADR 0056). The password is not stored in the database.
+Single user, fixed via `DEFAULT_USER_ID`. An empty `APP_PASSWORD` leaves the app open. A value requires an HMAC cookie signed with `SESSION_SECRET` for that same user before the UI or tRPC responds (ADR 0056). The password is not stored in the database and is not the signing key.
 
 ## Web type resolution
 `apps/web/tsconfig.json` pins `@types/react` 19 via `typeRoots` and `paths`. Mobile Expo’s `@types/react` 18 leaking through Next `styled-jsx` breaks JSX component types. Do not hide this with type assertions.

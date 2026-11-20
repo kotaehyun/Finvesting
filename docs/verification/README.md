@@ -37,9 +37,9 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ⚠️ 2026-11-19 재실행. ai·db·interop·core·worker·api·mobile 통과. web은 `geo-map.tsx` 301·308 (재무 기간 수정과 무관) | 2026-11-19 | Cursor |
-| core 테스트 (vitest) | ✅ 82개 파일 371개 통과 (`pnpm --filter @finvesting/core test`) | 2026-11-19 | Cursor |
-| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). payroll·brackets·ei-stability는 `verifiedBy` 사용자(2026-11-12). 미검증 259는 civil-pay·corp-local | 2026-11-12 | Cursor |
+| 타입체크 (web 포함 8패키지) | ✅ `pnpm typecheck` 8패키지 통과. 합친 `dev` | 2026-11-20 | Cursor |
+| core 테스트 (vitest) | ✅ 82개 파일 376개 통과. 합친 `dev` | 2026-11-20 | Cursor |
+| `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 4대보험 요율은 `verifiedBy` 사용자. `basicPersonalExemption`은 미검증. 미검증 260은 그 칸·civil-pay·corp-local | 2026-11-20 | Cursor |
 | 부동산·ERP 범위 | ✅ 동결·보류(ADR 0050). 내비 숨김 | 2026-09-26 | Cursor |
 | interop 테스트 | ✅ 5개 파일 18개 테스트 전건 통과 (`accounting-journal-csv.test.ts` 4건 포함) | 2026-10-10 | Gemini |
 | `pnpm db:generate` / `db:migrate` | ✅ 마이그레이션 23개 테이블 전건 적용 | 2026-10-09 | Gemini |
@@ -102,6 +102,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-20 | Cursor (급여 요율·로그인 키) | [2026-11-20-cursor-payroll-session.md](./2026-11-20-cursor-payroll-session.md) |
 | 2026-11-19 | Cursor (재무제표 기간·시장) | [2026-11-19-cursor-statements.md](./2026-11-19-cursor-statements.md) |
 | 2026-11-18 | Cursor (점유 지역·연령·성별) | [2026-11-18-cursor-tenure-detail.md](./2026-11-18-cursor-tenure-detail.md) |
 | 2026-11-18 | Cursor (지방끼리 이동 화살표) | [2026-11-18-cursor-move-local.md](./2026-11-18-cursor-move-local.md) |

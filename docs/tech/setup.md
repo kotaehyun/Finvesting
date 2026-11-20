@@ -30,7 +30,7 @@ psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db
 pnpm db:generate && pnpm db:migrate
 psql postgresql://finvesting:finvesting@localhost:5432/finvesting -f packages/db/seed/001_default_user.sql
 pnpm dev:web                     # http://127.0.0.1:3000 (로컬만)
-# APP_PASSWORD 가 비어 있으면 로그인 없이 연다. 값을 두면 그 비밀번호의 쿠키가 있어야 한다.
+# APP_PASSWORD 가 비어 있으면 로그인 없이 연다. 값을 두면 SESSION_SECRET(32바이트 이상 무작위)으로 서명한 쿠키가 있어야 한다. 비밀번호와 서명 키는 다르다.
 # 같은 Wi‑Fi의 폰에서 볼 때만: pnpm --filter @finvesting/web dev:lan  → 0.0.0.0:3000
 pnpm dev:worker                  # 또는 pnpm --filter @finvesting/worker run:once 로 1회 수집
 ```

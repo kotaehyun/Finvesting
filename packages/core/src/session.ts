@@ -41,6 +41,12 @@ export function passwordsMatch(input: string, expected: string): boolean {
   return fixedEqual(input, expected);
 }
 
+/** 실패 횟수 × 500ms. 최대 5초. 횟수는 호출하는 쪽이 프로세스 메모리에 둔다. */
+export function loginBackoffMs(failures: number): number {
+  const n = Math.max(0, Math.floor(failures));
+  return Math.min(5_000, n * 500);
+}
+
 export async function signSession(userId: string, secret: string, now = Date.now()): Promise<string> {
   const exp = String(now + SESSION_TTL_MS);
   const body = `${userId}.${exp}`;

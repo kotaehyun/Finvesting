@@ -63,6 +63,13 @@ describe("resolvePay", () => {
     expect(p.net).toBe(340);
     expect(p.gross).toBe(400);
   });
+
+  it("고시 밖 달은 공제를 만들지 않는다", () => {
+    const p = resolvePay({ monthlyGrossIncome: 3_000_000, payMonth: "2027-07" });
+    expect(p.status).toBe("unavailable");
+    expect(p.nationalPension).toBeNull();
+    expect(p.withholdTotal).toBeNull();
+  });
 });
 
 describe("mergeTaxTrend", () => {

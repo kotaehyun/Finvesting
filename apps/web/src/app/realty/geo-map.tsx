@@ -298,14 +298,14 @@ function focusMatch(focusId: string | null, focusCode: string | null) {
 function highlightPaint(focusId: string | null, focusCode: string | null): DataDrivenPropertyValueSpecification<string> {
   const match = focusMatch(focusId, focusCode);
   if (!match) return ["get", "color"];
-  return ["case", match, "#f59e0b", ["get", "color"]] as DataDrivenPropertyValueSpecification<string>;
+  return ["case", match, "#f59e0b", ["get", "color"]] as unknown as DataDrivenPropertyValueSpecification<string>;
 }
 
 function heightPaint(focusId: string | null, focusCode: string | null): DataDrivenPropertyValueSpecification<number> {
   const own = ["to-number", ["get", "height"]] as DataDrivenPropertyValueSpecification<number>;
   const match = focusMatch(focusId, focusCode);
   if (!match) return own;
-  return ["case", match, ["+", own, 5200], 180] as DataDrivenPropertyValueSpecification<number>;
+  return ["case", match, ["+", own, 5200], 180] as unknown as DataDrivenPropertyValueSpecification<number>;
 }
 
 export function RealtyGeoMap({

@@ -31,8 +31,8 @@ export async function upsertPayrollMonth(
   userId: string,
   month: string,
   pay: {
-    gross: number; net: number; nationalTax: number; localTax: number;
-    nationalPension: number; healthInsurance: number; longTermCare: number; employmentInsurance: number;
+    gross: number; net: number; nationalTax: number | null; localTax: number | null;
+    nationalPension: number | null; healthInsurance: number | null; longTermCare: number | null; employmentInsurance: number | null;
   },
   earnings: Array<{ name: string; amount: number }>,
 ) {
@@ -42,9 +42,9 @@ export async function upsertPayrollMonth(
   const bonus = parts.gross > 0 ? parts.bonus : 0;
   const other = parts.gross > 0 ? parts.other : 0;
   const gross = parts.gross > 0 ? parts.gross : pay.gross;
-  const tax = Math.max(0, pay.nationalTax) + Math.max(0, pay.localTax);
-  const insurance = Math.max(0, pay.nationalPension) + Math.max(0, pay.healthInsurance)
-    + Math.max(0, pay.longTermCare) + Math.max(0, pay.employmentInsurance);
+  const tax = Math.max(0, pay.nationalTax ?? 0) + Math.max(0, pay.localTax ?? 0);
+  const insurance = Math.max(0, pay.nationalPension ?? 0) + Math.max(0, pay.healthInsurance ?? 0)
+    + Math.max(0, pay.longTermCare ?? 0) + Math.max(0, pay.employmentInsurance ?? 0);
   const net = pay.net > 0 ? pay.net : Math.max(0, gross - tax - insurance);
   const values = {
     baseAmount: String(Math.round(base)),
@@ -59,6 +59,11 @@ export async function upsertPayrollMonth(
   };
   const [existing] = await db.select({ id: payrollMonths.id }).from(payrollMonths)
     .where(and(eq(payrollMonths.userId, userId), eq(payrollMonths.month, month)));
+  // 고시 밖은 보험료가 null이다. 0원으로 넣지 않고, 그 달 행이 있으면 지운다.
+  if (pay.nationalPension == null || pay.healthInsurance == null || pay.longTermCare == null || pay.employmentInsurance == null) {
+    if (existing) await db.delete(payrollMonths).where(eq(payrollMonths.id, existing.id));
+    return;
+  }
   if (existing) {
     await db.update(payrollMonths).set(values).where(eq(payrollMonths.id, existing.id));
   } else if (gross > 0 || tax > 0) {
@@ -93,10 +98,14 @@ export async function loadPayTrends(db: Db, userId: string, throughMonth: string
       monthlyNetIncome: profile.monthlyNetIncome,
       monthlyIncomeTax: profile.monthlyIncomeTax,
       monthlyHealthInsurance: profile.monthlyHealthInsurance,
+      payMonth: throughMonth,
     });
-    const tax = pay.nationalTax + pay.localTax;
-    const insurance = pay.nationalPension + pay.healthInsurance + pay.longTermCare + pay.employmentInsurance;
-    if (pay.gross > 0) {
+    const tax = pay.nationalTax != null && pay.localTax != null ? pay.nationalTax + pay.localTax : 0;
+    const insurance = pay.nationalPension != null && pay.healthInsurance != null
+      && pay.longTermCare != null && pay.employmentInsurance != null
+      ? pay.nationalPension + pay.healthInsurance + pay.longTermCare + pay.employmentInsurance
+      : 0;
+    if (pay.status === "ok" && pay.gross > 0) {
       current = {
         month: throughMonth,
         base: parts.gross > 0 ? parts.base : pay.gross,

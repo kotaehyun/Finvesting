@@ -12,8 +12,13 @@ function defaultUserId(): string {
 /** 비밀번호가 없으면 로컬 단일 사용자. 있으면 쿠키의 사용자만 통과한다. */
 export async function createContext(opts?: { req?: Request }): Promise<Context> {
   const userId = defaultUserId();
-  const secret = process.env.APP_PASSWORD?.trim() ?? "";
-  if (!secret) return { db, userId };
+  const password = process.env.APP_PASSWORD?.trim() ?? "";
+  if (!password) return { db, userId };
+  const secret = process.env.SESSION_SECRET?.trim() ?? "";
+  if (!secret) {
+    console.warn("APP_PASSWORD is set but SESSION_SECRET is missing");
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "로그인이 필요합니다." });
+  }
   const token = cookieValue(opts?.req?.headers.get("cookie"), SESSION_COOKIE);
   const sessionUser = token ? await readSession(token, secret) : null;
   if (sessionUser !== userId) {

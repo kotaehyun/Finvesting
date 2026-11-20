@@ -46,4 +46,4 @@
 
 ## 원문 대조 (2026-11-12)
 준비표: `docs/verification/2026-09-26-tax-verify-prep.md`  
-`payroll-rates-2026.json` · `brackets.json` · `ei-stability.json`은 `verifiedBy` 「사용자」, `verifiedOn` `2026-11-12`. 숫자는 그대로. `civil-pay-2026.json` · `corp-local-rate.json`은 미검증.
+`payroll-rates-2026.json`의 4대보험 요율·상하한과 `brackets.json` · `ei-stability.json`은 `verifiedBy` 「사용자」, `verifiedOn` `2026-11-12`. 숫자는 그대로. `basicPersonalExemption`만 출처를 소득세법 제50조로 고쳤고 `verifiedBy`는 「미검증」이다. `civil-pay-2026.json` · `corp-local-rate.json`은 미검증.

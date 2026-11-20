@@ -59,17 +59,54 @@ function truncWon(n: number) {
 }
 
 export type StatutoryWithholding = {
-  nationalPension: number;
-  healthInsurance: number;
-  longTermCare: number;
-  employmentInsurance: number;
-  nationalTax: number;
-  localTax: number;
-  insuranceTotal: number;
-  taxTotal: number;
-  withholdTotal: number;
-  pensionBase: number;
+  status: "ok" | "unavailable";
+  nationalPension: number | null;
+  healthInsurance: number | null;
+  longTermCare: number | null;
+  employmentInsurance: number | null;
+  nationalTax: number | null;
+  localTax: number | null;
+  insuranceTotal: number | null;
+  taxTotal: number | null;
+  withholdTotal: number | null;
+  pensionBase: number | null;
 };
+
+export type PayrollRateInput = {
+  nationalPensionEmployee: number;
+  healthInsuranceTotal: number;
+  healthInsuranceEmployeeShare: number;
+  longTermCareIncomeRate: number;
+  employmentInsuranceEmployee: number;
+};
+
+/** 소수 요율을 정수 분수로. 0.0475 → 19/400. 과학적 표기면 null. */
+export function rateFraction(rate: number): { num: number; den: number } | null {
+  if (!Number.isFinite(rate)) return null;
+  const m = String(rate).match(/^(-?)(\d+)(?:\.(\d+))?$/);
+  if (!m) return null;
+  const sign = m[1] === "-" ? -1 : 1;
+  const den = 10 ** (m[3]?.length ?? 0);
+  const num = sign * Number(`${m[2]}${m[3] ?? ""}`);
+  const g = gcd(Math.abs(num), den);
+  return { num: num / g, den: den / g };
+}
+
+function gcd(a: number, b: number): number {
+  let x = a;
+  let y = b;
+  while (y) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x || 1;
+}
+
+function applyFraction(base: number, frac: { num: number; den: number } | null): number | null {
+  if (!frac || frac.den === 0) return null;
+  return truncWon(base * frac.num / frac.den);
+}
 
 // 소득세법 제47조 근로소득공제. 한도 2,000만. 원 단위 절사.
 export const BASIC_PERSONAL_EXEMPTION = requireValue(dataFile, "basicPersonalExemption");
@@ -123,21 +160,60 @@ export function incomeTaxBaseFromMonthly(monthlyGross: number, monthlyPension = 
   return incomeTaxBaseFromAnnual(monthly * 12, pension * 12);
 }
 
-export function statutoryWithholding(grossIncome: number, nationalTax = 0, payMonth?: string): StatutoryWithholding {
+const JSON_RATES: PayrollRateInput = {
+  nationalPensionEmployee: PAYROLL_RATES_2026.nationalPensionEmployee,
+  healthInsuranceTotal: PAYROLL_RATES_2026.healthInsuranceTotal,
+  healthInsuranceEmployeeShare: PAYROLL_RATES_2026.healthInsuranceEmployeeShare,
+  longTermCareIncomeRate: PAYROLL_RATES_2026.longTermCareIncomeRate,
+  employmentInsuranceEmployee: PAYROLL_RATES_2026.employmentInsuranceEmployee,
+};
+
+function unavailableWithholding(): StatutoryWithholding {
+  return {
+    status: "unavailable",
+    nationalPension: null, healthInsurance: null, longTermCare: null, employmentInsurance: null,
+    nationalTax: null, localTax: null, insuranceTotal: null, taxTotal: null,
+    withholdTotal: null, pensionBase: null,
+  };
+}
+
+export function statutoryWithholding(
+  grossIncome: number,
+  nationalTax = 0,
+  payMonth?: string,
+  rates: PayrollRateInput = JSON_RATES,
+): StatutoryWithholding {
   const gross = Math.max(0, Number(grossIncome) || 0);
+  if (payMonth && !nationalPensionBand(payMonth)) return unavailableWithholding();
   const band = nationalPensionBand(payMonth);
-  // 고시 밖 달은 상·하한을 만들지 않는다. 세전을 그대로 기준소득월액으로 둔다.
-  const pensionBase = gross <= 0 ? 0 : band ? Math.min(Math.max(gross, band.floor), band.cap) : gross;
-  // 정수 분수로 계산해 0.009 * 3000000 = 26999.999… 같은 부동소수 오차를 피한다.
-  const nationalPension = truncWon(pensionBase * 475 / 10_000);
-  const healthInsurance = truncWon(gross * 719 / 20_000);
-  const longTermCare = truncWon(healthInsurance * 9_448 / 71_900);
-  const employmentInsurance = truncWon(gross * 9 / 1_000);
+  const pensionBase = gross <= 0 || !band ? 0 : Math.min(Math.max(gross, band.floor), band.cap);
+  const pensionFrac = rateFraction(rates.nationalPensionEmployee);
+  const healthTotal = rateFraction(rates.healthInsuranceTotal);
+  const healthShare = rateFraction(rates.healthInsuranceEmployeeShare);
+  const healthReduced = healthTotal && healthShare
+    ? (() => {
+      const num = healthTotal.num * healthShare.num;
+      const den = healthTotal.den * healthShare.den;
+      const g = gcd(Math.abs(num), den);
+      return { num: num / g, den: den / g };
+    })()
+    : null;
+  const nationalPension = applyFraction(pensionBase, pensionFrac);
+  const healthInsurance = applyFraction(gross, healthReduced);
+  const ltc = rateFraction(rates.longTermCareIncomeRate);
+  const longTermCare = healthInsurance != null && ltc && healthTotal && healthTotal.num !== 0
+    ? truncWon(healthInsurance * ltc.num * healthTotal.den / (ltc.den * healthTotal.num))
+    : null;
+  const employmentInsurance = applyFraction(gross, rateFraction(rates.employmentInsuranceEmployee));
+  if (nationalPension == null || healthInsurance == null || longTermCare == null || employmentInsurance == null) {
+    return unavailableWithholding();
+  }
   const tax = Math.max(0, Math.round(Number(nationalTax) || 0));
   const localTax = truncWon(tax / 10);
   const insuranceTotal = nationalPension + healthInsurance + longTermCare + employmentInsurance;
   const taxTotal = tax + localTax;
   return {
+    status: "ok",
     nationalPension, healthInsurance, longTermCare, employmentInsurance,
     nationalTax: tax, localTax, insuranceTotal, taxTotal,
     withholdTotal: insuranceTotal + taxTotal,
