@@ -669,13 +669,14 @@ function ProfileWorkspace() {
                 </table>
                 <h3 style={{ marginTop: 16 }}>임금 구성항목</h3>
                 <p className="erp-hint">고용노동부 임금명세서 예시의 지급란입니다. 금액 있는 항목만 저장되고 세전이 됩니다.</p>
+                {pay?.status === "unavailable" ? <p className="erp-hint">고시 기간 밖</p> : null}
                 <WageSlip
                   earnRows={earnRows}
                   selEarn={selEarn}
                   onSel={setSelEarn}
                   onPatch={patchEarn}
                   onAdd={addEarnRow}
-                  deductions={deductionRows(pay)}
+                  deductions={pay?.status === "unavailable" ? undefined : deductionRows(pay)}
                 />
               </>
             )}
@@ -695,12 +696,12 @@ function ProfileWorkspace() {
                     <tr><td className="ro">장기요양보험</td><td className="ro">건보료 × (0.9448 / 7.19)</td><td className="ro num">{payCell(pay?.longTermCare, pay?.status === "unavailable")}</td></tr>
                     <tr><td className="ro">고용보험</td><td className="ro">0.9%</td><td className="ro num">{payCell(pay?.employmentInsurance, pay?.status === "unavailable")}</td></tr>
                     <tr><td className="ro" colSpan={3}><strong>소득세 과세표준 · 세액</strong></td></tr>
-                    <tr><td className="ro">연 총급여</td><td className="ro">세전 × 12</td><td className="ro num">{pay ? won(pay.taxBase.annualGross) : "—"}</td></tr>
-                    <tr><td className="ro">근로소득공제</td><td className="ro">소득세법 제47조</td><td className="ro num">{pay ? won(pay.taxBase.earnedIncomeDeduction) : "—"}</td></tr>
-                    <tr><td className="ro">본인 기본공제</td><td className="ro">150만원</td><td className="ro num">{pay ? won(pay.taxBase.personalExemption) : "—"}</td></tr>
-                    <tr><td className="ro">연금보험료공제</td><td className="ro">국민연금 × 12</td><td className="ro num">{pay ? won(pay.taxBase.pensionDeduction) : "—"}</td></tr>
-                    <tr><td className="ro">소득세 과세표준(연)</td><td className="ro">근로소득금액 − 공제</td><td className="ro num">{pay ? won(pay.taxBase.taxableBase) : "—"}</td></tr>
-                    <tr><td className="ro">소득세 과세표준(월)</td><td className="ro">연 ÷ 12</td><td className="ro num">{pay ? won(pay.taxBase.monthlyTaxableBase) : "—"}</td></tr>
+                    <tr><td className="ro">연 총급여</td><td className="ro">세전 × 12</td><td className="ro num">{pay && pay.status !== "unavailable" ? won(pay.taxBase.annualGross) : "—"}</td></tr>
+                    <tr><td className="ro">근로소득공제</td><td className="ro">소득세법 제47조</td><td className="ro num">{pay && pay.status !== "unavailable" ? won(pay.taxBase.earnedIncomeDeduction) : "—"}</td></tr>
+                    <tr><td className="ro">본인 기본공제</td><td className="ro">150만원</td><td className="ro num">{pay && pay.status !== "unavailable" ? won(pay.taxBase.personalExemption) : "—"}</td></tr>
+                    <tr><td className="ro">연금보험료공제</td><td className="ro">국민연금 × 12</td><td className="ro num">{pay && pay.status !== "unavailable" ? won(pay.taxBase.pensionDeduction) : "—"}</td></tr>
+                    <tr><td className="ro">소득세 과세표준(연)</td><td className="ro">근로소득금액 − 공제</td><td className="ro num">{pay && pay.status !== "unavailable" ? won(pay.taxBase.taxableBase) : "—"}</td></tr>
+                    <tr><td className="ro">소득세 과세표준(월)</td><td className="ro">연 ÷ 12</td><td className="ro num">{pay && pay.status !== "unavailable" ? won(pay.taxBase.monthlyTaxableBase) : "—"}</td></tr>
                     <tr>
                       <td className="ro">근로소득세(국세) 세액</td>
                       <td className="ro">명세서 입력</td>
@@ -708,7 +709,7 @@ function ProfileWorkspace() {
                     </tr>
                     <tr><td className="ro">지방소득세 세액</td><td className="ro">국세 × 10%</td><td className="ro num">{payCell(pay?.localTax, pay?.status === "unavailable")}</td></tr>
                     <tr><td className="ro">공제 합계</td><td className="ro"></td><td className="ro num">{payCell(pay?.withholdTotal, pay?.status === "unavailable")}</td></tr>
-                    <tr><td className="ro">실수령액</td><td className="ro">세전 − 공제 (세후 입력이 있으면 그 값)</td><td className="ro num">{pay ? won(pay.net) : "—"}</td></tr>
+                    <tr><td className="ro">실수령액</td><td className="ro">세전 − 공제 (세후 입력이 있으면 그 값)</td><td className="ro num">{pay && (pay.status !== "unavailable" || pay.net > 0) ? won(pay.net) : "—"}</td></tr>
                   </tbody>
                 </table>
                 <p className="erp-hint">{PAYROLL_RATES_SOURCE}</p>
@@ -887,13 +888,14 @@ function ProfileWorkspace() {
                   근로기준법 시행령 제27조의2 · 고용노동부 임금명세서 작성 예시(지급|공제 양란).
                   차변은 지급, 대변은 공제·보통예금(실수령). 금액 0은 저장하지 않습니다. 저장해야 전표에 반영됩니다.
                 </p>
+                {pay?.status === "unavailable" ? <p className="erp-hint">고시 기간 밖</p> : null}
                 <WageSlip
                   earnRows={earnRows}
                   selEarn={selEarn}
                   onSel={setSelEarn}
                   onPatch={patchEarn}
                   onAdd={addEarnRow}
-                  deductions={deductionRows(pay)}
+                  deductions={pay?.status === "unavailable" ? undefined : deductionRows(pay)}
                   net={pay && pay.status === "ok" && pay.withholdTotal != null && pay.gross > 0 ? Math.max(0, (earnRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) || pay.gross) - pay.withholdTotal) : undefined}
                 />
                 {st && <PayYearSection points={st.payTrend} year={st.payYear} />}
@@ -1081,7 +1083,7 @@ function WageSlip({
             <td className="ro" colSpan={2}>지급액 계</td>
             <td className="ro num">{won(payTotal)}</td>
             <td className="ro">공제액 계</td>
-            <td className="ro num">{won(deductTotal)}</td>
+            <td className="ro num">{deductions == null ? "—" : won(deductTotal)}</td>
           </tr>
           {net != null && (
             <tr>

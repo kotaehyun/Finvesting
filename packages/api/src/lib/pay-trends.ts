@@ -59,6 +59,11 @@ export async function upsertPayrollMonth(
   };
   const [existing] = await db.select({ id: payrollMonths.id }).from(payrollMonths)
     .where(and(eq(payrollMonths.userId, userId), eq(payrollMonths.month, month)));
+  // 고시 밖은 보험료가 null이다. 0원으로 넣지 않고, 그 달 행이 있으면 지운다.
+  if (pay.nationalPension == null || pay.healthInsurance == null || pay.longTermCare == null || pay.employmentInsurance == null) {
+    if (existing) await db.delete(payrollMonths).where(eq(payrollMonths.id, existing.id));
+    return;
+  }
   if (existing) {
     await db.update(payrollMonths).set(values).where(eq(payrollMonths.id, existing.id));
   } else if (gross > 0 || tax > 0) {
@@ -93,15 +98,14 @@ export async function loadPayTrends(db: Db, userId: string, throughMonth: string
       monthlyNetIncome: profile.monthlyNetIncome,
       monthlyIncomeTax: profile.monthlyIncomeTax,
       monthlyHealthInsurance: profile.monthlyHealthInsurance,
+      payMonth: throughMonth,
     });
-    const tax = pay.status === "ok" && pay.nationalTax != null && pay.localTax != null
-      ? pay.nationalTax + pay.localTax : 0;
-    const insurance = pay.status === "ok"
-      && pay.nationalPension != null && pay.healthInsurance != null
+    const tax = pay.nationalTax != null && pay.localTax != null ? pay.nationalTax + pay.localTax : 0;
+    const insurance = pay.nationalPension != null && pay.healthInsurance != null
       && pay.longTermCare != null && pay.employmentInsurance != null
       ? pay.nationalPension + pay.healthInsurance + pay.longTermCare + pay.employmentInsurance
       : 0;
-    if (pay.gross > 0) {
+    if (pay.status === "ok" && pay.gross > 0) {
       current = {
         month: throughMonth,
         base: parts.gross > 0 ? parts.base : pay.gross,

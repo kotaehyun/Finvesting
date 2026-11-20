@@ -66,6 +66,7 @@ export async function loadStatement(db: Db, userId: string, month: string) {
     monthlyNetIncome: profile?.monthlyNetIncome,
     monthlyIncomeTax: profile?.monthlyIncomeTax,
     monthlyHealthInsurance: profile?.monthlyHealthInsurance,
+    payMonth: month,
   });
 
   const creditBy: Record<string, number> = {};
@@ -90,17 +91,19 @@ export async function loadStatement(db: Db, userId: string, month: string) {
     taxActualBy[m] = (taxActualBy[m] ?? 0) + n(t.amount);
   }
 
-  const payroll = buildPayrollLedger({
-    grossIncome: pay.gross,
-    nationalPension: pay.nationalPension ?? undefined,
-    healthInsurance: pay.healthInsurance ?? 0,
-    longTermCare: pay.longTermCare ?? undefined,
-    employmentInsurance: pay.employmentInsurance ?? undefined,
-    nationalTax: pay.nationalTax ?? undefined,
-    localTax: pay.localTax ?? undefined,
-    netIncome: pay.net,
-    earnings: payEarnings,
-  });
+  const payroll = pay.status === "ok"
+    ? buildPayrollLedger({
+      grossIncome: pay.gross,
+      nationalPension: pay.nationalPension ?? undefined,
+      healthInsurance: pay.healthInsurance ?? 0,
+      longTermCare: pay.longTermCare ?? undefined,
+      employmentInsurance: pay.employmentInsurance ?? undefined,
+      nationalTax: pay.nationalTax ?? undefined,
+      localTax: pay.localTax ?? undefined,
+      netIncome: pay.net,
+      earnings: payEarnings,
+    })
+    : { credits: [], debits: [], creditTotal: 0, debitTotal: 0, net: 0 };
   const monthly = buildMonthlyLedger({
     netIncome: pay.net,
     otherCredits: Object.entries(creditBy).map(([category, amount]) => ({

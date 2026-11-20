@@ -110,6 +110,7 @@ async function saveProfile(db: DbClient, userId: string, input: z.infer<typeof p
     monthlyNetIncome: input.monthlyNetIncome,
     monthlyIncomeTax: input.monthlyIncomeTax,
     monthlyHealthInsurance: input.monthlyHealthInsurance,
+    payMonth: month,
   });
   if (!(pay.net > 0) && !(pay.gross > 0)) {
     throw new Error("세전 또는 세후 월 소득을 입력하세요");
@@ -134,7 +135,7 @@ async function saveProfile(db: DbClient, userId: string, input: z.infer<typeof p
   const [row] = existing
     ? await db.update(financialProfiles).set(values).where(eq(financialProfiles.userId, userId)).returning()
     : await db.insert(financialProfiles).values({ ...values, userId }).returning();
-  if ((pay.tax ?? 0) > 0) await upsertTaxMonth(db, userId, month, pay.tax ?? 0);
+  if (pay.status === "ok" && (pay.tax ?? 0) > 0) await upsertTaxMonth(db, userId, month, pay.tax ?? 0);
   await upsertPayrollMonth(db, userId, month, pay, earnings);
   return toClient(row!);
 }
