@@ -21,7 +21,7 @@
 | Yahoo 종목 검색 | (api `market.searchSymbols`) | `query1.finance.yahoo.com/v1/finance/search`, `newsCount=0`. 저장 없음 | 요청 시 | 불필요 | 웹 `/invest`·`/markets` |
 | 세계은행 연간 CPI 상승률 | `worldbank.ts` | 공개 API `FP.CPI.TOTL.ZG`. 키 없음. 최신 연도 결측이면 이전 연도 | 매주 월 08시 | 불필요 | `macro_indicators` `WB_INFL_<ISO2>`. 웹 `/markets` |
 | BIS 중앙은행 정책금리 | `bis.ts` | 공개 SDMX `WS_CBPOL` 월. 키 없음. 18개월보다 오래된 시계열은 저장 안 함 | 월·목 08시 | 불필요 | `macro_indicators` `BIS_POL_<ISO2>`. 웹 `/markets` |
-| SEC EDGAR — 미국 상장사 10-K/10-Q (XBRL companyfacts) | `edgar.ts` | 공식 API. 대상 = trades∪watchlist(US/NYSE/NASDAQ/AMEX) ∪ `EDGAR_TARGETS` ∪ `/statements` 미국 섹터(`statementLookupHeldRefs`). 보유·관심이 섹터의 시장보다 우선. 타깃은 `티커` 또는 `티커:CIK`. CIK가 없으면 `company_tickers.json`에서 매핑. 목록에 없으면 skip. `SEC_USER_AGENT` 없으면 skip. fy는 `edgarMinFiscalYear`(5년). 손익·현금흐름은 `start`~`end`가 누적인 fact만 (FY 약 12개월, Q1 3, Q2 6, Q3 9). 같은 `end`의 3개월 값은 넣지 않음. 재무상태는 `end`가 최신인 fact | 매주 월 | `SEC_USER_AGENT` 필수, `EDGAR_TARGETS` 보조 | `financial_statements` |
+| SEC EDGAR — 미국 상장사 10-K/10-Q (XBRL companyfacts) | `edgar.ts` | 공식 API. 대상 = trades∪watchlist(US/NYSE/NASDAQ/AMEX) ∪ `EDGAR_TARGETS` ∪ `/statements` 미국 섹터(`statementLookupHeldRefs`). 보유·관심이 섹터의 시장보다 우선. 타깃은 `티커` 또는 `티커:CIK`. CIK가 없으면 `company_tickers.json`에서 매핑. 목록에 없으면 skip. `SEC_USER_AGENT` 없으면 skip. fy는 `edgarMinFiscalYear`(5년). 손익·현금흐름은 `start`~`end`가 누적인 fact만 (FY 약 12개월, Q1 3, Q2 6, Q3 9). 같은 `end`의 3개월 값은 넣지 않음. 기간이 안 맞는 계정만 빼고, 같은 표의 다른 계정은 유지한다. 재무상태는 `end`가 최신인 fact | 매주 월 | `SEC_USER_AGENT` 필수, `EDGAR_TARGETS` 보조 | `financial_statements` |
 | SEC EDGAR — 기업개황·부문 | `company-profile.ts` (`collectEdgarCompanyProfile`) | 대상은 EDGAR 재무와 동일(보유·env·미국 섹터). `submissions/CIK….json` 개황. 부문매출=같은 submissions의 10-K → Archives `*_htm.xml` → 제품축(ProductOrService) 우선·없으면 영업/지역 축 (`core/edgar-xbrl-segments`). companyfacts에는 차원 없음. 주주·배당은 단일 API 없어 비움 | 매주 월 | `SEC_USER_AGENT` | `company_overviews`, `company_year_facts`(segment) |
 
 ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검증 필요(코드가 바뀌기도 함).
@@ -56,7 +56,7 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 - 업종: `STATEMENT_LOOKUP_GROUPS` — 국내·미국 섹터마다 상장 티커·이름. 로컬 `finvesting.statement-sector-prefs`로 숨김·이름·종목·커스텀. 일본·중국·유럽은 칸만
 - 해외: 미국 활성, 일본·중국·유럽은 「추가」칸
 - 오른쪽: `STATEMENT_SIDE_SLOTS` — 종목·비율·감사·기업개황·사업부문·주주·배당. 수집분 없으면 힌트만(가짜 숫자 없음)
-- 수집 기간: `core/statement-collect` — 올해 포함 5년. DART는 FY·Q1·H1·Q3, EDGAR는 10-K/10-Q. 분기 손익·현금흐름은 누적 기준(연초부터). 3개월치와 누적을 섞지 않는다. `/statements` 기본 연도는 FY 행이 있는 최신 연도. 고르면 그 연도. 같은 연도에서는 FY, 없으면 3분기·반기·1분기(`preferStatementRow`). 재무상태·현금흐름은 손익과 같은 기간만. 그 기간 행이 없으면 빈 칸. FY가 아니면 ROE·ROA를 숨긴다
+- 수집 기간: `core/statement-collect` — 올해 포함 5년. DART는 FY·Q1·H1·Q3, EDGAR는 10-K/10-Q. 분기 손익·현금흐름은 누적 기준(연초부터). 3개월치와 누적을 섞지 않는다. EDGAR는 기간이 안 맞는 계정만 빼고 같은 표의 다른 계정은 유지한다. `/statements` 기본 연도는 FY 행이 있는 최신 연도. 고르면 그 연도. 같은 연도에서는 FY, 없으면 3분기·반기·1분기(`preferStatementRow`). 재무상태·현금흐름은 손익과 같은 기간만. 그 기간 행이 없으면 빈 칸. FY가 아니면 ROE·ROA를 숨긴다
 - 숫자는 공시 표준 항목만. Yahoo 전 종목은 `/invest`
 
 ## `/invest` 시가총액 보드

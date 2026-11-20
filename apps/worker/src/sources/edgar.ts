@@ -1,9 +1,11 @@
+import { and, eq } from "drizzle-orm";
 import { db, financialStatements } from "@finvesting/db";
 import {
   edgarMinFiscalYear,
   edgarNeedsCatalog,
   heldInstrumentKey,
   indexHeldPreferFirst,
+  mergeEdgarItems,
   parseEdgarTarget,
   pickEdgarFact,
   parseEnvTargets,
@@ -34,6 +36,15 @@ const TAGS: Array<{ tag: string; key: string; statement: "income" | "balance" | 
 ];
 
 type Fact = { start?: string; end: string; val: number; fy: number; fp: string; form: string };
+
+function statementItems(raw: unknown): Record<string, number> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, number> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof value === "number" && Number.isFinite(value)) out[key] = value;
+  }
+  return out;
+}
 
 export async function collectEdgar() {
   if (!UA) return { skipped: "SEC_USER_AGENT not set" };
@@ -87,21 +98,41 @@ export async function collectEdgar() {
       }
     }
     for (const g of groups.values()) {
-      const items: Record<string, number> = {};
+      const picked: Record<string, number> = {};
+      const dropped: string[] = [];
       let end = "";
       for (const [key, facts] of g.facts) {
-        const picked = pickEdgarFact(g.statement, g.fp, facts);
-        if (!picked) {
+        const fact = pickEdgarFact(g.statement, g.fp, facts);
+        if (!fact) {
+          dropped.push(key);
           console.warn(`edgar skip ${t.ticker} ${g.fy} ${g.fp} ${g.statement} ${key}: duration mismatch`);
           continue;
         }
-        items[key] = picked.val;
-        if (picked.end > end) end = picked.end;
+        picked[key] = fact.val;
+        if (fact.end > end) end = fact.end;
       }
-      if (!Object.keys(items).length || !end) continue;
+      const [prev] = await db.select({
+        id: financialStatements.id,
+        items: financialStatements.items,
+        periodEnd: financialStatements.periodEnd,
+      }).from(financialStatements).where(and(
+        eq(financialStatements.instrumentId, inst.id),
+        eq(financialStatements.fiscalYear, g.fy),
+        eq(financialStatements.fiscalPeriod, g.fp),
+        eq(financialStatements.statement, g.statement),
+        eq(financialStatements.consolidated, "CFS"),
+        eq(financialStatements.source, "edgar"),
+      ));
+      const items = mergeEdgarItems(statementItems(prev?.items), picked, dropped);
+      if (!Object.keys(items).length) {
+        if (prev) await db.delete(financialStatements).where(eq(financialStatements.id, prev.id));
+        continue;
+      }
+      const periodEnd = end || prev?.periodEnd;
+      if (!periodEnd) continue;
       await db.insert(financialStatements).values({
-        instrumentId: inst.id, fiscalYear: g.fy, fiscalPeriod: g.fp, statement: g.statement, consolidated: "CFS", currency: "USD", periodEnd: end, items, source: "edgar",
-      }).onConflictDoUpdate({ target: [financialStatements.instrumentId, financialStatements.fiscalYear, financialStatements.fiscalPeriod, financialStatements.statement, financialStatements.consolidated, financialStatements.source], set: { items, periodEnd: end, fetchedAt: new Date() } });
+        instrumentId: inst.id, fiscalYear: g.fy, fiscalPeriod: g.fp, statement: g.statement, consolidated: "CFS", currency: "USD", periodEnd, items, source: "edgar",
+      }).onConflictDoUpdate({ target: [financialStatements.instrumentId, financialStatements.fiscalYear, financialStatements.fiscalPeriod, financialStatements.statement, financialStatements.consolidated, financialStatements.source], set: { items, periodEnd, fetchedAt: new Date() } });
       upserted++;
     }
     await new Promise((r) => setTimeout(r, 150)); // SEC rate limit 배려

@@ -53,3 +53,23 @@ export function pickEdgarFact<T extends { start?: string | null; end: string; va
   if (want == null) return null;
   return sorted.find((f) => edgarSpanMonths(f.start, f.end) === want) ?? null;
 }
+
+/**
+ * 고른 계정만 넣고, 기간이 안 맞는 키는 뺀다.
+ * 이번 수집에 없는 기존 칸은 그대로 둔다.
+ */
+export function mergeEdgarItems(
+  existing: Record<string, number> | null | undefined,
+  picked: Record<string, number>,
+  dropped: readonly string[],
+): Record<string, number> {
+  const next: Record<string, number> = {};
+  for (const [key, value] of Object.entries(existing ?? {})) {
+    if (typeof value === "number" && Number.isFinite(value)) next[key] = value;
+  }
+  for (const key of dropped) delete next[key];
+  for (const [key, value] of Object.entries(picked)) {
+    if (typeof value === "number" && Number.isFinite(value)) next[key] = value;
+  }
+  return next;
+}

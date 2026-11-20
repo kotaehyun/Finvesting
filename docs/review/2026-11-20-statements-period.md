@@ -13,7 +13,7 @@
 
 | # | 심각도 | 위치 | 내용 | 반영 |
 |---|---|---|---|---|
-| 1 | 중간 | `apps/worker/src/sources/edgar.ts` 89–104행 | 기간이 안 맞는 계정은 빼는데, 남은 계정만으로 `items` 전체를 덮어쓴다. 같은 표의 다른 계정은 지워진다. 재수집 로그의 Ford `net_income` 5건이 이 경로다. 그 계정만 비우고 나머지 칸은 유지하는 편이 맞다 | 미반영 |
+| 1 | 중간 | `apps/worker/src/sources/edgar.ts` | 기간이 안 맞는 계정은 빼는데, 남은 계정만으로 `items` 전체를 덮어썼다. 같은 표의 다른 계정이 지워졌다 | 반영. `mergeEdgarItems`가 그 키만 빼고 기존 칸을 유지. 칸이 없으면 행을 지움. 이미 지워진 Ford 칸은 다시 수집하지 않음 |
 | 2 | 중간 | DART 재수집 | 코드는 반기·3분기 손익에 `thstrm_add_amount`를 쓴다. DB에 반영된 국내 종목은 18곳이다. 나머지는 예전 3개월 금액이 그대로다 | 미반영 |
 | 3 | 낮음 | `ensureInstrument` | 이미 있는 6자리는 시장을 고치지 않는다. 예전에 `KRX`로 덮인 코스닥 종목은 다음 수집에서도 그대로다. 앞으로의 덮어쓰기는 막혀 있다 | 미반영 |
 | 4 | 낮음 | `apps/web/src/app/realty/geo-map.tsx` | 이 브랜치의 `pnpm typecheck`는 web 301·308행에서 실패한다. 이번 재무 수정과 무관하다. 타입 단언은 `fix/payroll-session-hardening`에만 있다 | 미반영 |
