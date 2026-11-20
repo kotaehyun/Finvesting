@@ -30,6 +30,28 @@ describe("statutoryWithholding", () => {
     expect(statutoryWithholding(100_000, 0, "2026-03").pensionBase).toBe(400_000);
     expect(statutoryWithholding(100_000, 0, "2026-08").pensionBase).toBe(410_000);
   });
+
+  it("요율을 바꾸면 국민연금이 바뀐다", () => {
+    const w = statutoryWithholding(3_000_000, 0, "2026-07", {
+      nationalPensionEmployee: 0.1,
+      healthInsuranceTotal: 0.0719,
+      healthInsuranceEmployeeShare: 0.5,
+      longTermCareIncomeRate: 0.009448,
+      employmentInsuranceEmployee: 0.009,
+    });
+    expect(w.status).toBe("ok");
+    expect(w.nationalPension).toBe(300_000);
+  });
+
+  it("고시 기간 밖은 금액을 만들지 않는다", () => {
+    for (const month of ["2025-06", "2027-07"]) {
+      const w = statutoryWithholding(3_000_000, 80_000, month);
+      expect(w.status).toBe("unavailable");
+      expect(w.nationalPension).toBeNull();
+      expect(w.healthInsurance).toBeNull();
+      expect(w.withholdTotal).toBeNull();
+    }
+  });
 });
 
 describe("earnedIncomeDeduction / incomeTaxBaseFromMonthly", () => {
@@ -40,6 +62,7 @@ describe("earnedIncomeDeduction / incomeTaxBaseFromMonthly", () => {
 
   it("과세표준은 총급여−근로소득공제−본인기본공제−국민연금 연액", () => {
     const w = statutoryWithholding(4_200_000, 250_000);
+    if (w.nationalPension == null) throw new Error("고시 안");
     const b = incomeTaxBaseFromMonthly(4_200_000, w.nationalPension);
     expect(b.annualGross).toBe(50_400_000);
     expect(b.earnedIncomeDeduction).toBe(12_270_000);

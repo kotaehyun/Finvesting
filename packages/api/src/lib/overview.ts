@@ -164,8 +164,8 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
       ? {
           monthlyNetIncome,
           monthlyGrossIncome: pay.gross,
-          monthlyIncomeTax: pay.tax,
-          monthlyHealthInsurance: pay.health,
+          monthlyIncomeTax: pay.tax ?? 0,
+          monthlyHealthInsurance: pay.health ?? 0,
           monthlyFixedCost,
           otherFixed: Number(profile.monthlyFixedCost ?? 0),
           recurringSum,

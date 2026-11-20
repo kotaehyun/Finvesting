@@ -97,14 +97,24 @@ export function buildMonthlyLedger(i: MonthlyStatementInput): Ledger {
   );
 }
 
-export function resolvePay(p: { monthlyGrossIncome?: number | string | null; monthlyNetIncome?: number | string | null; monthlyIncomeTax?: number | string | null; monthlyHealthInsurance?: number | string | null }) {
+export function resolvePay(p: { monthlyGrossIncome?: number | string | null; monthlyNetIncome?: number | string | null; monthlyIncomeTax?: number | string | null; monthlyHealthInsurance?: number | string | null; payMonth?: string }) {
   const tax = Number(p.monthlyIncomeTax ?? 0);
   const healthOverride = Number(p.monthlyHealthInsurance ?? 0);
   const grossIn = Number(p.monthlyGrossIncome ?? 0);
   const netIn = Number(p.monthlyNetIncome ?? 0);
 
   if (grossIn > 0) {
-    const w = statutoryWithholding(grossIn, tax);
+    const w = statutoryWithholding(grossIn, tax, p.payMonth);
+    if (w.status !== "ok" || w.withholdTotal == null || w.nationalPension == null || w.healthInsurance == null || w.longTermCare == null) {
+      return {
+        ...w,
+        gross: grossIn,
+        net: netIn > 0 ? netIn : 0,
+        tax,
+        health: null,
+        taxBase: emptyIncomeTaxBase(),
+      };
+    }
     const net = netIn > 0 ? netIn : Math.max(0, grossIn - w.withholdTotal);
     return {
       gross: grossIn,
@@ -119,6 +129,7 @@ export function resolvePay(p: { monthlyGrossIncome?: number | string | null; mon
   const net = netIn > 0 ? netIn : 0;
   const gross = net > 0 ? net + tax + healthOverride : 0;
   return {
+    status: "ok" as const,
     gross, net, tax, health: healthOverride,
     nationalPension: 0, healthInsurance: healthOverride, longTermCare: 0, employmentInsurance: 0,
     nationalTax: tax, localTax: 0, insuranceTotal: healthOverride, taxTotal: tax,

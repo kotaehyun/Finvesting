@@ -160,11 +160,11 @@
       "asOf": "2026",
       "effectiveFrom": "2026-01-01",
       "effectiveTo": "2026-12-31",
-      "sourceTitle": "4대보험 연계센터·복지부 건정심(건강보험)",
-      "sourceUrl": "https://www.4insure.or.kr/",
-      "article": null,
-      "verifiedBy": "사용자",
-      "verifiedOn": "2026-11-12"
+      "sourceTitle": "소득세법 제50조",
+      "sourceUrl": "https://www.law.go.kr/",
+      "article": "제50조 제1항",
+      "verifiedBy": "미검증",
+      "verifiedOn": null
     }
   ]
 }

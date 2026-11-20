@@ -92,12 +92,12 @@ export async function loadStatement(db: Db, userId: string, month: string) {
 
   const payroll = buildPayrollLedger({
     grossIncome: pay.gross,
-    nationalPension: pay.nationalPension,
-    healthInsurance: pay.healthInsurance,
-    longTermCare: pay.longTermCare,
-    employmentInsurance: pay.employmentInsurance,
-    nationalTax: pay.nationalTax,
-    localTax: pay.localTax,
+    nationalPension: pay.nationalPension ?? undefined,
+    healthInsurance: pay.healthInsurance ?? 0,
+    longTermCare: pay.longTermCare ?? undefined,
+    employmentInsurance: pay.employmentInsurance ?? undefined,
+    nationalTax: pay.nationalTax ?? undefined,
+    localTax: pay.localTax ?? undefined,
     netIncome: pay.net,
     earnings: payEarnings,
   });

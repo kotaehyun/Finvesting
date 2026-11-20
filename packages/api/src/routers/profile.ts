@@ -134,7 +134,7 @@ async function saveProfile(db: DbClient, userId: string, input: z.infer<typeof p
   const [row] = existing
     ? await db.update(financialProfiles).set(values).where(eq(financialProfiles.userId, userId)).returning()
     : await db.insert(financialProfiles).values({ ...values, userId }).returning();
-  if (pay.tax > 0) await upsertTaxMonth(db, userId, month, pay.tax);
+  if ((pay.tax ?? 0) > 0) await upsertTaxMonth(db, userId, month, pay.tax ?? 0);
   await upsertPayrollMonth(db, userId, month, pay, earnings);
   return toClient(row!);
 }
@@ -238,7 +238,7 @@ export const profileRouter = router({
       monthlyNetIncome: true,
       monthlyIncomeTax: true,
       monthlyHealthInsurance: true,
-    }).optional())
+    }).extend({ payMonth: monthStr.optional() }).optional())
     .query(({ input }) => resolvePay(input ?? {})),
 
   upsert: publicProcedure

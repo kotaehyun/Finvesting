@@ -83,6 +83,10 @@ function currentMonth() {
 function won(n: number) {
   return `${Math.round(n).toLocaleString("ko-KR")}원`;
 }
+function payCell(n: number | null | undefined, blocked?: boolean) {
+  if (blocked || n == null) return "—";
+  return won(n);
+}
 function newKey() {
   return crypto.randomUUID();
 }
@@ -216,6 +220,7 @@ function ProfileWorkspace() {
     monthlyNetIncome: Number(pn) || undefined,
     monthlyIncomeTax: Number(pt) || undefined,
     monthlyHealthInsurance: Number(ph) || undefined,
+    payMonth: month,
   }, { enabled: Number(pg) > 0 || Number(pn) > 0 });
 
   function markDirty() { setDirty(true); setMsg(""); }
@@ -678,16 +683,17 @@ function ProfileWorkspace() {
               <>
                 <h3>급여공제 (2026 직장가입자 근로자분)</h3>
                 <p className="erp-hint">국세 세액만 명세서 금액을 넣습니다. 과세표준은 총급여−근로소득공제−본인 기본공제(150만)−국민연금. 부양가족 공제는 아직 없습니다.</p>
+                {pay?.status === "unavailable" ? <p className="erp-hint">고시 기간 밖</p> : null}
                 <table className="erp-grid">
                   <thead>
                     <tr><th>항목</th><th>요율·기준</th><th className="num">금액</th></tr>
                   </thead>
                   <tbody>
                     <tr><td className="ro">세전 근로소득</td><td className="ro">월 입력</td><td className="ro num">{pay ? won(pay.gross) : "—"}</td></tr>
-                    <tr><td className="ro">국민연금</td><td className="ro">4.75%. {NATIONAL_PENSION_BANDS.map((b) => `${b.from}~${b.to} 하한 ${b.floor / 10000}만 · 상한 ${b.cap / 10000}만`).join(". ")}. 이 금액은 2026-07 고시</td><td className="ro num">{pay ? won(pay.nationalPension) : "—"}</td></tr>
-                    <tr><td className="ro">건강보험</td><td className="ro">7.19% × 50%</td><td className="ro num">{pay ? won(pay.healthInsurance) : "—"}</td></tr>
-                    <tr><td className="ro">장기요양보험</td><td className="ro">건보료 × (0.9448 / 7.19)</td><td className="ro num">{pay ? won(pay.longTermCare) : "—"}</td></tr>
-                    <tr><td className="ro">고용보험</td><td className="ro">0.9%</td><td className="ro num">{pay ? won(pay.employmentInsurance) : "—"}</td></tr>
+                    <tr><td className="ro">국민연금</td><td className="ro">4.75%. {NATIONAL_PENSION_BANDS.map((b) => `${b.from}~${b.to} 하한 ${b.floor / 10000}만 · 상한 ${b.cap / 10000}만`).join(". ")}. 이 금액은 2026-07 고시</td><td className="ro num">{payCell(pay?.nationalPension, pay?.status === "unavailable")}</td></tr>
+                    <tr><td className="ro">건강보험</td><td className="ro">7.19% × 50%</td><td className="ro num">{payCell(pay?.healthInsurance, pay?.status === "unavailable")}</td></tr>
+                    <tr><td className="ro">장기요양보험</td><td className="ro">건보료 × (0.9448 / 7.19)</td><td className="ro num">{payCell(pay?.longTermCare, pay?.status === "unavailable")}</td></tr>
+                    <tr><td className="ro">고용보험</td><td className="ro">0.9%</td><td className="ro num">{payCell(pay?.employmentInsurance, pay?.status === "unavailable")}</td></tr>
                     <tr><td className="ro" colSpan={3}><strong>소득세 과세표준 · 세액</strong></td></tr>
                     <tr><td className="ro">연 총급여</td><td className="ro">세전 × 12</td><td className="ro num">{pay ? won(pay.taxBase.annualGross) : "—"}</td></tr>
                     <tr><td className="ro">근로소득공제</td><td className="ro">소득세법 제47조</td><td className="ro num">{pay ? won(pay.taxBase.earnedIncomeDeduction) : "—"}</td></tr>
@@ -700,8 +706,8 @@ function ProfileWorkspace() {
                       <td className="ro">명세서 입력</td>
                       <td><Num value={tax} onChange={(v) => { setTax(v); markDirty(); }} /></td>
                     </tr>
-                    <tr><td className="ro">지방소득세 세액</td><td className="ro">국세 × 10%</td><td className="ro num">{pay ? won(pay.localTax) : "—"}</td></tr>
-                    <tr><td className="ro">공제 합계</td><td className="ro"></td><td className="ro num">{pay ? won(pay.withholdTotal) : "—"}</td></tr>
+                    <tr><td className="ro">지방소득세 세액</td><td className="ro">국세 × 10%</td><td className="ro num">{payCell(pay?.localTax, pay?.status === "unavailable")}</td></tr>
+                    <tr><td className="ro">공제 합계</td><td className="ro"></td><td className="ro num">{payCell(pay?.withholdTotal, pay?.status === "unavailable")}</td></tr>
                     <tr><td className="ro">실수령액</td><td className="ro">세전 − 공제 (세후 입력이 있으면 그 값)</td><td className="ro num">{pay ? won(pay.net) : "—"}</td></tr>
                   </tbody>
                 </table>
@@ -888,7 +894,7 @@ function ProfileWorkspace() {
                   onPatch={patchEarn}
                   onAdd={addEarnRow}
                   deductions={deductionRows(pay)}
-                  net={pay && pay.gross > 0 ? Math.max(0, (earnRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) || pay.gross) - pay.withholdTotal) : undefined}
+                  net={pay && pay.status === "ok" && pay.withholdTotal != null && pay.gross > 0 ? Math.max(0, (earnRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) || pay.gross) - pay.withholdTotal) : undefined}
                 />
                 {st && <PayYearSection points={st.payTrend} year={st.payYear} />}
                 {st && (
@@ -993,12 +999,13 @@ function Num({ value, onChange, placeholder }: { value: string; onChange: (v: st
 }
 
 type PayPreview = {
-  nationalTax: number;
-  localTax: number;
-  nationalPension: number;
-  employmentInsurance: number;
-  healthInsurance: number;
-  longTermCare: number;
+  status?: "ok" | "unavailable";
+  nationalTax: number | null;
+  localTax: number | null;
+  nationalPension: number | null;
+  employmentInsurance: number | null;
+  healthInsurance: number | null;
+  longTermCare: number | null;
 };
 
 function deductionRows(pay?: PayPreview | null) {
