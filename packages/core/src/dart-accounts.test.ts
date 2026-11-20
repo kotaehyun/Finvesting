@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   dartStatementKind,
   mapDartAccountKey,
+  dartReportedAmount,
   mapDartFsRow,
   normalizeDartAccountNm,
   parseDartAmount,
@@ -42,6 +43,45 @@ describe("dart-accounts", () => {
     expect(parseDartAmount("72,982,621,000,000")).toBe(72_982_621_000_000);
     expect(parseDartAmount("-")).toBeNull();
     expect(parseDartAmount("")).toBeNull();
+  });
+
+  it("반기·3분기 손익은 누적 칸만 쓰고, 없으면 비운다", () => {
+    expect(dartReportedAmount({
+      statement: "income",
+      period: "H1",
+      thstrmAmount: "1",
+      thstrmAddAmount: "2",
+    })).toBe(2);
+    expect(dartReportedAmount({
+      statement: "income",
+      period: "Q3",
+      thstrmAmount: "3",
+      thstrmAddAmount: null,
+    })).toBeNull();
+    expect(dartReportedAmount({
+      statement: "income",
+      period: "Q1",
+      thstrmAmount: "4",
+      thstrmAddAmount: "4",
+    })).toBe(4);
+    expect(dartReportedAmount({
+      statement: "income",
+      period: "FY",
+      thstrmAmount: "5",
+      thstrmAddAmount: "9",
+    })).toBe(5);
+    expect(dartReportedAmount({
+      statement: "balance",
+      period: "H1",
+      thstrmAmount: "6",
+      thstrmAddAmount: "7",
+    })).toBe(6);
+    expect(dartReportedAmount({
+      statement: "cashflow",
+      period: "Q3",
+      thstrmAmount: "8",
+      thstrmAddAmount: "9",
+    })).toBe(8);
   });
 
   it("CF의 당기순이익 행은 cashflow에 넣지 않는다", () => {

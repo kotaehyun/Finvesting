@@ -14,8 +14,9 @@ import {
   formatStatementContext,
   goingConcernMentioned,
   lookupServices,
-  preferStatementRow,
-  statementRatios,
+  alignStatementRows,
+  defaultStatementYear,
+  statementRatiosForPeriod,
   type AuditBrief,
   type CompanyDividendRow,
   type CompanyHolder,
@@ -95,14 +96,16 @@ export async function loadStatementBundle(db: Db, instrumentId: string, year?: n
     .where(eq(auditReports.instrumentId, instrumentId))
     .orderBy(desc(auditReports.fiscalYear));
   const years = [...new Set([...fsAll.map((r) => r.fiscalYear), ...auAll.map((r) => r.fiscalYear)])].sort((a, b) => b - a);
-  const fiscalYear = year && years.includes(year) ? year : years[0];
+  const fiscalYear = year != null && years.includes(year)
+    ? year
+    : (defaultStatementYear(fsAll) ?? years[0]);
   if (fiscalYear == null) {
     const [overviewRow] = await db.select().from(companyOverviews)
       .where(eq(companyOverviews.instrumentId, instrumentId))
       .orderBy(desc(companyOverviews.fetchedAt))
       .limit(1);
     return {
-      instrument: inst, fiscalYear: null, years, income: {}, balance: {}, cashflow: {}, ratios: {},
+      instrument: inst, fiscalYear: null, fiscalPeriod: null, years, income: {}, balance: {}, cashflow: {}, ratios: {},
       audit: null,
       overview: overviewRow
         ? {
@@ -130,13 +133,12 @@ export async function loadStatementBundle(db: Db, instrumentId: string, year?: n
     };
   }
   const fs = fsAll.filter((r) => r.fiscalYear === fiscalYear);
-  const incomeRow = preferStatementRow(fs, "income");
-  const balanceRow = preferStatementRow(fs, "balance");
-  const cashflowRow = preferStatementRow(fs, "cashflow");
-  const income = asStatementItems(incomeRow?.items);
-  const balance = asStatementItems(balanceRow?.items);
-  const cashflow = asStatementItems(cashflowRow?.items);
-  const currency = incomeRow?.currency ?? balanceRow?.currency ?? cashflowRow?.currency ?? "KRW";
+  const aligned = alignStatementRows(fs);
+  const fiscalPeriod = aligned.period;
+  const income = asStatementItems(aligned.income?.items);
+  const balance = asStatementItems(aligned.balance?.items);
+  const cashflow = asStatementItems(aligned.cashflow?.items);
+  const currency = aligned.income?.currency ?? aligned.balance?.currency ?? aligned.cashflow?.currency ?? "KRW";
   const au = auAll.find((r) => r.fiscalYear === fiscalYear) ?? null;
   const audit = au ? toAudit(au) : null;
   const [overviewRow] = await db.select().from(companyOverviews)
@@ -177,6 +179,7 @@ export async function loadStatementBundle(db: Db, instrumentId: string, year?: n
     symbol: inst.symbol,
     name: inst.name,
     fiscalYear,
+    fiscalPeriod,
     currency,
     income,
     balance,
@@ -191,12 +194,13 @@ export async function loadStatementBundle(db: Db, instrumentId: string, year?: n
   return {
     instrument: inst,
     fiscalYear,
+    fiscalPeriod,
     years,
     currency,
     income,
     balance,
     cashflow,
-    ratios: statementRatios({ ...income, ...balance, ...cashflow }),
+    ratios: statementRatiosForPeriod({ ...income, ...balance, ...cashflow }, fiscalPeriod),
     audit: audit
       ? {
         ...audit,

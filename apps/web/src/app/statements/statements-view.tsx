@@ -34,6 +34,7 @@ import {
   type StatementSectorPrefs,
 } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
+import { StatementPeriodLabel } from "./statement-period-label";
 
 type ListItem = {
   id: string;
@@ -787,6 +788,9 @@ function MarketWork({
               {y}
             </button>
           ))}
+          {data.fiscalYear != null && (
+            <StatementPeriodLabel year={data.fiscalYear} period={data.fiscalPeriod} />
+          )}
           <button
             type="button"
             className="primary"
@@ -862,11 +866,13 @@ function StatementSide({
   picked?: ListItem;
   data?: {
     fiscalYear: number;
+    fiscalPeriod?: string | null;
     ratios: {
       opMargin?: number | null;
       netMargin?: number | null;
       debtToAssets?: number | null;
       roe?: number | null;
+      roa?: number | null;
       cfoMinusNetIncome?: number | null;
     };
     audit: {
@@ -911,7 +917,9 @@ function StatementSide({
   if (data?.ratios.opMargin != null) ratioRows.push(["영업이익률", pct(data.ratios.opMargin)]);
   if (data?.ratios.netMargin != null) ratioRows.push(["순이익률", pct(data.ratios.netMargin)]);
   if (data?.ratios.debtToAssets != null) ratioRows.push(["부채/자산", pct(data.ratios.debtToAssets)]);
-  if (data?.ratios.roe != null) ratioRows.push(["ROE", pct(data.ratios.roe)]);
+  const annual = data?.fiscalPeriod === "FY";
+  if (annual && data?.ratios.roe != null) ratioRows.push(["ROE", pct(data.ratios.roe)]);
+  if (annual && data?.ratios.roa != null) ratioRows.push(["ROA", pct(data.ratios.roa)]);
   if (data?.ratios.cfoMinusNetIncome != null) {
     ratioRows.push(["영업CF−순이익", won(data.ratios.cfoMinusNetIncome, currency)]);
   }
@@ -929,7 +937,12 @@ function StatementSide({
                     <tr><th>심볼</th><td className="ro">{picked.symbol}</td></tr>
                     <tr><th>시장</th><td className="ro">{picked.market}</td></tr>
                     {data?.fiscalYear != null && (
-                      <tr><th>연도</th><td className="ro">{data.fiscalYear}</td></tr>
+                      <tr>
+                        <th>연도</th>
+                        <td className="ro">
+                          <StatementPeriodLabel year={data.fiscalYear} period={data.fiscalPeriod} />
+                        </td>
+                      </tr>
                     )}
                     {!!picked.sources.length && (
                       <tr><th>출처</th><td className="ro">{picked.sources.join(", ")}</td></tr>

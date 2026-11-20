@@ -17,6 +17,8 @@ import {
   edgarCikPath,
   edgarInstanceXmlName,
   zipEdgarRecentFilings,
+  heldInstrumentKey,
+  indexHeldPreferFirst,
   resolveDartTargets,
   resolveEdgarTargets,
   statementCollectYears,
@@ -181,7 +183,7 @@ export async function collectDartCompanyProfile() {
   // 개황은 연도 무관 1회. 주주·배당·부문은 확정 사업연도(올해 제외 최근 3년).
   const factYears = statementCollectYears().filter((y) => y < new Date().getFullYear()).slice(0, 3);
   let upserted = 0;
-  const heldByStock = new Map(held.map((h) => [h.symbol.replace(/\.(KS|KQ)$/i, ""), h]));
+  const heldByStock = indexHeldPreferFirst(held, (h) => heldInstrumentKey(h.symbol));
 
   for (const t of targets) {
     const heldRow = heldByStock.get(t.stock);
@@ -189,7 +191,7 @@ export async function collectDartCompanyProfile() {
     const inst = await ensureInstrument({ symbol: t.stock, market, name: t.name, assetClass: "stock", currency: "KRW" });
     await ensureIdentifier(inst.id, "dart", t.corp);
 
-    const ovRes = await fetch(`https://opendart.fss.or.kr/api/company.json?crtfc_key=${key}&corp_code=${t.corp}`);
+    const ovRes = await dartFetch(`https://opendart.fss.or.kr/api/company.json?crtfc_key=${key}&corp_code=${t.corp}`);
     if (ovRes.ok) {
       const json = await ovRes.json() as Record<string, unknown>;
       const overview = parseDartCompanyOverview(json);
@@ -205,7 +207,7 @@ export async function collectDartCompanyProfile() {
     for (const year of factYears) {
       const base = `crtfc_key=${key}&corp_code=${t.corp}&bsns_year=${year}&reprt_code=11011`;
 
-      const hRes = await fetch(`https://opendart.fss.or.kr/api/hyslrSttus.json?${base}`);
+      const hRes = await dartFetch(`https://opendart.fss.or.kr/api/hyslrSttus.json?${base}`);
       if (hRes.ok) {
         const json = await hRes.json() as { status: string; message?: string; list?: unknown[] };
         if (json.status === "000") {
@@ -214,7 +216,7 @@ export async function collectDartCompanyProfile() {
       }
       await sleep(120);
 
-      const dRes = await fetch(`https://opendart.fss.or.kr/api/alotMatter.json?${base}`);
+      const dRes = await dartFetch(`https://opendart.fss.or.kr/api/alotMatter.json?${base}`);
       if (dRes.ok) {
         const json = await dRes.json() as { status: string; message?: string; list?: unknown[] };
         if (json.status === "000") {
@@ -312,7 +314,7 @@ export async function collectEdgarCompanyProfile() {
   // 미국은 결산월이 달라 올해 10-K가 이미 있을 수 있음 → 최근 3개 연도 시도
   const factYears = statementCollectYears().slice(0, 3);
   let upserted = 0;
-  const heldByTicker = new Map(held.map((h) => [h.symbol.trim().toUpperCase(), h]));
+  const heldByTicker = indexHeldPreferFirst(held, (h) => heldInstrumentKey(h.symbol));
   for (const t of targets) {
     const heldRow = heldByTicker.get(t.ticker);
     const market = heldRow && /^(US|NYSE|NASDAQ|AMEX)$/i.test(heldRow.market) ? heldRow.market : "US";

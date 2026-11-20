@@ -16,10 +16,8 @@ export async function ensureInstrument(p: { symbol: string; market: string; name
   }
   if (/^\d{6}$/.test(p.symbol)) {
     const [kr] = await db.select().from(instruments).where(eq(instruments.symbol, p.symbol));
-    if (kr) {
-      await db.update(instruments).set({ market: p.market, name: p.name, currency: p.currency, assetClass: p.assetClass }).where(eq(instruments.id, kr.id));
-      return { ...kr, market: p.market, name: p.name, currency: p.currency, assetClass: p.assetClass };
-    }
+    // 이미 있는 6자리 종목의 시장·이름·통화는 유지한다. 섹터 목록의 KRX로 바꾸지 않는다.
+    if (kr) return kr;
   }
   const [created] = await db.insert(instruments).values(p).onConflictDoNothing().returning();
   if (created) return created;

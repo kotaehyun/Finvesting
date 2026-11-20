@@ -41,6 +41,7 @@ describe("statementRegionFor", () => {
   it("market으로 가른다", () => {
     expect(statementRegionFor({ symbol: "005930", market: "KRX" })?.id).toBe("kr");
     expect(statementRegionFor({ symbol: "AAPL", market: "US" })?.id).toBe("us");
+    expect(statementRegionFor({ symbol: "AAPL", market: "AMEX" })?.id).toBe("us");
     expect(statementRegionFor({ symbol: "7203.T", market: "TSE" })?.id).toBe("jp");
   });
 

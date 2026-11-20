@@ -40,7 +40,7 @@ export const STATEMENT_REGIONS: readonly StatementRegion[] = [
   {
     id: "us",
     title: "미국",
-    markets: ["US", "NYSE", "NASDAQ"],
+    markets: ["US", "NYSE", "NASDAQ", "AMEX"],
     venue: "edgar",
     currencyDefault: "USD",
     active: true,

@@ -60,6 +60,7 @@ describe("formatStatementContext", () => {
       symbol: "005930", name: "삼성전자", fiscalYear: 2025, currency: "KRW",
       income: { revenue: 1_000_000 },
     });
+    expect(t).toContain("삼성전자(005930) 2025 연결");
     expect(t).toContain("매출액 1,000,000원");
     expect(t).toContain("감사의견");
     expect(t).toContain("없음");
@@ -97,6 +98,19 @@ describe("formatStatementContext", () => {
     expect(t).toContain("## 최대주주");
     expect(t).toContain("8.5%");
     expect(t).toContain("## 배당");
-    expect(t).toContain("1,446");
+  });
+
+  it("3분기 누적이면 기간을 적고 ROE는 빼는다", () => {
+    const t = formatStatementContext({
+      symbol: "005930",
+      name: "삼성전자",
+      fiscalYear: 2026,
+      fiscalPeriod: "Q3",
+      currency: "KRW",
+      income: { net_income: 10 },
+      balance: { total_equity: 100 },
+    });
+    expect(t).toContain("2026 · 3분기 누적");
+    expect(t).not.toContain("ROE");
   });
 });

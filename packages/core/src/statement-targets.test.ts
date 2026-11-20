@@ -11,9 +11,24 @@ import {
   parseEdgarTarget,
   parseSecCompanyTickers,
   resolveDartTargets,
+  heldInstrumentKey,
+  indexHeldPreferFirst,
   resolveEdgarTargets,
   statementLookupHeldRefs,
 } from "./statement-targets";
+
+describe("보유 시장이 섹터보다 먼저", () => {
+  it("보유 KOSDAQ과 섹터 KRX가 있으면 KOSDAQ", () => {
+    const map = indexHeldPreferFirst(
+      [
+        { symbol: "035720.KQ", market: "KOSDAQ" },
+        { symbol: "035720", market: "KRX" },
+      ],
+      (row) => heldInstrumentKey(row.symbol),
+    );
+    expect(map.get("035720")?.market).toBe("KOSDAQ");
+  });
+});
 
 describe("pad identifiers", () => {
   it("DART 고유번호는 8자리, CIK는 10자리", () => {

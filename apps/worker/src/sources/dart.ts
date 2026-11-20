@@ -2,8 +2,10 @@ import { db, financialStatements, auditReports } from "@finvesting/db";
 import {
   DART_REPORTS,
   dartNeedsCatalog,
+  dartReportedAmount,
+  heldInstrumentKey,
+  indexHeldPreferFirst,
   mapDartFsRow,
-  parseDartAmount,
   parseDartTarget,
   parseEnvTargets,
   resolveDartTargets,
@@ -20,6 +22,7 @@ import { ensureInstrument, ensureIdentifier, loadHeldInstruments } from "../lib/
 // 목록에 없는 종목은 skip. 고유번호를 추측하지 않는다.
 // 기간: statementCollectYears(기본 5년) × 사업/1분기/반기/3분기. 감사는 사업보고서만.
 // 손익·재무상태: fnlttSinglAcnt (CFS). 현금흐름: fnlttSinglAcntAll (SinglAcnt에 CF 없음).
+// 반기·3분기 손익은 thstrm_add_amount(누적). 없으면 그 행은 건너뛴다.
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -60,7 +63,7 @@ export async function collectDart() {
 
   const years = statementCollectYears();
   let upserted = 0;
-  const heldByStock = new Map(held.map((h) => [h.symbol.replace(/\.(KS|KQ)$/i, ""), h]));
+  const heldByStock = indexHeldPreferFirst(held, (h) => heldInstrumentKey(h.symbol));
   for (const t of targets) {
     const heldRow = heldByStock.get(t.stock);
     const market = heldRow && /^(KRX|KOSDAQ)$/i.test(heldRow.market) ? heldRow.market : "KRX";
@@ -93,8 +96,9 @@ function absorbDartRows(
     account_nm?: string;
     account_id?: string;
     thstrm_amount?: string;
+    thstrm_add_amount?: string;
   }>,
-  opts: { requireFsDivCfs: boolean; onlySj?: string },
+  opts: { requireFsDivCfs: boolean; onlySj?: string; period: DartReportSpec["period"]; label: string },
 ) {
   for (const row of rows) {
     if (opts.requireFsDivCfs && row.fs_div !== "CFS") continue;
@@ -105,8 +109,18 @@ function absorbDartRows(
       accountId: row.account_id,
     });
     if (!mapped) continue;
-    const num = parseDartAmount(row.thstrm_amount);
-    if (num == null) continue;
+    const num = dartReportedAmount({
+      statement: mapped.statement,
+      period: opts.period,
+      thstrmAmount: row.thstrm_amount,
+      thstrmAddAmount: row.thstrm_add_amount,
+    });
+    if (num == null) {
+      if (mapped.statement === "income" && (opts.period === "H1" || opts.period === "Q3")) {
+        console.warn(`dart skip ${opts.label} ${mapped.key}: cumulative amount missing`);
+      }
+      continue;
+    }
     const g = groups.get(mapped.statement) ?? {};
     g[mapped.key] = num;
     groups.set(mapped.statement, g);
@@ -128,7 +142,14 @@ async function upsertDartFs(
   const json = (await res.json()) as {
     status: string;
     message?: string;
-    list?: Array<{ fs_div: string; sj_div: string; account_nm: string; thstrm_amount: string; thstrm_dt?: string }>;
+    list?: Array<{
+      fs_div: string;
+      sj_div: string;
+      account_nm: string;
+      thstrm_amount: string;
+      thstrm_add_amount?: string;
+      thstrm_dt?: string;
+    }>;
   };
   // 미제출·해당없음은 흔함. 경고만 남기고 skip.
   if (json.status !== "000") {
@@ -137,7 +158,11 @@ async function upsertDartFs(
   }
 
   const groups = new Map<string, Record<string, number>>();
-  absorbDartRows(groups, json.list ?? [], { requireFsDivCfs: true });
+  absorbDartRows(groups, json.list ?? [], {
+    requireFsDivCfs: true,
+    period: report.period,
+    label: `${stock} ${year} ${report.period}`,
+  });
 
   // SinglAcnt에는 CF가 없음 → 전체표에서 영업현금흐름만.
   await sleep(150);
@@ -152,10 +177,16 @@ async function upsertDartFs(
         account_nm?: string;
         account_id?: string;
         thstrm_amount?: string;
+        thstrm_add_amount?: string;
       }>;
     };
     if (allJson.status === "000") {
-      absorbDartRows(groups, allJson.list ?? [], { requireFsDivCfs: false, onlySj: "CF" });
+      absorbDartRows(groups, allJson.list ?? [], {
+        requireFsDivCfs: false,
+        onlySj: "CF",
+        period: report.period,
+        label: `${stock} ${year} ${report.period}`,
+      });
     } else if (allJson.status !== "013") {
       console.warn(`dart CF ${stock} ${year} ${report.code}: ${allJson.message}`);
     }

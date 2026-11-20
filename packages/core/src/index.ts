@@ -29,6 +29,7 @@ export * from "./naver-news";
 export * from "./dart-accounts";
 export * from "./dart-xbrl-segments";
 export * from "./edgar-xbrl-segments";
+export * from "./edgar-facts";
 export * from "./world-indices";
 export * from "./fx-pairs";
 export * from "./inflation-countries";

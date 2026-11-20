@@ -10,6 +10,7 @@ import {
   type CompanyOverview,
   type CompanySegmentRow,
 } from "./company-profile";
+import { statementPeriodLabel } from "./statement-collect";
 
 export const FS_ITEM_LABELS: Record<string, string> = {
   revenue: "매출액",
@@ -55,6 +56,15 @@ export function goingConcernMentioned(...texts: Array<string | null | undefined>
   return texts.some((t) => Boolean(t && /계속기업/.test(t)));
 }
 
+/** 기간이 FY가 아니면 ROE·ROA는 연간 비율이라 빼는다. 기간을 안 넘기면 그대로 둔다. */
+export function statementRatiosForPeriod(items: Record<string, number>, period?: string | null) {
+  const r = statementRatios(items);
+  if (period == null || period === "FY") return r;
+  delete r.roe;
+  delete r.roa;
+  return r;
+}
+
 export function statementRatios(items: Record<string, number>) {
   const revenue = items.revenue;
   const op = items.operating_income;
@@ -96,6 +106,8 @@ export function formatStatementContext(input: {
   symbol: string;
   name: string;
   fiscalYear: number;
+  /** FY가 아니면 ROE·ROA를 컨텍스트에 넣지 않는다. */
+  fiscalPeriod?: string | null;
   currency: string;
   income?: Record<string, number>;
   balance?: Record<string, number>;
@@ -107,9 +119,12 @@ export function formatStatementContext(input: {
   segments?: CompanySegmentRow[] | null;
 }): string {
   const merged = { ...input.income, ...input.balance, ...input.cashflow };
-  const ratios = statementRatios(merged);
+  const ratios = statementRatiosForPeriod(merged, input.fiscalPeriod);
+  const periodLabel = statementPeriodLabel(input.fiscalPeriod);
   const blocks: string[] = [
-    `${input.name}(${input.symbol}) ${input.fiscalYear} 연결`,
+    periodLabel
+      ? `${input.name}(${input.symbol}) ${input.fiscalYear} · ${periodLabel} 연결`
+      : `${input.name}(${input.symbol}) ${input.fiscalYear} 연결`,
   ];
   const overview = formatOverviewContext(input.overview);
   if (overview) blocks.push(`## 기업개황\n${overview}`);

@@ -36,14 +36,14 @@ export function edgarMinFiscalYear(now: Date = new Date()): number {
 
 const PERIOD_RANK: Record<string, number> = {
   FY: 0,
-  H1: 1,
-  Q3: 2,
+  Q3: 1,
+  H1: 2,
   Q2: 3,
   Q1: 4,
   Q4: 5,
 };
 
-/** 같은 연도·표에서 연간(FY)을 먼저. 없으면 반기·분기 순. */
+/** 같은 연도·표에서 연간(FY)을 먼저. 없으면 3분기, 반기, 1분기 순. */
 export function preferStatementRow<T extends { statement: string; fiscalPeriod: string }>(
   rows: readonly T[],
   statement: string,
@@ -53,4 +53,44 @@ export function preferStatementRow<T extends { statement: string; fiscalPeriod: 
   return [...of].sort(
     (a, b) => (PERIOD_RANK[a.fiscalPeriod] ?? 99) - (PERIOD_RANK[b.fiscalPeriod] ?? 99),
   )[0];
+}
+
+/**
+ * 고른 연도가 목록에 있으면 그 연도.
+ * 아니면 FY 행이 있는 최신 연도. FY가 없으면 목록의 최신 연도.
+ */
+export function defaultStatementYear(
+  rows: readonly { fiscalYear: number; fiscalPeriod: string }[],
+  picked?: number | null,
+): number | undefined {
+  const years = [...new Set(rows.map((r) => r.fiscalYear))];
+  if (picked != null && years.includes(picked)) return picked;
+  const fyYears = rows.filter((r) => r.fiscalPeriod === "FY").map((r) => r.fiscalYear);
+  if (fyYears.length) return Math.max(...fyYears);
+  if (!years.length) return undefined;
+  return Math.max(...years);
+}
+
+/** 손익 행의 기간에 재무상태·현금흐름을 맞춘다. 그 기간 행이 없으면 그 표는 없다. */
+export function alignStatementRows<T extends { statement: string; fiscalPeriod: string }>(
+  rows: readonly T[],
+): { period: string | null; income?: T; balance?: T; cashflow?: T } {
+  const income = preferStatementRow(rows, "income");
+  if (!income) return { period: null };
+  const period = income.fiscalPeriod;
+  const same = (statement: string) => rows.find((r) => r.statement === statement && r.fiscalPeriod === period);
+  return { period, income, balance: same("balance"), cashflow: same("cashflow") };
+}
+
+/** 화면·챗에 붙이는 기간 이름. 모르는 코드는 null. */
+export function statementPeriodLabel(period: string | null | undefined): string | null {
+  switch ((period ?? "").trim().toUpperCase()) {
+    case "FY": return "연간";
+    case "Q1": return "1분기 누적";
+    case "Q2": return "2분기 누적";
+    case "H1": return "반기 누적";
+    case "Q3": return "3분기 누적";
+    case "Q4": return "4분기";
+    default: return null;
+  }
 }

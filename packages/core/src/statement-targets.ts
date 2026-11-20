@@ -22,6 +22,28 @@ export type SecTickerEntry = { cik: string; title: string };
 const KR_MARKETS = new Set(["KRX", "KOSDAQ"]);
 const US_MARKETS = new Set(["US", "NYSE", "NASDAQ", "AMEX"]);
 
+/** 보유·섹터를 한 맵으로 묶을 때 쓰는 키. `.KS`·`.KQ`를 떼고 대문자로 맞춘다. */
+export function heldInstrumentKey(symbol: string): string {
+  return symbol.trim().replace(/\.(KS|KQ)$/i, "").toUpperCase();
+}
+
+/**
+ * 같은 키의 첫 행만 남긴다.
+ * 보유·관심을 앞에, 섹터 목록을 뒤에 두면 섹터의 `KRX`가 보유 `KOSDAQ`을 덮지 않는다.
+ */
+export function indexHeldPreferFirst<T>(
+  rows: readonly T[],
+  keyOf: (row: T) => string,
+): Map<string, T> {
+  const map = new Map<string, T>();
+  for (const row of rows) {
+    const key = keyOf(row);
+    if (!key || map.has(key)) continue;
+    map.set(key, row);
+  }
+  return map;
+}
+
 function tag(block: string, name: string): string {
   const m = block.match(new RegExp(`<${name}>\\s*([^<]*)\\s*</${name}>`, "i"));
   return (m?.[1] ?? "").trim();
