@@ -2,6 +2,21 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-22 — 세션 C: 요율 기간·DART 빈 손익·코스닥 dry-run·로그인 게이트 (Cursor)
+**한 일**
+- `fix/data-cleanup-rate-period` (기준 `f680b8d`). N2 요율 effective 기간, N1-b H1/Q3 빈 손익 삭제, N3 KOSDAQ 복구 dry-run(근거 0·36 skip), N4 nextAllowedAt 429·SECRET 32자. 리뷰 문서 4건 포함. push·merge 안 함
+
+**다음 할 일**
+1. N1 국내 DART 재수집은 요청이 있을 때
+2. N3는 사용자 원장에 KOSDAQ 근거가 생기면 APPLY=1
+3. DGX Spark/vLLM. 쓸 장비·엔드포인트는 없음
+
+**막힌 것**
+- 기본공제 150만 원은 사용자가 다시 대조하기 전이다
+- `APP_PASSWORD`가 있으면 `.env`에 `SESSION_SECRET`(32자 이상)이 있어야 한다
+
+---
+
 ## 2026-11-22 — 반복 패턴·능동 알림을 dev에 합침 (Cursor)
 **한 일**
 - `feat/repeat-mistake`를 `dev`에 합침. `main`은 그대로. ADR 0064·0065

@@ -37,8 +37,9 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ `pnpm typecheck` 8패키지 통과. `feat/repeat-mistake` | 2026-11-22 | Cursor |
-| core 테스트 (vitest) | ✅ 86개 파일 404개 통과. `feat/repeat-mistake` | 2026-11-22 | Cursor |
+| 타입체크 (web 포함 8패키지) | ✅ `pnpm typecheck` 8패키지 통과. `fix/data-cleanup-rate-period` | 2026-11-22 | Cursor |
+| core 테스트 (vitest) | ✅ 87개 파일 411개 통과. `fix/data-cleanup-rate-period` | 2026-11-22 | Cursor |
+| KOSDAQ market dry-run | ✅ 6자리 KRX 36건, 근거 0 → 전부 skip. APPLY 안 함 | 2026-11-22 | Cursor |
 | 능동 알림(확인할 일) | ✅ BTC 집중·코인 중립 규칙이 확인할 일에 올라옴. 푸시 없음 | 2026-11-22 | Cursor |
 | 이상 지출 홈 카드 | ✅ 2026-11은 소비 거래 없음. 2026-09는 이전 소비 달 0개월이라 비교하지 않음. 챗 스타터는 보임. 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |
 | 리스크 홈 카드 | ✅ BTC 100%, 코인 100%, KRW 100%, 해외 통화 없음, 성향 중립, 변동폭 없음. 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |
