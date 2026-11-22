@@ -66,7 +66,7 @@ async function main() {
 
   if (!apply) {
     console.log("적용하려면 APPLY=1 로 다시 실행. 근거 없는 행은 바꾸지 않는다.");
-    return;
+    process.exit(0);
   }
 
   for (const row of restore) {
@@ -74,6 +74,7 @@ async function main() {
     await db.update(instruments).set({ market: "KOSDAQ" }).where(eq(instruments.id, row.id));
     console.log(`updated ${row.symbol} ${row.from} → KOSDAQ (${row.reason})`);
   }
+  process.exit(0);
 }
 
 main().catch((err) => {
