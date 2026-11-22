@@ -101,3 +101,15 @@ export function dartReportedAmount(input: {
   if (cumulative) return parseDartAmount(input.thstrmAddAmount);
   return parseDartAmount(input.thstrmAmount);
 }
+
+/**
+ * 반기·3분기 손익 누적 칸이 하나도 없으면 예전 3개월 행이 남지 않게 지운다.
+ * EDGAR의 빈 items → delete와 같은 취지.
+ */
+export function shouldDeleteStaleDartIncome(input: {
+  period: string;
+  incomeItemCount: number;
+}): boolean {
+  if (input.period !== "H1" && input.period !== "Q3") return false;
+  return input.incomeItemCount <= 0;
+}

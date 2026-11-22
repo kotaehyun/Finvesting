@@ -1,3 +1,4 @@
+import { and, eq } from "drizzle-orm";
 import { db, financialStatements, auditReports } from "@finvesting/db";
 import {
   DART_REPORTS,
@@ -9,6 +10,7 @@ import {
   parseDartTarget,
   parseEnvTargets,
   resolveDartTargets,
+  shouldDeleteStaleDartIncome,
   statementCollectYears,
   statementLookupHeldRefs,
   type DartReportSpec,
@@ -192,6 +194,22 @@ async function upsertDartFs(
     }
   } else {
     console.warn(`dart CF ${stock} ${year} ${report.code}: ${allRes.status}`);
+  }
+
+  const incomeItems = groups.get("income") ?? {};
+  if (shouldDeleteStaleDartIncome({
+    period: report.period,
+    incomeItemCount: Object.keys(incomeItems).length,
+  })) {
+    groups.delete("income");
+    await db.delete(financialStatements).where(and(
+      eq(financialStatements.instrumentId, instrumentId),
+      eq(financialStatements.fiscalYear, year),
+      eq(financialStatements.fiscalPeriod, report.period),
+      eq(financialStatements.statement, "income"),
+      eq(financialStatements.consolidated, "CFS"),
+      eq(financialStatements.source, "dart"),
+    ));
   }
 
   let n = 0;
