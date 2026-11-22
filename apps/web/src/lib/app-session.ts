@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { readSession, SESSION_COOKIE } from "@finvesting/core";
+import { readSession, SESSION_COOKIE, sessionSecretUsable } from "@finvesting/core";
 
 export function appPassword(): string {
   return process.env.APP_PASSWORD?.trim() ?? "";
@@ -18,8 +18,8 @@ export async function isAuthed(): Promise<boolean> {
   const password = appPassword();
   if (!password) return true;
   const secret = sessionSecret();
-  if (!secret) {
-    console.warn("APP_PASSWORD is set but SESSION_SECRET is missing");
+  if (!sessionSecretUsable(secret)) {
+    console.warn("APP_PASSWORD is set but SESSION_SECRET is missing or shorter than 32 characters");
     return false;
   }
   const token = (await cookies()).get(SESSION_COOKIE)?.value ?? "";

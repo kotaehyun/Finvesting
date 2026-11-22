@@ -2,6 +2,28 @@
 
 export const SESSION_COOKIE = "finvesting_session";
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+/** HMAC 키 최소 길이(문자). 짧으면 없는 것과 같다. */
+export const SESSION_SECRET_MIN_LENGTH = 32;
+
+/** SESSION_SECRET이 서명에 쓸 수 있는 길이인지. */
+export function sessionSecretUsable(secret: string | null | undefined): boolean {
+  return typeof secret === "string" && secret.length >= SESSION_SECRET_MIN_LENGTH;
+}
+
+/**
+ * nextAllowedAt 이전 요청은 비밀번호를 비교하지 않는다.
+ * retryAfterSec는 Retry-After용(초, 최소 1).
+ */
+export function loginGate(
+  now: number,
+  nextAllowedAt: number | null,
+): { allowed: true } | { allowed: false; retryAfterSec: number } {
+  if (nextAllowedAt == null || now >= nextAllowedAt) return { allowed: true };
+  return {
+    allowed: false,
+    retryAfterSec: Math.max(1, Math.ceil((nextAllowedAt - now) / 1000)),
+  };
+}
 
 function utf8(value: string): Uint8Array<ArrayBuffer> {
   const encoded = new TextEncoder().encode(value);

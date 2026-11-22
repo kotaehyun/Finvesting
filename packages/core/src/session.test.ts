@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   cookieValue,
   loginBackoffMs,
+  loginGate,
   passwordsMatch,
   readSession,
   SESSION_COOKIE,
+  SESSION_SECRET_MIN_LENGTH,
   SESSION_TTL_MS,
+  sessionSecretUsable,
   signSession,
 } from "./session";
 
@@ -44,5 +47,18 @@ describe("쿠키 세션", () => {
   it("쿠키 헤더에서 세션 값만 꺼낸다", () => {
     expect(cookieValue(`a=1; ${SESSION_COOKIE}=abc`, SESSION_COOKIE)).toBe("abc");
     expect(cookieValue(null, SESSION_COOKIE)).toBe("");
+  });
+
+  it("SESSION_SECRET은 32자 미만이면 쓸 수 없다", () => {
+    expect(sessionSecretUsable("")).toBe(false);
+    expect(sessionSecretUsable("short")).toBe(false);
+    expect(sessionSecretUsable("x".repeat(SESSION_SECRET_MIN_LENGTH - 1))).toBe(false);
+    expect(sessionSecretUsable("x".repeat(SESSION_SECRET_MIN_LENGTH))).toBe(true);
+  });
+
+  it("nextAllowedAt 전이면 비교 없이 거절한다", () => {
+    expect(loginGate(1_000, null)).toEqual({ allowed: true });
+    expect(loginGate(1_000, 1_000)).toEqual({ allowed: true });
+    expect(loginGate(1_000, 2_500)).toEqual({ allowed: false, retryAfterSec: 2 });
   });
 });
