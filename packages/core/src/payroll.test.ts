@@ -52,6 +52,13 @@ describe("statutoryWithholding", () => {
       expect(w.withholdTotal).toBeNull();
     }
   });
+
+  it("국민연금 구간 안이어도 요율 effectiveTo 밖이면 unavailable", () => {
+    // h2 구간은 2027-06까지지만 요율 entry는 2026-12-31까지
+    expect(statutoryWithholding(3_000_000, 0, "2027-01").status).toBe("unavailable");
+    expect(statutoryWithholding(3_000_000, 0, "2026-12").status).toBe("ok");
+    expect(statutoryWithholding(3_000_000, 0, "2026-07").status).toBe("ok");
+  });
 });
 
 describe("earnedIncomeDeduction / incomeTaxBaseFromMonthly", () => {

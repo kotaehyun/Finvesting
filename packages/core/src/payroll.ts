@@ -1,9 +1,38 @@
 // 2026년 직장가입자·근로자 부담분. 원 단위 절사.
 // 국세(근로소득세)는 간이세액표·부양가족에 따라 달라 요율로 추정하지 않는다. 명세서 금액을 넣고 지방세는 그 10%.
 import dataFile from "../data/tax/payroll-rates-2026.json";
-import { assertDataFile, dataSourceLine, requireValue } from "./load-data";
+import { assertDataFile, dataSourceLine, mergeEntry, requireValue } from "./load-data";
 
 assertDataFile(dataFile, "tax/payroll-rates-2026.json");
+
+/** 급여 요율 항목. 국민연금 상·하한 구간과 별도로 달마다 유효 기간을 본다. */
+const PAYROLL_RATE_PERIOD_IDS = [
+  "rates.nationalPensionEmployee",
+  "rates.healthInsuranceTotal",
+  "rates.healthInsuranceEmployeeShare",
+  "rates.longTermCareIncomeRate",
+  "rates.employmentInsuranceEmployee",
+] as const;
+
+/** payMonth(YYYY-MM)가 요율 entry의 effectiveFrom~To 안인지. 하나라도 밖이면 false. */
+export function payrollRatesCoverPayMonth(
+  payMonth: string,
+  file: typeof dataFile = dataFile,
+): boolean {
+  const ym = payMonth.slice(0, 7);
+  if (!/^\d{4}-\d{2}$/.test(ym)) return false;
+  const day = `${ym}-01`;
+  const entries = file.entries;
+  if (!Array.isArray(entries)) return false;
+  for (const id of PAYROLL_RATE_PERIOD_IDS) {
+    const hit = entries.find((e) => e.id === id);
+    if (!hit) return false;
+    const full = mergeEntry(file.defaults, hit);
+    if (!full.effectiveFrom || !full.effectiveTo) return false;
+    if (day < full.effectiveFrom || day > full.effectiveTo) return false;
+  }
+  return true;
+}
 
 export const PAYROLL_RATES_SOURCE = dataSourceLine(dataFile.defaults);
 
@@ -185,6 +214,7 @@ export function statutoryWithholding(
 ): StatutoryWithholding {
   const gross = Math.max(0, Number(grossIncome) || 0);
   if (payMonth && !nationalPensionBand(payMonth)) return unavailableWithholding();
+  if (payMonth && !payrollRatesCoverPayMonth(payMonth)) return unavailableWithholding();
   const band = nationalPensionBand(payMonth);
   const pensionBase = gross <= 0 || !band ? 0 : Math.min(Math.max(gross, band.floor), band.cap);
   const pensionFrac = rateFraction(rates.nationalPensionEmployee);
