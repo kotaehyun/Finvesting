@@ -3,8 +3,9 @@ import {
   accounts, transactions, financialProfiles, recurringCosts,
   savingsPlans, savingsContributions, type Db,
 } from "@finvesting/db";
-import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets, addMonths, convertAccountBalances, detectSpendAnomalies, explainHoldingRisk, SPEND_ANOMALY_LOOKBACK_MONTHS, type RiskTolerance } from "@finvesting/core";
+import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets, addMonths, convertAccountBalances, detectSpendAnomalies, explainHoldingRisk, buildProactiveAlerts, SPEND_ANOMALY_LOOKBACK_MONTHS, type RiskTolerance } from "@finvesting/core";
 import { latestUsdKrw, loadHoldings } from "./holdings";
+import { loadRepeatMistakes } from "./repeat-mistake";
 
 export function currentKstMonth() {
   return new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 7);
@@ -98,6 +99,14 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
     riskTolerance,
     usdkrw: holdings.usdkrw,
   });
+  const repeatMistake = await loadRepeatMistakes(db, userId);
+  const alerts = buildProactiveAlerts({
+    uncategorizedCount,
+    missingQuoteCount: holdings.totals.missingQuote,
+    spendAnomaly,
+    riskExplain,
+    repeatMistake,
+  });
   const quoteDates = holdings.positions.map((p) => p.lastDate).filter((d): d is string => d != null);
   const quoteAsOf = quoteDates.length ? quoteDates.reduce((a, b) => (a > b ? a : b)) : null;
 
@@ -184,6 +193,8 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
     cashflow,
     spendAnomaly,
     riskExplain,
+    repeatMistake,
+    alerts,
     txnCount: monthTxns.length,
     uncategorizedCount,
     quoteAsOf,

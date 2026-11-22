@@ -24,6 +24,10 @@ export type RiskExplainInput = {
 export type RiskExplainResult = {
   status: "empty" | "unpriced" | "ok";
   lines: string[];
+  /** 40% 이상일 때만. 알림용. */
+  concentration: { symbol: string; weight: number } | null;
+  /** 공격이 아닐 때 코인 20% 이상. 알림용. */
+  cryptoAttention: { weight: number; riskLabel: string } | null;
 };
 
 function pct(n: number) {
@@ -39,7 +43,7 @@ export function explainHoldingRisk(input: RiskExplainInput): RiskExplainResult {
   const open = input.positions.filter((p) => p.quantity > 0);
   const tail = "가격 변동폭은 계산하지 않습니다.";
   if (open.length === 0) {
-    return { status: "empty", lines: ["보유 종목이 없습니다.", tail] };
+    return { status: "empty", lines: ["보유 종목이 없습니다.", tail], concentration: null, cryptoAttention: null };
   }
   const usable = open.filter(priced);
   const missing = open.length - usable.length;
@@ -47,6 +51,8 @@ export function explainHoldingRisk(input: RiskExplainInput): RiskExplainResult {
     return {
       status: "unpriced",
       lines: ["시세가 없어 비중을 계산하지 않습니다.", `시세 없는 종목 ${missing}개입니다.`, tail],
+      concentration: null,
+      cryptoAttention: null,
     };
   }
 
@@ -77,8 +83,9 @@ export function explainHoldingRisk(input: RiskExplainInput): RiskExplainResult {
     .map(([currency, value]) => `${currency} ${pct(value / total)}`)
     .join(", ");
 
+  const concentration = topWeight >= SINGLE_NAME_WEIGHT ? { symbol: top.symbol, weight: topWeight } : null;
   const lines = [`시세가 있는 평가액 가운데 가장 큰 종목은 ${top.symbol}이고, 비중은 ${pct(topWeight)}입니다.`];
-  if (topWeight >= SINGLE_NAME_WEIGHT) {
+  if (concentration) {
     lines.push("한 종목이 40% 이상입니다. 투자성향과 같은 경험 규칙이며, 공식 위험 지표가 아닙니다.");
   }
   lines.push(`자산군은 ${classText}입니다.`);
@@ -99,12 +106,16 @@ export function explainHoldingRisk(input: RiskExplainInput): RiskExplainResult {
   }
 
   const cryptoWeight = (byClass.get("crypto") ?? 0) / total;
-  if (cryptoWeight >= CRYPTO_WEIGHT_FOR_NON_AGGRESSIVE && input.riskTolerance && input.riskTolerance !== "aggressive") {
-    lines.push(`코인이 ${pct(cryptoWeight)}이고 성향은 ${RISK_TOLERANCE_LABEL[input.riskTolerance]}입니다. 투자성향과 같은 경험 규칙으로 20% 이상입니다.`);
+  const cryptoAttention =
+    cryptoWeight >= CRYPTO_WEIGHT_FOR_NON_AGGRESSIVE && input.riskTolerance && input.riskTolerance !== "aggressive"
+      ? { weight: cryptoWeight, riskLabel: RISK_TOLERANCE_LABEL[input.riskTolerance] }
+      : null;
+  if (cryptoAttention) {
+    lines.push(`코인이 ${pct(cryptoAttention.weight)}이고 성향은 ${cryptoAttention.riskLabel}입니다. 투자성향과 같은 경험 규칙으로 20% 이상입니다.`);
   }
   if (missing > 0) lines.push(`시세 없는 종목 ${missing}개는 비중에 넣지 않았습니다.`);
   lines.push(tail);
-  return { status: "ok", lines };
+  return { status: "ok", lines, concentration, cryptoAttention };
 }
 
 export function formatRiskExplainContext(result: RiskExplainResult): string {

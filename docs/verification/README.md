@@ -37,10 +37,12 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ `pnpm typecheck` 8패키지 통과. `feat/spend-anomaly` | 2026-11-22 | Cursor |
-| core 테스트 (vitest) | ✅ 84개 파일 393개 통과. `feat/spend-anomaly` | 2026-11-22 | Cursor |
+| 타입체크 (web 포함 8패키지) | ✅ `pnpm typecheck` 8패키지 통과. `feat/repeat-mistake` | 2026-11-22 | Cursor |
+| core 테스트 (vitest) | ✅ 86개 파일 404개 통과. `feat/repeat-mistake` | 2026-11-22 | Cursor |
+| 능동 알림(확인할 일) | ✅ BTC 집중·코인 중립 규칙이 확인할 일에 올라옴. 푸시 없음 | 2026-11-22 | Cursor |
 | 이상 지출 홈 카드 | ✅ 2026-11은 소비 거래 없음. 2026-09는 이전 소비 달 0개월이라 비교하지 않음. 챗 스타터는 보임. 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |
 | 리스크 홈 카드 | ✅ BTC 100%, 코인 100%, KRW 100%, 해외 통화 없음, 성향 중립, 변동폭 없음. 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |
+| 반복 패턴 홈 카드 | ✅ 「2회 이상인 종목이 없습니다.」 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |
 | `packages/core/data/**` JSON 스키마 | ✅ tax=entries만·realty=defaults(+config). 4대보험 요율은 `verifiedBy` 사용자. `basicPersonalExemption`은 미검증. 미검증 260은 그 칸·civil-pay·corp-local | 2026-11-20 | Cursor |
 | 부동산·ERP 범위 | ✅ 동결·보류(ADR 0050). 내비 숨김 | 2026-09-26 | Cursor |
 | interop 테스트 | ✅ 5개 파일 18개 테스트 전건 통과 (`accounting-journal-csv.test.ts` 4건 포함) | 2026-10-10 | Gemini |
@@ -104,6 +106,8 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-22 | Cursor (능동 알림) | [2026-11-22-cursor-proactive-alerts.md](./2026-11-22-cursor-proactive-alerts.md) |
+| 2026-11-22 | Cursor (반복 패턴) | [2026-11-22-cursor-repeat-mistake.md](./2026-11-22-cursor-repeat-mistake.md) |
 | 2026-11-22 | Cursor (리스크 설명) | [2026-11-22-cursor-risk-explain.md](./2026-11-22-cursor-risk-explain.md) |
 | 2026-11-22 | Cursor (이상 지출) | [2026-11-22-cursor-spend-anomaly.md](./2026-11-22-cursor-spend-anomaly.md) |
 | 2026-11-20 | Cursor (급여 요율·로그인 키) | [2026-11-20-cursor-payroll-session.md](./2026-11-20-cursor-payroll-session.md) |

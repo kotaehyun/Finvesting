@@ -6,7 +6,7 @@
 
 It pulls together bank, card, brokerage and crypto balances and transactions to show net worth and monthly cash flow (spending and saving rates against income), and suggests how to split money between deposits, investments and spending based on income, assets, emergency fund and risk tolerance. A worker collects news, quotes, inflation, interest rates and FX automatically; that data plus your own financial situation becomes the context for an investment-assistant chatbot. Financial data never leaves your machine — everything runs locally.
 
-- **Current stage**: Phases 1–3, chat streaming, saved conversations, anomaly spending detection, and risk explanations are done. Next is the rest of phase 5, starting with repeated-mistake patterns. There is no hosted database URL. Payroll, social insurance, and the realty terminal stay deferred (ADR 0050)
+- **Current stage**: Phases 1–3 and phase-5 chat, anomaly spending, risk, repeated patterns, and home/chat alerts (no push/email) are done. Next is vLLM. There is no hosted database URL. Payroll, social insurance, and the realty terminal stay deferred (ADR 0050)
 - **Long term**: once optimized, evolve into a service — multi-user auth and a hosted database. Payroll and labor stay deferred (ADR 0050)
 - **Original brief**: `Finvesting_프로젝트_소개서.pdf` (Concept Brief v0.1) → summarized in [docs/tech/overview.md](./docs/tech/overview.md)
 
