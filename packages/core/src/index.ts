@@ -31,6 +31,7 @@ export * from "./statement-mcap";
 export * from "./news-embed";
 export * from "./naver-news";
 export * from "./dart-accounts";
+export * from "./instrument-market-repair";
 export * from "./dart-xbrl-segments";
 export * from "./edgar-xbrl-segments";
 export * from "./edgar-facts";
