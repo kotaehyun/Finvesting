@@ -3,6 +3,8 @@ export * from "./account-balance";
 export * from "./cashflow";
 export * from "./spend-anomaly";
 export * from "./risk-explain";
+export * from "./repeat-mistake";
+export * from "./proactive-alerts";
 export * from "./transactions-filter";
 export * from "./currency-convert";
 export * from "./portfolio";

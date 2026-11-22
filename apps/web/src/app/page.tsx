@@ -34,7 +34,7 @@ export default function Dashboard() {
   if (error) return <p>오류: {error.message}</p>;
   if (!data) return null;
 
-  const { assets, cashflow, spendAnomaly, riskExplain, guide, holdings, profile, txnCount, uncategorizedCount, quoteAsOf, upcoming, isCurrentMonth, asOf } = data;
+  const { assets, cashflow, spendAnomaly, riskExplain, repeatMistake, alerts, guide, holdings, profile, txnCount, quoteAsOf, upcoming, isCurrentMonth, asOf } = data;
   const spent = cashflow.fixedCost + cashflow.variableCost;
   const emptyLedger = txnCount === 0;
   const noHoldings = holdings.totals.openCount === 0;
@@ -42,13 +42,7 @@ export default function Dashboard() {
   const classRows = holdings.byClass.filter((c) => c.count > 0);
   const currencyRows = holdings.byCurrency.filter((c) => c.count > 0);
   const contrib = holdings.pnlContribution.slice(0, 5);
-  const todos: Array<{ href: string; label: string }> = [];
-  if (uncategorizedCount > 0) {
-    todos.push({ href: "/accounts", label: `미분류 거래 ${uncategorizedCount}건` });
-  }
-  if (holdings.totals.missingQuote > 0) {
-    todos.push({ href: "/holdings", label: `시세 없는 보유 ${holdings.totals.missingQuote}종목` });
-  }
+  const todos = alerts;
 
   return (
     <>
@@ -235,6 +229,43 @@ export default function Dashboard() {
         </ul>
       </section>
 
+      <section className="card" style={{ marginTop: 16 }}>
+        <h3>반복 패턴</h3>
+        <p className="muted" style={{ margin: "0 0 8px" }}>
+          손실 실현 뒤 같은 계좌·같은 종목을 다시 산 횟수만 셉니다. {repeatMistake.minCount}회 이상만 반복으로 봅니다. 실수라고 단정하지 않습니다.
+        </p>
+        {repeatMistake.status === "empty" && (
+          <p className="muted" style={{ margin: 0 }}>체결이 없습니다.</p>
+        )}
+        {repeatMistake.status === "insufficient" && (
+          <p className="muted" style={{ margin: 0 }}>{repeatMistake.minCount}회 이상인 종목이 없습니다.</p>
+        )}
+        {repeatMistake.status === "ok" && repeatMistake.patterns.length > 0 && (
+          <ul className="plain">
+            {repeatMistake.patterns.map((p) => (
+              <li key={`${p.accountId}-${p.instrumentId}`}>
+                {p.symbol}{p.name ? ` (${p.name})` : ""}
+                {p.accountName ? <span className="muted"> · {p.accountName}</span> : null}
+                {" "}
+                {p.count}회
+                <span className="muted"> · 최근 재매수 {p.lastBuyAt}</span>
+                <ul className="plain">
+                  {p.samples.map((s) => (
+                    <li key={`${s.sellAt}-${s.buyAt}-${s.realizedPnlKrw}`}>
+                      <span className="muted">손실 매도 {s.sellAt}</span>
+                      {" "}
+                      {won(s.realizedPnlKrw)}
+                      {" → "}
+                      <span className="muted">재매수 {s.buyAt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {(classRows.length > 0 || currencyRows.length > 0 || contrib.length > 0) && (
         <div className="grid" style={{ marginTop: 16 }}>
           {classRows.length > 0 && (
@@ -307,12 +338,15 @@ export default function Dashboard() {
       <div className="grid" style={{ marginTop: 16 }}>
         <section className="card">
           <h3>확인할 일</h3>
+          <p className="muted" style={{ margin: "0 0 8px" }}>
+            미분류·시세 없음·이상 지출·보유 집중·반복 패턴을 모읍니다. 푸시·메일은 보내지 않습니다.
+          </p>
           {todos.length === 0
             ? <p className="muted" style={{ margin: 0 }}>지금 확인할 항목이 없습니다.</p>
             : (
               <ul className="plain todo-list">
                 {todos.map((t) => (
-                  <li key={t.href}><a href={t.href}>{t.label}</a></li>
+                  <li key={t.id}><a href={t.href}>{t.label}</a></li>
                 ))}
               </ul>
             )}

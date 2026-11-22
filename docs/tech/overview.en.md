@@ -37,7 +37,7 @@ A personal finance work terminal that connects scattered account, card, brokerag
 - Phase 2 Market Terminal: watchlist, per-symbol news mapping, and RAG are done. Korea Investment quotes are not used. Quotes are Yahoo and Upbit (ADR 0053)
 - Phase 3 Tax + Year-End: own year-end settlement, overseas-stock capital gains, and dividend/interest monitoring are done
 - Phase 4: Douzone, WEHAGO, and Semusarang export is done. Multi-user auth, hosted DB move, worker container, and payroll/social insurance are not. Payroll and social insurance stay deferred (ADR 0050)
-- Phase 5: chat streaming and saved conversations are done (ADR 0058, 0059). Anomaly spending compares each category's month total with the user's own prior monthly maximum and shows it on the home page and in chat (ADR 0062). Risk text states only the priced holding's top name, asset class, and currency (ADR 0063). Still open: repeated-mistake patterns, proactive alerts, DGX Spark/vLLM provider
+- Phase 5: chat streaming and saved conversations are done (ADR 0058, 0059). Anomaly spending (ADR 0062), risk text (ADR 0063), repeated loss-then-rebuy patterns (ADR 0064), and home/chat proactive alerts that reuse those results without push or email (ADR 0065) are done. Still open: DGX Spark/vLLM provider
 
 ## Original brief
 `Finvesting_프로젝트_소개서.pdf` (Concept Brief v0.1) — 9 modules (Account, Investment, Market Terminal, Tax, Year-End, Accounting, Labor/HR, Research, AI Assistant); signature feature: Financial Timeline.
