@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { pnlTone, signedWon } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
+import { categoryLabel } from "@/lib/categories";
 import { Pnl } from "./pnl";
 import { NetWorthChart } from "./net-worth-chart";
 
@@ -33,7 +34,7 @@ export default function Dashboard() {
   if (error) return <p>오류: {error.message}</p>;
   if (!data) return null;
 
-  const { assets, cashflow, guide, holdings, profile, txnCount, uncategorizedCount, quoteAsOf, upcoming, isCurrentMonth, asOf } = data;
+  const { assets, cashflow, spendAnomaly, riskExplain, guide, holdings, profile, txnCount, uncategorizedCount, quoteAsOf, upcoming, isCurrentMonth, asOf } = data;
   const spent = cashflow.fixedCost + cashflow.variableCost;
   const emptyLedger = txnCount === 0;
   const noHoldings = holdings.totals.openCount === 0;
@@ -167,6 +168,71 @@ export default function Dashboard() {
             {profile && <> · <a href="/profile">프로필대장</a></>}
           </p>
         )}
+      </section>
+
+      <section className="card" style={{ marginTop: 16 }}>
+        <h3>이상 지출</h3>
+        <p className="muted" style={{ margin: "0 0 8px" }}>
+          소비 분류만 봅니다. 저축·투자·이체·미분류는 빼 두고, 이전 달에 없던 분류는 이상으로 보지 않습니다.
+          이전 {spendAnomaly.lookbackMonths}개월 가운데 소비가 있는 달이 {spendAnomaly.minBaselineMonths}개월 이상일 때, 그 분류의 월 합계 최댓값보다 큰 달만 표시합니다.
+        </p>
+        {spendAnomaly.status === "empty" && (
+          <p className="muted" style={{ margin: 0 }}>이 달 소비로 볼 거래가 없습니다.</p>
+        )}
+        {spendAnomaly.status === "insufficient" && (
+          <p className="muted" style={{ margin: 0 }}>
+            소비가 있는 이전 달은 {spendAnomaly.comparedMonths}개월이라 비교하지 않습니다.
+          </p>
+        )}
+        {spendAnomaly.status === "ok" && spendAnomaly.flags.length === 0 && (
+          <p className="muted" style={{ margin: 0 }}>
+            분류별 소비는 이전 {spendAnomaly.lookbackMonths}개월 최댓값을 넘지 않습니다.
+          </p>
+        )}
+        {spendAnomaly.flags.length > 0 && (
+          <ul className="plain">
+            {spendAnomaly.flags.map((f) => (
+              <li key={f.category}>
+                {categoryLabel(f.category)} {won(f.monthTotal)}
+                <span className="muted"> · 이전 최댓값 {won(f.baselineMax)} ({f.baselineMonth})</span>
+                {f.outliers.length > 0 && (
+                  <ul className="plain">
+                    {f.outliers.map((t) => (
+                      <li key={t.id ?? `${t.date}-${t.amount}-${t.merchant ?? ""}`}>
+                        <span className="muted">{t.date}</span>
+                        {" "}
+                        {t.merchant || t.memo || categoryLabel(f.category)}
+                        {" "}
+                        {won(t.amount)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {f.outlierCount === 0 && (
+                  <div className="muted">한 건이 월 최댓값을 넘긴 것은 아니고, 달 합계가 넘었습니다.</div>
+                )}
+                {f.outlierCount > f.outliers.length && (
+                  <div className="muted">월 최댓값을 넘긴 거래 {f.outlierCount}건 중 {f.outliers.length}건만 표시합니다.</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {isCurrentMonth && (
+          <p className="muted" style={{ margin: "8px 0 0" }}>이 달은 아직 끝나지 않았습니다. 합계는 {asOf}까지의 거래입니다.</p>
+        )}
+      </section>
+
+      <section className="card" style={{ marginTop: 16 }}>
+        <h3>리스크</h3>
+        <p className="muted" style={{ margin: "0 0 8px" }}>
+          시세가 있는 평가액 비중만 말합니다. 40%·20%는 투자성향과 같은 경험 규칙이고, 가격 변동폭은 계산하지 않습니다.
+        </p>
+        <ul className="plain">
+          {riskExplain.lines.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
       </section>
 
       {(classRows.length > 0 || currencyRows.length > 0 || contrib.length > 0) && (

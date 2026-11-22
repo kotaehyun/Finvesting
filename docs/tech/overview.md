@@ -37,7 +37,7 @@
 - 2단계 Market Terminal: 관심 종목, 종목 뉴스 매핑, RAG까지 됨. 한투 시세는 하지 않음. 시세는 Yahoo·업비트 (ADR 0053)
 - 3단계 Tax + Year-End: 본인 기준 연말정산, 해외주식 양도세, 배당·이자 모니터링까지 됨
 - 4단계: 더존·위하고·세무사랑 내보내기는 됨. 다중 사용자 인증, 호스팅 DB 이전, worker 컨테이너, 급여·4대보험은 아직. 급여·4대보험은 ADR 0050 보류
-- 5단계: 챗 스트리밍·대화 저장은 됨 (ADR 0058·0059). 남은 것은 이상 지출 탐지, 리스크 설명, 반복 실수 패턴, 능동 알림, DGX Spark/vLLM
+- 5단계: 챗 스트리밍·대화 저장은 됨 (ADR 0058·0059). 이상 지출은 본인 원장의 분류별 월 최댓값과 비교해 홈과 챗에 보여 줌 (ADR 0062). 리스크는 시세가 있는 평가액의 종목·자산군·통화만 말함 (ADR 0063). 남은 것은 반복 실수 패턴, 능동 알림, DGX Spark/vLLM
 
 ## 원본 기획서
 `Finvesting_프로젝트_소개서.pdf` (Concept Brief v0.1) — 9개 모듈(Account, Investment, Market Terminal, Tax, Year-End, Accounting, Labor/HR, Research, AI Assistant), 대표 기능 Financial Timeline.

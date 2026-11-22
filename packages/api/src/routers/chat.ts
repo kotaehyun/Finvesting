@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, cosineDistance, desc, eq, inArray, isNotNull, notInArray, or, sql } from "drizzle-orm";
 import { news, macroIndicators, quotes, instruments, watchlist, chatSessions, chatMessages, type Db } from "@finvesting/db";
-import { ANALYST_TITLE_RE, allOpinionSources, formatFundamentalsContext, formatInvestStyleContext, isNewsEmbedVector, NEWS_EMBED_DIM, NEWS_EMBED_MODEL, newsEmbedInput, signedWon, worldIndexByYahoo, worldIndexYahooTickers } from "@finvesting/core";
+import { ANALYST_TITLE_RE, allOpinionSources, formatFundamentalsContext, formatInvestStyleContext, formatRiskExplainContext, formatSpendAnomalyContext, isNewsEmbedVector, NEWS_EMBED_DIM, NEWS_EMBED_MODEL, newsEmbedInput, signedWon, worldIndexByYahoo, worldIndexYahooTickers } from "@finvesting/core";
 import { createProvider, INVEST_ASSISTANT_SYSTEM, buildContextBlock, type LlmProvider } from "@finvesting/ai";
 import { router, publicProcedure } from "../trpc";
 import { loadOverview } from "../lib/overview";
@@ -164,7 +164,11 @@ async function askMessages(
 
       const coverage = await loadCoverageSnapshot(ctx.db, ctx.userId);
       const investAdvice = await loadInvestAdvice(ctx.db, ctx.userId, Promise.resolve(overview));
-      const { assets, cashflow, txnCount, month, guide, holdings: h, profile } = overview;
+      const { assets, cashflow, spendAnomaly, riskExplain, txnCount, month, guide, holdings: h, profile, isCurrentMonth, asOf } = overview;
+      const spendText = formatSpendAnomalyContext(spendAnomaly);
+      const spendBlock = isCurrentMonth
+        ? `${spendText}\n조회 월은 아직 끝나지 않았고, 합계는 ${asOf}까지의 거래입니다.`
+        : spendText;
       const fundBoard = await loadLatestFundamentals(ctx.db);
       const fundById = new Map((fundBoard.status === "ok" ? fundBoard.items : []).map((r) => [r.instrumentId, r]));
       const fundBlocks = h.positions
@@ -205,6 +209,8 @@ async function askMessages(
         "이번 달 현금흐름": txnCount
           ? `수입 ${won(cashflow.income)} · 고정 ${won(cashflow.fixedCost)} · 변동 ${won(cashflow.variableCost)} · 저축·투자 ${won(cashflow.savingAndInvest)}`
           : undefined,
+        "이상 지출": spendBlock,
+        "리스크": formatRiskExplainContext(riskExplain),
         "월 배분 가이드": guide
           ? `필수 ${won(guide.needs)} · 여가 ${won(guide.wants)} · 저축·투자 ${won(guide.saveAndInvest)} (예적금 ${won(guide.ofWhichDeposit)} / 투자 ${won(guide.ofWhichInvest)})`
           : undefined,
