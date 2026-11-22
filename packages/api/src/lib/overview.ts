@@ -3,7 +3,7 @@ import {
   accounts, transactions, financialProfiles, recurringCosts,
   savingsPlans, savingsContributions, type Db,
 } from "@finvesting/db";
-import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets, addMonths, convertAccountBalances } from "@finvesting/core";
+import { summarizeCashflow, monthlyBudgetGuide, resolvePay, brokerCashKrw, investedAssets, addMonths, convertAccountBalances, detectSpendAnomalies, explainHoldingRisk, SPEND_ANOMALY_LOOKBACK_MONTHS, type RiskTolerance } from "@finvesting/core";
 import { latestUsdKrw, loadHoldings } from "./holdings";
 
 export function currentKstMonth() {
@@ -40,10 +40,12 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
   const { from, to } = monthRange(month);
   const asOf = currentKstDate();
   const isCurrentMonth = month === currentKstMonth();
+  const baselineFrom = `${addMonths(month, -SPEND_ANOMALY_LOOKBACK_MONTHS)}-01`;
 
   const accts = await db.select().from(accounts).where(and(eq(accounts.userId, userId), eq(accounts.isActive, true)));
   const txns = await db.select().from(transactions)
-    .where(and(eq(transactions.userId, userId), gte(transactions.date, from), lte(transactions.date, to)));
+    .where(and(eq(transactions.userId, userId), gte(transactions.date, baselineFrom), lte(transactions.date, to)));
+  const monthTxns = txns.filter((t) => t.date >= from && t.date <= to);
   const [profile] = await db.select().from(financialProfiles).where(eq(financialProfiles.userId, userId));
   const recurring = await db.select().from(recurringCosts)
     .where(and(eq(recurringCosts.userId, userId), eq(recurringCosts.isActive, true)));
@@ -70,8 +72,32 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
   // 투자자산 = 보유 평가액 + 증권·코인·연금 예수금(계좌 balance)
   const invested = investedAssets(holdings.totals.marketValueKrw, brokerCash);
 
-  const cashflow = summarizeCashflow(txns.map((t) => ({ amount: Number(t.amount), direction: t.direction, category: t.category })));
-  const uncategorizedCount = txns.filter((t) => t.category === "uncategorized").length;
+  const cashflow = summarizeCashflow(monthTxns.map((t) => ({ amount: Number(t.amount), direction: t.direction, category: t.category })));
+  const uncategorizedCount = monthTxns.filter((t) => t.category === "uncategorized").length;
+  const spendAnomaly = detectSpendAnomalies(txns.map((t) => ({
+    id: t.id,
+    date: t.date,
+    amount: Number(t.amount),
+    direction: t.direction,
+    category: t.category,
+    merchant: t.merchant,
+    memo: t.memo,
+  })), month);
+  const riskTolerance: RiskTolerance | null = profile?.riskTolerance === "conservative" || profile?.riskTolerance === "moderate" || profile?.riskTolerance === "aggressive"
+    ? profile.riskTolerance
+    : null;
+  const riskExplain = explainHoldingRisk({
+    positions: holdings.positions.map((p) => ({
+      symbol: p.symbol,
+      name: p.name,
+      assetClass: p.assetClass,
+      currency: p.currency,
+      quantity: p.quantity,
+      marketValueKrw: p.marketValueKrw,
+    })),
+    riskTolerance,
+    usdkrw: holdings.usdkrw,
+  });
   const quoteDates = holdings.positions.map((p) => p.lastDate).filter((d): d is string => d != null);
   const quoteAsOf = quoteDates.length ? quoteDates.reduce((a, b) => (a > b ? a : b)) : null;
 
@@ -156,7 +182,9 @@ export async function loadOverview(db: Db, userId: string, month = currentKstMon
     },
     holdings,
     cashflow,
-    txnCount: txns.length,
+    spendAnomaly,
+    riskExplain,
+    txnCount: monthTxns.length,
     uncategorizedCount,
     quoteAsOf,
     upcoming,
