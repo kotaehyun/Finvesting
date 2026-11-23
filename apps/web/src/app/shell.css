@@ -1,0 +1,54 @@
+/* 계정 모드 셸 (ADR 0067). 색은 공통 변수만. */
+.shell-brand { font-weight: 700; text-decoration: none; color: var(--fg); white-space: nowrap; }
+.shell-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.shell-logout { margin: 0; }
+.mode-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.mode-switch button { background: transparent; color: var(--muted); border: 0; border-radius: 0; padding: 6px 12px; font-size: 13px; }
+.mode-switch button.on { background: var(--accent); color: #fff; }
+
+/* 일반: 위쪽 한 줄 + 묶음 하위 둘째 줄 */
+.pshell-top { display: flex; align-items: center; gap: 20px; padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--card); }
+.pshell-nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.pshell-nav a { text-decoration: none; color: var(--fg); font-weight: 600; padding: 6px 12px; border-radius: 8px; white-space: nowrap; }
+.pshell-nav a:hover { background: var(--bg); }
+.pshell-nav a.on { background: var(--user); color: var(--accent); }
+.pshell-sub { display: flex; gap: 2px; padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--card); overflow-x: auto; scrollbar-width: none; }
+.pshell-sub a { text-decoration: none; color: var(--muted); font-size: 14px; padding: 8px 12px; border-bottom: 2px solid transparent; white-space: nowrap; }
+.pshell-sub a.on { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* 비즈니스: 남색 윗줄 + 왼쪽 트리 */
+.bshell { --biz-navy: #0a3d62; --biz-side: #f4f7fa; --biz-line: #d5dee8; --biz-sel: #dbeafe; --biz-fg: #1a1d21; --biz-muted: #5c6470; }
+@media (prefers-color-scheme: dark) {
+  .bshell { --biz-navy: #1b3354; --biz-side: #151b24; --biz-line: #2a3442; --biz-sel: #1e3a5f; --biz-fg: #e6e8eb; --biz-muted: #9aa3ad; }
+}
+.bshell-top { display: flex; align-items: center; gap: 16px; padding: 8px 16px; background: var(--biz-navy); color: #fff; }
+.bshell-top .shell-brand { color: #fff; }
+.bshell-badge { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,.18); margin-left: 6px; }
+.bshell-where { font-size: 13px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bshell-top .mode-switch { border-color: rgba(255,255,255,.35); }
+.bshell-top .mode-switch button { color: rgba(255,255,255,.8); }
+.bshell-top .mode-switch button.on { background: #fff; color: var(--biz-navy); }
+.bshell-top button.link { color: #fff; }
+.bshell-body { display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: calc(100vh - 44px); }
+.bshell-tree { background: var(--biz-side); border-right: 1px solid var(--biz-line); padding: 8px 0; font-size: 14px; }
+.bshell-group { padding: 4px 0; }
+.bshell-group-title { padding: 6px 16px; font-size: 12px; font-weight: 700; color: var(--biz-muted); }
+.bshell-group.open .bshell-group-title { color: var(--biz-fg); }
+.bshell-item { display: block; padding: 6px 16px 6px 24px; color: var(--biz-fg); text-decoration: none; }
+.bshell-item:hover { background: var(--biz-sel); }
+.bshell-item.on { background: var(--biz-sel); font-weight: 700; box-shadow: inset 3px 0 0 var(--accent); }
+.bshell-item.pending { color: var(--biz-muted); cursor: not-allowed; }
+.bshell-item.pending small { display: block; font-size: 11px; }
+.main.main-biz { max-width: none; margin: 0; }
+
+@media (max-width: 900px) {
+  .pshell-top { flex-wrap: wrap; gap: 8px; }
+  .pshell-nav { order: 3; width: 100%; }
+  .bshell-body { grid-template-columns: 1fr; }
+  .bshell-tree { display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--biz-line); padding: 0; }
+  .bshell-group { display: flex; align-items: center; }
+  .bshell-group-title { padding: 8px 6px 8px 12px; }
+  .bshell-item { padding: 8px 8px; white-space: nowrap; }
+  .bshell-item.pending { display: none; }
+  .bshell-where { display: none; }
+}
