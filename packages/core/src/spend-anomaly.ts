@@ -1,4 +1,5 @@
 // 이상 지출. 본인 원장의 분류별 월 합계만 비교한다. 인구 통계·배수는 쓰지 않는다.
+import { isSpendingCategory } from "./cashflow";
 import { addMonths } from "./savings";
 import { TXN_ACCOUNT_LABELS } from "./tax-year";
 
@@ -8,13 +9,6 @@ export const SPEND_ANOMALY_LOOKBACK_MONTHS = 6;
 export const SPEND_ANOMALY_MIN_BASELINE_MONTHS = 3;
 /** 최댓값을 넘긴 거래는 금액이 큰 순으로 이 건수만 돌려준다. */
 export const SPEND_ANOMALY_OUTLIER_LIMIT = 5;
-
-// 홈의 소비(고정+변동)와 같다. 저축·투자·이체·미분류는 빼 둔다.
-export const SPEND_ANOMALY_CATEGORIES = new Set([
-  "housing", "utilities", "insurance", "subscription", "phone",
-  "income_tax", "health_insurance", "loan_repayment",
-  "food", "transport", "shopping", "leisure", "health", "education", "misc",
-]);
 
 export type SpendAnomalyTxn = {
   id?: string | null;
@@ -83,7 +77,7 @@ export function detectSpendAnomalies(txns: readonly SpendAnomalyTxn[], month: st
   const selected: SpendAnomalyTxn[] = [];
 
   for (const t of txns) {
-    if (t.direction !== "out" || !SPEND_ANOMALY_CATEGORIES.has(t.category)) continue;
+    if (t.direction !== "out" || !isSpendingCategory(t.category)) continue;
     if (!Number.isFinite(t.amount) || t.amount <= 0) continue;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(t.date)) continue;
     const ym = t.date.slice(0, 7);

@@ -2,6 +2,143 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — ADR 0067 3단계 보강 (Cursor)
+**한 일**
+- 일반 모드 카드형: 기업 숫자·재무제표·급여/공제(`/profile`)까지 확장. 종목·메뉴는 위쪽 칩/탭. web tsc 통과
+
+**다음 할 일**
+1. `globals.css` 분리(5단계)
+2. `fix/data-cleanup-rate-period` → `dev` 머지는 사용자 확인 후
+
+**막힌 것**
+- 브라우저 실물 확인·스크린샷은 안 함
+
+---
+
+## 2026-11-23 — ADR 0067 3·4단계 (Cursor)
+**한 일**
+- `feat/account-mode-shell`: `useUiMode` Context. 일반=세금·보유·계좌 카드형(탭·필드 라벨·전표 링크 숨김). 비즈니스=홈「이번 달 현황」·타임라인「거래 흐름」, `.bshell .erp-menu` 숨겨 이중 메뉴 제거. web tsc 통과
+
+**다음 할 일**
+1. 일반 모드 펀더멘털·재무제표·프로필 카드화
+2. `globals.css` 분리(5단계)
+
+**막힌 것**
+- 라이트/다크 실물 스크린샷은 안 남김
+
+---
+
+## 2026-11-23 — 일반·비즈니스 계정 셸 1단계 (Claude)
+**한 일**
+- 사용자가 ADR 0067을 확정(「작업을 진행하자」). `feat/account-mode-shell`(`feat/ui-unify-tones` 위)
+- `packages/core/src/ui-mode.ts`: 모드 두 개, 쿠키 이름, 메뉴 두 벌(일반 6묶음·비즈니스 7묶음), 현재 위치 판정. 테스트 `ui-mode.test.ts`
+- `apps/web/src/app/app-shell.tsx`·`shell.css`: 일반 = 위쪽 메뉴 + 묶음 둘째 줄, 비즈니스 = 남색 윗줄 + 왼쪽 트리. 「일반 / 비즈니스」 스위치. `next/link`, `aria-current`
+- 모드 저장은 DB 대신 쿠키 `finvesting_ui_mode`(ADR 0067에 이유). 화면 내용은 건드리지 않음
+
+**다음 할 일**
+1. 맥에서 `pnpm --filter @finvesting/core test` (이 세션 VM에서는 vitest 실행 불가 — 아래 검증 기록)
+2. `fix/data-cleanup-rate-period`(세션 C)를 dev에 합친 뒤 이 브랜치들 순서대로 머지
+3. ADR 0067 3단계(일반 화면 카드형·쉬운 말), 4단계(비즈니스 화면 ERP 메뉴 하나로)
+
+**막힌 것**
+- 없음
+
+---
+
+## 2026-11-23 — ADR 0067 초안 (Cursor)
+**한 일**
+- 일반(`personal`) / 비즈니스(`business`) UI 분리 ADR 0067을 **제안**으로 기록. 단계 2(톤·다크)는 `feat/ui-unify-tones`에 이미 있음. 셸·`ui_mode` 구현은 확정 전 안 함
+
+**다음 할 일**
+1. 사용자가 0067 채택·수정 여부 확정
+2. 채택 시 단계 1: `users.ui_mode` + 셸 두 개 + 메뉴 두 벌
+
+**막힌 것**
+- 0067 사용자 확정 전
+
+---
+
+## 2026-11-23 — UI 톤·다크 1단계 (Cursor)
+**한 일**
+- `feat/ui-unify-tones`: `--tone-*`·`.up/.down/.flat/.warn`, 타임라인·부동산·투자 인라인 색 정리. 순자산 0은 「변동 없음」, 세금 `-0원` 제거. wehago 다크가 흰 화면을 강제하던 것·프로필 라벨(`--erp-label`) 수정. `docs/tech/ui.md`, AGENTS/CLAUDE/ChatGPT 12번
+
+**다음 할 일**
+1. U5 메뉴 묶음·next/link·한국어 이름
+2. U7 국내 종목 표시명(DART)
+3. `fix/data-cleanup-rate-period` → `dev` 머지는 사용자 확인 후
+
+**막힌 것**
+- 라이트/다크 실물 스크린샷은 이번 세션에서 안 남김
+
+---
+
+## 2026-11-23 — Claude 리뷰 후속 (Cursor)
+**한 일**
+- `feat/valuation-triangle` 미커밋 4커밋 분리 + A2~A7·M2·DART 재개/타임아웃. `fix/data-cleanup-rate-period` push. 국내 DART 40종목 재수집 upserted=2275. 삼성·하이닉스·네이버 Q3 누적 매출 OpenDART 원문 일치. core 412·web/api tsc 통과
+
+**다음 할 일**
+1. `fix/data-cleanup-rate-period` → `dev` 머지 여부는 사용자 확인 후. 머지되면 `feat/valuation-triangle` rebase
+2. `docs/fred-api-key-setup` push·`stash@{0}` 정리
+3. localhost:5432(앱)와 Colima `finvesting-db`가 다르면 하나로 맞출지 결정
+
+**막힌 것**
+- `dev` 머지는 사용자 지시 전
+- Ollama 켠/끈 AI 분석 버튼 브라우저 실클릭은 안 함
+
+---
+
+## 2026-11-23 — 펀더멘털 AI 분석 버튼 (Cursor)
+**한 일**
+- `/fundamentals` 선택 종목에 「AI 분석」. `market.explainFundamentals` + `FUNDAMENTAL_READER_SYSTEM`. Yahoo 스냅샷만 읽고 매수·매도 단정 없음. Ollama 필요
+
+**다음 할 일**
+1. 커밋은 사용자 지시 시
+
+**막힌 것**
+- 로컬 Ollama가 꺼져 있으면 분석 호출 실패
+
+---
+
+## 2026-11-22 — 일반인용 쉬운 말 UX (Cursor)
+**한 일**
+- `/tax`·`/accounting`·`/fundamentals` wehago 뼈대 유지, 메뉴·KPI·「한눈에」·표 헤더를 쉬운 한국어로. 세금 ADR 0040 준수. `feat/valuation-triangle` 워킹트리. push·merge 안 함
+
+**다음 할 일**
+1. 커밋은 사용자 지시 시
+2. 재무제표 쉬운 말은 요청 시
+
+**막힌 것**
+- 없음(이 작업 기준)
+
+---
+
+## 2026-11-22 — 세금·회계전표 wehago ERP UI (Cursor)
+**한 일**
+- `/tax`·`/accounting`을 재무제표·펀더멘털과 같은 `erp wehago` 셸로 맞춤(타이틀바·툴바·왼쪽 메뉴·요약 KPI·본문+우측 요약). 계산·내보내기 로직은 유지. `feat/valuation-triangle` 워킹트리. push·merge 안 함
+
+**다음 할 일**
+1. 커밋은 사용자 지시 시
+2. 세션 C·DART 재수집은 요청 시
+
+**막힌 것**
+- 없음(이 작업 기준)
+
+---
+
+## 2026-11-22 — ROE·PER·PBR 삼각 차트 (Cursor)
+**한 일**
+- `feat/valuation-triangle`: `/fundamentals`를 재무제표·세금·전표와 같은 wehago ERP 터미널 UI로. ROE·PER·PBR 삼각+시총추정. ADR 0066. push·merge 안 함
+- 삼각 아래 선택 종목 상세 3칸(밸류에이션·규모/손익·가격/구간·시그널·52주) 추가. 스냅샷 표 탭은 유지
+
+**다음 할 일**
+1. 세션 C·DART 재수집은 요청 시
+2. 커밋은 사용자 지시 시
+
+**막힌 것**
+- 시총·순이익·ROE가 없는 국내 종목은 여전히 삼각 불가
+
+---
+
 ## 2026-11-22 — 반복 패턴·능동 알림을 dev에 합침 (Cursor)
 **한 일**
 - `feat/repeat-mistake`를 `dev`에 합침. `main`은 그대로. ADR 0064·0065

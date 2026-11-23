@@ -68,7 +68,7 @@ export function RealtyStressPanel({
             <div className="sub-kpi-title">
               <span>🏚️</span> 빈집(미거주 주택) 비율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{fmtRate(REALTY_EMPTY.kr2025)}</div>
+            <div className="sub-kpi-val warn">{fmtRate(REALTY_EMPTY.kr2025)}</div>
             <p className="sub-kpi-sub">{REALTY_EMPTY.houses2025.toLocaleString("ko-KR")}호 · 아파트 미거주 {fmtRate(emptyAptShare())}</p>
           </div>
 
@@ -124,7 +124,7 @@ export function RealtyStressPanel({
             <div className="sub-kpi-title">
               <span>🏙️</span> 수도권 상대 PIR 부담
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{sudoTone ? INCOME_HOUSING_TONE_LABEL[sudoTone] : "—"}</div>
+            <div className="sub-kpi-val warn">{sudoTone ? INCOME_HOUSING_TONE_LABEL[sudoTone] : "—"}</div>
             <p className="sub-kpi-sub">수도권 {REALTY_PIR.sudo}배 (전국 대비 {pirSudoVs?.toFixed(2)}배 수준)</p>
           </div>
 
@@ -132,7 +132,7 @@ export function RealtyStressPanel({
             <div className="sub-kpi-title">
               <span>🏛️</span> 서울 상대 PIR 부담
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{seoulTone ? INCOME_HOUSING_TONE_LABEL[seoulTone] : "—"}</div>
+            <div className="sub-kpi-val warn">{seoulTone ? INCOME_HOUSING_TONE_LABEL[seoulTone] : "—"}</div>
             <p className="sub-kpi-sub">서울 13.9배 (전국 대비 {pirSeoulVs?.toFixed(2)}배 초고부담)</p>
           </div>
 

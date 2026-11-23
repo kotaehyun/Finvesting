@@ -23,10 +23,10 @@
 | 대상 | 형식 | 상태 |
 |---|---|---|
 | 세무사 전달용 범용 장부 CSV | 일자·계정과목·차변·대변·적요·거래처·증빙 | 구현됨 (`exporters/generic-csv.ts`) |
-| **더존** (Smart A / iCUBE) | 일반전표 엑셀/CSV 업로드 규격 (일자, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
-| **위하고** (WEHAGO) | 전자전표 CSV 업로드 규격 (회계일자, 전표구분 차변/대변, 계정코드, 공급가액, 합계, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
-| **세무사랑 Pro** (K-Lep) | 일반전표 엑셀 업로드 규격 (월, 일, 전표번호, 구분 3:차변/4:대변, 계정코드, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
-| **회계 통합 워크북** | 4개 시트 통합 XLSX (더존, 위하고, 세무사랑, 복식부기 분개장) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting`) |
+| **더존** (Smart A / iCUBE) | 일반전표 엑셀/CSV 업로드 규격 (일자, 전표번호, 구분 3:차변/4:대변, 계정코드, 거래처, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting` · UI는 `erp wehago`) |
+| **위하고** (WEHAGO) | 전자전표 CSV 업로드 규격 (회계일자, 전표구분 차변/대변, 계정코드, 공급가액, 합계, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting` · UI는 `erp wehago`) |
+| **세무사랑 Pro** (K-Lep) | 일반전표 엑셀 업로드 규격 (월, 일, 전표번호, 구분 3:차변/4:대변, 계정코드, 금액, 적요) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting` · UI는 `erp wehago`) |
+| **회계 통합 워크북** | 4개 시트 통합 XLSX (더존, 위하고, 세무사랑, 복식부기 분개장) | 구현됨 (`exporters/accounting-journal-csv.ts`, `/accounting` · UI는 `erp wehago`) |
 | 연말정산 제출 자료 패키지 | 4개 시트 통합 XLSX (정산요약, 공제명세, 해외주식 양도세, 금융소득) | 구현됨 (`exporters/tax-settlement-xlsx.ts`, `/tax`) |
 | 급여명세·원천세 신고 자료 | XLSX | 4단계 |
 | 부가세·인건비·3.3%·법인세·종소세·비상장·면세·수출입 시산 양식 | 화면 | 연결됨. `/erp` 인격별. 홈택스 XML·더존 업로드 아님 |

@@ -48,7 +48,7 @@ export function RealtyNtsPanel() {
             <div className="sub-kpi-title">
               <span>🏙️</span> 수도권 전체 집중도
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{c.sudoSharePct}%</div>
+            <div className="sub-kpi-val warn">{c.sudoSharePct}%</div>
             <p className="sub-kpi-sub">수도권 총 {fmtManPeople(sudoNow)} (서울·경기·인천 집중)</p>
           </div>
 
@@ -95,7 +95,7 @@ export function RealtyNtsPanel() {
                     <span style={{ marginLeft: 8 }}>{fmtPct(ntsCgtShare(r.now))}</span>
                   </td>
                   <td className="num">+{fmtManPeople(ntsCgtDelta(r))}</td>
-                  <td className="num" style={{ color: "#dc2626" }}>+{r.yoyPct.toFixed(1)}%</td>
+                  <td className="num up">+{r.yoyPct.toFixed(1)}%</td>
                 </tr>
               ))}
               <tr style={{ background: "color-mix(in srgb, var(--accent) 8%, var(--card))", fontWeight: 700 }}>

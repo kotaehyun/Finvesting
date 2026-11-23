@@ -59,7 +59,7 @@ export function RealtyPeoplePanel() {
             <div className="sub-kpi-title">
               <span>⚠️</span> 행안부 인구감소지역
             </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>{realtyPopDeclineCount()}곳</div>
+            <div className="sub-kpi-val alert up">{realtyPopDeclineCount()}곳</div>
             <p className="sub-kpi-sub">관심 지역 {realtyPopWatchCount()}곳 지정 (서울은 해당 없음)</p>
           </div>
         </div>
@@ -86,7 +86,7 @@ export function RealtyPeoplePanel() {
                 {REALTY_MOVE_2025.regions.map((r) => (
                   <tr key={r.id}>
                     <td style={{ fontWeight: 600 }}>{r.label}</td>
-                    <td className="num" style={{ color: r.net > 0 ? "#dc2626" : "#2563eb", fontWeight: 700 }}>
+                    <td className={`num ${r.net > 0 ? "up" : "down"}`} style={{ fontWeight: 700 }}>
                       {fmtNet(r.net)}
                     </td>
                   </tr>
@@ -164,7 +164,7 @@ export function RealtyPeoplePanel() {
             <div className="sub-kpi-title">
               <span>🧾</span> 전월세 거래 중 월세 누계
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{REALTY_LEASE_TRADE.wolseYtd}%</div>
+            <div className="sub-kpi-val warn">{REALTY_LEASE_TRADE.wolseYtd}%</div>
             <p className="sub-kpi-sub">전년 {REALTY_LEASE_TRADE.wolseYtdPrev}% 대비 +{REALTY_LEASE_TRADE.wolseYtdDelta}%p 증가</p>
           </div>
 

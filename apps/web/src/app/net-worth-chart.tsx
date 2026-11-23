@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { calculateBarHeights, type MonthlyNetWorthPoint } from "@finvesting/core";
+import { calculateBarHeights, pnlTone, signedPct, type MonthlyNetWorthPoint } from "@finvesting/core";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
@@ -51,10 +51,23 @@ export function NetWorthChart({ selectedMonth, onSelectMonth }: NetWorthChartPro
           </div>
           <div className="nw-metric-row">
             <span className="nw-big-amount">{won(displayPoint.netWorth)}</span>
-            <div className={`nw-growth-badge ${displayPoint.momChange >= 0 ? "up" : "down"}`}>
-              {displayPoint.momChange >= 0 ? "▲" : "▼"} {won(Math.abs(displayPoint.momChange))} ({pct(displayPoint.momRate)})
-              <span className="nw-growth-sub">전월 대비</span>
-            </div>
+            {(() => {
+              const tone = pnlTone(displayPoint.momChange);
+              if (tone === "flat") {
+                return (
+                  <div className="nw-growth-badge flat">
+                    변동 없음
+                    <span className="nw-growth-sub">전월 대비</span>
+                  </div>
+                );
+              }
+              return (
+                <div className={`nw-growth-badge ${tone}`}>
+                  {tone === "up" ? "▲" : "▼"} {won(Math.abs(displayPoint.momChange))} ({signedPct(displayPoint.momRate)})
+                  <span className="nw-growth-sub">전월 대비</span>
+                </div>
+              );
+            })()}
           </div>
           <p className="muted nw-month-label">
             기준월: <strong>{displayPoint.month}</strong> · 총자산 {won(displayPoint.totalAssets)} · 부채 {won(displayPoint.debt)}

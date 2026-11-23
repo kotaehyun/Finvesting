@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { pnlTone, signedWon } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
 import { categoryLabel } from "@/lib/categories";
+import { useUiMode } from "@/lib/ui-mode";
 import { Pnl } from "./pnl";
 import { NetWorthChart } from "./net-worth-chart";
 
@@ -25,6 +26,8 @@ function monthOptions(count = 12) {
 const CHAT_Q = "내 현재 재무 상태를 컨텍스트 숫자만으로 짧게 정리해 줘. 순자산은 오늘 잔액 기준이고, 선택한 달의 수입·소비·저축은 거래 원장 기준이다. 없는 값은 없다고 해.";
 
 export default function Dashboard() {
+  const mode = useUiMode();
+  const business = mode === "business";
   const months = useMemo(() => monthOptions(), []);
   const [month, setMonth] = useState(kstMonth);
   const { data, isLoading, error } = trpc.dashboard.overview.useQuery({ month });
@@ -48,8 +51,9 @@ export default function Dashboard() {
     <>
       <div className="page-head">
         <div>
-          <h1 style={{ marginBottom: 4 }}>홈</h1>
+          <h1 style={{ marginBottom: 4 }}>{business ? "이번 달 현황" : "홈"}</h1>
           <p className="muted" style={{ margin: 0 }}>
+            {business ? "대시보드 · " : ""}
             조회 {month}
             {" · "}
             화면 기준 {asOf} (한국)

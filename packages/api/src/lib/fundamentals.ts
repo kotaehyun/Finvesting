@@ -1,6 +1,7 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { fundamentals, instruments, quotes, type Db } from "@finvesting/db";
 import {
+  fillMissingPerPbr,
   parseFundamentalExtra,
   type FundamentalBoardRow,
   type FundamentalsBoard,
@@ -47,6 +48,22 @@ export async function loadLatestFundamentals(db: Db): Promise<FundamentalsBoard>
     for (const r of rows) {
       if (seen.has(r.instrumentId)) continue;
       seen.add(r.instrumentId);
+      const marketCap = num(r.marketCap);
+      const roe = num(r.roe);
+      const netIncomeTtm = num(r.netIncomeTtm);
+      const extra = parseFundamentalExtra(r.extra);
+      const filled = fillMissingPerPbr({
+        per: num(r.per),
+        pbr: num(r.pbr),
+        roe,
+        marketCap,
+        netIncomeTtm,
+        currency: r.currency,
+        financialCurrency: extra.financialCurrency ?? null,
+        market: r.market,
+      });
+      if (filled.filledPer) extra.perDerived = true;
+      if (filled.filledPbr) extra.pbrDerived = true;
       out.push({
         instrumentId: r.instrumentId,
         symbol: r.symbol,
@@ -56,18 +73,18 @@ export async function loadLatestFundamentals(db: Db): Promise<FundamentalsBoard>
         currency: r.currency,
         date: r.date,
         source: r.source,
-        marketCap: num(r.marketCap),
-        per: num(r.per),
+        marketCap,
+        per: filled.per,
         forwardPer: num(r.forwardPer),
-        pbr: num(r.pbr),
+        pbr: filled.pbr,
         eps: num(r.eps),
-        roe: num(r.roe),
+        roe,
         dividendYield: num(r.dividendYield),
         revenueTtm: num(r.revenueTtm),
-        netIncomeTtm: num(r.netIncomeTtm),
+        netIncomeTtm,
         debtToEquity: num(r.debtToEquity),
         beta: num(r.beta),
-        extra: parseFundamentalExtra(r.extra),
+        extra,
         lastPrice: null,
         lastPriceDate: null,
         lastPriceSource: null,
@@ -99,4 +116,14 @@ export async function loadLatestFundamentals(db: Db): Promise<FundamentalsBoard>
   } catch {
     return { status: "unavailable", items: [] };
   }
+}
+
+/** 종목 1건의 최신 Yahoo 펀더멘털. 없으면 null. */
+export async function loadFundamentalByInstrumentId(
+  db: Db,
+  instrumentId: string,
+): Promise<FundamentalBoardRow | null> {
+  const board = await loadLatestFundamentals(db);
+  if (board.status !== "ok") return null;
+  return board.items.find((r) => r.instrumentId === instrumentId) ?? null;
 }

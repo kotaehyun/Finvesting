@@ -13,4 +13,5 @@
 | [commands.md](./commands.md) | 자주 쓰는 개발·DB·워커·검사 CLI 명령어 모음 및 환경별(macOS/PowerShell) 실행법 |
 | [git-workflow.md](./git-workflow.md) | 브랜치 전략(main/dev/기능), 두 기기 동기화, AI 도구 커밋 규칙 |
 | [tax.md](./tax.md) | 세금 & 연말정산(해외주식 250만 공제, 2천만 금융소득, 연말정산 환급 시뮬레이터) |
+| [ui.md](./ui.md) | 웹 UI 색·0 표시·다크 모드 규칙 |
 | [decisions/](./decisions/README.md) | 아키텍처 결정 기록(ADR) |

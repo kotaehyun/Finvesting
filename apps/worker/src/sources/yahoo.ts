@@ -300,6 +300,9 @@ export async function collectYahoo() {
         const fd = summary?.financialData ?? {};
         const ks = summary?.defaultKeyStatistics ?? {};
         const extra = extraFromQuote(q);
+        if (typeof fd.financialCurrency === "string" && fd.financialCurrency.trim()) {
+          extra.financialCurrency = fd.financialCurrency.trim().toUpperCase();
+        }
         const beta = n(q.beta) ?? n(ks.beta);
         await db.insert(fundamentals).values({
           instrumentId: inst.id, date: tradeDate, source: "yahoo",

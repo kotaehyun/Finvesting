@@ -36,7 +36,7 @@ export function RealtyWealthPanel() {
             <div className="sub-kpi-title">
               <span>👑</span> 상위 10% 순자산 점유율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{w.topShare}%</div>
+            <div className="sub-kpi-val warn">{w.topShare}%</div>
             <p className="sub-kpi-sub">전년비 +{w.topShareDeltaPp}%p 상승 · 하위 50% 순자산 총합 {w.bottom50Share}%</p>
           </div>
 

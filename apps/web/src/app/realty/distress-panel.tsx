@@ -44,7 +44,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>🏠</span> 가계대출 연체율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{n.household.toFixed(2)}%</div>
+            <div className="sub-kpi-val warn">{n.household.toFixed(2)}%</div>
             <p className="sub-kpi-sub">주담대 {n.mortgage.toFixed(2)}% · 기타대출 {n.other.toFixed(2)}%</p>
           </div>
 
@@ -52,7 +52,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>⚠️</span> 고위험가구 청년 비중
             </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>{y.youthShare}%</div>
+            <div className="sub-kpi-val alert up">{y.youthShare}%</div>
             <p className="sub-kpi-sub">{y.asOf} 기준 총 {(y.households / 10_000).toFixed(1)}만 가구</p>
           </div>
 
@@ -68,7 +68,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>🏪</span> 자영업자 차주 연체율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{n.selfEmp.toFixed(2)}%</div>
+            <div className="sub-kpi-val warn">{n.selfEmp.toFixed(2)}%</div>
             <p className="sub-kpi-sub">취약 자영업 {n.selfEmpWeak.toFixed(2)}% · 기업대출 {n.firm.toFixed(2)}%</p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>💳</span> 전업 카드사 총 연체율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{REALTY_CARD_NPL.all.toFixed(2)}%</div>
+            <div className="sub-kpi-val warn">{REALTY_CARD_NPL.all.toFixed(2)}%</div>
             <p className="sub-kpi-sub">전년말 대비 +{REALTY_CARD_NPL.allDelta.toFixed(2)}%p (카드채권 {REALTY_CARD_NPL.card.toFixed(2)}%)</p>
           </div>
 
@@ -95,7 +95,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>📉</span> 카드대출 연체율
             </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>{REALTY_CARD_NPL.loan.toFixed(2)}%</div>
+            <div className="sub-kpi-val alert up">{REALTY_CARD_NPL.loan.toFixed(2)}%</div>
             <p className="sub-kpi-sub">신용판매 {REALTY_CARD_NPL.sales.toFixed(2)}% · 비카드 여전 {REALTY_CARD_NPL.nonCard.toFixed(2)}%</p>
           </div>
 
@@ -111,7 +111,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>💸</span> 평균 리볼빙 수수료율
             </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>{REALTY_REVOLVING.feePct}%</div>
+            <div className="sub-kpi-val alert up">{REALTY_REVOLVING.feePct}%</div>
             <p className="sub-kpi-sub">현금서비스 {REALTY_REVOLVING.cashFeePct}% · 카드론 {REALTY_REVOLVING.cardLoanFeePct}%</p>
           </div>
         </div>
@@ -254,7 +254,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>🏗️</span> 부동산업 대출 연체율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{cre.realEstate.toFixed(2)}%</div>
+            <div className="sub-kpi-val warn">{cre.realEstate.toFixed(2)}%</div>
             <p className="sub-kpi-sub">전 업종 평균 {cre.all.toFixed(2)}% (잔액 비중 {cre.realEstateShare}%)</p>
           </div>
 
@@ -262,7 +262,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>🏬</span> 도소매업 대출 연체율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{cre.retail.toFixed(2)}%</div>
+            <div className="sub-kpi-val warn">{cre.retail.toFixed(2)}%</div>
             <p className="sub-kpi-sub">잔액 비중 {cre.retailShare}% (상권 침체 지표)</p>
           </div>
 
@@ -278,7 +278,7 @@ export function RealtyDistressPanel() {
             <div className="sub-kpi-title">
               <span>🏦</span> 비은행권 기업 연체율
             </div>
-            <div className="sub-kpi-val alert" style={{ color: "#dc2626" }}>{n.nonbankFirm.toFixed(2)}%</div>
+            <div className="sub-kpi-val alert up">{n.nonbankFirm.toFixed(2)}%</div>
             <p className="sub-kpi-sub">은행권 기업 {n.bankFirm.toFixed(2)}% 대비 3.7배 수준</p>
           </div>
         </div>

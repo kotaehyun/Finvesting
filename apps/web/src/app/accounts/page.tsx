@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from "react";
 import { trpc } from "@/lib/trpc";
 import { categoriesFor, categoryLabel, type TxnCategoryId } from "@/lib/categories";
+import { useUiMode } from "@/lib/ui-mode";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 
@@ -43,6 +44,8 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export default function AccountsPage() {
+  const mode = useUiMode();
+  const personal = mode === "personal";
   const list = trpc.accounts.list.useQuery();
   const create = trpc.accounts.create.useMutation({ onSuccess: () => list.refetch() });
   const preview = trpc.transactions.previewImport.useMutation();
@@ -102,31 +105,40 @@ export default function AccountsPage() {
   }
 
   return (
-    <>
-      <div className="page-head" style={{ marginBottom: 12 }}>
+    <div className={personal ? "card-page" : undefined}>
+      <div className={personal ? "card-page-head" : "page-head"} style={personal ? undefined : { marginBottom: 12 }}>
         <div>
-          <h1 style={{ marginBottom: 4 }}>계좌 · 거래</h1>
-          <p className="muted" style={{ margin: 0 }}>
-            통장·카드 계좌를 등록하고, 은행 내보내기 CSV/엑셀/워드를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 분류를 바꿀 수 있습니다.
+          <h1 style={{ marginBottom: personal ? 0 : 4 }}>{personal ? "계좌 · 거래" : "계좌 · 거래"}</h1>
+          <p className={personal ? "lead" : "muted"} style={personal ? undefined : { margin: 0 }}>
+            {personal
+              ? "통장·카드를 등록하고 은행에서 받은 파일을 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 바꿀 수 있습니다."
+              : "통장·카드 계좌를 등록하고, 은행 내보내기 CSV/엑셀/워드를 가져옵니다. 입금은 기타수입, 출금은 미분류로 들어가며 아래에서 분류를 바꿀 수 있습니다."}
           </p>
         </div>
-        <div className="row">
-          <a className="starter" href="/accounting" style={{ background: "#1f6feb" }}>
-            🏢 회계 전표 내보내기 (더존/위하고)
-          </a>
-        </div>
+        {!personal && (
+          <div className="row">
+            <a className="starter" href="/accounting">
+              회계 전표 내보내기 (더존/위하고)
+            </a>
+          </div>
+        )}
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
         <h3>계좌 추가</h3>
-        <form onSubmit={onCreate} className="row">
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="이름 (예: 카카오뱅크 입출금)" required />
-          <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="금융기관 (선택)" />
-          <select value={type} onChange={(e) => setType(e.target.value as TypeId)}>
-            {TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-          </select>
-          <input value={balance} onChange={(e) => setBalance(e.target.value)} type="number" step="1" placeholder="잔액" />
-          <button type="submit" disabled={create.isPending}>추가</button>
+        <form onSubmit={onCreate} className="field-grid">
+          <label>이름<input value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 카카오뱅크 입출금" required /></label>
+          <label>금융기관<input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="선택" /></label>
+          <label>
+            종류
+            <select value={type} onChange={(e) => setType(e.target.value as TypeId)}>
+              {TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+          </label>
+          <label>잔액<input value={balance} onChange={(e) => setBalance(e.target.value)} type="number" step="1" placeholder="0" /></label>
+          <div style={{ display: "flex", alignItems: "flex-end" }}>
+            <button type="submit" disabled={create.isPending}>추가</button>
+          </div>
         </form>
       </div>
 
@@ -179,7 +191,7 @@ export default function AccountsPage() {
       {accountId && !!txns.data?.length && (
         <TxnTable rows={txns.data} onChanged={() => { txns.refetch(); utils.dashboard.overview.invalidate(); }} />
       )}
-    </>
+    </div>
   );
 }
 

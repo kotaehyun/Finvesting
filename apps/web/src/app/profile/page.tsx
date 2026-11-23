@@ -2,6 +2,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { trpc } from "@/lib/trpc";
+import { useUiMode } from "@/lib/ui-mode";
 import { categoriesFor, categoryLabel, type TxnCategoryId } from "@/lib/categories";
 import { ComboChart } from "./combo-chart";
 import { PayYearSection } from "./pay-year";
@@ -566,19 +567,35 @@ function ProfileWorkspace() {
   const st = statement.data;
   const trend = st?.taxTrend ?? [];
   const menuLabel = MENUS.find((m) => m.id === menu)?.label ?? "";
+  const mode = useUiMode();
+  const personal = mode === "personal";
 
   return (
-    <div className="erp">
-      <div className="erp-titlebar">
-        <h1>프로필대장 <span className="path">재무관리 › {menuLabel}</span></h1>
-        <div className="wehago-title-meta">
-          <label>
+    <div className={personal ? "card-page profile-personal" : "erp"}>
+      {personal ? (
+        <div className="card-page-head">
+          <div>
+            <h1>급여 · 공제 입력</h1>
+            <p className="lead">월급·공제·고정비를 적으면 세금 화면과 맞춰 볼 수 있습니다.</p>
+            <p className="muted" style={{ margin: "4px 0 0" }}>{menuLabel}</p>
+          </div>
+          <label className="muted" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             기준월
             <input type="month" value={month} onChange={(e) => { setMonth(e.target.value); setDirty(false); }} />
           </label>
         </div>
-      </div>
-      <div className="erp-toolbar">
+      ) : (
+        <div className="erp-titlebar">
+          <h1>프로필대장 <span className="path">재무관리 › {menuLabel}</span></h1>
+          <div className="wehago-title-meta">
+            <label>
+              기준월
+              <input type="month" value={month} onChange={(e) => { setMonth(e.target.value); setDirty(false); }} />
+            </label>
+          </div>
+        </div>
+      )}
+      <div className={personal ? "card-toolbar" : "erp-toolbar"}>
         <button type="button" onClick={onQuery} disabled={current.isFetching}>조회</button>
         <button type="button" className="primary" onClick={onSave} disabled={save.isPending}>저장</button>
         <button type="button" onClick={onNew}>신규</button>
@@ -601,16 +618,26 @@ function ProfileWorkspace() {
         {dirty && <span className="erp-dirty">* 미저장</span>}
         {msg && <span>{msg}</span>}
       </div>
-      <div className="erp-body">
-        <nav className="erp-menu" aria-label="프로필대장 메뉴">
-          <h2>메뉴</h2>
-          {MENUS.map((m) => (
-            <button key={m.id} type="button" className={menu === m.id ? "on" : ""} onClick={() => goMenu(m.id)}>
-              {m.no} {m.label}
-            </button>
-          ))}
-        </nav>
-        <div className="erp-work">
+      <div className={personal ? "profile-personal-body" : "erp-body"}>
+        {personal ? (
+          <div className="card-page-tabs" aria-label="급여·공제 메뉴">
+            {MENUS.map((m) => (
+              <button key={m.id} type="button" className={menu === m.id ? "on" : ""} onClick={() => goMenu(m.id)}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <nav className="erp-menu" aria-label="프로필대장 메뉴">
+            <h2>메뉴</h2>
+            {MENUS.map((m) => (
+              <button key={m.id} type="button" className={menu === m.id ? "on" : ""} onClick={() => goMenu(m.id)}>
+                {m.no} {m.label}
+              </button>
+            ))}
+          </nav>
+        )}
+        <div className={personal ? "profile-personal-work" : "erp-work"}>
           <div className="erp-panel">
             {filePreview && (
               <div className="erp-preview">

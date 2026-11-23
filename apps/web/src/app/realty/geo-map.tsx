@@ -15,19 +15,24 @@ import type { DataDrivenPropertyValueSpecification, GeoJSONSource, LngLatLike, M
 import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import plan from "./korea-plan.json";
+import { toneColors } from "@/lib/tones";
 import { RealtyMoveDetail } from "./move-detail";
 import { RealtyTenureDetail } from "./tenure-detail";
 
-const FILL: Record<string, string> = {
-  danger: "#dc2626",
-  warn: "#ea580c",
-  info: "#2563eb",
-  growth: "#64748b",
-  nature: "#0f766e",
-  muted: "#9aa3ad",
-};
+function mapFill(): Record<string, string> {
+  const t = toneColors();
+  return {
+    danger: t.up,
+    warn: t.warn,
+    info: t.down,
+    growth: "#64748b",
+    nature: "#0f766e",
+    muted: "#9aa3ad",
+  };
+}
 
 function fillOf(s: RealtyPlanStyle) {
+  const FILL = mapFill();
   if (s.kind === "growth") return FILL.growth!;
   if (s.kind === "nature") return FILL.nature!;
   if (s.tone === "danger") return FILL.danger!;
@@ -226,8 +231,8 @@ function populationMoves(fc: FeatureCollection): MoveArrow[] {
     const out = slideLine(a, b, 0.16, 1, 0.22, 0.78);
     const inn = slideLine(b, a, 0.16, -1, 0.22, 0.78);
     arrows.push(
-      arrowOf(out.from, out.to, "#2563eb", "out", `${pair.outLabel} ${pair.outPct.toFixed(1)}%`, 1.3 + (pair.outPct / maxPct) * 2.2, along(out.from, out.to, 0.5)),
-      arrowOf(inn.from, inn.to, "#dc2626", "in", `${pair.inLabel} ${pair.inPct.toFixed(1)}%`, 1.3 + (pair.inPct / maxPct) * 2.2, along(inn.from, inn.to, 0.5)),
+      arrowOf(out.from, out.to, toneColors().down, "out", `${pair.outLabel} ${pair.outPct.toFixed(1)}%`, 1.3 + (pair.outPct / maxPct) * 2.2, along(out.from, out.to, 0.5)),
+      arrowOf(inn.from, inn.to, toneColors().up, "in", `${pair.inLabel} ${pair.inPct.toFixed(1)}%`, 1.3 + (pair.inPct / maxPct) * 2.2, along(inn.from, inn.to, 0.5)),
     );
   }
   const capPts = ["seoul", "incheon", "gyeonggi"].map(at).filter((p): p is [number, number] => !!p);
@@ -245,8 +250,8 @@ function populationMoves(fc: FeatureCollection): MoveArrow[] {
     const back = slideLine(cap, a, 0.08, -1, 0.42, 0.8);
     const labelAt = row.id === "jeju" ? along(a, cap, 0.22) : along(cap, a, 1.15);
     arrows.push(
-      arrowOf(go.from, go.to, "#dc2626", "in", "", 1.15 + (row.toCapital / maxThou) * 2.6, labelAt, true),
-      arrowOf(back.from, back.to, "#2563eb", "out", `${name} →${row.toCapital} ←${row.fromCapital}`, 1.15 + (row.fromCapital / maxThou) * 2.6, labelAt, true),
+      arrowOf(go.from, go.to, toneColors().up, "in", "", 1.15 + (row.toCapital / maxThou) * 2.6, labelAt, true),
+      arrowOf(back.from, back.to, toneColors().down, "out", `${name} →${row.toCapital} ←${row.fromCapital}`, 1.15 + (row.fromCapital / maxThou) * 2.6, labelAt, true),
     );
   }
   const localPcts = [
@@ -632,7 +637,7 @@ export function RealtyGeoMap({
             source: "plan",
             filter: ["==", ["get", "hatch"], 1],
             paint: {
-              "line-color": "#dc2626",
+              "line-color": toneColors().up,
               "line-width": 1.8,
               "line-dasharray": [2, 1.2],
             },
@@ -705,10 +710,10 @@ export function RealtyGeoMap({
               source: "dongtan",
               paint: {
                 "circle-radius": 16,
-                "circle-color": "#dc2626",
+                "circle-color": toneColors().up,
                 "circle-opacity": 0.28,
                 "circle-stroke-width": 2,
-                "circle-stroke-color": "#dc2626",
+                "circle-stroke-color": toneColors().up,
                 "circle-stroke-opacity": 1,
               },
             });
