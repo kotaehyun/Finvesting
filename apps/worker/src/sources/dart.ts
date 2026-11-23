@@ -31,7 +31,7 @@ async function dartFetch(url: string, tries = 4): Promise<Response> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
     try {
-      return await fetch(url);
+      return await fetch(url, { signal: AbortSignal.timeout(60_000) });
     } catch (e) {
       last = e;
       await sleep(400 * (i + 1));
@@ -48,9 +48,11 @@ export async function collectDart() {
   let catalogStatus: "ok" | "empty" | "unavailable" | "skipped" = "skipped";
   let catalog = new Map<string, { corp: string; name: string }>();
   if (dartNeedsCatalog(held, env)) {
+    console.log("dart catalog loading…");
     const loaded = await loadDartCorpCatalog(key);
     catalog = loaded.catalog;
     catalogStatus = loaded.status;
+    console.log(`dart catalog ${catalogStatus} size=${catalog.size}`);
   }
   for (const raw of env) {
     if (!parseDartTarget(raw)) console.warn(`dart skip invalid target: ${raw}`);
@@ -60,9 +62,11 @@ export async function collectDart() {
   if (!targets.length) {
     return { skipped: "no dart targets", catalog: catalogStatus, unmatched };
   }
+  console.log(`dart targets=${targets.length} unmatched=${unmatched.length}`);
 
   const years = statementCollectYears();
   let upserted = 0;
+  let targetIdx = 0;
   const heldByStock = indexHeldPreferFirst(held, (h) => heldInstrumentKey(h.symbol));
   /** 끊긴 뒤 이어서: `DART_START_STOCK=005930`이면 그 종목부터(포함). */
   const startStock = process.env.DART_START_STOCK?.trim().replace(/\D/g, "") || null;
@@ -73,6 +77,8 @@ export async function collectDart() {
       started = true;
       console.log(`dart resume from ${t.stock}`);
     }
+    targetIdx += 1;
+    console.log(`dart ${targetIdx}/${targets.length} ${t.stock} ${t.name}`);
     const heldRow = heldByStock.get(t.stock);
     const market = heldRow && /^(KRX|KOSDAQ)$/i.test(heldRow.market) ? heldRow.market : "KRX";
     const inst = await ensureInstrument({ symbol: t.stock, market, name: t.name, assetClass: "stock", currency: "KRW" });

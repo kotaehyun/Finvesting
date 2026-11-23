@@ -13,7 +13,11 @@ export type CatalogLoad<T> = {
 
 export async function loadDartCorpCatalog(apiKey: string): Promise<CatalogLoad<DartCorpEntry>> {
   try {
-    const res = await fetch(`https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key=${encodeURIComponent(apiKey)}`);
+    // corpCode.zip이 커서 끊기면 전체 수집이 멈춘다. 120초 넘으면 unavailable로 넘긴다.
+    const res = await fetch(
+      `https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key=${encodeURIComponent(apiKey)}`,
+      { signal: AbortSignal.timeout(120_000) },
+    );
     if (!res.ok) return { status: "unavailable", catalog: new Map() };
     const buf = Buffer.from(await res.arrayBuffer());
     const text = decodeDartCorpCodePayload(buf);
