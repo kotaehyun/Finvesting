@@ -28,6 +28,10 @@ export type FundamentalExtra = {
   netExpenseRatio?: number;
   netAssets?: number;
   quoteType?: string;
+  /** Yahoo PER이 비어 시총/순이익(TTM)으로 채움 */
+  perDerived?: boolean;
+  /** Yahoo PBR이 비어 PER×ROE로 채움 */
+  pbrDerived?: boolean;
 };
 
 export type FundamentalSnapshot = {
@@ -262,6 +266,8 @@ export function parseFundamentalExtra(raw: unknown): FundamentalExtra {
   if (er != null) extra.netExpenseRatio = er;
   if (na != null) extra.netAssets = na;
   if (typeof o.quoteType === "string" && o.quoteType) extra.quoteType = o.quoteType;
+  if (o.perDerived === true) extra.perDerived = true;
+  if (o.pbrDerived === true) extra.pbrDerived = true;
   return extra;
 }
 
@@ -313,7 +319,10 @@ export function formatFundamentalsContext(row: FundamentalSnapshot): string {
   for (const f of FUNDAMENTAL_FIELDS) {
     const n = row[f.id];
     if (n == null) continue;
-    lines.push(`- ${f.label} ${formatFundamentalValue(f.id, n, row.currency)}`);
+    let line = `- ${f.label} ${formatFundamentalValue(f.id, n, row.currency)}`;
+    if (f.id === "per" && row.extra.perDerived) line += " (시총추정)";
+    if (f.id === "pbr" && row.extra.pbrDerived) line += " (시총추정)";
+    lines.push(line);
   }
   const x = row.extra;
   if (x.fiftyTwoWeekHigh != null && x.fiftyTwoWeekLow != null) {

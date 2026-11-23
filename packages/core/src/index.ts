@@ -57,6 +57,7 @@ export * from "./realty-tenure";
 export * from "./realty-card";
 export * from "./flow-ref";
 export * from "./yahoo-fundamentals";
+export * from "./valuation-triangle";
 export * from "./invest-style";
 export * from "./signed-amount";
 export * from "./year-end-pay";
