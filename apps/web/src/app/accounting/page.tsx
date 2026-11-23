@@ -18,8 +18,16 @@ const SOURCE_LABELS: Record<SourceFilter, string> = {
 
 const SOURCE_MENU: SourceFilter[] = ["all", "transaction", "dividend", "interest", "trade", "payroll"];
 
+function kstYear(): number {
+  return Number(new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 4));
+}
+
 export default function AccountingPage() {
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const yearChoices = useMemo(() => {
+    const y = kstYear();
+    return [y, y - 1];
+  }, []);
+  const [selectedYear, setSelectedYear] = useState<number>(() => kstYear());
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [sourceType, setSourceType] = useState<SourceFilter>("all");
   const [isExporting, setIsExporting] = useState<string | null>(null);
@@ -115,7 +123,7 @@ export default function AccountingPage() {
       </div>
 
       <div className="erp-toolbar">
-        {[2026, 2025].map((y) => (
+        {yearChoices.map((y) => (
           <button
             key={y}
             type="button"

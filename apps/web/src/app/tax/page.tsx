@@ -8,8 +8,20 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
 type TaxTab = "capital_gains" | "financial_income" | "year_end";
 
+function kstToday(): string {
+  return new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 10);
+}
+
+function kstYear(): number {
+  return Number(kstToday().slice(0, 4));
+}
+
 export default function TaxPage() {
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const yearChoices = useMemo(() => {
+    const y = kstYear();
+    return [y, y - 1];
+  }, []);
+  const [selectedYear, setSelectedYear] = useState<number>(() => kstYear());
   const [activeTab, setActiveTab] = useState<TaxTab>("capital_gains");
 
   // Summary query
@@ -140,11 +152,16 @@ export default function TaxPage() {
 
   // New Income Form State
   const [showAddIncomeModal, setShowAddIncomeModal] = useState(false);
-  const [newIncome, setNewIncome] = useState({
+  const [newIncome, setNewIncome] = useState<{
+    accountId: string;
+    kind: "dividend" | "interest";
+    gross: number | "";
+    paidOn: string;
+  }>({
     accountId: "",
-    kind: "dividend" as "dividend" | "interest",
-    gross: 100_000,
-    paidOn: "2026-10-10",
+    kind: "dividend",
+    gross: "",
+    paidOn: kstToday(),
   });
 
   const addIncomeMutation = trpc.tax.addIncome.useMutation({
@@ -161,10 +178,15 @@ export default function TaxPage() {
       alert("입금 계좌를 선택해주세요.");
       return;
     }
+    const gross = typeof newIncome.gross === "number" ? newIncome.gross : Number(newIncome.gross);
+    if (!Number.isFinite(gross) || gross <= 0) {
+      alert("세전 금액을 입력해주세요.");
+      return;
+    }
     addIncomeMutation.mutate({
       accountId: newIncome.accountId,
       kind: newIncome.kind,
-      gross: Number(newIncome.gross),
+      gross,
       paidOn: newIncome.paidOn,
     });
   };
@@ -209,7 +231,7 @@ export default function TaxPage() {
       </div>
 
       <div className="erp-toolbar">
-        {[2026, 2025].map((y) => (
+        {yearChoices.map((y) => (
           <button
             key={y}
             type="button"
@@ -634,11 +656,18 @@ export default function TaxPage() {
                 <input
                   type="number"
                   min={1}
-                  value={newIncome.gross}
-                  onChange={(e) => setNewIncome({ ...newIncome, gross: Number(e.target.value) })}
+                  value={newIncome.gross === "" ? "" : newIncome.gross}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setNewIncome({ ...newIncome, gross: v === "" ? "" : Number(v) });
+                  }}
                   required
                 />
-                <span className="field-hint">원천징수 15.4%({won(Math.floor(newIncome.gross * 0.154))}) 자동 계산</span>
+                <span className="field-hint">
+                  {typeof newIncome.gross === "number" && newIncome.gross > 0
+                    ? `원천징수 15.4%(${won(Math.floor(newIncome.gross * 0.154))}) 자동 계산`
+                    : "금액을 입력하면 원천징수 15.4%를 계산합니다"}
+                </span>
               </div>
               <div className="form-group">
                 <label>수취 일자</label>
