@@ -2,6 +2,19 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — ADR 0067 초안 (Cursor)
+**한 일**
+- 일반(`personal`) / 비즈니스(`business`) UI 분리 ADR 0067을 **제안**으로 기록. 단계 2(톤·다크)는 `feat/ui-unify-tones`에 이미 있음. 셸·`ui_mode` 구현은 확정 전 안 함
+
+**다음 할 일**
+1. 사용자가 0067 채택·수정 여부 확정
+2. 채택 시 단계 1: `users.ui_mode` + 셸 두 개 + 메뉴 두 벌
+
+**막힌 것**
+- 0067 사용자 확정 전
+
+---
+
 ## 2026-11-23 — UI 톤·다크 1단계 (Cursor)
 **한 일**
 - `feat/ui-unify-tones`: `--tone-*`·`.up/.down/.flat/.warn`, 타임라인·부동산·투자 인라인 색 정리. 순자산 0은 「변동 없음」, 세금 `-0원` 제거. wehago 다크가 흰 화면을 강제하던 것·프로필 라벨(`--erp-label`) 수정. `docs/tech/ui.md`, AGENTS/CLAUDE/ChatGPT 12번
