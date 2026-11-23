@@ -376,7 +376,12 @@ export default function FundamentalsPage() {
                 {explain.error && (
                   <p className="erp-caution" style={{ margin: "8px 12px" }}>오류: {explain.error.message}</p>
                 )}
-                {explain.data && (
+                {explain.data?.status === "unavailable" && (
+                  <p className="erp-caution" style={{ margin: "8px 12px" }}>
+                    로컬 AI를 쓸 수 없습니다. {explain.data.reason}
+                  </p>
+                )}
+                {explain.data?.status === "ok" && (
                   <div className="erp-panel" style={{ padding: "8px 12px 16px" }}>
                     <h3>
                       AI 분석 · {explain.data.provider} · {explain.data.symbol} · {explain.data.date}

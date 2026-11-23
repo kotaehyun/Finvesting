@@ -51,14 +51,17 @@ export async function loadLatestFundamentals(db: Db): Promise<FundamentalsBoard>
       const marketCap = num(r.marketCap);
       const roe = num(r.roe);
       const netIncomeTtm = num(r.netIncomeTtm);
+      const extra = parseFundamentalExtra(r.extra);
       const filled = fillMissingPerPbr({
         per: num(r.per),
         pbr: num(r.pbr),
         roe,
         marketCap,
         netIncomeTtm,
+        currency: r.currency,
+        financialCurrency: extra.financialCurrency ?? null,
+        market: r.market,
       });
-      const extra = parseFundamentalExtra(r.extra);
       if (filled.filledPer) extra.perDerived = true;
       if (filled.filledPbr) extra.pbrDerived = true;
       out.push({

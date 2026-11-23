@@ -28,6 +28,8 @@ export type FundamentalExtra = {
   netExpenseRatio?: number;
   netAssets?: number;
   quoteType?: string;
+  /** Yahoo financialData.financialCurrency — 시총 통화와 다를 수 있음 */
+  financialCurrency?: string;
   /** Yahoo PER이 비어 시총/순이익(TTM)으로 채움 */
   perDerived?: boolean;
   /** Yahoo PBR이 비어 PER×ROE로 채움 */
@@ -266,6 +268,9 @@ export function parseFundamentalExtra(raw: unknown): FundamentalExtra {
   if (er != null) extra.netExpenseRatio = er;
   if (na != null) extra.netAssets = na;
   if (typeof o.quoteType === "string" && o.quoteType) extra.quoteType = o.quoteType;
+  if (typeof o.financialCurrency === "string" && o.financialCurrency.trim()) {
+    extra.financialCurrency = o.financialCurrency.trim().toUpperCase();
+  }
   if (o.perDerived === true) extra.perDerived = true;
   if (o.pbrDerived === true) extra.pbrDerived = true;
   return extra;

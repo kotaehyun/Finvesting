@@ -17,12 +17,27 @@ describe("valuation-triangle", () => {
       roe: 0.4158,
       marketCap: 1_295_222_281_601_024,
       netIncomeTtm: 212_962_144_944_128,
+      market: "KRX",
     });
     expect(f.filledPer).toBe(true);
     expect(f.filledPbr).toBe(true);
     expect(f.per).toBeCloseTo(1_295_222_281_601_024 / 212_962_144_944_128, 4);
     expect(f.pbr).toBeCloseTo((f.per as number) * 0.4158, 4);
     expect(hasValuationTriangleMetrics({ roe: 0.4158, per: f.per, pbr: f.pbr })).toBe(true);
+  });
+
+  it("통화가 다르면 시총추정 PER을 채우지 않는다", () => {
+    const f = fillMissingPerPbr({
+      per: null,
+      pbr: null,
+      roe: 0.2,
+      marketCap: 100,
+      netIncomeTtm: 10,
+      currency: "USD",
+      financialCurrency: "TWD",
+      market: "US",
+    });
+    expect(f).toEqual({ per: null, pbr: null, filledPer: false, filledPbr: false });
   });
 
   it("이미 있는 PER·PBR은 덮지 않는다", () => {
@@ -32,6 +47,8 @@ describe("valuation-triangle", () => {
       roe: 0.2,
       marketCap: 100,
       netIncomeTtm: 10,
+      currency: "USD",
+      financialCurrency: "USD",
     });
     expect(f).toEqual({ per: 12, pbr: 1.5, filledPer: false, filledPbr: false });
   });

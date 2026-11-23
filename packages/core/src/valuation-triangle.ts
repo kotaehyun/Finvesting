@@ -15,6 +15,9 @@ export type ValuationTriangleMetrics = {
  * 같은 스냅샷의 시총·순이익(TTM)·ROE로만 채운다.
  * PER ≈ 시총/순이익, PBR ≈ PER×ROE (= 시총/(순이익/ROE)).
  * 만든 값이 아니라 저장된 칸의 나눗셈이다.
+ * 시총 통화와 재무제표 통화(financialCurrency)가 같을 때만 채운다.
+ * financialCurrency가 없으면 KRX·KOSDAQ(둘 다 KRW)만 채운다.
+ * PBR은 PER·ROE 정의가 다르면 시총÷자본과 어긋날 수 있다.
  */
 export function fillMissingPerPbr(input: {
   per: number | null;
@@ -22,6 +25,12 @@ export function fillMissingPerPbr(input: {
   roe: number | null;
   marketCap: number | null;
   netIncomeTtm: number | null;
+  /** instruments.currency (시총·주가 통화) */
+  currency?: string | null;
+  /** Yahoo financialData.financialCurrency */
+  financialCurrency?: string | null;
+  /** instruments.market — financialCurrency 없을 때 KRX·KOSDAQ만 허용 */
+  market?: string | null;
 }): {
   per: number | null;
   pbr: number | null;
@@ -32,6 +41,15 @@ export function fillMissingPerPbr(input: {
   let pbr = input.pbr != null && Number.isFinite(input.pbr) && input.pbr > 0 ? input.pbr : null;
   let filledPer = false;
   let filledPbr = false;
+
+  const cur = (input.currency ?? "").trim().toUpperCase();
+  const fin = (input.financialCurrency ?? "").trim().toUpperCase();
+  const mkt = (input.market ?? "").trim().toUpperCase();
+  const sameCurrency = Boolean(cur && fin && cur === fin);
+  const krFallback = !fin && (mkt === "KRX" || mkt === "KOSDAQ");
+  if (!sameCurrency && !krFallback) {
+    return { per, pbr, filledPer: false, filledPbr: false };
+  }
 
   const mcap = input.marketCap;
   const ni = input.netIncomeTtm;
@@ -163,11 +181,12 @@ export function buildValuationTriangle(
     });
   }
 
+  const peerN = peers.filter((p) => hasValuationTriangleMetrics(p)).length;
   return {
     status: "ok",
     axes,
     scaleNote: usedPeer
-      ? "바깥쪽일수록 표시 중인 주식 대비 ROE는 높고 PER·PBR은 낮습니다. 순위 스케일이며 투자 점수가 아닙니다."
+      ? `바깥쪽일수록 표시 중인 주식 ${peerN}종 대비 ROE는 높고 PER·PBR은 낮습니다. 순위 스케일이며 투자 점수가 아닙니다.`
       : `바깥쪽일수록 ROE는 높고 PER·PBR은 낮습니다. 절대 축(ROE ${VALUATION_TRIANGLE_ABS.roeCap * 100}%·PER ${VALUATION_TRIANGLE_ABS.perCap}·PBR ${VALUATION_TRIANGLE_ABS.pbrCap})이며 투자 점수가 아닙니다.`,
   };
 }
