@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { signedWon } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
+/** 차감 행: 0이면 부호 없음, 아니면 -금액. */
+const deductWon = (n: number) => signedWon(-(n || 0));
 
 type TaxTab = "capital_gains" | "financial_income" | "year_end";
 
@@ -314,10 +317,10 @@ export default function TaxPage() {
                         <table className="erp-props">
                           <tbody>
                             <tr><th>판 금액</th><td className="ro num">{won(cg?.totalProceeds ?? 0)}</td></tr>
-                            <tr><th>(-) 산 가격</th><td className="ro num">-{won(cg?.totalCost ?? 0)}</td></tr>
-                            <tr><th>(-) 수수료</th><td className="ro num">-{won(cg?.totalFees ?? 0)}</td></tr>
+                            <tr><th>(-) 산 가격</th><td className="ro num">{deductWon(cg?.totalCost ?? 0)}</td></tr>
+                            <tr><th>(-) 수수료</th><td className="ro num">{deductWon(cg?.totalFees ?? 0)}</td></tr>
                             <tr><th>실제로 번 돈</th><td className="ro num">{won(cg?.netRealizedGain ?? 0)}</td></tr>
-                            <tr><th>(-) 기본공제(250만)</th><td className="ro num">-{won(cg?.appliedDeduction ?? 0)}</td></tr>
+                            <tr><th>(-) 기본공제(250만)</th><td className="ro num">{deductWon(cg?.appliedDeduction ?? 0)}</td></tr>
                             <tr><th>세금 매기는 금액</th><td className="ro num">{won(cg?.taxableBase ?? 0)}</td></tr>
                             <tr><th>국세 20%</th><td className="ro num">{won(cg?.nationalTax ?? 0)}</td></tr>
                             <tr><th>지방세 2%</th><td className="ro num">{won(cg?.localTax ?? 0)}</td></tr>

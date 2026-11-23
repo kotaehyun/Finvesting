@@ -104,10 +104,14 @@ export default function TimelinePage() {
           </div>
           <div
             className={`timeline-kpi-val ${
-              (summary?.netFlow ?? 0) >= 0 ? "highlight-in" : "highlight-out"
+              (summary?.netFlow ?? 0) > 0
+                ? "highlight-in"
+                : (summary?.netFlow ?? 0) < 0
+                  ? "highlight-out"
+                  : "highlight-flat"
             }`}
           >
-            {(summary?.netFlow ?? 0) >= 0 ? "+" : ""}
+            {(summary?.netFlow ?? 0) > 0 ? "+" : ""}
             {summary ? summary.netFlow.toLocaleString() : 0}
             <span className="unit">원</span>
           </div>
