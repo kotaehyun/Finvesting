@@ -51,7 +51,7 @@ export function RealtyCorpPanel() {
             <div className="sub-kpi-title">
               <span>💰</span> 전체 세액 중 법인 납부 비중
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{fmtPct(ntsCgtCorpTaxShare())}</div>
+            <div className="sub-kpi-val warn">{fmtPct(ntsCgtCorpTaxShare())}</div>
             <p className="sub-kpi-sub">총 세액 {c.housingTaxEok.toLocaleString("ko-KR")}억원 중 법인이 {c.corpTaxEok.toLocaleString("ko-KR")}억원 부담</p>
           </div>
 

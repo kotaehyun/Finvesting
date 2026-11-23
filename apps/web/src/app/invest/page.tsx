@@ -72,9 +72,9 @@ function IndexSpark({ values, up }: { values: number[]; up: boolean | null }) {
 }
 
 const FUNDS_COLOR: Record<string, string> = {
-  deposit: "#2563eb",
-  credit: "#b45309",
-  margin: "#b91c1c",
+  deposit: "var(--tone-down)",
+  credit: "var(--tone-warn)",
+  margin: "var(--tone-up)",
 };
 
 function jo(n: number) {

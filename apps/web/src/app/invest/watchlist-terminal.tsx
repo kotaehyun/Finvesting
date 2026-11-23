@@ -138,9 +138,9 @@ export function WatchlistTerminal() {
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 8, fontSize: 13, background: "var(--bg)", padding: "6px 12px", borderRadius: 8, border: "1px solid var(--border)" }}>
             <span>전체 <strong>{summary.total}</strong></span>
-            <span style={{ color: "#dc2626" }}>▲ 상승 <strong>{summary.upCount}</strong></span>
-            <span style={{ color: "#2563eb" }}>▼ 하락 <strong>{summary.downCount}</strong></span>
-            <span style={{ color: "var(--muted)" }}>보합 <strong>{summary.flatCount}</strong></span>
+            <span className="up">▲ 상승 <strong>{summary.upCount}</strong></span>
+            <span className="down">▼ 하락 <strong>{summary.downCount}</strong></span>
+            <span className="flat">보합 <strong>{summary.flatCount}</strong></span>
           </div>
           <button
             type="button"
@@ -235,7 +235,7 @@ export function WatchlistTerminal() {
 
       {/* 4. 메인 리스트 테이블 / 카드 */}
       {watch.isLoading && <p className="muted">관심 종목을 불러오는 중…</p>}
-      {watch.error && <p style={{ color: "#dc2626" }}>오류: {watch.error.message}</p>}
+      {watch.error && <p className="up">오류: {watch.error.message}</p>}
 
       {watch.data && filteredItems.length === 0 && (
         <div style={{ textAlign: "center", padding: "32px 16px", border: "1px dashed var(--border)", borderRadius: 8 }}>
@@ -256,8 +256,12 @@ export function WatchlistTerminal() {
             const isUp = hasChange && changePct > 0;
             const isDown = hasChange && changePct < 0;
 
-            const changeColor = isUp ? "#dc2626" : isDown ? "#2563eb" : "var(--muted)";
-            const changeBg = isUp ? "rgba(220, 38, 38, 0.08)" : isDown ? "rgba(37, 99, 235, 0.08)" : "rgba(128, 128, 128, 0.08)";
+            const changeColor = isUp ? "var(--tone-up)" : isDown ? "var(--tone-down)" : "var(--tone-flat)";
+            const changeBg = isUp
+              ? "color-mix(in srgb, var(--tone-up) 8%, transparent)"
+              : isDown
+                ? "color-mix(in srgb, var(--tone-down) 8%, transparent)"
+                : "color-mix(in srgb, var(--tone-flat) 8%, transparent)";
 
             const naverUrl = item.market === "KRX" ? `https://finance.naver.com/item/main.naver?code=${item.symbol}` : null;
             const yahooUrl = `https://finance.yahoo.com/quote/${item.symbol}`;
@@ -412,8 +416,8 @@ export function WatchlistTerminal() {
                     )}
                     <button
                       type="button"
-                      className="link"
-                      style={{ color: "#dc2626", fontSize: 12, marginLeft: 6 }}
+                      className="link up"
+                      style={{ fontSize: 12, marginLeft: 6 }}
                       onClick={() => handleRemove(item.id, item.name)}
                       disabled={remove.isPending}
                     >

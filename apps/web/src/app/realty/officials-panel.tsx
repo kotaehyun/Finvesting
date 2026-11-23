@@ -40,7 +40,7 @@ export function RealtyOfficialsPanel() {
             <div className="sub-kpi-title">
               <span>📈</span> 재산 증가자 비율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{a.upPct}%</div>
+            <div className="sub-kpi-val warn">{a.upPct}%</div>
             <p className="sub-kpi-sub">증가 {a.up.toLocaleString("ko-KR")}명 · 감소 {a.down.toLocaleString("ko-KR")}명</p>
           </div>
 

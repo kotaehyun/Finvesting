@@ -77,7 +77,7 @@ export function RealtyClaimsPanel({ items }: { items: NewsItem[] }) {
             <div className="sub-kpi-title">
               <span>👤</span> 30대 미혼율
             </div>
-            <div className="sub-kpi-val warn" style={{ color: "#ea580c" }}>{c.single30}%</div>
+            <div className="sub-kpi-val warn">{c.single30}%</div>
             <p className="sub-kpi-sub">40대 미혼 {c.single40}% · 서울 성인 미혼율 {c.seoulSingle}%</p>
           </div>
 

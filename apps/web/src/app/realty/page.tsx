@@ -355,7 +355,7 @@ export default function RealtyPage() {
                   </p>
                 </div>
               </div>
-              <span className="realty-block-badge" style={{ color: "#ea580c" }}>건전성 모니터링</span>
+              <span className="realty-block-badge warn">건전성 모니터링</span>
             </div>
             <RealtyDistressPanel />
           </section>
