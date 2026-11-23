@@ -53,11 +53,13 @@ import {
   buildMcapBoards,
   formatMcapLabel,
   matchNewsForSymbol,
+  formatFundamentalsContext,
   type LoanPoint,
   type RealtyMetroId,
 } from "@finvesting/core";
 import { TRPCError } from "@trpc/server";
-import { loadLatestFundamentals } from "../lib/fundamentals";
+import { createProvider, FUNDAMENTAL_READER_SYSTEM, buildContextBlock } from "@finvesting/ai";
+import { loadLatestFundamentals, loadFundamentalByInstrumentId } from "../lib/fundamentals";
 import { latestCloses } from "../lib/holdings";
 import { router, publicProcedure } from "../trpc";
 
@@ -782,6 +784,31 @@ export const marketRouter = router({
 
   // Yahoo 일 단위 스냅샷. 종목별 최신 1행. DART 재무제표와 별개.
   fundamentals: publicProcedure.query(({ ctx }) => loadLatestFundamentals(ctx.db)),
+
+  /** 선택 종목 Yahoo 스냅샷을 LLM이 읽어 줌. 매수·매도 단정 없음. */
+  explainFundamentals: publicProcedure
+    .input(z.object({ instrumentId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const row = await loadFundamentalByInstrumentId(ctx.db, input.instrumentId);
+      if (!row) throw new Error("수집된 펀더멘털이 없습니다. worker로 Yahoo 스냅샷을 모으세요.");
+      const llm = createProvider();
+      const reading = await llm.chat([
+        { role: "system", content: FUNDAMENTAL_READER_SYSTEM },
+        { role: "system", content: buildContextBlock({ "펀더멘털 스냅샷": formatFundamentalsContext(row) }) },
+        {
+          role: "user",
+          content:
+            "이 종목의 펀더멘털 숫자를 일반인이 이해하게 읽어 주세요. 컨텍스트에 없는 항목은 없다고 하고, 매수·매도는 단정하지 마세요.",
+        },
+      ]);
+      return {
+        reading,
+        provider: llm.name,
+        date: row.date,
+        symbol: row.symbol,
+        name: row.name,
+      };
+    }),
 
   /** `/invest` 국내·해외 시총 순위(Yahoo 수집분) + 관련 뉴스 제목·링크. */
   mcapBoard: publicProcedure
