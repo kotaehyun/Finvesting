@@ -2,6 +2,21 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — Claude 리뷰 후속 (Cursor)
+**한 일**
+- `feat/valuation-triangle` 미커밋 4커밋 분리 + A2~A7·M2·DART 재개/타임아웃. `fix/data-cleanup-rate-period` push. 국내 DART 40종목 재수집 upserted=2275. 삼성·하이닉스·네이버 Q3 누적 매출 OpenDART 원문 일치. core 412·web/api tsc 통과
+
+**다음 할 일**
+1. `fix/data-cleanup-rate-period` → `dev` 머지 여부는 사용자 확인 후. 머지되면 `feat/valuation-triangle` rebase
+2. `docs/fred-api-key-setup` push·`stash@{0}` 정리
+3. localhost:5432(앱)와 Colima `finvesting-db`가 다르면 하나로 맞출지 결정
+
+**막힌 것**
+- `dev` 머지는 사용자 지시 전
+- Ollama 켠/끈 AI 분석 버튼 브라우저 실클릭은 안 함
+
+---
+
 ## 2026-11-23 — 펀더멘털 AI 분석 버튼 (Cursor)
 **한 일**
 - `/fundamentals` 선택 종목에 「AI 분석」. `market.explainFundamentals` + `FUNDAMENTAL_READER_SYSTEM`. Yahoo 스냅샷만 읽고 매수·매도 단정 없음. Ollama 필요
