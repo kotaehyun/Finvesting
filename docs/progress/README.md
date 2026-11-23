@@ -2,6 +2,23 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — 일반·비즈니스 계정 셸 1단계 (Claude)
+**한 일**
+- 사용자가 ADR 0067을 확정(「작업을 진행하자」). `feat/account-mode-shell`(`feat/ui-unify-tones` 위)
+- `packages/core/src/ui-mode.ts`: 모드 두 개, 쿠키 이름, 메뉴 두 벌(일반 6묶음·비즈니스 7묶음), 현재 위치 판정. 테스트 `ui-mode.test.ts`
+- `apps/web/src/app/app-shell.tsx`·`shell.css`: 일반 = 위쪽 메뉴 + 묶음 둘째 줄, 비즈니스 = 남색 윗줄 + 왼쪽 트리. 「일반 / 비즈니스」 스위치. `next/link`, `aria-current`
+- 모드 저장은 DB 대신 쿠키 `finvesting_ui_mode`(ADR 0067에 이유). 화면 내용은 건드리지 않음
+
+**다음 할 일**
+1. 맥에서 `pnpm --filter @finvesting/core test` (이 세션 VM에서는 vitest 실행 불가 — 아래 검증 기록)
+2. `fix/data-cleanup-rate-period`(세션 C)를 dev에 합친 뒤 이 브랜치들 순서대로 머지
+3. ADR 0067 3단계(일반 화면 카드형·쉬운 말), 4단계(비즈니스 화면 ERP 메뉴 하나로)
+
+**막힌 것**
+- 없음
+
+---
+
 ## 2026-11-23 — ADR 0067 초안 (Cursor)
 **한 일**
 - 일반(`personal`) / 비즈니스(`business`) UI 분리 ADR 0067을 **제안**으로 기록. 단계 2(톤·다크)는 `feat/ui-unify-tones`에 이미 있음. 셸·`ui_mode` 구현은 확정 전 안 함

@@ -108,6 +108,7 @@
 ## 목록
 | 날짜 | 모델/도구 | 파일 |
 |---|---|---|
+| 2026-11-23 | Claude (계정 모드 셸) | [2026-11-23-claude-account-mode.md](./2026-11-23-claude-account-mode.md) |
 | 2026-11-22 | Cursor (능동 알림) | [2026-11-22-cursor-proactive-alerts.md](./2026-11-22-cursor-proactive-alerts.md) |
 | 2026-11-22 | Cursor (반복 패턴) | [2026-11-22-cursor-repeat-mistake.md](./2026-11-22-cursor-repeat-mistake.md) |
 | 2026-11-22 | Cursor (리스크 설명) | [2026-11-22-cursor-risk-explain.md](./2026-11-22-cursor-risk-explain.md) |
