@@ -2,6 +2,20 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — UI 톤·다크 1단계 (Cursor)
+**한 일**
+- `feat/ui-unify-tones`: `--tone-*`·`.up/.down/.flat/.warn`, 타임라인·부동산·투자 인라인 색 정리. 순자산 0은 「변동 없음」, 세금 `-0원` 제거. wehago 다크가 흰 화면을 강제하던 것·프로필 라벨(`--erp-label`) 수정. `docs/tech/ui.md`, AGENTS/CLAUDE/ChatGPT 12번
+
+**다음 할 일**
+1. U5 메뉴 묶음·next/link·한국어 이름
+2. U7 국내 종목 표시명(DART)
+3. `fix/data-cleanup-rate-period` → `dev` 머지는 사용자 확인 후
+
+**막힌 것**
+- 라이트/다크 실물 스크린샷은 이번 세션에서 안 남김
+
+---
+
 ## 2026-11-23 — Claude 리뷰 후속 (Cursor)
 **한 일**
 - `feat/valuation-triangle` 미커밋 4커밋 분리 + A2~A7·M2·DART 재개/타임아웃. `fix/data-cleanup-rate-period` push. 국내 DART 40종목 재수집 upserted=2275. 삼성·하이닉스·네이버 Q3 누적 매출 OpenDART 원문 일치. core 412·web/api tsc 통과
