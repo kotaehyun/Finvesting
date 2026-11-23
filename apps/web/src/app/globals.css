@@ -484,6 +484,147 @@ body:has(.chat-shell) .nav a[href="/chat"] { color: var(--chat-accent); }
   border-radius: 2px;
 }
 .tv-embed { overflow: hidden; }
+.erp.wehago .erp-toolbar-link {
+  font-size: 12px;
+  color: #0a3d62;
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid #b8c0cb;
+  border-radius: 4px;
+  background: #f7f9fb;
+}
+.fund-compact-kpi {
+  margin: 10px 12px 0;
+  padding: 0;
+}
+.fund-triangle-layout {
+  margin-top: 10px;
+  min-height: 360px;
+  background: #fff;
+  border-top: 1px solid var(--erp-line, #d5dee8);
+  align-items: start;
+}
+.fund-detail-grids {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--erp-line, #d5dee8);
+}
+.fund-detail-grids .wehago-widget {
+  border: 1px solid var(--erp-line, #d5dee8);
+  background: #fff;
+}
+.fund-detail-grids .erp-props {
+  margin: 0;
+}
+.fund-detail-grids .erp-props th,
+.fund-detail-grids .erp-props td {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.fund-detail-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 10px 8px;
+}
+.erp-plain-lead {
+  margin: 10px 12px 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #0a3d62;
+  background: #f4f8fb;
+  border: 1px solid var(--erp-line, #d5dee8);
+}
+.tax-erp-stack { display: flex; flex-direction: column; gap: 0; }
+.tax-erp-panel .wehago-widget h3 .link,
+.ye-erp-form + .link,
+.wehago-widget h3 .link {
+  background: transparent;
+  border: 0;
+  color: #0a3d62;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.ye-erp-form td { padding: 0; }
+.ye-erp-form input {
+  width: 100%;
+  border: 0;
+  padding: 5px 8px;
+  font-size: 13px;
+  background: #fff;
+  color: #1a1d21;
+}
+.fund-triangle-panel h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #0a3d62;
+}
+.fund-triangle-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 20px;
+}
+.fund-triangle-svg { width: min(100%, 300px); height: auto; flex: 0 0 auto; }
+.fund-triangle-frame {
+  fill: rgba(10, 61, 98, 0.04);
+  stroke: rgba(10, 61, 98, 0.35);
+  stroke-width: 1.2;
+}
+.fund-triangle-grid {
+  fill: none;
+  stroke: rgba(10, 61, 98, 0.2);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.fund-triangle-spoke {
+  stroke: rgba(10, 61, 98, 0.18);
+  stroke-width: 1;
+}
+.fund-triangle-fill {
+  fill: rgba(0, 184, 212, 0.28);
+  stroke: #00b8d4;
+  stroke-width: 1.6;
+}
+.fund-triangle-dot { fill: #0a3d62; }
+.fund-triangle-label {
+  fill: #0a3d62;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.fund-triangle-note { margin: 0; max-width: 22rem; }
+.fund-menu-item {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 2px;
+  line-height: 1.25;
+}
+.fund-menu-sym { font-weight: 700; }
+.fund-menu-name {
+  font-size: 11px;
+  opacity: 0.75;
+  font-weight: 400;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fund-erp-table th button.link {
+  background: transparent;
+  color: #0a3d62;
+  border: none;
+  padding: 0;
+  font-weight: 700;
+}
+.erp.wehago .fund-signal-tag {
+  border-color: #b8c0cb;
+  background: #f4f8fb;
+  color: #0a3d62;
+}
+
 .main:has(.invest-page), .main:has(.fund-page), .main:has(.markets-page), .main:has(.realty-page) { max-width: 1360px; }
 .infl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
 .infl-cell { border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
