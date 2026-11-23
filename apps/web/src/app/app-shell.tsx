@@ -13,6 +13,7 @@ import {
   type NavGroup,
   type UiMode,
 } from "@finvesting/core";
+import { UiModeProvider } from "@/lib/ui-mode";
 
 function ModeSwitch({ mode }: { mode: UiMode }) {
   const change = (next: UiMode) => {
@@ -148,7 +149,8 @@ export function AppShell({
   showLogout: boolean;
   children: React.ReactNode;
 }) {
-  return mode === "business"
+  const shell = mode === "business"
     ? <BusinessShell showLogout={showLogout}>{children}</BusinessShell>
     : <PersonalShell showLogout={showLogout}>{children}</PersonalShell>;
+  return <UiModeProvider mode={mode}>{shell}</UiModeProvider>;
 }

@@ -2,6 +2,20 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — ADR 0067 3·4단계 (Cursor)
+**한 일**
+- `feat/account-mode-shell`: `useUiMode` Context. 일반=세금·보유·계좌 카드형(탭·필드 라벨·전표 링크 숨김). 비즈니스=홈「이번 달 현황」·타임라인「거래 흐름」, `.bshell .erp-menu` 숨겨 이중 메뉴 제거. web tsc 통과
+
+**다음 할 일**
+1. `globals.css` 분리(5단계)
+2. 펀더멘털·재무제표 일반 모드 카드화
+3. `fix/data-cleanup-rate-period` → `dev` 머지는 사용자 확인 후
+
+**막힌 것**
+- 라이트/다크 실물 스크린샷은 안 남김
+
+---
+
 ## 2026-11-23 — 일반·비즈니스 계정 셸 1단계 (Claude)
 **한 일**
 - 사용자가 ADR 0067을 확정(「작업을 진행하자」). `feat/account-mode-shell`(`feat/ui-unify-tones` 위)

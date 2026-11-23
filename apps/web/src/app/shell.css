@@ -41,6 +41,63 @@
 .bshell-item.pending small { display: block; font-size: 11px; }
 .main.main-biz { max-width: none; margin: 0; }
 
+/* 4단계: 비즈니스 셸 트리가 있으므로 화면 안 .erp-menu는 숨긴다. */
+.bshell .erp-menu { display: none !important; }
+.bshell .erp-body.statements-erp-body,
+.bshell .erp-body {
+  grid-template-columns: 1fr !important;
+}
+.bshell .erp-titlebar .wehago-title-meta { display: none; }
+.bshell .erp-titlebar { padding-left: 16px; }
+
+/* 3단계: 일반 모드 카드형 페이지 뼈대 */
+.card-page { display: flex; flex-direction: column; gap: 16px; }
+.card-page-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-end; }
+.card-page-head h1 { margin: 0; font-size: 24px; }
+.card-page-head .lead { margin: 6px 0 0; color: var(--muted); font-size: 14px; max-width: 52em; }
+.card-page-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-page-tabs button {
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+  border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+}
+.card-page-tabs button.on { background: var(--user); color: var(--accent); border-color: var(--accent); }
+.card-kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;
+}
+.card-kpi { border: 1px solid var(--border); border-radius: 10px; padding: 14px; background: var(--card); }
+.card-kpi .k { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+.card-kpi .v { display: block; margin-top: 6px; font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.card-panel { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--card); }
+.card-panel h3 { margin: 0 0 10px; font-size: 15px; }
+.card-panel .hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.card-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.card-toolbar button.primary { background: var(--accent); color: #fff; border-color: transparent; }
+.field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.field-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.field-grid label input,
+.field-grid label select { font-weight: 400; color: var(--fg); }
+
+.tax-personal-body { display: flex; flex-direction: column; gap: 14px; }
+.tax-personal-work { display: flex; flex-direction: column; gap: 14px; }
+.tax-personal .statements-erp-main { display: flex; flex-direction: column; gap: 12px; }
+.tax-personal .wehago-widget,
+.tax-personal .erp-panel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  overflow: hidden;
+}
+.tax-personal .wehago-widget h3 {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 15px;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+}
+.tax-personal .erp-props th { color: var(--muted); background: var(--bg); }
+.tax-personal .erp-slip a:first-child { display: none; }
+
 @media (max-width: 900px) {
   .pshell-top { flex-wrap: wrap; gap: 8px; }
   .pshell-nav { order: 3; width: 100%; }

@@ -4,8 +4,11 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
 import type { TimelineTypeGroup, TimelineDateGroup, UnifiedFinancialEvent } from "@finvesting/core";
+import { useUiMode } from "@/lib/ui-mode";
 
 export default function TimelinePage() {
+  const mode = useUiMode();
+  const business = mode === "business";
   const [selectedMonth, setSelectedMonth] = useState<string>("2026-09");
   const [selectedType, setSelectedType] = useState<TimelineTypeGroup>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -48,9 +51,11 @@ export default function TimelinePage() {
       {/* 1. 상단 타이틀 및 설명 헤더 */}
       <div className="timeline-header">
         <div>
-          <h1 className="timeline-title">Financial Timeline</h1>
+          <h1 className="timeline-title">{business ? "거래 흐름" : "돈의 흐름"}</h1>
           <p className="timeline-desc">
-            모든 금융 활동(통장 입출금 · 카드 지출 · 주식/ETF 체결 · 배당 · 적금 · 급여명세)의 시간순 통합 피드
+            {business
+              ? "장부 보기: 통장·카드·체결·배당·적금·급여를 날짜순으로 모은 거래 피드"
+              : "통장 입출금 · 카드 지출 · 주식/ETF 체결 · 배당 · 적금 · 급여를 시간순으로 모은 기록"}
           </p>
         </div>
         {isFallback && (

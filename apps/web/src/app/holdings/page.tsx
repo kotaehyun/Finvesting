@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { trpc } from "@/lib/trpc";
 import { assetClassLabel } from "@finvesting/core";
+import { useUiMode } from "@/lib/ui-mode";
 import { InvestTrail } from "../invest-trail";
 import { Pnl } from "../pnl";
 
@@ -31,6 +32,8 @@ function localNow() {
 }
 
 export default function HoldingsPage() {
+  const mode = useUiMode();
+  const personal = mode === "personal";
   const accounts = trpc.accounts.list.useQuery();
   const instruments = trpc.market.instruments.useQuery();
   const holdings = trpc.trades.holdings.useQuery();
@@ -134,52 +137,74 @@ export default function HoldingsPage() {
   const busy = create.isPending || ensure.isPending;
 
   return (
-    <>
-      <h1>보유 · 체결</h1>
-      <p className="muted">매수·매도를 넣으면 평단·실현손익을 계산합니다. 워커가 모은 최근 종가가 있으면 평가손익도 표시합니다. 순자산의 투자 금액은 보유 평가액과 증권·코인·연금 예수금의 합입니다.</p>
-      <InvestTrail current="holdings" />
+    <div className={personal ? "card-page" : undefined}>
+      <div className={personal ? "card-page-head" : undefined}>
+        <div>
+          <h1 style={personal ? undefined : { marginBottom: 4 }}>{personal ? "내 보유" : "보유 · 체결"}</h1>
+          <p className={personal ? "lead" : "muted"}>
+            {personal
+              ? "산 주식·코인을 적으면 평단과 이익·손실을 보여 줍니다. 시세가 있으면 평가손익도 나옵니다."
+              : "매수·매도를 넣으면 평단·실현손익을 계산합니다. 워커가 모은 최근 종가가 있으면 평가손익도 표시합니다. 순자산의 투자 금액은 보유 평가액과 증권·코인·연금 예수금의 합입니다."}
+          </p>
+        </div>
+      </div>
+      {!personal && <InvestTrail current="holdings" />}
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <h3>체결 추가</h3>
+        <h3>{personal ? "사고팔기 기록 추가" : "체결 추가"}</h3>
         {!accounts.data?.length && <p className="muted">먼저 <a href="/accounts">계좌</a>를 등록하세요.</p>}
         <form onSubmit={onCreate}>
-          <div className="row" style={{ marginBottom: 8 }}>
-            <select value={accountId} onChange={(e) => setAccountId(e.target.value)} required>
-              <option value="">계좌 선택</option>
-              {accountChoices.map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </select>
-            <select value={instrumentId} onChange={(e) => setInstrumentId(e.target.value)}>
-              <option value="">종목 선택 또는 아래 신규</option>
-              {instruments.data?.map((i) => (
-                <option key={i.id} value={i.id}>{i.symbol} · {i.market} · {i.name}</option>
-              ))}
-            </select>
-            <select value={side} onChange={(e) => setSide(e.target.value as "buy" | "sell")}>
-              <option value="buy">매수</option>
-              <option value="sell">매도</option>
-            </select>
+          <div className="field-grid" style={{ marginBottom: 8 }}>
+            <label>
+              계좌
+              <select value={accountId} onChange={(e) => setAccountId(e.target.value)} required>
+                <option value="">계좌 선택</option>
+                {accountChoices.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              종목
+              <select value={instrumentId} onChange={(e) => setInstrumentId(e.target.value)}>
+                <option value="">종목 선택 또는 아래 신규</option>
+                {instruments.data?.map((i) => (
+                  <option key={i.id} value={i.id}>{i.symbol} · {i.market} · {i.name}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              매수/매도
+              <select value={side} onChange={(e) => setSide(e.target.value as "buy" | "sell")}>
+                <option value="buy">매수</option>
+                <option value="sell">매도</option>
+              </select>
+            </label>
           </div>
           {!instrumentId && (
-            <div className="row" style={{ marginBottom: 8 }}>
-              <input value={newSymbol} onChange={(e) => setNewSymbol(e.target.value)} placeholder="심볼 (BTC, 005930)" />
-              <input value={newMarket} onChange={(e) => setNewMarket(e.target.value)} placeholder="마켓 (UPBIT, KRX, US)" />
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="이름" />
-              <select value={newClass} onChange={(e) => setNewClass(e.target.value as ClassId)}>
-                {CLASSES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-              </select>
-              <input value={newCurrency} onChange={(e) => setNewCurrency(e.target.value)} placeholder="통화" />
+            <div className="field-grid" style={{ marginBottom: 8 }}>
+              <label>심볼<input value={newSymbol} onChange={(e) => setNewSymbol(e.target.value)} placeholder="예: BTC, 005930" /></label>
+              <label>시장<input value={newMarket} onChange={(e) => setNewMarket(e.target.value)} placeholder="UPBIT, KRX, US" /></label>
+              <label>이름<input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="종목 이름" /></label>
+              <label>
+                자산군
+                <select value={newClass} onChange={(e) => setNewClass(e.target.value as ClassId)}>
+                  {CLASSES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                </select>
+              </label>
+              <label>통화<input value={newCurrency} onChange={(e) => setNewCurrency(e.target.value)} placeholder="KRW" /></label>
             </div>
           )}
-          <div className="row">
-            <input value={quantity} onChange={(e) => setQuantity(e.target.value)} type="number" step="any" min="0" placeholder="수량" required />
-            <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="any" min="0" placeholder="단가" required />
-            <input value={fee} onChange={(e) => setFee(e.target.value)} type="number" step="any" min="0" placeholder="수수료" />
-            <input value={tax} onChange={(e) => setTax(e.target.value)} type="number" step="any" min="0" placeholder="세금" />
-            {needFx && <input value={fxRate} onChange={(e) => setFxRate(e.target.value)} type="number" step="any" min="0" placeholder="환율 (비우면 USDKRW)" />}
-            <input value={tradedAt} onChange={(e) => setTradedAt(e.target.value)} type="datetime-local" required />
-            <input value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 (선택)" />
+          <div className="field-grid">
+            <label>수량<input value={quantity} onChange={(e) => setQuantity(e.target.value)} type="number" step="any" min="0" required /></label>
+            <label>단가<input value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="any" min="0" required /></label>
+            <label>수수료<input value={fee} onChange={(e) => setFee(e.target.value)} type="number" step="any" min="0" placeholder="없으면 0" /></label>
+            <label>세금<input value={tax} onChange={(e) => setTax(e.target.value)} type="number" step="any" min="0" placeholder="없으면 0" /></label>
+            {needFx && <label>환율<input value={fxRate} onChange={(e) => setFxRate(e.target.value)} type="number" step="any" min="0" placeholder="비우면 USDKRW" /></label>}
+            <label>체결 시각<input value={tradedAt} onChange={(e) => setTradedAt(e.target.value)} type="datetime-local" required /></label>
+            <label>메모<input value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="선택" /></label>
+          </div>
+          <div className="row" style={{ marginTop: 10 }}>
             <button type="submit" disabled={busy || !accountChoices.length}>저장</button>
           </div>
         </form>
@@ -239,6 +264,6 @@ export default function HoldingsPage() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
