@@ -64,7 +64,15 @@ export async function collectDart() {
   const years = statementCollectYears();
   let upserted = 0;
   const heldByStock = indexHeldPreferFirst(held, (h) => heldInstrumentKey(h.symbol));
+  /** 끊긴 뒤 이어서: `DART_START_STOCK=005930`이면 그 종목부터(포함). */
+  const startStock = process.env.DART_START_STOCK?.trim().replace(/\D/g, "") || null;
+  let started = !startStock;
   for (const t of targets) {
+    if (!started) {
+      if (t.stock.replace(/\D/g, "") !== startStock) continue;
+      started = true;
+      console.log(`dart resume from ${t.stock}`);
+    }
     const heldRow = heldByStock.get(t.stock);
     const market = heldRow && /^(KRX|KOSDAQ)$/i.test(heldRow.market) ? heldRow.market : "KRX";
     const inst = await ensureInstrument({ symbol: t.stock, market, name: t.name, assetClass: "stock", currency: "KRW" });
