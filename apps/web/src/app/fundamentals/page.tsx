@@ -18,6 +18,7 @@ import {
   type MarketRegion,
 } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
+import { useUiMode } from "@/lib/ui-mode";
 import { ValuationTriangleChart } from "./valuation-triangle-chart";
 
 type AssetFilter = "all" | "stock" | "etf";
@@ -37,6 +38,8 @@ const MARKET_LABELS: Record<MarketRegion, string> = {
 };
 
 export default function FundamentalsPage() {
+  const mode = useUiMode();
+  const personal = mode === "personal";
   const board = trpc.market.fundamentals.useQuery();
   const explain = trpc.market.explainFundamentals.useMutation();
   const [assetFilter, setAssetFilter] = useState<AssetFilter>("stock");
@@ -159,21 +162,31 @@ export default function FundamentalsPage() {
   ].filter(Boolean).join(" · ");
 
   return (
-    <div className="erp wehago">
-      <div className="erp-titlebar">
-        <h1>
-          <span className="wehago-mark" aria-hidden>펀더</span>
-          기업 숫자 한눈에
-          <span className="path">Fundamentals · {pathLabel}</span>
-        </h1>
-        <div className="wehago-title-meta">
-          <a href="/statements">재무제표</a>
-          <a href="/tax">세금/연말정산</a>
-          <a href="/accounting">돈 기록(전표)</a>
+    <div className={personal ? "card-page fund-personal" : "erp wehago"}>
+      {personal ? (
+        <div className="card-page-head">
+          <div>
+            <h1>기업 숫자</h1>
+            <p className="lead">ROE·PER·PBR과 시세 숫자를 모아 봅니다. 매수·매도 추천이 아닙니다.</p>
+            <p className="muted" style={{ margin: "4px 0 0" }}>{pathLabel}</p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="erp-titlebar">
+          <h1>
+            <span className="wehago-mark" aria-hidden>펀더</span>
+            기업 숫자 한눈에
+            <span className="path">Fundamentals · {pathLabel}</span>
+          </h1>
+          <div className="wehago-title-meta">
+            <a href="/statements">재무제표</a>
+            <a href="/tax">세금/연말정산</a>
+            <a href="/accounting">돈 기록(전표)</a>
+          </div>
+        </div>
+      )}
 
-      <div className="erp-toolbar">
+      <div className={personal ? "card-toolbar" : "erp-toolbar"}>
         {(["all", "us", "kr"] as const).map((id) => (
           <button
             key={id}
@@ -259,20 +272,17 @@ export default function FundamentalsPage() {
       )}
 
       {loadStatus === "ok" && (
-        <div className="erp-body statements-erp-body">
-          <nav className="erp-menu statements-menu" aria-label="펀더멘털 종목">
-            <h2>종목 · {sortedRows.length}</h2>
-            <div className="statements-tree">
-              {!sortedRows.length && (
-                <p className="erp-hint" style={{ padding: "8px 12px", color: "#9bb8cc" }}>필터에 맞는 종목 없음</p>
-              )}
+        <div className={personal ? "fund-personal-body" : "erp-body statements-erp-body"}>
+          {personal ? (
+            <div className="card-page-tabs fund-stock-tabs" aria-label="종목">
+              {!sortedRows.length && <span className="muted">필터에 맞는 종목 없음</span>}
               {sortedRows.map((r) => {
                 const on = selected?.instrumentId === r.instrumentId;
                 return (
                   <button
                     key={r.instrumentId}
                     type="button"
-                    className={`lv3 fund-menu-item${on ? " on" : ""}`}
+                    className={on ? "on" : ""}
                     onClick={() => {
                       setSelectedId(r.instrumentId);
                       setTab("triangle");
@@ -280,15 +290,42 @@ export default function FundamentalsPage() {
                     }}
                     title={r.name}
                   >
-                    <span className="fund-menu-sym">{r.symbol}</span>
-                    <span className="fund-menu-name">{r.name}</span>
+                    {r.symbol} · {r.name}
                   </button>
                 );
               })}
             </div>
-          </nav>
+          ) : (
+            <nav className="erp-menu statements-menu" aria-label="펀더멘털 종목">
+              <h2>종목 · {sortedRows.length}</h2>
+              <div className="statements-tree">
+                {!sortedRows.length && (
+                  <p className="erp-hint" style={{ padding: "8px 12px", color: "#9bb8cc" }}>필터에 맞는 종목 없음</p>
+                )}
+                {sortedRows.map((r) => {
+                  const on = selected?.instrumentId === r.instrumentId;
+                  return (
+                    <button
+                      key={r.instrumentId}
+                      type="button"
+                      className={`lv3 fund-menu-item${on ? " on" : ""}`}
+                      onClick={() => {
+                        setSelectedId(r.instrumentId);
+                        setTab("triangle");
+                        explain.reset();
+                      }}
+                      title={r.name}
+                    >
+                      <span className="fund-menu-sym">{r.symbol}</span>
+                      <span className="fund-menu-name">{r.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
+          )}
 
-          <div className="erp-work">
+          <div className={personal ? "fund-personal-work" : "erp-work"}>
             {!sortedRows.length ? (
               <p className="erp-hint" style={{ padding: 12 }}>선택한 필터에 맞는 종목이 없습니다.</p>
             ) : tab === "triangle" && selected ? (

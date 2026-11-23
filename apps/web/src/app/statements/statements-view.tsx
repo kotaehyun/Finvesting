@@ -34,6 +34,7 @@ import {
   type StatementSectorPrefs,
 } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
+import { useUiMode } from "@/lib/ui-mode";
 import { StatementPeriodLabel } from "./statement-period-label";
 
 type ListItem = {
@@ -159,6 +160,8 @@ export function StatementsView({
   initialArea?: string;
   initialBrowse?: string;
 }) {
+  const mode = useUiMode();
+  const personal = mode === "personal";
   const qParam = q.trim();
   const startBrowse = parseInitialBrowse(initialBrowse?.trim());
   const startArea: StatementAreaId =
@@ -374,26 +377,41 @@ export function StatementsView({
   }
 
   return (
-    <div className="erp wehago">
-      <div className="erp-titlebar">
-        <h1>
-          <span className="wehago-mark" aria-hidden>공시</span>
-          재무제표 · 기업정보
-          <span className="path">
-            {area.title}
-            {areaId === "os" ? ` · ${region.title}` : ""}
-            {` · ${browseTitle}`}
-            {searchTrim ? ` · ${searchTrim}` : ""}
-          </span>
-        </h1>
-        <div className="wehago-title-meta">
-          <a href="/fundamentals">Fundamentals</a>
-          <a href="/invest">투자</a>
-          <a href="/">자산 홈</a>
+    <div className={personal ? "card-page statements-personal" : "erp wehago"}>
+      {personal ? (
+        <div className="card-page-head">
+          <div>
+            <h1>재무제표</h1>
+            <p className="lead">공시에서 모은 손익·재무상태 숫자입니다. 해석·추천이 아닙니다.</p>
+            <p className="muted" style={{ margin: "4px 0 0" }}>
+              {area.title}
+              {areaId === "os" ? ` · ${region.title}` : ""}
+              {` · ${browseTitle}`}
+              {searchTrim ? ` · ${searchTrim}` : ""}
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="erp-titlebar">
+          <h1>
+            <span className="wehago-mark" aria-hidden>공시</span>
+            재무제표 · 기업정보
+            <span className="path">
+              {area.title}
+              {areaId === "os" ? ` · ${region.title}` : ""}
+              {` · ${browseTitle}`}
+              {searchTrim ? ` · ${searchTrim}` : ""}
+            </span>
+          </h1>
+          <div className="wehago-title-meta">
+            <a href="/fundamentals">기업 숫자</a>
+            <a href="/invest">투자</a>
+            <a href="/">홈</a>
+          </div>
+        </div>
+      )}
 
-      <div className="erp-toolbar">
+      <div className={personal ? "card-toolbar" : "erp-toolbar"}>
         <label>
           수집 검색
           <input
@@ -433,8 +451,8 @@ export function StatementsView({
       )}
 
       {listReady && region && (
-        <div className="erp-body statements-erp-body">
-          <nav className="erp-menu statements-menu" aria-label="재무제표 메뉴">
+        <div className={personal ? "statements-personal-body" : "erp-body statements-erp-body"}>
+          <nav className={personal ? "statements-personal-nav" : "erp-menu statements-menu"} aria-label="재무제표 메뉴">
             <div className="statements-area">
               {STATEMENT_AREAS.map((a) => (
                 <button
@@ -625,7 +643,7 @@ export function StatementsView({
             </div>
           </nav>
 
-          <div className="erp-work">
+          <div className={personal ? "statements-personal-work" : "erp-work"}>
             <MarketWork
               region={region}
               groupTitle={browseTitle}

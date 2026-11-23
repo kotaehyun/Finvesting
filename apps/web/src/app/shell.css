@@ -98,6 +98,36 @@
 .tax-personal .erp-props th { color: var(--muted); background: var(--bg); }
 .tax-personal .erp-slip a:first-child { display: none; }
 
+.fund-personal-body,
+.statements-personal-body,
+.profile-personal-body { display: flex; flex-direction: column; gap: 14px; }
+.fund-personal-work,
+.statements-personal-work,
+.profile-personal-work { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.fund-stock-tabs { max-width: 100%; }
+.fund-personal .wehago-widget,
+.fund-personal .erp-panel,
+.statements-personal .wehago-widget,
+.statements-personal .erp-panel,
+.profile-personal .erp-panel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  overflow: hidden;
+}
+.statements-personal-nav {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card);
+}
+.statements-personal-nav .statements-area { display: flex; flex-wrap: wrap; gap: 6px; }
+.statements-personal-nav .statements-tree { max-height: 280px; overflow: auto; }
+.statements-personal-nav .statements-folder,
+.statements-personal-nav .lv2,
+.statements-personal-nav .lv3 {
+  color: var(--fg);
+}
+.profile-personal .erp-props th { color: var(--muted); background: var(--bg); }
+
 @media (max-width: 900px) {
   .pshell-top { flex-wrap: wrap; gap: 8px; }
   .pshell-nav { order: 3; width: 100%; }
