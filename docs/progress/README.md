@@ -2,6 +2,58 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-23 — 펀더멘털 AI 분석 버튼 (Cursor)
+**한 일**
+- `/fundamentals` 선택 종목에 「AI 분석」. `market.explainFundamentals` + `FUNDAMENTAL_READER_SYSTEM`. Yahoo 스냅샷만 읽고 매수·매도 단정 없음. Ollama 필요
+
+**다음 할 일**
+1. 커밋은 사용자 지시 시
+
+**막힌 것**
+- 로컬 Ollama가 꺼져 있으면 분석 호출 실패
+
+---
+
+## 2026-11-22 — 일반인용 쉬운 말 UX (Cursor)
+**한 일**
+- `/tax`·`/accounting`·`/fundamentals` wehago 뼈대 유지, 메뉴·KPI·「한눈에」·표 헤더를 쉬운 한국어로. 세금 ADR 0040 준수. `feat/valuation-triangle` 워킹트리. push·merge 안 함
+
+**다음 할 일**
+1. 커밋은 사용자 지시 시
+2. 재무제표 쉬운 말은 요청 시
+
+**막힌 것**
+- 없음(이 작업 기준)
+
+---
+
+## 2026-11-22 — 세금·회계전표 wehago ERP UI (Cursor)
+**한 일**
+- `/tax`·`/accounting`을 재무제표·펀더멘털과 같은 `erp wehago` 셸로 맞춤(타이틀바·툴바·왼쪽 메뉴·요약 KPI·본문+우측 요약). 계산·내보내기 로직은 유지. `feat/valuation-triangle` 워킹트리. push·merge 안 함
+
+**다음 할 일**
+1. 커밋은 사용자 지시 시
+2. 세션 C·DART 재수집은 요청 시
+
+**막힌 것**
+- 없음(이 작업 기준)
+
+---
+
+## 2026-11-22 — ROE·PER·PBR 삼각 차트 (Cursor)
+**한 일**
+- `feat/valuation-triangle`: `/fundamentals`를 재무제표·세금·전표와 같은 wehago ERP 터미널 UI로. ROE·PER·PBR 삼각+시총추정. ADR 0066. push·merge 안 함
+- 삼각 아래 선택 종목 상세 3칸(밸류에이션·규모/손익·가격/구간·시그널·52주) 추가. 스냅샷 표 탭은 유지
+
+**다음 할 일**
+1. 세션 C·DART 재수집은 요청 시
+2. 커밋은 사용자 지시 시
+
+**막힌 것**
+- 시총·순이익·ROE가 없는 국내 종목은 여전히 삼각 불가
+
+---
+
 ## 2026-11-22 — 반복 패턴·능동 알림을 dev에 합침 (Cursor)
 **한 일**
 - `feat/repeat-mistake`를 `dev`에 합침. `main`은 그대로. ADR 0064·0065
