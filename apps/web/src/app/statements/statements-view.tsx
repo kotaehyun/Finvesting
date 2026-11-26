@@ -395,7 +395,7 @@ export function StatementsView({
         <div className="erp-titlebar">
           <h1>
             <span className="wehago-mark" aria-hidden>공시</span>
-            재무제표 · 기업정보
+            재무제표
             <span className="path">
               {area.title}
               {areaId === "os" ? ` · ${region.title}` : ""}
@@ -405,8 +405,6 @@ export function StatementsView({
           </h1>
           <div className="wehago-title-meta">
             <a href="/fundamentals">기업 숫자</a>
-            <a href="/invest">투자</a>
-            <a href="/">홈</a>
           </div>
         </div>
       )}
@@ -425,14 +423,8 @@ export function StatementsView({
             style={{ width: 180, marginLeft: 6 }}
           />
         </label>
-        {filtered.slice(0, 5).map((h) => (
-          <button key={h.id} type="button" onClick={() => selectSymbol(h.symbol)}>
-            {h.symbol}
-          </button>
-        ))}
-        <span className="sep" />
-        <span className="erp-hint" style={{ margin: 0 }}>
-          수집분만. Yahoo 전 종목은 <a href="/invest">/invest</a>. 숫자는 공시 표준 항목만.
+        <span className="erp-hint" style={{ margin: "0 0 0 auto" }}>
+          수집분만. 숫자는 공시 표준 항목만.
         </span>
       </div>
 
@@ -451,8 +443,8 @@ export function StatementsView({
       )}
 
       {listReady && region && (
-        <div className={personal ? "statements-personal-body" : "erp-body statements-erp-body"}>
-          <nav className={personal ? "statements-personal-nav" : "erp-menu statements-menu"} aria-label="재무제표 메뉴">
+        <div className={personal ? "statements-personal-body" : "statements-stage"}>
+          <nav className={personal ? "statements-personal-nav" : "statements-nav statements-menu"} aria-label="재무제표 메뉴">
             <div className="statements-area">
               {STATEMENT_AREAS.map((a) => (
                 <button
@@ -754,7 +746,8 @@ function MarketWork({
       {!items.length ? (
         <p className="erp-hint">{emptyMsg}</p>
       ) : (
-        <table className="erp-grid" style={{ marginBottom: 12 }}>
+        <div className="statements-pick">
+        <table className="erp-grid">
           <thead>
             <tr>
               {showMcap && <th>순위</th>}
@@ -792,10 +785,11 @@ function MarketWork({
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       {picked && data?.years?.length ? (
-        <div className="erp-slip" style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+        <div className="statements-years">
           {data.years.map((y) => (
             <button
               key={y}

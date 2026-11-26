@@ -162,7 +162,7 @@ export default function FundamentalsPage() {
   ].filter(Boolean).join(" · ");
 
   return (
-    <div className={personal ? "card-page fund-personal" : "erp wehago"}>
+    <div className={personal ? "card-page fund-page fund-personal" : "erp wehago fund-page"}>
       {personal ? (
         <div className="card-page-head">
           <div>
@@ -175,40 +175,16 @@ export default function FundamentalsPage() {
         <div className="erp-titlebar">
           <h1>
             <span className="wehago-mark" aria-hidden>펀더</span>
-            기업 숫자 한눈에
-            <span className="path">Fundamentals · {pathLabel}</span>
+            기업 숫자
+            <span className="path">{pathLabel}</span>
           </h1>
           <div className="wehago-title-meta">
             <a href="/statements">재무제표</a>
-            <a href="/tax">세금/연말정산</a>
-            <a href="/accounting">돈 기록(전표)</a>
           </div>
         </div>
       )}
 
-      <div className={personal ? "card-toolbar" : "erp-toolbar"}>
-        {(["all", "us", "kr"] as const).map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={marketFilter === id ? "primary" : ""}
-            onClick={() => setMarketFilter(id)}
-          >
-            {MARKET_LABELS[id]}
-          </button>
-        ))}
-        <span className="sep" />
-        {(["stock", "etf", "all"] as const).map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={assetFilter === id ? "primary" : ""}
-            onClick={() => setAssetFilter(id)}
-          >
-            {ASSET_CLASS_LABELS[id]}
-          </button>
-        ))}
-        <span className="sep" />
+      <div className={personal ? "card-toolbar fund-toolbar" : "erp-toolbar fund-toolbar"}>
         <label>
           검색
           <input
@@ -216,47 +192,29 @@ export default function FundamentalsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="AAPL, 005930…"
-            aria-label="펀더멘털 종목 검색"
+            aria-label="종목 검색"
             autoComplete="off"
             style={{ width: 160, marginLeft: 6 }}
           />
         </label>
-        <span className="sep" />
-        <button
-          type="button"
-          className={tab === "triangle" ? "primary" : ""}
-          onClick={() => setTab("triangle")}
-        >
-          ROE·PER·PBR 그림
-        </button>
-        <button
-          type="button"
-          className={tab === "board" ? "primary" : ""}
-          onClick={() => setTab("board")}
-        >
-          숫자 표
-        </button>
-        <span className="sep" />
         <button
           type="button"
           className="primary"
           disabled={!selected || explain.isPending || loadStatus !== "ok"}
           onClick={() => {
             if (!selected) return;
-            setTab("triangle");
             explain.mutate({ instrumentId: selected.instrumentId });
           }}
         >
           {explain.isPending ? "분석 중…" : "AI 분석"}
         </button>
-        <span className="sep" />
-        {fundamentalVenueLookups(marketFilter).map((s) => (
-          <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="erp-toolbar-link">
-            {s.label}
-          </a>
-        ))}
-        <span className="erp-hint" style={{ margin: "0 0 0 auto" }}>
-          하루 기준 숫자 · 자세한 공시 표는 재무제표
+        <span className="fund-links">
+          {fundamentalVenueLookups(marketFilter).map((s) => (
+            <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="erp-toolbar-link">
+              {s.label}
+            </a>
+          ))}
+          <span className="erp-hint">하루 기준 숫자 · 공시 표는 재무제표</span>
         </span>
       </div>
 
@@ -272,10 +230,42 @@ export default function FundamentalsPage() {
       )}
 
       {loadStatus === "ok" && (
-        <div className={personal ? "fund-personal-body" : "erp-body statements-erp-body"}>
-          {personal ? (
-            <div className="card-page-tabs fund-stock-tabs" aria-label="종목">
-              {!sortedRows.length && <span className="muted">필터에 맞는 종목 없음</span>}
+        <div className="fund-body">
+          <div className="fund-filters" role="toolbar" aria-label="보기 조건">
+            {(["all", "us", "kr"] as const).map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={marketFilter === id ? "on" : ""}
+                aria-pressed={marketFilter === id}
+                onClick={() => setMarketFilter(id)}
+              >
+                {MARKET_LABELS[id]}
+              </button>
+            ))}
+            <span className="sep" aria-hidden />
+            {(["stock", "etf", "all"] as const).map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={assetFilter === id ? "on" : ""}
+                aria-pressed={assetFilter === id}
+                onClick={() => setAssetFilter(id)}
+              >
+                {ASSET_CLASS_LABELS[id]}
+              </button>
+            ))}
+            <span className="sep" aria-hidden />
+            <button type="button" className={tab === "triangle" ? "on" : ""} aria-pressed={tab === "triangle"} onClick={() => setTab("triangle")}>
+              ROE·PER·PBR 그림
+            </button>
+            <button type="button" className={tab === "board" ? "on" : ""} aria-pressed={tab === "board"} onClick={() => setTab("board")}>
+              숫자 표
+            </button>
+          </div>
+          <div className="fund-stage">
+            <div className="fund-list" role="group" aria-label="종목">
+              {!sortedRows.length && <span className="erp-hint">필터에 맞는 종목 없음</span>}
               {sortedRows.map((r) => {
                 const on = selected?.instrumentId === r.instrumentId;
                 return (
@@ -283,55 +273,26 @@ export default function FundamentalsPage() {
                     key={r.instrumentId}
                     type="button"
                     className={on ? "on" : ""}
+                    aria-pressed={on}
+                    title={r.name}
                     onClick={() => {
                       setSelectedId(r.instrumentId);
-                      setTab("triangle");
                       explain.reset();
                     }}
-                    title={r.name}
                   >
-                    {r.symbol} · {r.name}
+                    <span className="sym">{r.symbol}</span>
+                    <span className="nm">{r.name}</span>
                   </button>
                 );
               })}
             </div>
-          ) : (
-            <nav className="erp-menu statements-menu" aria-label="펀더멘털 종목">
-              <h2>종목 · {sortedRows.length}</h2>
-              <div className="statements-tree">
-                {!sortedRows.length && (
-                  <p className="erp-hint" style={{ padding: "8px 12px", color: "#9bb8cc" }}>필터에 맞는 종목 없음</p>
-                )}
-                {sortedRows.map((r) => {
-                  const on = selected?.instrumentId === r.instrumentId;
-                  return (
-                    <button
-                      key={r.instrumentId}
-                      type="button"
-                      className={`lv3 fund-menu-item${on ? " on" : ""}`}
-                      onClick={() => {
-                        setSelectedId(r.instrumentId);
-                        setTab("triangle");
-                        explain.reset();
-                      }}
-                      title={r.name}
-                    >
-                      <span className="fund-menu-sym">{r.symbol}</span>
-                      <span className="fund-menu-name">{r.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </nav>
-          )}
-
-          <div className={personal ? "fund-personal-work" : "erp-work"}>
+            <div className="fund-stage-main">
             {!sortedRows.length ? (
               <p className="erp-hint" style={{ padding: 12 }}>선택한 필터에 맞는 종목이 없습니다.</p>
             ) : tab === "triangle" && selected ? (
               <>
                 <p className="erp-plain-lead">
-                  한눈에: 회사가 얼마나 벌고(ROE)·주가가 비싼지(PER·PBR)를 그림으로 봅니다. 투자 점수가 아닙니다.
+                  회사가 얼마나 벌고(ROE)·주가가 비싼지(PER·PBR)를 그림으로 봅니다. 투자 점수가 아닙니다.
                 </p>
                 <div className="wehago-kpis fund-compact-kpi">
                   <div className="wehago-kpi">
@@ -352,8 +313,8 @@ export default function FundamentalsPage() {
                   </div>
                 </div>
 
-                <div className="statements-erp-main fund-triangle-layout">
-                  <div className="erp-panel" style={{ padding: "8px 12px" }}>
+                <div className="fund-split">
+                  <div className="fund-main">
                     <ValuationTriangleChart
                       title={`${selected.symbol} · ${selected.name}`}
                       triangle={
@@ -368,44 +329,31 @@ export default function FundamentalsPage() {
                       currency={selected.currency}
                       derived={Boolean(selected.extra.perDerived || selected.extra.pbrDerived)}
                     />
-
                     <SelectedFundDetail row={selected} />
                   </div>
 
-                  <aside className="statements-erp-side" aria-label="선택 종목">
-                    <div className="statements-side-card">
-                      <h3>고른 종목</h3>
-                      <div className="body">
-                        <table className="erp-props">
-                          <tbody>
-                            <tr><th>코드</th><td className="ro">{selected.symbol}</td></tr>
-                            <tr><th>시장</th><td className="ro">{selected.market}</td></tr>
-                            <tr><th>기준일</th><td className="ro">{selected.date}</td></tr>
-                            <tr><th>P/E</th><td className="ro num">{cell("per", selected.per, selected.currency)}</td></tr>
-                            <tr><th>P/B</th><td className="ro num">{cell("pbr", selected.pbr, selected.currency)}</td></tr>
-                            <tr><th>ROE</th><td className="ro num">{cell("roe", selected.roe, selected.currency)}</td></tr>
-                            <tr><th>시총</th><td className="ro num">{cell("marketCap", selected.marketCap, selected.currency)}</td></tr>
-                            <tr><th>배당</th><td className="ro num">{cell("dividendYield", selected.dividendYield, selected.currency)}</td></tr>
-                          </tbody>
-                        </table>
-                        {(selected.extra.perDerived || selected.extra.pbrDerived) && (
-                          <p className="erp-hint">빈 P/E·P/B는 시총·순이익·ROE로 채운 추정값입니다.</p>
-                        )}
-                        <div className="erp-slip">
-                          <button
-                            type="button"
-                            className="primary"
-                            disabled={explain.isPending}
-                            onClick={() => explain.mutate({ instrumentId: selected.instrumentId })}
-                          >
-                            {explain.isPending ? "분석 중…" : "AI 분석"}
-                          </button>
-                          {fundamentalLookups(selected.symbol, selected.market).map((l) => (
-                            <a key={l.id} href={l.url} target="_blank" rel="noreferrer">{l.label}</a>
-                          ))}
-                          <a href={`/statements?q=${encodeURIComponent(selected.symbol)}`}>재무제표</a>
-                        </div>
-                      </div>
+                  <aside className="fund-side" aria-label="고른 종목">
+                    <h3>{selected.symbol}</h3>
+                    <table className="erp-props">
+                      <tbody>
+                        <tr><th>이름</th><td className="ro">{selected.name}</td></tr>
+                        <tr><th>시장</th><td className="ro">{selected.market}</td></tr>
+                        <tr><th>기준일</th><td className="ro">{selected.date}</td></tr>
+                        <tr><th>P/E</th><td className="ro num">{cell("per", selected.per, selected.currency)}</td></tr>
+                        <tr><th>P/B</th><td className="ro num">{cell("pbr", selected.pbr, selected.currency)}</td></tr>
+                        <tr><th>ROE</th><td className="ro num">{cell("roe", selected.roe, selected.currency)}</td></tr>
+                        <tr><th>시총</th><td className="ro num">{cell("marketCap", selected.marketCap, selected.currency)}</td></tr>
+                        <tr><th>배당</th><td className="ro num">{cell("dividendYield", selected.dividendYield, selected.currency)}</td></tr>
+                      </tbody>
+                    </table>
+                    {(selected.extra.perDerived || selected.extra.pbrDerived) && (
+                      <p className="erp-hint">빈 P/E·P/B는 시총·순이익·ROE로 채운 추정값입니다.</p>
+                    )}
+                    <div className="erp-slip">
+                      {fundamentalLookups(selected.symbol, selected.market).map((l) => (
+                        <a key={l.id} href={l.url} target="_blank" rel="noreferrer">{l.label}</a>
+                      ))}
+                      <a href={`/statements?q=${encodeURIComponent(selected.symbol)}`}>재무제표</a>
                     </div>
                   </aside>
                 </div>
@@ -432,9 +380,8 @@ export default function FundamentalsPage() {
               </>
             ) : (
               <div className="erp-panel" style={{ padding: 12 }}>
-                <p className="erp-plain-lead">한눈에: 여러 종목 숫자를 표로 비교합니다. 행을 누르면 그림 화면으로 갑니다.</p>
+                <p className="erp-plain-lead">여러 종목 숫자를 표로 비교합니다. 줄을 누르면 그 종목이 선택되고, 그림은 위 버튼에서 봅니다.</p>
                 <h3>숫자 표 · {sortedRows.length}종</h3>
-                <p className="erp-hint">행을 누르면 ROE·PER·PBR 그림으로 이동합니다.</p>
                 <div className="table-wrap">
                   <table className="erp-grid fund-erp-table">
                     <thead>
@@ -457,7 +404,7 @@ export default function FundamentalsPage() {
                               onClick={() => toggleSort(f.id)}
                               disabled={marketFilter === "all" && isMoneyFundamentalSortKey(f.id)}
                             >
-                              {f.label}{sortIndicator(f.id)}
+                              {FIELD_LABEL_KO[f.id]}{sortIndicator(f.id)}
                             </button>
                           </th>
                         ))}
@@ -481,7 +428,6 @@ export default function FundamentalsPage() {
                             style={{ cursor: "pointer" }}
                             onClick={() => {
                               setSelectedId(r.instrumentId);
-                              setTab("triangle");
                               explain.reset();
                             }}
                           >
@@ -514,6 +460,7 @@ export default function FundamentalsPage() {
               </div>
             )}
           </div>
+        </div>
         </div>
       )}
     </div>

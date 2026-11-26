@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { signedWon } from "@finvesting/core";
+import { pnlTone, signedWon } from "@finvesting/core";
 import { trpc } from "@/lib/trpc";
 import { useUiMode } from "@/lib/ui-mode";
 
@@ -221,11 +221,11 @@ export default function TaxPage() {
         ? "한눈에: 올해 받은 배당·이자가 2천만원 한도에 얼마나 찼는지 봅니다."
         : "한눈에: 월급에서 떼인 세금과 공제를 맞춰 돌려받을(더 낼) 돈을 봅니다.";
 
-  const yeLabel = ye?.isRefund
-    ? (personal ? `돌려받을 돈 ${won(ye.refundOrPayback)}` : `+${won(ye.refundOrPayback)}`)
-    : ye
-      ? (personal ? `더 낼 돈 ${won(Math.abs(ye.refundOrPayback))}` : `-${won(Math.abs(ye.refundOrPayback))}`)
-      : "—";
+  const yeSigned = ye ? (ye.isRefund ? ye.refundOrPayback : -Math.abs(ye.refundOrPayback)) : 0;
+  const yeTone = ye ? pnlTone(yeSigned) : "flat";
+  const yeKicker = yeTone === "up" ? "돌려받을 돈" : yeTone === "down" ? "더 낼 돈" : "연말정산";
+  const yeAmount = ye ? won(Math.abs(ye.refundOrPayback)) : "—";
+  const yeLabel = ye ? signedWon(yeSigned) : "—";
 
   return (
     <div className={personal ? "card-page tax-personal" : "erp wehago"}>
@@ -234,7 +234,7 @@ export default function TaxPage() {
           <div>
             <h1>세금 · 연말정산</h1>
             <p className="lead">{plainLead}</p>
-            <p className="muted" style={{ margin: "4px 0 0" }}>{pathLabel} · 숫자만 보여 줍니다. 세무 상담이 아닙니다.</p>
+            <p className="muted" style={{ margin: "4px 0 0" }}>{selectedYear}년 · 숫자만 보여 줍니다. 세무 상담이 아닙니다.</p>
           </div>
         </div>
       ) : (
@@ -253,21 +253,37 @@ export default function TaxPage() {
       )}
 
       <div className={personal ? "card-toolbar" : "erp-toolbar"}>
-        {yearChoices.map((y) => (
-          <button
-            key={y}
-            type="button"
-            className={selectedYear === y ? "primary" : ""}
-            onClick={() => setSelectedYear(y)}
-          >
-            {y}년
-          </button>
-        ))}
+        {personal ? (
+          <div className="year-seg" role="group" aria-label="연도">
+            {yearChoices.map((y) => (
+              <button
+                key={y}
+                type="button"
+                className={selectedYear === y ? "on" : ""}
+                aria-pressed={selectedYear === y}
+                onClick={() => setSelectedYear(y)}
+              >
+                {y}년
+              </button>
+            ))}
+          </div>
+        ) : (
+          yearChoices.map((y) => (
+            <button
+              key={y}
+              type="button"
+              className={selectedYear === y ? "primary" : ""}
+              onClick={() => setSelectedYear(y)}
+            >
+              {y}년
+            </button>
+          ))
+        )}
         {!personal && <span className="sep" />}
-        <button type="button" className="primary" onClick={handleExportXlsx} disabled={isExporting || summaryLoading}>
+        <button type="button" className={personal ? "ghost" : "primary"} onClick={handleExportXlsx} disabled={isExporting || summaryLoading}>
           {isExporting ? "엑셀 생성 중…" : "연말정산 엑셀 받기"}
         </button>
-        <button type="button" onClick={() => setShowHometaxModal(true)}>홈택스 자료 불러오기</button>
+        <button type="button" className={personal ? "ghost" : ""} onClick={() => setShowHometaxModal(true)}>홈택스 자료 불러오기</button>
         {!personal && <a href="/accounting" className="erp-toolbar-link">돈 기록(전표)</a>}
         {!personal && (
           <span className="erp-hint" style={{ margin: "0 0 0 auto" }}>
@@ -289,30 +305,27 @@ export default function TaxPage() {
         <div className={personal ? "tax-personal-body" : "erp-body statements-erp-body"}>
           {personal ? (
             <div className="card-page-tabs" role="tablist" aria-label="세금 구분">
-              <button type="button" className={activeTab === "capital_gains" ? "on" : ""} onClick={() => setActiveTab("capital_gains")}>
-                해외주식 팔아서 낸 세금
+              <button type="button" className={activeTab === "capital_gains" ? "on" : ""} aria-pressed={activeTab === "capital_gains"} title="해외주식을 팔아서 낸 세금" onClick={() => setActiveTab("capital_gains")}>
+                해외주식
               </button>
-              <button type="button" className={activeTab === "financial_income" ? "on" : ""} onClick={() => setActiveTab("financial_income")}>
-                배당·이자 소득
+              <button type="button" className={activeTab === "financial_income" ? "on" : ""} aria-pressed={activeTab === "financial_income"} title="배당·이자 소득" onClick={() => setActiveTab("financial_income")}>
+                배당·이자
               </button>
-              <button type="button" className={activeTab === "year_end" ? "on" : ""} onClick={() => setActiveTab("year_end")}>
-                월급 연말정산(돌려받을 돈)
+              <button type="button" className={activeTab === "year_end" ? "on" : ""} aria-pressed={activeTab === "year_end"} title="월급 연말정산" onClick={() => setActiveTab("year_end")}>
+                연말정산
               </button>
             </div>
           ) : (
-            <nav className="erp-menu statements-menu" aria-label="세금 메뉴">
-              <h2>무엇을 볼까요</h2>
-              <div className="statements-tree">
-                <button type="button" className={`lv3${activeTab === "capital_gains" ? " on" : ""}`} onClick={() => setActiveTab("capital_gains")}>
-                  해외주식 팔아서 낸 세금
-                </button>
-                <button type="button" className={`lv3${activeTab === "financial_income" ? " on" : ""}`} onClick={() => setActiveTab("financial_income")}>
-                  배당·이자 소득
-                </button>
-                <button type="button" className={`lv3${activeTab === "year_end" ? " on" : ""}`} onClick={() => setActiveTab("year_end")}>
-                  월급 연말정산(돌려받을 돈)
-                </button>
-              </div>
+            <nav className="tax-tabs" aria-label="세금 메뉴">
+              <button type="button" className={activeTab === "capital_gains" ? "on" : ""} aria-pressed={activeTab === "capital_gains"} onClick={() => setActiveTab("capital_gains")}>
+                해외주식
+              </button>
+              <button type="button" className={activeTab === "financial_income" ? "on" : ""} aria-pressed={activeTab === "financial_income"} onClick={() => setActiveTab("financial_income")}>
+                배당·이자
+              </button>
+              <button type="button" className={activeTab === "year_end" ? "on" : ""} aria-pressed={activeTab === "year_end"} onClick={() => setActiveTab("year_end")}>
+                연말정산
+              </button>
             </nav>
           )}
 
@@ -328,8 +341,8 @@ export default function TaxPage() {
                 <span className="v">{won(fi?.totalGross ?? 0)}</span>
               </div>
               <div className={personal ? "card-kpi" : "wehago-kpi"}>
-                <span className="k">연말정산 예상</span>
-                <span className="v">{yeLabel}</span>
+                <span className="k">{personal ? yeKicker : "연말정산 예상"}</span>
+                <span className={`v ${personal ? yeTone : ""}`}>{personal ? yeAmount : yeLabel}</span>
               </div>
               <div className={personal ? "card-kpi" : "wehago-kpi"}>
                 <span className="k">{personal ? "배당·이자 2천만원 한도" : "2천만원 한도 사용률"}</span>
@@ -337,8 +350,8 @@ export default function TaxPage() {
               </div>
             </div>
 
-            <div className="statements-erp-main fund-triangle-layout">
-              <div className="erp-panel tax-erp-panel" style={{ padding: "8px 12px" }}>
+            <div className="tax-layout">
+              <div className={personal ? "tax-stack" : "erp-panel tax-erp-panel"} style={personal ? undefined : { padding: "8px 12px" }}>
                 {activeTab === "capital_gains" && (
                   <div className="tax-erp-stack">
                     <div className="statements-erp-grids">
@@ -431,9 +444,7 @@ export default function TaxPage() {
                                     <td className="ro num">{won(t.sellPrice)}</td>
                                     <td className="ro num">{won(t.buyPrice)}</td>
                                     <td className="ro num">{won(t.feeAndTax)}</td>
-                                    <td className={`ro num ${gain >= 0 ? "up" : "down"}`}>
-                                      {gain >= 0 ? `+${won(gain)}` : won(gain)}
-                                    </td>
+                                    <td className={`ro num ${pnlTone(gain)}`}>{signedWon(gain)}</td>
                                   </tr>
                                 );
                               })}
@@ -543,7 +554,7 @@ export default function TaxPage() {
                           기본값 복원
                         </button>
                       </h3>
-                      <p className="erp-hint" style={{ margin: "0 10px 6px" }}>숫자를 바꾸면 오른쪽(아래) 환급·추가납부가 바로 다시 계산됩니다.</p>
+                      <p className="erp-hint" style={{ margin: "0 10px 6px" }}>숫자를 바꾸면 돌려받을 돈·더 낼 돈이 바로 다시 계산됩니다.</p>
                       <table className="erp-props ye-erp-form">
                         <tbody>
                           {([
@@ -580,13 +591,9 @@ export default function TaxPage() {
                       <table className="erp-props">
                         <tbody>
                           <tr>
-                            <th>{ye?.isRefund ? "돌려받을 돈" : "더 낼 돈"}</th>
-                            <td className={`ro num ${ye?.isRefund ? "up" : "down"}`}>
-                              <strong>
-                                {ye?.isRefund
-                                  ? `+${won(ye.refundOrPayback)}`
-                                  : `-${won(Math.abs(ye?.refundOrPayback ?? 0))}`}
-                              </strong>
+                            <th>{ye ? yeKicker : "연말정산"}</th>
+                            <td className={`ro num ${yeTone}`}>
+                              <strong>{yeLabel}</strong>
                             </td>
                           </tr>
                           <tr><th>총급여</th><td className="ro num">{won(ye?.grossSalary ?? 0)}</td></tr>
@@ -612,8 +619,9 @@ export default function TaxPage() {
                 )}
               </div>
 
+              {!personal && (
               <aside className="statements-erp-side" aria-label="세금 요약">
-                <div className="statements-side-card">
+                <div className="statements-side-card tax-side">
                   <h3>올해 요약 · {selectedYear}</h3>
                   <div className="body">
                     <table className="erp-props">
@@ -622,11 +630,7 @@ export default function TaxPage() {
                         <tr><th>양도세</th><td className="ro num">{won(cg?.totalEstimatedTax ?? 0)}</td></tr>
                         <tr><th>배당·이자</th><td className="ro num">{won(fi?.totalGross ?? 0)}</td></tr>
                         <tr><th>한도 남은 돈</th><td className="ro num">{won(fi?.remainingLimit ?? 0)}</td></tr>
-                        <tr><th>연말정산</th><td className={`ro num ${ye?.isRefund ? "up" : "down"}`}>
-                          {ye?.isRefund
-                            ? `+${won(ye.refundOrPayback)}`
-                            : `-${won(Math.abs(ye?.refundOrPayback ?? 0))}`}
-                        </td></tr>
+                        <tr><th>연말정산</th><td className={`ro num ${yeTone}`}>{yeLabel}</td></tr>
                         <tr><th>최종 세금</th><td className="ro num">{won(ye?.determinedTax ?? 0)}</td></tr>
                       </tbody>
                     </table>
@@ -637,6 +641,7 @@ export default function TaxPage() {
                   </div>
                 </div>
               </aside>
+              )}
             </div>
           </div>
         </div>

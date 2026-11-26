@@ -46,13 +46,21 @@ function allowedCategories(direction: "in" | "out" | "transfer") {
 
 export const transactionsRouter = router({
   list: publicProcedure
-    .input(z.object({ accountId: z.string().uuid(), limit: z.number().min(1).max(200).default(50) }))
+    .input(z.object({
+      accountId: z.string().uuid(),
+      limit: z.number().min(1).max(200).default(50),
+      from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    }))
     .query(async ({ ctx, input }) => {
       const [acct] = await ctx.db.select({ id: accounts.id }).from(accounts)
         .where(and(eq(accounts.id, input.accountId), eq(accounts.userId, ctx.userId)));
       if (!acct) return [];
+      const conds = [eq(transactions.userId, ctx.userId), eq(transactions.accountId, input.accountId)];
+      if (input.from) conds.push(gte(transactions.date, input.from));
+      if (input.to) conds.push(lte(transactions.date, input.to));
       return ctx.db.select().from(transactions)
-        .where(and(eq(transactions.userId, ctx.userId), eq(transactions.accountId, input.accountId)))
+        .where(and(...conds))
         .orderBy(desc(transactions.date))
         .limit(input.limit);
     }),
