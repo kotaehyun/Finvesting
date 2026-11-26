@@ -2,6 +2,18 @@
 
 최신이 위. 형식: 날짜 / 한 일 / 다음 할 일 / 막힌 것.
 
+## 2026-11-26 — 세션 C를 dev에 머지 (Grok)
+**한 일**
+- `fix/data-cleanup-rate-period`를 `dev`에 머지. 진행·검증 기록이 겹친 곳은 날짜순으로 둘 다 남김. `pnpm typecheck` 8패키지 통과, core 테스트 89파일 427개 통과
+
+**다음 할 일**
+1. `feat/globals-css-split`은 일반·비즈니스 × 라이트·다크 확인 전이라 `dev`에 넣지 않음
+
+**막힌 것**
+- 없음
+
+---
+
 ## 2026-11-23 — ADR 0067 3단계 보강 (Cursor)
 **한 일**
 - 일반 모드 카드형: 기업 숫자·재무제표·급여/공제(`/profile`)까지 확장. 종목·메뉴는 위쪽 칩/탭. web tsc 통과
@@ -136,6 +148,21 @@
 
 **막힌 것**
 - 시총·순이익·ROE가 없는 국내 종목은 여전히 삼각 불가
+
+---
+
+## 2026-11-22 — 세션 C: 요율 기간·DART 빈 손익·코스닥 dry-run·로그인 게이트 (Cursor)
+**한 일**
+- `fix/data-cleanup-rate-period` (기준 `f680b8d`). N2 요율 effective 기간, N1-b H1/Q3 빈 손익 삭제, N3 KOSDAQ 복구 dry-run(근거 0·36 skip), N4 nextAllowedAt 429·SECRET 32자. 리뷰 문서 4건 포함. 2026-11-26 `dev`에 머지
+
+**다음 할 일**
+1. N1 국내 DART 재수집은 요청이 있을 때
+2. N3는 사용자 원장에 KOSDAQ 근거가 생기면 APPLY=1
+3. DGX Spark/vLLM. 쓸 장비·엔드포인트는 없음
+
+**막힌 것**
+- 기본공제 150만 원은 사용자가 다시 대조하기 전이다
+- `APP_PASSWORD`가 있으면 `.env`에 `SESSION_SECRET`(32자 이상)이 있어야 한다
 
 ---
 

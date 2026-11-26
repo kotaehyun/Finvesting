@@ -6,6 +6,7 @@ import {
   mapDartFsRow,
   normalizeDartAccountNm,
   parseDartAmount,
+  shouldDeleteStaleDartIncome,
 } from "./dart-accounts";
 
 describe("dart-accounts", () => {
@@ -94,5 +95,13 @@ describe("dart-accounts", () => {
       accountId: "ifrs-full_CashFlowsFromUsedInOperatingActivities",
       accountNm: "영업활동현금흐름",
     })).toEqual({ statement: "cashflow", key: "cfo" });
+  });
+
+  it("반기·3분기 손익 칸이 비면 옛 행을 지운다", () => {
+    expect(shouldDeleteStaleDartIncome({ period: "H1", incomeItemCount: 0 })).toBe(true);
+    expect(shouldDeleteStaleDartIncome({ period: "Q3", incomeItemCount: 0 })).toBe(true);
+    expect(shouldDeleteStaleDartIncome({ period: "H1", incomeItemCount: 1 })).toBe(false);
+    expect(shouldDeleteStaleDartIncome({ period: "Q1", incomeItemCount: 0 })).toBe(false);
+    expect(shouldDeleteStaleDartIncome({ period: "FY", incomeItemCount: 0 })).toBe(false);
   });
 });

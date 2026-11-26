@@ -4,3 +4,4 @@
 - 결정: 새 패키지를 넣지 않는다. `APP_PASSWORD`가 비어 있으면 지금처럼 로그인 없이 단일 사용자다. 값이 있으면 HMAC 쿠키(`finvesting_session`, 30일, httpOnly)가 `DEFAULT_USER_ID`와 같을 때만 화면과 tRPC를 연다. 비밀번호는 데이터베이스에 저장하지 않는다. 계정은 늘리지 않는다.
 - 결과: 호스팅 DB 이전은 하지 않는다. `APP_PASSWORD`를 켠 동안 모바일은 로그인 화면이 없어 API가 거절한다. 로컬 기본값은 비밀번호 없음이다.
 - 변경 (2026-11-20): 쿠키 HMAC 키는 `SESSION_SECRET`이다. `APP_PASSWORD`는 로그인 비교에만 쓴다. 비밀번호가 있는데 서명 키가 없으면 로그인을 거부하고 경고한다. 실패는 프로세스 메모리에서 횟수 × 500ms, 최대 5초 지연하고 성공하면 0으로 되돌린다.
+- 변경 (2026-11-22): `SESSION_SECRET`은 32자 미만이면 없는 것과 같다. tRPC는 키 없을 때 `INTERNAL_SERVER_ERROR` + 「서버 설정: SESSION_SECRET 없음」. 로그인 실패 후 `nextAllowedAt` 이전 요청은 비밀번호를 비교하지 않고 `429` + `Retry-After`다.

@@ -37,10 +37,11 @@
 | 항목 | 상태 | 마지막 검증 | 누가 |
 |---|---|---|---|
 | `pnpm install` | ✅ | 2026-09-02 | Cursor |
-| 타입체크 (web 포함 8패키지) | ✅ web `tsc --noEmit` 통과(`feat/account-mode-shell` 3단계 보강). 8패키지 일괄은 미실행 | 2026-11-23 | Cursor |
-| core 테스트 (vitest) | ✅ 87개 파일 412개 통과. `feat/valuation-triangle` | 2026-11-23 | Cursor |
+| 타입체크 (web 포함 8패키지) | ✅ web `tsc --noEmit` 통과(`feat/account-mode-shell` 3단계 보강). 8패키지 일괄은 11-22 `fix/data-cleanup-rate-period`에서 통과, 그 이후 일괄은 미실행 | 2026-11-23 | Cursor |
+| core 테스트 (vitest) | ✅ 87개 파일 412개 통과. `feat/valuation-triangle` (11-22 세션 C는 411개) | 2026-11-23 | Cursor |
 | UI 톤·다크 1단계 (U1~U4) | ✅ 코드·tsc. 라이트/다크 스크린샷 ❌ | 2026-11-23 | Cursor |
 | ADR 0067 일반 카드형 3단계 보강 | ✅ web tsc. 펀더멘털·재무제표·프로필 코드 분기. 브라우저 실물 ❌ | 2026-11-23 | Cursor |
+| KOSDAQ market dry-run | ✅ 6자리 KRX 36건, 근거 0 → 전부 skip. APPLY 안 함 | 2026-11-22 | Cursor |
 | 능동 알림(확인할 일) | ✅ BTC 집중·코인 중립 규칙이 확인할 일에 올라옴. 푸시 없음 | 2026-11-22 | Cursor |
 | 이상 지출 홈 카드 | ✅ 2026-11은 소비 거래 없음. 2026-09는 이전 소비 달 0개월이라 비교하지 않음. 챗 스타터는 보임. 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |
 | 리스크 홈 카드 | ✅ BTC 100%, 코인 100%, KRW 100%, 해외 통화 없음, 성향 중립, 변동폭 없음. 봇 답은 호출하지 않음 | 2026-11-22 | Cursor |

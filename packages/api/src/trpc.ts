@@ -1,6 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { cookieValue, readSession, SESSION_COOKIE } from "@finvesting/core";
+import { cookieValue, readSession, SESSION_COOKIE, sessionSecretUsable } from "@finvesting/core";
 import { db } from "@finvesting/db";
 
 export type Context = { db: typeof db; userId: string };
@@ -15,9 +15,9 @@ export async function createContext(opts?: { req?: Request }): Promise<Context> 
   const password = process.env.APP_PASSWORD?.trim() ?? "";
   if (!password) return { db, userId };
   const secret = process.env.SESSION_SECRET?.trim() ?? "";
-  if (!secret) {
-    console.warn("APP_PASSWORD is set but SESSION_SECRET is missing");
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "로그인이 필요합니다." });
+  if (!sessionSecretUsable(secret)) {
+    console.warn("APP_PASSWORD is set but SESSION_SECRET is missing or shorter than 32 characters");
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "서버 설정: SESSION_SECRET 없음" });
   }
   const token = cookieValue(opts?.req?.headers.get("cookie"), SESSION_COOKIE);
   const sessionUser = token ? await readSession(token, secret) : null;
