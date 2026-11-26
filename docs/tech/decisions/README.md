@@ -70,3 +70,4 @@
 | 0066 | [ROE·PER·PBR 삼각은 Yahoo 스냅샷 + 표시용 스케일](./0066-valuation-triangle.md) | 채택 |
 | 0065 | [능동 알림은 홈 확인할 일에 모은다](./0065-proactive-alerts.md) | 채택 |
 | 0067 | [일반·비즈니스 계정은 화면을 따로 둔다](./0067-personal-business-ui.md) | 채택 |
+| 0068 | [은행 계좌 API는 문서만, 아직 호출하지 않음](./0068-bank-api-later.md) | 채택 (구현 보류) |

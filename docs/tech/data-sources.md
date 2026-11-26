@@ -106,7 +106,7 @@ ECOS 통계코드는 `ecos.ts`의 `SERIES`에 있으며 ECOS 사이트에서 검
 | ECB SDW, BOJ, 중국 인민은행 | API·크롤링 | 유로·엔·위안 금리·환율 | 미구현 |
 | 국제 원자재 (금·은·구리·WTI·브렌트) | Yahoo 선물 | `/invest` 원자재 칸 | **구현** (ADR 0012). 두바이유 Yahoo 없음 |
 | 글로벌 경제 캘린더 (FOMC, ECB, CPI 발표, 실적) | 크롤링 | `economic_events` | 미구현 |
-| 은행·카드·증권 거래내역 | CSV/엑셀 수동 업로드 | `transactions`, `trades` | 미구현 (파서 필요) |
+| 은행·카드·증권 거래내역 | 파일 업로드. 계좌 API는 호출하지 않음 (ADR 0068) | `transactions`, `trades` | 통장 공통 파일은 연결됨 (`interop.md`). 카드·증권 파일, 오픈뱅킹·마이데이터는 없음 |
 
 ## 어댑터 추가 방법
 1. `src/sources/<name>.ts`에 `export async function collect<Name>()` 작성, `onConflictDoNothing/Update`로 멱등하게

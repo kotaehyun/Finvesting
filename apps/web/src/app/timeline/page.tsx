@@ -51,7 +51,7 @@ export default function TimelinePage() {
       {/* 1. 상단 타이틀 및 설명 헤더 */}
       <div className="timeline-header">
         <div>
-          <h1 className="timeline-title">{business ? "거래 흐름" : "돈의 흐름"}</h1>
+          <h1 className="timeline-title">거래 흐름</h1>
           <p className="timeline-desc">
             {business
               ? "장부 보기: 통장·카드·체결·배당·적금·급여를 날짜순으로 모은 거래 피드"

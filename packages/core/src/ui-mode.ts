@@ -38,10 +38,10 @@ export const PERSONAL_NAV: NavGroup[] = [
   { id: "home", label: "홈", href: "/", items: [{ href: "/", label: "홈" }] },
   {
     id: "flow",
-    label: "돈의 흐름",
+    label: "거래 흐름",
     href: "/timeline",
     items: [
-      { href: "/timeline", label: "타임라인" },
+      { href: "/timeline", label: "거래 흐름" },
       { href: "/accounts", label: "계좌·거래" },
     ],
   },
